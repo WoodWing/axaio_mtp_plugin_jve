@@ -40,6 +40,5 @@ abstract class WflSetObjectProperties_EnterpriseConnector extends ServiceConnect
 	 */
 	public function onError( WflSetObjectPropertiesRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

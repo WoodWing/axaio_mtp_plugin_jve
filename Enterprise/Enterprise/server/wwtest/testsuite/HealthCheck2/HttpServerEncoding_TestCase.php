@@ -54,6 +54,7 @@ class WW_TestSuite_HealthCheck2_HttpServerEncoding_TestCase extends TestCase
 		}
 
 		$contents = null;
+		$details = null;
 		try {
 			$httpClient->setUri( $testUrl );
 			$httpClient->setMethod( Zend\Http\Request::METHOD_GET );

@@ -23,7 +23,7 @@ class DBPublication extends DBBase
 	 */
 	public static function getPublication($pubId)
     {
-        $result = self::getRow(self::TABLENAME, "`id` = '$pubId' ", true);
+        $result = self::getRow(self::TABLENAME, "`id` = ? ", '*', array( intval( $pubId ) ) );
         return $result;
     }
     
@@ -59,13 +59,18 @@ class DBPublication extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
 
-		$name = $dbDriver->toDBString($name);
-
 		$sql = "SELECT * FROM $db WHERE 1=1";
-		if ($name) { $sql .= " AND `publication` = '$name'"; }
-		if ($id) { $sql .= " AND `id` = $id"; }
+		$params = array();
+		if ($name) {
+			$sql .= " AND `publication` = ? ";
+			$params[] = strval( $name );
+		}
+		if ($id) {
+			$sql .= " AND `id` = ? ";
+			$params[] = intval( $id );
+		}
 		$sql .= " ORDER BY `code`, `id`";
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query( $sql, $params );
 		return $sth;
 	}
 
@@ -73,8 +78,8 @@ class DBPublication extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbo  = $dbDriver->tablename(self::TABLENAME);
-		$sql = 'SELECT `id`, `publication` FROM '.$dbo.' WHERE `id` = '.$id;
-		$sth = $dbDriver->query($sql);
+		$sql = 'SELECT `id`, `publication` FROM '.$dbo.' WHERE `id` = ? ';
+		$sth = $dbDriver->query($sql, array( intval( $id ) ) );
 		$row = $dbDriver->fetch($sth);
 		if( empty($row) === false ) {
 			return $row['publication'];

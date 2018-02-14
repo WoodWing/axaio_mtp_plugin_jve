@@ -158,6 +158,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Autocomplete_Tes
 
 			// Determine column indexes to work with.
 			$colNames = array( 'ID', 'Name' );
+			$indexes = array();
 			foreach( $colNames as $colName ) {
 				foreach( $response->Columns as $index => $column ) {
 					if( $column->Name == $colName ) {
@@ -430,6 +431,9 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Autocomplete_Tes
 	/**
 	 * Calls Autocomplete service call and verify its response.
 	 *
+	 * @param string|null $provider
+	 * @param array $ignoreValues
+	 * @param string $searchValue
 	 * @return bool Whether or not the test was successful.
 	 */
 	private function runAutocompleteServiceTest( $provider=null, $ignoreValues=array( 'amsabang', 'amsamka' ), $searchValue='ams' )

@@ -14,27 +14,33 @@ $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
 // check publication rights
 checkPublAdmin($id);
 
+// Sort categories.
 $recs = isset($_REQUEST['recs_section']) ? intval($_REQUEST['recs_section']) : 0;
 if ($recs > 0) {
+	$dbh = DBDriverFactory::gen();
+	$dbs = $dbh->tablename('publsections');
+	$sql = "UPDATE {$dbs} SET `code` = ? WHERE `id` = ?";
 	for ($i = 1; $i < $recs; $i++) {
-		$tid = intval($_REQUEST["sec_order$i"]);
-		$cd = intval($_REQUEST["sec_code$i"]);
-		$dbh = DBDriverFactory::gen();
-		$dbs = $dbh->tablename('publsections');
-		$sql = "update $dbs set `code` = $cd where `id` = $tid";
-		$sth = $dbh->query($sql);
+		$params = array( 
+			intval($_REQUEST["sec_code$i"]),
+			intval($_REQUEST["sec_order$i"])
+		);
+		$sth = DBBase::query( $sql, $params );
 	}
 }
 
+// Sort Publication Channels.
 $recs = isset($_REQUEST['recs_channel']) ? intval($_REQUEST['recs_channel']) : 0;
 if ($recs > 0) {
+	$dbh = DBDriverFactory::gen();
+	$dbch = $dbh->tablename('channels');
+	$sql = "UPDATE {$dbch} SET `code` = ? WHERE `id` = ?";
 	for ($i = 1; $i < $recs; $i++) {
-		$tid = intval($_REQUEST["channel_order$i"]);
-		$cd = intval($_REQUEST["channel_code$i"]);
-		$dbh = DBDriverFactory::gen();
-		$dbch = $dbh->tablename('channels');
-		$sql = "update $dbch set `code` = $cd where `id` = $tid";
-		$sth = $dbh->query($sql);
+		$params = array( 
+			intval($_REQUEST["channel_code$i"]),
+			intval($_REQUEST["channel_order$i"])
+		);
+		$sth = DBBase::query( $sql, $params );
 	}
 }
 
@@ -63,6 +69,7 @@ $del = isset($_REQUEST['del']) ? intval($_REQUEST['del']) : 0;
 $errors = array();
 $validateErrors = array();
 $app = new PublicationMaintenanceApp();
+$pubObj = null;
 try {
 	$pubObj = $app->buildPublicationObj( $ticket, $id );
 } catch( BizException $e ) {
@@ -82,6 +89,7 @@ switch ($mode) {
 			$pubObj = $response->Publications[0];
 		} catch( BizException $e ) {
 			$errors[] = $e->getMessage();
+			$mode = 'error';
 		}
 		break;
 	case 'insert':
@@ -95,6 +103,7 @@ switch ($mode) {
 			$pubObj = $response->Publications[0];
 		} catch( BizException $e ) {
 			$errors[] = $e->getMessage();
+			$mode = 'error';
 		}
 		break;
 	case 'delete':
@@ -106,6 +115,7 @@ switch ($mode) {
 				$service->execute( $request );
 			} catch( BizException $e ) {
 				$errors[] = $e->getMessage();
+				$mode = 'error';
 			}
 		}
 		break;
@@ -118,6 +128,7 @@ switch ($mode) {
 				$service->execute( $request );
 			} catch( BizException $e ) {
 				$errors[] = $e->getMessage();
+				$mode = 'error';
 			}
 		}
 		break;
@@ -134,6 +145,7 @@ switch ($mode) {
 					exit;
 				}
 				$errors[] = $e->getMessage();
+				$mode = 'error';
 			}
 			break;
 		}
@@ -141,32 +153,50 @@ switch ($mode) {
 	case 'delauthor':
 		if ($id > 0 && $del > 0) {
 			try {
-				require_once BASEDIR.'/server/dbclasses/DBAuthorizations.class.php';
-				/*$ret = */ DBAuthorizations::deleteAuthorization( $id, 0, null, null, $del );
-				require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-				$group = DBUser::getUserGroupObj( $del );
-				require_once BASEDIR.'/server/dbclasses/DBRouting.class.php';
-				/*$ret= */ DBRouting::deleteRouting($id, 0, null, null, $group->Name);
-			} catch ( BizException $e ) {
+				require_once BASEDIR.'/server/services/adm/AdmDeleteWorkflowUserGroupAuthorizationsService.class.php';
+				$request = new AdmDeleteWorkflowUserGroupAuthorizationsRequest();
+				$request->Ticket = $ticket;
+				$request->PublicationId = $id;
+				$request->IssueId = 0;
+				$request->UserGroupId = $del;
+				$service = new AdmDeleteWorkflowUserGroupAuthorizationsService();
+				$service->execute( $request );
+			} catch( BizException $e ) {
 				$errors[] = $e->getMessage();
+				$mode = 'error';
 			}
 		}
 		break;
 	case 'delpubladmin':
 		if ($id > 0 && $del > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbpa = $dbh->tablename('publadmin');
-			$sql = "DELETE FROM $dbpa WHERE `grpid` = $del AND `publication`=$id";
-			$sth = $dbh->query($sql);
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmDeletePublicationAdminAuthorizationsService.class.php';
+				$request = new AdmDeletePublicationAdminAuthorizationsRequest();
+				$request->Ticket = $ticket;
+				$request->PublicationId = $id;
+				$request->UserGroupIds = array( $del );
+				$service = new AdmDeletePublicationAdminAuthorizationsService();
+				$service->execute( $request );
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
+				$mode = 'error';
+			}
 		}
 		break;
 	case 'delroute':
-		if ($id > 0) {
+		if ($id > 0 && $del > 0) {
 			try {
-				require_once BASEDIR.'/server/dbclasses/DBRouting.class.php';
-				/*$ret= */ DBRouting::deleteRouting($id, 0, $del, null, null);
-			} catch ( BizException $e ) {
+				require_once BASEDIR.'/server/services/adm/AdmDeleteRoutingsService.class.php';
+				$request = new AdmDeleteRoutingsRequest();
+				$request->Ticket = $ticket;
+				$request->PublicationId = $id;
+				$request->IssueId = 0;
+				$request->SectionId = $del;
+				$service = new AdmDeleteRoutingsService();
+				$service->execute( $request );
+			} catch( BizException $e ) {
 				$errors[] = $e->getMessage();
+				$mode = 'error';
 			}
 		}
 		break;
@@ -183,6 +213,7 @@ if( $mode != 'new' && $id ) {
 		$pubObj = $app->getPublicationObj( $ticket, $id );
 	} catch( BizException $e ) {
 		$errors[] = $e->getMessage();
+		$mode = 'error';
 	}
 }
 
@@ -263,7 +294,9 @@ class PublicationMaintenanceApp
 	 *
 	 * @param AdmPublication $pubObj
 	 * @param string $action 'Create' or 'Update'
+	 * @param array $errors List of errors.
 	 * @param array $validateErrors Errors from property validations. Keys are property names. Values are error messages.
+	 * @param string $ticket The user's session ticket.
 	 * @return string HTML fragment representing the publication properties. The form itself is excluded!
 	 */
 	public function buildPublicationForm( AdmPublication $pubObj, $action, $errors, $validateErrors, $ticket )
@@ -311,6 +344,7 @@ class PublicationMaintenanceApp
 			}
 			$prop = BizAdmProperty::newHtmlField( $doc, $form, $prefix, $widget );
 			$found = false;
+			$mdValue = null;
 			foreach( $mdValues as $mdValue ) {
 				if( $mdValue->Property == $widget->PropertyInfo->Name ) {
 					$found = true;
@@ -344,6 +378,7 @@ class PublicationMaintenanceApp
 			// Only if the property is not a custom property add this to the page. Otherwise the data cannot be saved in the channeldata table.
 			$prop = BizAdmProperty::newHtmlField( $doc, $form, $prefix, $widget );
 			$found = false;
+			$mdValue = null;
 			foreach( $mdValues as $mdValue ) {
 				if( $mdValue->Property == $widget->PropertyInfo->Name ) {
 					$found = true;
@@ -408,7 +443,6 @@ class PublicationMaintenanceApp
 	 */
 	private function drawHtmlField( AdmPublication $pubObj, DialogWidget $widget, Utils_XHtmlField $htmlPropObj, $validateError, $width = 200 )
 	{
-		$pubObj = $pubObj; // keep code analyzer happy
 		if( $widget->PropertyInfo->Name == 'AutoPurge' ) {
 			$postfix = ' '.BizResources::localize('TIME_DAYS');
 			$htmlPropObj->setWidth( 100 );
@@ -433,16 +467,18 @@ class PublicationMaintenanceApp
 	 * (such as categories, statuses, etc) that belong to a given publication ($id).
 	 *
 	 * @param integer $id Publication ID
-	 * @return HTML panes.
+	 * @param string $ticket The user's session ticket.
+	 * @param array &$errors List of errors.
+	 * @return string HTML panes.
 	 */
-	private function getPublicationSubPanes( $id, $ticket, $errors )
+	private function getPublicationSubPanes( $id, $ticket, array &$errors )
 	{
-		$pubChannelsPane = $this->getPubChannelsPane( $id );
-		$categoriesPane = $this->getCategoriesPane( $id );
-		$statusesPane = $this->getStatusesPane( $id );
-		$userAuthPane = $this->getUserAuthorizationsPane( $id );
-		$adminAuthPane = $this->getAdminAuthorizationsPane( $id );
-		$routingPane = $this->getRoutingsPane( $id, $ticket );
+		$pubChannelsPane = $this->getPubChannelsPane( $id, $ticket, $errors );
+		$categoriesPane = $this->getCategoriesPane( $id, $ticket, $errors );
+		$statusesPane = $this->getStatusesPane( $id, $ticket, $errors );
+		$userAuthPane = $this->getUserAuthorizationsPane( $id, $ticket, $errors );
+		$adminAuthPane = $this->getAdminAuthorizationsPane( $id, $ticket, $errors );
+		$routingPane = $this->getRoutingsPane( $id, $ticket, $errors );
 		$dossierTplPane = $this->getDossierTemplatesPane( $id, $ticket, $errors );
 	
 		// Remark when implement JQuery UI 
@@ -477,31 +513,51 @@ class PublicationMaintenanceApp
 	 * Builds a HTML pane in memory that lists the channels of a given publication ($id).
 	 *
 	 * @param integer $id Publication ID
-	 * @return HTML pane.
+	 * @param string $ticket The user's session ticket.
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane.
 	 */
-	private function getPubChannelsPane( $id )
+	private function getPubChannelsPane( $id, $ticket, array &$errors )
 	{
-		$dbh = DBDriverFactory::gen();
-		$dbch = $dbh->tablename('channels');
 		$detail = inputvar( 'id', $id, 'hidden' );
 		if ($id > 0) {
-			$sql = "select * from $dbch where `publicationid` = $id order by `code`, `name`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$cnt=1;
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$cnt%2];
-				$tid = $row['id'];
-				$bx = inputvar("channel_code$cnt", $row['code'], "small").inputvar( "channel_order$cnt", $tid, 'hidden' );
-				$detail .= "<tr$clr><td><a href='editChannel.php?publid=$id&channelid=$tid'>"
-					.$row["name"]."</a></td><td>$bx</td><td><a href='hppublications.php?delchannel=1&id=$id&del="
-					.$row['id']
-					."' onClick='return myconfirm(\"delchannel\")'>"
-					."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
-					."</a></td><tr>";
-				$cnt++;
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetPubChannelsService.class.php';
+				$request = new AdmGetPubChannelsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array();
+				$request->PublicationId = $id;
+				$service = new AdmGetPubChannelsService();
+				$response = $service->execute( $request );
+				$pubChannels = $response->PubChannels;
+
+				// Sort the channels by code, then by name in natural order.
+				if( $pubChannels ) {
+					usort( $pubChannels, function( AdmPubChannel $channelA, AdmPubChannel $channelB ) {
+						if( $channelA->SortOrder == $channelB->SortOrder ) {
+							return strnatcmp( $channelA->Name, $channelB->Name );
+						}
+						return $channelA->SortOrder < $channelB->SortOrder ? -1 : 1;
+					} );
+				}
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$cnt=1;
+				if( $pubChannels ) foreach( $pubChannels as $pubChannel ) {
+					$clr = $color[$cnt%2];
+					$bx = inputvar("channel_code$cnt", $pubChannel->SortOrder, "small").inputvar( "channel_order$cnt", $pubChannel->Id, 'hidden' );
+					$detail .= "<tr$clr><td><a href='editChannel.php?publid=$id&channelid=$pubChannel->Id'>"
+						.$pubChannel->Name."</a></td><td>$bx</td><td><a href='hppublications.php?delchannel=1&id=$id&del="
+						.$pubChannel->Id
+						."' onClick='return myconfirm(\"delchannel\")'>"
+						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
+						."</a></td><tr>";
+					$cnt++;
+				}
+				$detail .= inputvar( 'recs_channel', $cnt, 'hidden' );
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
-			$detail .= inputvar( 'recs_channel', $cnt, 'hidden' );
 		}
 		$txt = HtmlDocument::loadTemplate( 'hppublicationsdetchannel.htm' );
 		$txt = str_replace( '<!--ROWS-->', $detail, $txt );
@@ -513,31 +569,52 @@ class PublicationMaintenanceApp
 	 * Builds a HTML pane in memory that lists the categories of a given publication ($id).
 	 *
 	 * @param integer $id Publication ID
-	 * @return HTML pane.
+	 * @param string $ticket The user's session ticket.
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane.
 	 */
-	private function getCategoriesPane( $id )
+	private function getCategoriesPane( $id, $ticket, array &$errors )
 	{
 		$detail = '';
-		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbs = $dbh->tablename('publsections');
-			$sql = "select * from $dbs where `publication` = $id and `issue` = 0 order by `code`, `section`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$cnt=1;
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$cnt%2];
-				$tid = $row['id'];
-				$bx = inputvar("sec_code$cnt", $row['code'], "small").inputvar( "sec_order$cnt", $tid, 'hidden' );
-				$detail .= "<tr$clr><td><a href='hppublsections.php?publ=$id&id=$tid'>"
-					.$row["section"]."</a></td><td>$bx</td><td><a href='hppublications.php?delsection=1&id=$id&del="
-					.$row['id']
-					."' onClick='return myconfirm(\"delsection\")'>"
-					."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
-					."</a></td><tr>";
-				$cnt++;
+		if( $id > 0 ) {
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetSectionsService.class.php';
+				$request = new AdmGetSectionsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array();
+				$request->PublicationId = $id;
+				$request->IssueId = 0;
+				$service = new AdmGetSectionsService();
+				$response = $service->execute( $request );
+				$sections = $response->Sections;
+
+				// Sort the sections by code, then by name in natural order.
+				if( $sections ) {
+					usort( $sections, function( AdmSection $sectionA, AdmSection $sectionB ) {
+						if( $sectionA->SortOrder == $sectionB->SortOrder ) {
+							return strnatcmp( $sectionA->Name, $sectionB->Name );
+						}
+						return $sectionA->SortOrder < $sectionB->SortOrder ? -1 : 1;
+					} );
+				}
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$cnt=1;
+				if( $sections ) foreach( $sections as $section ) {
+					$clr = $color[$cnt%2];
+					$bx = inputvar("sec_code$cnt", $section->SortOrder, "small").inputvar( "sec_order$cnt", $section->Id, 'hidden' );
+					$detail .= "<tr$clr><td><a href='hppublsections.php?publ=$id&id=$section->Id;'>"
+						.$section->Name."</a></td><td>$bx</td><td><a href='hppublications.php?delsection=1&id=$id&del="
+						.$section->Id
+						."' onClick='return myconfirm(\"delsection\")'>"
+						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
+						."</a></td><tr>";
+					$cnt++;
+				}
+				$detail .= inputvar( 'recs_section', $cnt, 'hidden' );
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
-			$detail .= inputvar( 'recs_section', $cnt, 'hidden' );
 		}
 		$txt = HtmlDocument::loadTemplate( 'hppublicationsdetsection.htm' );
 		$txt = str_replace( '<!--ROWS-->', $detail, $txt );
@@ -548,34 +625,47 @@ class PublicationMaintenanceApp
 	/**
 	 * Builds a HTML pane in memory that lists the statuses of a given publication ($id).
 	 *
-	 * @param integer $id Publication ID
-	 * @return HTML pane.
+	 * @param string $id Issue id
+	 * @param string $ticket The user's session ticket.
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane
 	 */
-	private function getStatusesPane( $id )
+	private function getStatusesPane( $id, $ticket, array &$errors )
 	{
 		$detail = '';
 		if ($id > 0) {
 			$typesdomain = getObjectTypeMap();
-			$dbh = DBDriverFactory::gen();
-			$dbst = $dbh->tablename('states');
-			$sql = "select `type`, `state`, `id` from $dbst ".
-				"where `publication` = $id  and `issue` = 0 order by `type`, `code`";
-			$sth = $dbh->query($sql);
-			$arr = array();
-			while (($row = $dbh->fetch($sth))) {
-				if (!isset($arr[$row['type']]))
-					$arr[$row['type']] = array ($row['state']);
-				else
-					$arr[$row['type']][] = $row['state'];
-			}
-			$color = array (" bgcolor='#eeeeee'", '');
-			$flip = 0;
-			foreach (array_keys($arr) as $type) {
-				$clr = $color[$flip];
-				$states = implode($arr[$type], ', ');
-				$detail .= "<tr$clr><td><a href='states.php?publ=$id&type=$type'>".formvar($typesdomain[$type]).'</a></td>';
-				$detail .= '<td>'.formvar($states).'</td></tr>';
-				$flip = 1- $flip;
+
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+				$request = new AdmGetStatusesRequest();
+				$request->Ticket = $ticket;
+				$request->PublicationId = $id;
+				$request->IssueId = 0;
+				$service = new AdmGetStatusesService();
+				/** @var AdmGetStatusesResponse $response */
+				$response = $service->execute( $request );
+				$statuses = $response->Statuses;
+
+				$arr = array();
+				if( $statuses ) foreach( $statuses as $status ) {
+					if( !isset( $arr[$status->Type] ) ) {
+						$arr[$status->Type] = array( $status->Name );
+					} else {
+						$arr[$status->Type][] = $status->Name;
+					}
+				}
+				$color = array (" bgcolor='#eeeeee'", '');
+				$flip = 0;
+				foreach( array_keys($arr) as $type ) {
+					$clr = $color[$flip];
+					$statusNames = implode( $arr[$type], ', ' );
+					$detail .= "<tr$clr><td><a href='states.php?publ=$id&type=$type'>".formvar( $typesdomain[$type] ).'</a></td>';
+					$detail .= '<td>'.formvar( $statusNames ).'</td></tr>';
+					$flip = 1- $flip;
+				}
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
 		}
 		$txt = HtmlDocument::loadTemplate( 'hppublicationsdetstate.htm' );
@@ -583,39 +673,51 @@ class PublicationMaintenanceApp
 		$txt = str_replace( '<!--PUBL-->', $id, $txt );
 		return $txt;
 	}
-	
+
 	/**
 	 * Builds a HTML pane in memory that lists the user authorizations of a given publication ($id).
 	 *
 	 * @param integer $id Publication ID
-	 * @return HTML pane.
+	 * @param string $ticket User session ticket
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane.
 	 */
-	private function getUserAuthorizationsPane( $id )
+	private function getUserAuthorizationsPane( $id, $ticket, array &$errors )
 	{
 		$detail = '';
 		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dba = $dbh->tablename('authorizations');
-			$dbg = $dbh->tablename('groups');
-			$sql = "SELECT g.`id`, g.`name` FROM $dba a, $dbg g ".
-					"WHERE a.`grpid` = g.`id` and a.`publication` = $id  and a.`issue` = 0 ".
-					"GROUP BY g.`id`, g.`name` ".
-					"ORDER BY g.`name`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$flip = 0;
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$flip];
-				$detail .= "<tr$clr><td><a href='authorizations.php?publ=$id&grp="
-					.$row["id"]
-					."'>"
-					.formvar($row["name"])
-					."</a></td><td><a href='hppublications.php?delauthor=1&id=$id&del="
-					.$row['id']
-					."' onClick='return myconfirm(\"delauthor\")'>"
-					."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
-					."</a></td><tr>";
-				$flip = 1- $flip;
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetWorkflowUserGroupAuthorizationsService.class.php';
+				$request = new AdmGetWorkflowUserGroupAuthorizationsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array( 'GetUserGroups' );
+				$request->PublicationId = $id;
+				$request->IssueId = 0;
+				$service = new AdmGetWorkflowUserGroupAuthorizationsService();
+				/** @var AdmGetWorkflowUserGroupAuthorizationsResponse $response */
+				$response = $service->execute( $request );
+				$userGroups = $response->UserGroups;
+
+				// Sort the user groups by name, in natural order.
+				if( $userGroups ) {
+					usort( $userGroups, function( AdmUserGroup $userGroupA, AdmUserGroup $userGroupB ) {
+						return strnatcmp( $userGroupA->Name, $userGroupB->Name );
+					} );
+				}
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$flip = 0;
+				if( $userGroups ) foreach( $userGroups as $userGroup ) {
+					$clr = $color[$flip];
+					$detail .= "<tr$clr><td><a href='authorizations.php?publ=$id&grp=".$userGroup->Id."'>"
+						.formvar( $userGroup->Name )
+						."</a></td><td><a href='hppublications.php?delauthor=1&id=$id&del=".$userGroup->Id."' onClick='return myconfirm(\"delauthor\")'>"
+						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
+						."</a></td><tr>";
+					$flip = 1- $flip;
+				}
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
 		}
 		$txt = HtmlDocument::loadTemplate( 'hppublicationsdetauthor.htm' );
@@ -628,31 +730,47 @@ class PublicationMaintenanceApp
 	 * Builds a HTML pane in memory that lists the admin authorizations of a given publication ($id).
 	 *
 	 * @param integer $id Publication ID
-	 * @return HTML pane.
+	 * @param string $ticket User session ticket
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane.
 	 */
-	private function getAdminAuthorizationsPane( $id )
+	private function getAdminAuthorizationsPane( $id, $ticket, array &$errors )
 	{
 		// publication authorizations
 		$detail = '';
 		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbpa = $dbh->tablename('publadmin');
-			$dbg = $dbh->tablename('groups');
-			$sql = "SELECT g.`id`, g.`name` FROM $dbpa pa, $dbg g ".
-					"WHERE pa.`grpid` = g.`id` and pa.`publication` = $id ".
-					"ORDER BY g.`name`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$flip = 0;
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$flip];
-				$detail .= "<tr$clr><td>"
-					.formvar($row["name"])."</td><td><a href='hppublications.php?delpubladmin=1&id=$id&del="
-					.$row['id']
-					."' onClick='return myconfirm(\"delpubladmin\")'>"
-					."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
-					."</a></td><tr>";
-				$flip = 1- $flip;
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetPublicationAdminAuthorizationsService.class.php';
+				$request = new AdmGetPublicationAdminAuthorizationsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array( 'GetUserGroups' );
+				$request->PublicationId = $id;
+				$service = new AdmGetPublicationAdminAuthorizationsService();
+				/** @var AdmGetWorkflowUserGroupAuthorizationsResponse $response */
+				$response = $service->execute( $request );
+				$userGroups = $response->UserGroups;
+
+				// Sort the user groups by name, in natural order.
+				if( $userGroups ) {
+					usort( $userGroups, function( AdmUserGroup $userGroupA, AdmUserGroup $userGroupB ) {
+						return strnatcmp( $userGroupA->Name, $userGroupB->Name );
+					} );
+				}
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$flip = 0;
+				if( $userGroups ) foreach( $userGroups as $userGroup ) {
+					$clr = $color[$flip];
+					$detail .= "<tr$clr><td>"
+						.formvar( $userGroup->Name )."</td><td><a href='hppublications.php?delpubladmin=1&id=$id&del="
+						.$userGroup->Id
+						."' onClick='return myconfirm(\"delpubladmin\")'>"
+						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
+						."</a></td><tr>";
+					$flip = 1- $flip;
+				}
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
 		}
 		$tpl = HtmlDocument::loadTemplate( 'hppublicationsdetpubladmin.htm' );
@@ -664,53 +782,55 @@ class PublicationMaintenanceApp
 	/**
 	 * Builds a HTML pane in memory that lists the workflow routings of a given publication ($id).
 	 *
+	 * @param string $ticket The user's session ticket.
 	 * @param integer $id Publication ID
-	 * @return HTML pane.
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane.
 	 */
-	private function getRoutingsPane( $id, $ticket )
+	private function getRoutingsPane( $id, $ticket, array &$errors )
 	{
 		$detail = '';
-		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbst = $dbh->tablename('states');
-			$sql = "SELECT `id`, `state`, `type` FROM $dbst ".
-				"WHERE `publication` = $id and `issue` = 0 ".
-				"ORDER BY `type`, `code`";
-			$sth = $dbh->query($sql);
-			$statedomain = array();
-			while (($row = $dbh->fetch($sth))) {
-				$statedomain[$row['id']] = $row['type']."/".$row['state'];
+		if( $id > 0 ) {
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetRoutingsService.class.php';
+				$request = new AdmGetRoutingsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array( 'GetSections', 'GetStatuses' );
+				$request->PublicationId = $id;
+				$request->IssueId = 0;
+				$service = new AdmGetRoutingsService();
+				/** @var AdmGetRoutingsResponse $response */
+				$response = $service->execute( $request );
+				$routings = $response->Routings;
+				$sections = $response->Sections;
+				$statuses = $response->Statuses;
+
+				$statusDomain = array();
+				if( $statuses ) foreach( $statuses as $status ) {
+					$statusDomain[$status->Id] = $status->Type."/".$status->Name;
+				}
+				$sectionDomain = array();
+				if( $sections) foreach( $sections as $section ) {
+					$sectionDomain[$section->Id] = $section->Name;
+				}
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$flip = 0;
+				$sAll = BizResources::localize("LIS_ALL");
+				if( $routings ) foreach( $routings as $routing ) {
+					$clr = $color[$flip];
+					$sect = $routing->SectionId ? $sectionDomain[$routing->SectionId] : '<'.$sAll.'>';
+					$detail .= "<tr$clr><td><a href='routing.php?publ=$id&selsection=$routing->SectionId'>".formvar($sect)."</a></td>";
+					$routeToDetails = !empty($routing->RouteTo) ? $routing->RouteTo : '<'.$sAll.'>';
+					$statusDetails = $routing->StatusId ? $statusDomain[$routing->StatusId] : '<'.$sAll.'>';
+					$detail .= '<td>'.formvar($statusDetails).'</td><td>'.formvar($routeToDetails).'</td></tr>';
+					$flip = 1- $flip;
+				}
+			} catch(BizException $e) {
+				$errors[] = $e->getMessage();
 			}
-			$routedomain = array();
-			$arrayOfRoute = listrouteto( $ticket, $id, null );
-			if ($arrayOfRoute) foreach ($arrayOfRoute as $route) {
-				$routedomain[$route] = $route;
-			}
-			$dbs = $dbh->tablename('publsections');
-			$dbr = $dbh->tablename('routing');
-			$sql = "SELECT s.`id`, s.`section`, r.`routeto`, r.`state` FROM $dbr r ".
-					"LEFT JOIN $dbs s on (r.`section` = s.`id`) ".
-					"WHERE r.`publication` = $id and r.`issue` = 0 ".
-					"GROUP BY s.`section`, s.`id`, r.`routeto`, r.`state` ".
-					"ORDER BY s.`section`, s.`id`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$flip = 0;
-	
-			$sAll = BizResources::localize("LIS_ALL");
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$flip];
-				$sid = $row['id'];
-				$sect = trim($row['section']); 
-				if (!$sect) $sect = '<'.$sAll.'>';
-				$detail .= "<tr$clr><td><a href='routing.php?publ=$id&selsection=$sid'>".formvar($sect)."</a></td>";
-				$routeTo = trim($row['routeto']); // MSSQL bug: empty fields have single space, so we trim
-				$routeToDetails = !empty($routeTo) && isset($routedomain[$routeTo]) ? $routedomain[$routeTo] : '<'.$sAll.'>';
-				$status = trim($row['state']); // MSSQL bug: empty fields have single space, so we trim
-				$statusDetails = !empty($status) && isset($statedomain[$status]) ? $statedomain[$status] : '<'.$sAll.'>';
-				$detail .= '<td>'.formvar($statusDetails).'</td><td>'.formvar($routeToDetails).'</td></tr>';
-				$flip = 1- $flip;
-			}
+			//group by ssection, sid, rrouteto, rstate
+			//order by ssection, sid
 		}
 		$txt = HtmlDocument::loadTemplate( 'hppublicationsdetroute.htm' );
 		$txt = str_replace( '<!--ROWS-->', $detail, $txt );
@@ -722,56 +842,63 @@ class PublicationMaintenanceApp
 	 * Builds a HTML pane in memory that lists the dossier templates of a given publication ($id).
 	 *
 	 * @param integer $id Publication ID
-	 * @return HTML pane.
+	 * @param string $ticket The user's session ticket.
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane.
 	 */
-	private function getDossierTemplatesPane( $id, $ticket, &$errors )
+	private function getDossierTemplatesPane( $id, $ticket, array &$errors )
 	{
 		$detail = '';
 		if ($id > 0) {
-			require_once BASEDIR . '/server/bizclasses/BizAdmPubObject.class.php';
-			$pubObjects = array();
-			$pubObjects = BizAdmPubObject::listPubObjects( $id );
-	
-			$usergroups = null;
 			try {
-				require_once BASEDIR.'/server/services/adm/AdmGetUserGroupsService.class.php';
-				require_once BASEDIR.'/server/interfaces/services/adm/AdmGetUserGroupsRequest.class.php';
-				$service = new AdmGetUserGroupsService();
-				$request = new AdmGetUserGroupsRequest( $ticket, array() );
-				$response = $service->execute($request);
-				$usergroups = $response->UserGroups;
+				require_once BASEDIR.'/server/services/adm/AdmGetTemplateObjectsService.class.php';
+				$request = new AdmGetTemplateObjectsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array( 'GetUserGroups', 'GetObjectInfos' );
+				$request->PublicationId = $id;
+				$request->IssueId = null;
+				$service = new AdmGetTemplateObjectsService();
+				$response = $service->execute( $request );
+				$templateObjects = $response->TemplateObjects;
+				$resUserGroups = $response->UserGroups;
+				$resObjectInfos = $response->ObjectInfos;
+
+				$userGroupsArr = array();
+				$userGroupsArr[0] = '<'.BizResources::localize("LIS_ALL").'>';
+				if( $resUserGroups ) foreach( $resUserGroups as $userGroup ) {
+					$userGroupsArr[$userGroup->Id] = $userGroup->Name;
+				}
+
+				$objectInfos = array();
+				if( $resObjectInfos ) foreach( $resObjectInfos as $objectInfo ) {
+					$objectInfos[$objectInfo->ID] = $objectInfo;
+				}
+
+				$dosArr = array();
+				$grpArr = array();
+				if( $templateObjects ) foreach( $templateObjects as $templateObject ) {
+					$dosArr[$templateObject->TemplateObjectId] = $objectInfos[$templateObject->TemplateObjectId]->Name;
+					if( !isset($grpArr[$templateObject->TemplateObjectId] ) )
+						$grpArr[$templateObject->TemplateObjectId] = array( $userGroupsArr[$templateObject->UserGroupId] );
+					else
+						$grpArr[$templateObject->TemplateObjectId][] = $userGroupsArr[$templateObject->UserGroupId];
+				}
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$cnt=1;
+				foreach( array_keys($dosArr) as $objId ) {
+					$clr = $color[$cnt%2];
+					$groups = implode($grpArr[$objId], ', ');
+					$detail .= "<tr$clr><td><a href='dossiertemplates.php?publ=$id&objid=$objId'>".formvar($dosArr[$objId]).'</a></td>';
+					$detail .= "<td>".formvar($groups)."</td><td><a href='dossiertemplates.php?publ=$id&issue=0&delete=2&objid="
+							.$objId
+							."' onClick='return myconfirm(\"delpublobjects\")'>"
+							."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
+							."</a></td><tr>";
+					$cnt++;
+				}
 			} catch(BizException $e) {
 				$errors[] = $e->getMessage();
-			}
-			
-			$usergroupsArr = array();
-			$usergroupsArr[0] = '<'.BizResources::localize("LIS_ALL").'>';
-			foreach( $usergroups as $usergroup ) {
-				$usergroupsArr[$usergroup->Id]= $usergroup->Name;
-			}
-	
-			$dosArr = array();
-			$grpArr = array();
-			foreach( $pubObjects as $pubObject ) {
-				$dosArr[$pubObject->ObjectId] = $pubObject->ObjectName;
-				if (!isset($grpArr[$pubObject->ObjectId]))
-					$grpArr[$pubObject->ObjectId] = array ($usergroupsArr[$pubObject->GroupId]);
-				else
-					$grpArr[$pubObject->ObjectId][] = $usergroupsArr[$pubObject->GroupId];
-			}
-	
-			$color = array (" bgcolor='#eeeeee'", '');
-			$cnt=1;
-			foreach (array_keys($dosArr) as $objId) {
-				$clr = $color[$cnt%2];
-				$groups = implode($grpArr[$objId], ', ');
-				$detail .= "<tr$clr><td><a href='dossiertemplates.php?publ=$id&objid=$objId'>".formvar($dosArr[$objId]).'</a></td>';
-				$detail .= "<td>".formvar($groups)."</td><td><a href='dossiertemplates.php?publ=$id&issue=0&delete=1&objid="
-						.$objId
-						."' onClick='return myconfirm(\"delpublobjects\")'>"
-						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
-						."</a></td><tr>";
-				$cnt++;
 			}
 		}
 		$txt = HtmlDocument::loadTemplate( 'hppublicationsdetdossiertemplate.htm' );

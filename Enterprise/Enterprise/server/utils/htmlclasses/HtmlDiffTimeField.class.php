@@ -101,7 +101,7 @@ class HtmlDiffTimeField extends HtmlAnyField
 	}
 
 	/**
-	 *  @return returns the raw input-value as an array of three strings as
+	 *  @return array|null returns the raw input-value as an array of three strings as
 	 *  in this implementation there are three inputfields (comboboxes).
 	 *  Returns null if not posted.
 	**/	
@@ -123,14 +123,14 @@ class HtmlDiffTimeField extends HtmlAnyField
 	}
 
 	/**
-	 *  @return returns the converted raw input-values as totalseconds.
+	 *  @return integer|null returns the converted raw input-values as totalseconds.
 	 *  Returns null if not posted.
 	**/
 	public function requestValue()
 	{
 		$temp = self::requestInput();
 		if (is_null($temp)) {
-			return $temp;   
+			return null;
 		}
 		if (is_array($temp)) {
 			$result = ($temp['diffdays']*(24*60*60)) + ($temp['diffhours'] * (60*60)) + ($temp['diffminutes'] * (60));
@@ -178,7 +178,7 @@ class HtmlDiffTimeField extends HtmlAnyField
 	/**
 	 *  Draws the three inputfields
 	 *  Each in separate function
-	 *  @return html
+	 *  @return string HTML body
 	**/
 	public function drawBody()
 	{

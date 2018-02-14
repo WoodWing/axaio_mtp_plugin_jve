@@ -66,7 +66,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 			$this->getPagesInfo();
 		}
 		catch( BizException $e ) {
-			$e = $e; // keep analyzer happy
 		}
 
 		// Delete the layout and article objects.
@@ -223,7 +222,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 					}
 				}
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 		}
 	}
@@ -334,7 +332,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 	 * @param string $layoutName
 	 * @param integer $fileSize
 	 * @param integer $layoutId
-	 * @return Object $metaData MetaData object
+	 * @return MetaData
 	 */
 	private function buildLayoutMetaData( $layoutName, $fileSize, $layoutId=null )
 	{
@@ -408,7 +406,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 	 *
 	 * @param string $articleName
 	 * @param integer $fileSize
-	 * @return Object $metaData MetaData object
+	 * @return MetaData
 	 */
 	private function buildArticleMetaData( $articleName, $fileSize )
 	{
@@ -473,7 +471,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 			}
 		}
 		$this->assertNotNull( $this->issueObj,
-				'Could not find the test Issue: '.$this->suiteOpts['Issue'], 
+				'Could not find the test Issue: '.$this->suiteOpts['Issue'].' '.
 				'Please check the TESTSUITE setting in configserver.php.' );
 
 		// Determine the layout status object
@@ -486,7 +484,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 			}
 		}
 		$this->assertNotNull( $this->layoutStatus,
-				'Could not find a Layout status configured for brand "'.$this->pubObj->Name.'".', 
+				'Could not find a Layout status configured for brand "'.$this->pubObj->Name.'". '.
 				'Please check your brand setup (or the TESTSUITE setting in configserver.php).' );
 
 		// Determine the article status object
@@ -499,7 +497,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 			}
 		}	
 		$this->assertNotNull( $this->articleStatus,
-				'Could not find a Article status configured for brand "'.$this->pubObj->Name.'".', 
+				'Could not find a Article status configured for brand "'.$this->pubObj->Name.'". '.
 				'Please check your brand setup (or the TESTSUITE setting in configserver.php).' );
 
 		// Determine pubchannel object
@@ -508,13 +506,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 		$setup->resolveIssuePubChannelBrand( $this->issueObj->Id );
 		$this->pubChannelObj = $setup->getPubChannel();
 		$this->assertNotNull( $this->pubChannelObj,
-				'Could not find a Publication Channel configured for brand "'.$this->pubObj->Name.'".', 
+				'Could not find a Publication Channel configured for brand "'.$this->pubObj->Name.'". '.
 				'Please check your brand setup (or the TESTSUITE setting in configserver.php).' );
 		
 		// Determine the category object
 		$this->category = count( $this->pubObj->Categories ) > 0  ? $this->pubObj->Categories[0] : null;
 		$this->assertNotNull( $this->category,
-				'Could not find a Category configured for brand "'.$this->pubObj->Name.'".', 
+				'Could not find a Category configured for brand "'.$this->pubObj->Name.'". '.
 				'Please check your brand setup (or the TESTSUITE setting in configserver.php).' );
 		
 		// Determine the edition object
@@ -522,14 +520,14 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 		$editions = DBEdition::listChannelEditionsObj( $this->pubChannelObj->Id );
 		$this->editionObj = ( count($editions) > 0 ) ? $editions[0] : null;
 		$this->assertNotNull( $this->editionObj,
-				'Could not find an Edition configured for pub channel "'.$this->pubChannelObj->Name.'".', 
+				'Could not find an Edition configured for pub channel "'.$this->pubChannelObj->Name.'". '.
 				'Please check your brand setup (or the TESTSUITE setting in configserver.php).' );
 	}
 
 	/**
 	 * Create Relation object based on provided/existing object Ids.
 	 *
-	 * @return Object $relation Object Relation
+	 * @return Relation
 	 */
 	private function buildRelation()
 	{
@@ -548,7 +546,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 	/**
 	 * Build Placement object
 	 *
-	 * @return Object $placement Object Placement
+	 * @return Placement
 	 */
 	private function buildPlacement()
 	{
@@ -599,7 +597,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 	 * Validate the response on the placementtiles objects
 	 * 
 	 * @throws BizException on failure
-	 * @param Object $placementTiles PlacementTiles
+	 * @param PlacementTile[] $placementTiles
 	 * @param string $service Service name
 	 */
 	private function validatePlacementTiles( array $placementTiles, $service )
@@ -607,7 +605,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 		$numberDefined = count($this->placementTiles);
 		$numberStored = count($placementTiles);
 		$this->assertEquals( $numberDefined, $numberStored,
-				"Number of tiles do not match, $numberDefined defined, $numberStored stored.", 
+				"Number of tiles do not match, $numberDefined defined, $numberStored stored. ".
 				'Error occurred in ' . $service . ' response.' );
 		
 		require_once BASEDIR.'/server/utils/PhpCompare.class.php';
@@ -676,7 +674,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 	/**
 	 * Composes a placement info data object (from a given placement tile).
 	 *
-	 * @param integer $id Child object id
 	 * @param PlacementTile $tile
 	 * @return PlacementInfo
 	 */

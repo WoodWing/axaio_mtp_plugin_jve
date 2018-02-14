@@ -17,9 +17,9 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 	public function getDisplayName() { return 'php.ini'; }
 	public function getTestGoals()   { return 'Checks if the php.ini settings are correct. '; }
 	public function getTestMethods() { return 'Various PHP settings are checked that are crucial for Enterprise Server. Also checked is if required PHP extentions are installed and loaded.'; }
-    public function getPrio()        { return 3; }
+	public function getPrio()        { return 3; }
 
-    private $phpVersion = null;      // Php version
+	private $phpVersion = null;      // Php version
 
 	final public function runTest()
 	{
@@ -33,19 +33,21 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 		$this->phpVersion = NumberUtils::getPhpVersionNumber();
 
 		// Check PHP extensions
-		$this->checkPhpExtensions();
+		// If the check fails, don't do the other checks as they will cause the entire test to fail
+		// with an 'Invalid XML response' error.
+		if( $this->checkPhpExtensions() ) {
+			// Check mandatory PHP settings
+			$this->checkMandatoryPhpSettings( $help );
 
-		// Check mandatory PHP settings
-		$this->checkMandatoryPhpSettings( $help );
+			// Check PHP session directory
+			$this->checkPhpSessionDirectory( $help );
 
-		// Check PHP session directory
-		$this->checkPhpSessionDirectory( $help );
+			// Check system temp directory
+			$this->checkSystemTempDirectory();
 
-		// Check system temp directory
-		$this->checkSystemTempDirectory();
-
-		// Check Zend OPcache extension
-		$this->checkOpcacheExtension();
+			// Check Zend OPcache extension
+			$this->checkOpcacheExtension();
+		}
 	}
 
 	/**
@@ -80,40 +82,38 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 	 *
 	 * @return string
 	 */
-   private function getPhpIni()
-   {
-	   ob_start();
-	   phpinfo( INFO_GENERAL );
-	   $phpinfo = ob_get_contents();
-	   ob_end_clean();
-	   $found = array();
-	   return preg_match( '/\(php.ini\).*<\/td><td[^>]*>([^<]+)/', $phpinfo, $found ) ? trim( $found[1] ) : '';
-   }
+	private function getPhpIni()
+	{
+		ob_start();
+		phpinfo( INFO_GENERAL );
+		$phpinfo = ob_get_contents();
+		ob_end_clean();
+		$found = array();
+		return preg_match( '/\(php.ini\).*<\/td><td[^>]*>([^<]+)/', $phpinfo, $found ) ? trim( $found[1] ) : '';
+	}
 
-    /**
-     * Session error handler
-     *
-     * @param string $errno
-     * @param string $errstr
-     * @param $errfile
-     * @param $errline
-     * @param $errcontext
-     * @throws Exception
-     */
-    public function session_error_handler( $errno, $errstr,  $errfile, $errline, $errcontext )
-    {
-        /** @noinspection PhpSillyAssignmentInspection */ $errfile = $errfile; // keep analyzer happy
-        /** @noinspection PhpSillyAssignmentInspection */ $errline = $errline;
-        /** @noinspection PhpSillyAssignmentInspection */ $errcontext = $errcontext;
-
-    	throw new Exception( $errstr, $errno );
-    }
+	/**
+	 * Session error handler
+	 *
+	 * @param string $errno
+	 * @param string $errstr
+	 * @param $errfile
+	 * @param $errline
+	 * @param $errcontext
+	 * @throws Exception
+	 */
+	public function session_error_handler( $errno, $errstr,  $errfile, $errline, $errcontext )
+	{
+		throw new Exception( $errstr, $errno );
+	}
 
 	/**
 	 * Check if mandatory extension libraries is loaded in PHP
+	 * @returns boolean check passed or not
 	 */
 	private function checkPhpExtensions()
 	{
+		$passed = true;
 		// Mandatory PHP extensions for which an ERROR should raise.
 		$exts = array(
 			'gd' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/image-installation',
@@ -124,20 +124,16 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 			'iconv' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/iconv-installation',
 			'curl' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/curl-installation',
 			'zlib' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/zlib-installation',
-				// L> Note that zlib is needed since Enterprise 9.5 to support Deflate compression
-				//    during file uploads/downloads through Transfer Server.
-			'xsl' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/xsl-installation'
+			// L> Note that zlib is needed since Enterprise 9.5 to support Deflate compression
+			//    during file uploads/downloads through Transfer Server.
+			'xsl' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/xsl-installation',
+			'openssl' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/openssl-installation'
 		);
 
 		// Optional PHP extentions for which a WARNing should raise instead.
 		$optExtWarnings = array(
 			'xsl' => 'This will break HTML5 exports from ContentStation'
 		);
-
-		if( defined('ENCRYPTION_PRIVATEKEY_PATH') ) {
-			LogHandler::Log('wwtest', 'INFO', 'Using password encryption which requires PHP "openssl" library.');
-			$exts['openssl'] = 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/openssl-installation';
-		}
 
 		// Note that since Enterprise 10.0 RabbitMQ AMQP requires the bcmatch library.
 		// For example used in: php-amqplib/PhpAmqpLib/Wire/AMQPWriter.php.
@@ -149,6 +145,7 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 
 		foreach( $exts as $ext => $phpManual ) {
 			if( !extension_loaded($ext) ) {
+				$passed = false;
 				$extPath = ini_get('extension_dir');
 				$help = 'Please see <a href="'.$phpManual.'" target="_blank">PHP manual</a> for instructions.<br/>'.
 					'Note that the PHP extension path is "'.$extPath.'".<br/>'.
@@ -163,6 +160,7 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 			}
 		}
 		LogHandler::Log('wwtest', 'INFO', 'PHP libraries checked.');
+		return $passed;
 	}
 
 	/**
@@ -218,9 +216,14 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 		}
 		LogHandler::Log('wwtest', 'INFO', 'date.timezone checked. Set to: ['.$tz.']');
 
-        if( version_compare($this->phpVersion, '5.6.0') >= 0 && ini_get('always_populate_raw_post_data') != -1 ) {
-            $this->setResult( 'ERROR', "PHP setting <b>\"always_populate_raw_post_data\"</b> is enabled. Please disable this (deprecated) option in php.ini by setting its value to \"-1\".", $help );
-        }
+		// The always_populate_raw_post_data option is deprecated since PHP 5.6 and obsoleted since PHP 7.0.
+		// For PHP 5.6 we want the option to be set to -1 to simulate the deprecation and be prepared for PHP 7.0.
+		// For PHP 7.0 we can not test option because it is gone (obsoleted).
+		if( version_compare($this->phpVersion, '7.0.0') < 0 ) {
+			if( version_compare( $this->phpVersion, '5.6.0' ) >= 0 && ini_get( 'always_populate_raw_post_data' ) != -1 ) {
+				$this->setResult( 'ERROR', "PHP setting <b>\"always_populate_raw_post_data\"</b> is enabled. Please disable this (deprecated) option in php.ini by setting its value to \"-1\".", $help );
+			}
+		}
 		LogHandler::Log('wwtest', 'INFO', 'always_populate_raw_post_data checked.');
 
 		// BZ#11308

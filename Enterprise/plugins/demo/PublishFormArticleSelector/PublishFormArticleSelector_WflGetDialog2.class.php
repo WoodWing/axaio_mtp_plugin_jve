@@ -22,20 +22,22 @@ require_once dirname(__FILE__) . '/config.php';
 class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseConnector
 {
 
-	final public function getPrio() {
+	final public function getPrio()
+	{
 		return self::PRIO_DEFAULT;
 	}
 
-	final public function getRunMode() {
+	final public function getRunMode()
+	{
 		return self::RUNMODE_BEFOREAFTER;
 	}
         
-	final public function runBefore( WflGetDialog2Request &$req ) {
+	final public function runBefore( WflGetDialog2Request &$req )
+	{
 		LogHandler::Log( 'PublishFormArticleSelector', 'DEBUG', 'Called: PublishFormArticleSelector_WflGetDialog2->runBefore()' );
 		require_once BASEDIR . '/server/bizclasses/BizQuery.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizTarget.class.php';
 
-		$req = $req; // Keep code analyzer happy.
 		$objectId = '';
 		$objectType = '';
 		$issueId = '';
@@ -157,7 +159,6 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 							$service = new WflCreateObjectRelationsService();
 							$service->execute( $request );
 						} catch ( BizException $e ) {
-							$e = $e; // Keep the analyzer happy.
 							LogHandler::Log( 'PublishFormArticleSelector', 'ERROR', $e->getMessage() );
 						}
 					}
@@ -175,7 +176,8 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 	* @param string $area 'Workflow' or 'Trash' where the object resides.
 	* @return string Version of the Object.
 	*/
-	private function getObjectVersion( $id, $area = 'Workflow' ) {
+	private function getObjectVersion( $id, $area = 'Workflow' )
+	{
 		$result = null;
 
 		$dbDriver = DBDriverFactory::gen();
@@ -202,7 +204,8 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 	* @param Publication publication The publication used when copying an Article.
 	* @param category The category used when copying an article
 	*/
-	private function getArticle( $dossierId, $dossierName, $target, $publication, $category ) {
+	private function getArticle( $dossierId, $dossierName, $target, $publication, $category )
+	{
 		try {
 			$copyArticleToDossier = false;
 			$suffix = '';
@@ -343,7 +346,8 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 	* @param int $articleId The id of the article Object.
 	* @return Object|null An article Object or null if not found.
 	*/
-	public function getArticleObject( $articleId ) {
+	public function getArticleObject( $articleId )
+	{
 		require_once BASEDIR . '/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest( BizSession::getTicket(), array( $articleId ), false, 'none', array( 'Elements' ) );
 		$service = new WflGetObjectsService();
@@ -359,7 +363,8 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 	* @param string $issueId The id the PublishForm is in.
 	* @return The retrieved Dialog.
 	*/
-	private function getPublishFormDialog( $publishFormId, $issueId ) {
+	private function getPublishFormDialog( $publishFormId, $issueId )
+	{
 		// Get the Dialog for the PublishForm.
 		LogHandler::Log( 'PublishFormArticleSelector', 'DEBUG', 'Get the dialog.' );
 
@@ -417,7 +422,8 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 	* @param Relation[] $relations The Relations of the getDialog.
 	* @return bool True if there is a component assigned else false.
 	*/
-	private function hasArticleComponentAssigned( $relations ) {
+	private function hasArticleComponentAssigned( $relations )
+	{
 		if ( $relations ) foreach ( $relations as $relation ) {
 			foreach ( $relation->Placements as $placement ) {
 				if ( $placement->FormWidgetId ) {
@@ -438,7 +444,8 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 	* @param string $componentName Name of the article component
 	* @param int $channelId The id of channel
 	*/
-	private function doesComponentMap( $widget, $componentName, $channelId ) {
+	private function doesComponentMap( $widget, $componentName, $channelId )
+	{
 		$mappingRules = unserialize( MAPPING_RULES );
 
 		if ( $mappingRules ) foreach ( $mappingRules as $rule ) {
@@ -453,17 +460,16 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 		return false;
 	}
 
-	final public function runAfter(WflGetDialog2Request $req, WflGetDialog2Response &$resp) {
+	final public function runAfter(WflGetDialog2Request $req, WflGetDialog2Response &$resp)
+	{
 		LogHandler::Log( 'PublishFormArticleSelector', 'DEBUG', 'Called: PublishFormArticleSelector_WflGetDialog2->runAfter()' );
 		require_once dirname( __FILE__ ) . '/config.php';
-		$req = $req;
-		$resp = $resp; // Keep code analyzer happy.
 
 		LogHandler::Log( 'PublishFormArticleSelector', 'DEBUG', 'Returns: PublishFormArticleSelector_WflGetDialog2->runAfter()' );
 	}
 
 	// Not called.
-	final public function runOverruled( WflGetDialog2Request $req ) {
-		$req = $req; // Keep code analyzer happy.
+	final public function runOverruled( WflGetDialog2Request $req )
+	{
 	}
 }

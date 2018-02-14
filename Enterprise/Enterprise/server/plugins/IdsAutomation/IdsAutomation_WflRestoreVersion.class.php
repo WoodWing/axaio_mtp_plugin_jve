@@ -63,11 +63,6 @@ class IdsAutomation_WflRestoreVersion extends WflRestoreVersion_EnterpriseConnec
 
 	final public function runAfter( WflRestoreVersionRequest $req, WflRestoreVersionResponse &$resp )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$resp = $resp; // keep analyzer happy
-		
 		foreach( $this->hookedLayouts as $hookedLayout ) {
 			// After restore operation, the pages are removed from DB and the page renditions
 			// are removed from the filestore. Therefore here is it time to create an IDS job, 
@@ -85,11 +80,6 @@ class IdsAutomation_WflRestoreVersion extends WflRestoreVersion_EnterpriseConnec
 	
 	final public function onError( WflRestoreVersionRequest $req, BizException $e )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$e = $e; // keep analyzer happy
-		
 		// Clear service context data.
 		$this->cleanupResources();
 	} 
@@ -97,8 +87,6 @@ class IdsAutomation_WflRestoreVersion extends WflRestoreVersion_EnterpriseConnec
 	// Not called.
 	final public function runOverruled( WflRestoreVersionRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep code analyzer happy
 	}
 	
 	/**

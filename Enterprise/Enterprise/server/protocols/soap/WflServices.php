@@ -1,11 +1,14 @@
 <?php
-
 /**
  * @package Enterprise
  * @subpackage Services
  * @since v3.x
  * @copyright WoodWing Software bv. All Rights Reserved.
- * 
+ *
+ * Unwraps incoming SOAP requests and dispatches them to Worflow Services.
+ * Wraps returned service results into outgoing SOAP responses. Also handles exceptions.
+ * This way the SOAP message protocol is entirely hidden from the core Enterprise Server.
+ *
  * Notes: 
  * - Since v6.0 this class was renamed from smartserverbase into WorkflowServices
  * - Since v6.1 this class uses PHP SOAP (instead of PEAR SOAP)
@@ -13,7 +16,7 @@
  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * Use the WorkflowServices.template.php file instead.
+ * Use the server/buildtools/genservices/interfaces/wfl/SoapServices.template.php file instead.
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
 
@@ -63,6 +66,45 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 
 		try {
 			$service = new WflLogOffService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function GetUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetUserSettingsService.class.php';
+
+		try {
+			$service = new WflGetUserSettingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function SaveUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflSaveUserSettingsService.class.php';
+
+		try {
+			$service = new WflSaveUserSettingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function DeleteUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflDeleteUserSettingsService.class.php';
+
+		try {
+			$service = new WflDeleteUserSettingsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
 			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );

@@ -14,15 +14,12 @@ class GetPubChannelIcons
 {
 	public static function execute( $ticket, $iconMetrics )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		
 		// Start business session, create DB instance etc.
 		BizSession::startSession( $ticket );
 		BizSession::startTransaction();
 		try {
 			// Read the resource table from disk
 			$ret = null;
-			require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
 			$iconInfos = BizResources::getPubChannelIcons( $iconMetrics );
 			// flatten the structure (remove keys)
 			foreach( $iconInfos as $iconInfo ) {

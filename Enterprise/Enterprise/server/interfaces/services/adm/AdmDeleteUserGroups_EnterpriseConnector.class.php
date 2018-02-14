@@ -40,6 +40,5 @@ abstract class AdmDeleteUserGroups_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmDeleteUserGroupsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

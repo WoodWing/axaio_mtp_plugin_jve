@@ -15,7 +15,6 @@
  */
 
 require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 
 class DBCascadePub extends DBBase
 {
@@ -25,40 +24,6 @@ class DBCascadePub extends DBBase
 	static private $StatusesMap;
 	static private $IssuesMap;
 	static private $ChannelsMap;
-
-	/**
-	 * Makes 'raw' copy of a table row.
-	 * This is without understanding the exact meaning of individual fields.
-	 *
-	 * @param string $tableName  Name of table without prefix or quotes
-	 * @param array  $sourceRow    Row to be copied. Keys are column names, values are field data.
-	 * @param array  $overruleFields Some fields to be filled in during copy
-	 * @param boolean $autoincrement
-	 * @return string The id of the created row (the copy), or null if copy failed.
-	 */
-	static private function copyRow( $tableName, $sourceRow, $overruleFields, $autoincrement = true )
-	{
-		// Copy record in memory, except the id
-		$copyRow = $sourceRow;
-
-		// Take care that both $copyRow and $overruleFields have lowercase keys, as this may not be garantueed?!?
-		$copyRow = array_change_key_case($copyRow);
-		$overruleFields = array_change_key_case($overruleFields);
-
-		// Apply overruled data
-		foreach ($overruleFields as $overfieldname => $overvalue) {
-			if (isset($copyRow[$overfieldname])) {
-				$copyRow[$overfieldname] = $overvalue;
-			}
-		}
-
-		// Insert the copy into DB
-		$newId = self::insertRow($tableName, $copyRow, $autoincrement);
-		
-		return $newId;
-		// Get fresh copy to make sure we're looking at correct data, and to get the rid of quoted fields as added above
-		//return self::getRow( $tableName, "`$idFieldName` = $newId" );
-	}
 
 	/**
 	 * Performs cascade copy of a publication.
@@ -181,7 +146,7 @@ class DBCascadePub extends DBBase
 	static private function copyChannels( $srcPubId, $copyPubId, $copyIssues )
 	{
 		// Get source publication channels
-		$srcChanRows = self::listRows( 'channels', 'id', 'name', "`publicationid` = $srcPubId" );
+		$srcChanRows = self::listRows( 'channels', 'id', 'name', "`publicationid` = ?", '*', array( intval( $srcPubId ) ) );
 		foreach( $srcChanRows as $srcChanRow ) {
 			// Copy channel
 			$copyChanId = self::copyRow( 'channels', $srcChanRow,
@@ -208,7 +173,7 @@ class DBCascadePub extends DBBase
 			// Resolve current issue
 			if( $copyIssues && isset($srcChanRow['currentissueid']) && $srcChanRow['currentissueid'] ) {
 				$copyCurIss = self::$IssuesMap[$srcChanRow['currentissueid']];
-				self::updateRow( 'channels', array( 'currentissueid' => $copyCurIss ), "`id` = ".$copyChanId );
+				self::updateRow( 'channels', array( 'currentissueid' => $copyCurIss ), "`id` = ?", array( intval( $copyChanId ) ) );
 			}
 		}
 	}
@@ -225,7 +190,7 @@ class DBCascadePub extends DBBase
 	{
 		require_once BASEDIR.'/server/dbclasses/DBAdmIssue.class.php';
 		// Get source issue
-		$srcIssueRows = self::listRows( 'issues', 'id', 'name', "`channelid` = $srcChanId" );
+		$srcIssueRows = self::listRows( 'issues', 'id', 'name', "`channelid` = ?", '*', array( intval( $srcChanId ) ) );
 		// Copy issues
 		foreach( $srcIssueRows as $srcIssueRow ) {
 			$copyIssueObj = DBAdmIssue::getIssueObj( $srcIssueRow['id']);
@@ -318,7 +283,7 @@ class DBCascadePub extends DBBase
 	{
 		// Get source statuses
 		$srcStatusRows = self::listRows( 'states', 'id', 'state',
-								"( `publication` = ".$srcPubId." ) AND ( `issue` = ".$srcIssueId." )" );
+								"( `publication` = ? ) AND ( `issue` = ? )", '*', array( intval( $srcPubId ), intval( $srcIssueId ) ) );
 		// Copy statuses
 		foreach( $srcStatusRows as $srcStatusRow ) {
 			$copyIssueId = $srcStatusRow['issue'] > 0 ? self::$IssuesMap[$srcStatusRow['issue']] : 0;
@@ -352,7 +317,7 @@ class DBCascadePub extends DBBase
 	{
 		if( $srcIssueId == 0 ) { // only pubs have pub admins
 			// Get source pub admin authorizations
-			$srcAdminRows = self::listRows( 'publadmin', 'id', '', "`publication` = ".$srcPubId );
+			$srcAdminRows = self::listRows( 'publadmin', 'id', '', "`publication` = ?", '*', array( intval( $srcPubId ) ) );
 			// Copy authorizations
 			foreach( $srcAdminRows as $srcAdminRow ) {
 				self::copyRow( 'publadmin', $srcAdminRow,
@@ -362,7 +327,7 @@ class DBCascadePub extends DBBase
 
 		// Get source pub user authorizations
 		$srcAuthRows = self::listRows( 'authorizations', 'id', '',
-								"( `publication` = ".$srcPubId." ) AND ( `issue` = ".$srcIssueId." )" );
+								"( `publication` = ? ) AND ( `issue` = ? )", '*', array( intval( $srcPubId ), intval( $srcIssueId ) ) );
 		// Copy authorizations
 		foreach( $srcAuthRows as $srcAuthRow ) {
 			$copyIssueId   = $srcAuthRow['issue']   > 0 ? self::$IssuesMap  [$srcAuthRow['issue']] : 0;
@@ -385,7 +350,7 @@ class DBCascadePub extends DBBase
 	{
 		// Get source pub user authorizations
 		$srcRoutingRows = self::listRows( 'routing', 'id', '',
-								"( `publication` = ".$srcPubId." ) AND ( `issue` = ".$srcIssueId." )" );
+								"( `publication` = ? ) AND ( `issue` = ? )", '*', array( intval( $srcPubId ), intval( $srcIssueId ) ) );
 		// Copy authorizations
 		foreach( $srcRoutingRows as $srcRoutingRow ) {
 			$copyIssueId   = $srcRoutingRow['issue']   > 0 ? self::$IssuesMap  [$srcRoutingRow['issue']] : 0;
@@ -496,7 +461,7 @@ class DBCascadePub extends DBBase
 	static private function copyProperties( $srcPubId, $copyPubId )
 	{
 		// Get source properties
-		$srcPropRows = self::listRows( 'properties', 'id', 'name', "`publication` = ".$srcPubId );
+		$srcPropRows = self::listRows( 'properties', 'id', 'name', "`publication` = ?", '*', array( intval( $srcPubId ) ) );
 		// Copy properties
 		foreach( $srcPropRows as $srcPropRow ) {
 			self::copyRow( 'properties', $srcPropRow,
@@ -578,43 +543,43 @@ class DBCascadePub extends DBBase
 	static public function deletePublication( $pubId )
 	{
 		// Remove sections
-		$sectionRows = self::listRows( 'publsections', 'id', 'name', "`publication` = $pubId" );
-		$sectionIds = array_diff( array_keys($sectionRows), array( 0 ) ); // paranoid filter; remove zeros
-		if( count($sectionIds) > 0 ) {
+		$sectionRows = self::listRows( 'publsections', 'id', 'name', "`publication` = ?", '*', array( intval( $pubId ) ) );
+		$sectionIds = array_diff( array_keys( $sectionRows ), array( 0 ) ); // paranoid filter; remove zeros
+		if( count( $sectionIds ) > 0 ) {
 			$sectionIds = implode( ', ', $sectionIds ); // make ids comma separated to fit into SQL
-			self::deleteRows( 'sectionstate',"`section` IN ( $sectionIds )" );
+			self::deleteRows( 'sectionstate', "`section` IN ( $sectionIds )" );
 		}
 
 		// Remove sections
-		self::deleteRows( 'publsections', "`publication` = $pubId" );
+		self::deleteRows( 'publsections', "`publication` = ?", array( intval( $pubId ) ) );
 
 		// Remove channels, issues and editions
-		$chanRows = self::listRows( 'channels', 'id', 'name', "`publicationid` = $pubId" );
+		$chanRows = self::listRows( 'channels', 'id', 'name', "`publicationid` = ?", '*', array( intval( $pubId ) ) );
 		if( $chanRows ) {
-			self::deleteChannels( array_keys($chanRows) );
+			self::deleteChannels( array_keys( $chanRows ) );
 		}
-		self::deleteRows( 'channels',        "`publicationid` = $pubId" ); // remove zerofied channels
+		self::deleteRows( 'channels', "`publicationid` = ?", array( intval( $pubId ) ) ); // remove zerofied channels
 
 		// Remove statuses and routing
-		self::deleteRows( 'states',          "`publication` = $pubId" );
-		self::deleteRows( 'routing',         "`publication` = $pubId" );
+		self::deleteRows( 'states', "`publication` = ?", array( intval( $pubId ) ) );
+		self::deleteRows( 'routing', "`publication` = ?", array( intval( $pubId ) ) );
 
 		// Remove user/admin authorizations
-		self::deleteRows( 'authorizations',  "`publication` = $pubId" );
-		self::deleteRows( 'publadmin',       "`publication` = $pubId" );
-		
+		self::deleteRows( 'authorizations', "`publication` = ?", array( intval( $pubId ) ) );
+		self::deleteRows( 'publadmin', "`publication` = ?", array( intval( $pubId ) ) );
+
 		// Remove custom properties (values)
-		self::deleteRows( 'channeldata', 	  "`publication` IN ( $pubId )" );
+		self::deleteRows( 'channeldata', "`publication` IN ( $pubId )" );
 		
 		// Remove custom properties (definitions)
-		self::deleteRows( 'properties',      "`publication` = $pubId" );
-		self::deleteRows( 'actionproperties',"`publication` = $pubId" );
+		self::deleteRows( 'properties', "`publication` = ?", array( intval( $pubId ) ) );
+		self::deleteRows( 'actionproperties', "`publication` = ?", array( intval( $pubId ) ) );
 
 		// Unlink from logging
-		self::updateRow( 'log', array( 'publication' => 0 ), "`publication` = $pubId" );
+		self::updateRow( 'log', array( 'publication' => 0 ), "`publication` = ?", array( intval( $pubId ) ) );
 
 		// Remove master record
-		self::deleteRows( 'publications', "`id` = $pubId" );
+		self::deleteRows( 'publications', "`id` = ?", array( intval( $pubId ) ) );
 	}
 
 	/**
@@ -656,8 +621,8 @@ class DBCascadePub extends DBBase
 	static public function updatePubDefaultChannelId( $chanId )
 	{
 		$values = array('defaultchannelid' => 0);
-		$where = '`defaultchannelid` = ' . $chanId;
-		self::updateRow( 'publications', $values, $where );
+		$where = '`defaultchannelid` = ?';
+		self::updateRow( 'publications', $values, $where, array( intval( $chanId ) ) );
 	}
 
 	/**

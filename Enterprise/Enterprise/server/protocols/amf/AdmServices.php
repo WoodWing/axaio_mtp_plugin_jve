@@ -49,6 +49,28 @@ require_once(BASEDIR.'/server/interfaces/services/adm/AdmCreateSectionsRequest.c
 require_once(BASEDIR.'/server/interfaces/services/adm/AdmGetSectionsRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/adm/AdmModifySectionsRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/adm/AdmDeleteSectionsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmCreateStatusesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmGetStatusesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmModifyStatusesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmDeleteStatusesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmCreateAccessProfilesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmGetAccessProfilesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmModifyAccessProfilesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmDeleteAccessProfilesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmCreateWorkflowUserGroupAuthorizationsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmGetWorkflowUserGroupAuthorizationsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmModifyWorkflowUserGroupAuthorizationsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmDeleteWorkflowUserGroupAuthorizationsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmCreatePublicationAdminAuthorizationsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmGetPublicationAdminAuthorizationsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmDeletePublicationAdminAuthorizationsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmCreateRoutingsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmGetRoutingsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmModifyRoutingsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmDeleteRoutingsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmAddTemplateObjectsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmGetTemplateObjectsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/adm/AdmRemoveTemplateObjectsRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/adm/AdmCreateAutocompleteTermEntitiesRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/adm/AdmGetAutocompleteTermEntitiesRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/adm/AdmModifyAutocompleteTermEntitiesRequest.class.php');
@@ -579,6 +601,336 @@ class WW_AMF_AdmServices extends WW_AMF_Services
 		try {
 			$req = $this->objectToRequest( $req, 'AdmDeleteSectionsRequest' );
 			$service = new AdmDeleteSectionsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function CreateStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateStatusesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmCreateStatusesRequest' );
+			$service = new AdmCreateStatusesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function GetStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmGetStatusesRequest' );
+			$service = new AdmGetStatusesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function ModifyStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyStatusesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmModifyStatusesRequest' );
+			$service = new AdmModifyStatusesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function DeleteStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmDeleteStatusesRequest' );
+			$service = new AdmDeleteStatusesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function CreateAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateAccessProfilesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmCreateAccessProfilesRequest' );
+			$service = new AdmCreateAccessProfilesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function GetAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetAccessProfilesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmGetAccessProfilesRequest' );
+			$service = new AdmGetAccessProfilesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function ModifyAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyAccessProfilesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmModifyAccessProfilesRequest' );
+			$service = new AdmModifyAccessProfilesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function DeleteAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteAccessProfilesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmDeleteAccessProfilesRequest' );
+			$service = new AdmDeleteAccessProfilesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function CreateWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateWorkflowUserGroupAuthorizationsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmCreateWorkflowUserGroupAuthorizationsRequest' );
+			$service = new AdmCreateWorkflowUserGroupAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function GetWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetWorkflowUserGroupAuthorizationsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmGetWorkflowUserGroupAuthorizationsRequest' );
+			$service = new AdmGetWorkflowUserGroupAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function ModifyWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyWorkflowUserGroupAuthorizationsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmModifyWorkflowUserGroupAuthorizationsRequest' );
+			$service = new AdmModifyWorkflowUserGroupAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function DeleteWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteWorkflowUserGroupAuthorizationsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmDeleteWorkflowUserGroupAuthorizationsRequest' );
+			$service = new AdmDeleteWorkflowUserGroupAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function CreatePublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreatePublicationAdminAuthorizationsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmCreatePublicationAdminAuthorizationsRequest' );
+			$service = new AdmCreatePublicationAdminAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function GetPublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetPublicationAdminAuthorizationsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmGetPublicationAdminAuthorizationsRequest' );
+			$service = new AdmGetPublicationAdminAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function DeletePublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeletePublicationAdminAuthorizationsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmDeletePublicationAdminAuthorizationsRequest' );
+			$service = new AdmDeletePublicationAdminAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function CreateRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateRoutingsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmCreateRoutingsRequest' );
+			$service = new AdmCreateRoutingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function GetRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetRoutingsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmGetRoutingsRequest' );
+			$service = new AdmGetRoutingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function ModifyRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyRoutingsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmModifyRoutingsRequest' );
+			$service = new AdmModifyRoutingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function DeleteRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteRoutingsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmDeleteRoutingsRequest' );
+			$service = new AdmDeleteRoutingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function AddTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmAddTemplateObjectsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmAddTemplateObjectsRequest' );
+			$service = new AdmAddTemplateObjectsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function GetTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetTemplateObjectsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmGetTemplateObjectsRequest' );
+			$service = new AdmGetTemplateObjectsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function RemoveTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmRemoveTemplateObjectsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'AdmRemoveTemplateObjectsRequest' );
+			$service = new AdmRemoveTemplateObjectsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
 			require_once 'Zend/Amf/Server/Exception.php';

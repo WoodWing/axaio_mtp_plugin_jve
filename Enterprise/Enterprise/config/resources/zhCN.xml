@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">Enterprise表中的数据已经成功迁移</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">数据库- 安装/ 升级</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Enterprise数据库模型信息:</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Enterprise数据库模型信息:</Term>
   <Term key="DBINSTALLER_DBSELECT">数据库名字</Term>
   <Term key="DBINSTALLER_DBSERVER">数据库服务器</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. 检查定义数据库连接的选项:\n• configserver.php 文件: DBSERVER 和 DBTYPE\n• config.php 文件: DBSELECT, DBUSER and DBPASS\n2. 检查是否数据库服务器是否正在运行之中并能通过已配置的连接 '%1' 访问到.\n3. 确定用户 '%2' 有数据库的访问权限.\n4. 如果是全新安装, 确信空的数据库 (表空间) 名字 '%3' 已预先创建.\n5. 如果你已修复完配置文件请点击 '%4'.</Term>
@@ -881,7 +882,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 不能删除因为它置入到已删除的对象中. 使用垃圾桶永久删除这些对象再尝试. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">%1不能删除,因为它已置入到对象中,请找出这些对象, 切断与 %1的连接再尝试. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">原文件名已存在,以下恢复的项目必须重命名</Term>
-  <Term key="ERR_LAY_NOT_SAVED">设计版面未保存</Term>
+  <Term key="ERR_LAY_NOT_SAVED">无法生成预览，因为未保存版面布局或文章还没有完成复制。</Term>
   <Term key="ERR_LICENSE">许可错误</Term>
   <Term key="ERR_LOCKED">错误: 对已上锁的对象上锁 (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">上级文件已上锁 (S1065)</Term>
@@ -1113,7 +1114,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">没有激活的InDesign Server配置到任务 %1. 请配置一个InDesign Server %2 服务优先级 %3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign 服务器没有响应．(S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">以下优先级的作务将不会处理: %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
+  <Term key="IDS_PICKUP_FROM">服务器工作的日期和时间</Term>
   <Term key="IDS_PORTNUMBER">端口号</Term>
   <Term key="IDS_PRIO">任务优先级</Term>
   <Term key="IDS_PRIO_1">非常高</Term>
@@ -1448,6 +1449,7 @@
   <Term key="MNU_REPORTING">报告</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">任务配置</Term>
   <Term key="MNU_SERVER_JOBS">任务队列</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">上传</Term>
   <Term key="MNU_USER">用户</Term>
   <Term key="MNU_USER_QUERY">用户查询</Term>

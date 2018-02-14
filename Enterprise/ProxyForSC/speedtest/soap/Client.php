@@ -486,7 +486,6 @@ class WW_SOAP_Client extends SoapClient
 		$xml = new SimpleXMLElement( $xmlStream );
 		$attachment = new Attachment();
 		foreach( get_object_vars( $attachment ) as $name => $value ) {
-			$value = $value; // keep analyzer happy
 			if (isset( $xml->$name )) {
 				if ($name == 'Content') {
 					// NOTE: $childNode->Content['id'] does not work when namespaces are involved!!

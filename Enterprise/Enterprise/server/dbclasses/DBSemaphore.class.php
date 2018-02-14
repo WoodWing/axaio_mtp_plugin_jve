@@ -21,10 +21,11 @@ class DBSemaphore extends DBBase
 	 * @param string $entityId The id of any entity. For example, the issue id for which a publishing operation runs.
 	 * @param integer $lifeTime Seconds to keep up the semaphore in case process ends unexpectedly.
 	 * @param string $userShort User for whom the process is created that needs the semaphore.
+	 * @param bool $logSql Whether or not the SQL will be logged.
 	 * @throws BizException on DB error.
 	 * @return integer Semaphore id.
 	 */
-	static public function createSemaphore( $entityId, $lifeTime, $userShort )
+	static public function createSemaphore( $entityId, $lifeTime, $userShort, $logSql  )
 	{
 		// Init.
 		$dbDriver = DBDriverFactory::gen();
@@ -37,7 +38,7 @@ class DBSemaphore extends DBBase
 		$where = "`entityid` = ? AND `lastupdate` < ? ";
 		$params = array( $entityId, $expirationTime );
 	    try {
-			self::deleteRows( self::TABLENAME, $where, $params );
+			self::deleteRows( self::TABLENAME, $where, $params, $logSql );
 		} catch ( BizException $e ) {
 			LogHandler::Log( __CLASS__ ,'WARN', 'Cleaning up old semaphores failed: '.$e->getMessage().' Just continue.' );
 		}		
@@ -45,12 +46,11 @@ class DBSemaphore extends DBBase
 		$params = array( $entityId, $userShort, $ipAddress, $now, $lifeTime );
 		$sql = "INSERT INTO $dbTable (`entityid`, `user`, `ip`, `lastupdate`, `lifetime`) VALUES (?, ?, ?, ?, ?)";
 		$sql = $dbDriver->autoincrement( $sql );
-		$sth = $dbDriver->query( $sql, $params, null, true, false );
+		$sth = $dbDriver->query( $sql, $params, null, $logSql, false );
 
-		// Suppress 'already' exists error.
 		if( !$sth ) {
 			$errCode = $dbDriver->errorcode();
-			if( $errCode == DB_ERROR_ALREADY_EXISTS || $errCode == DB_ERROR_CONSTRAINT ) {
+			if( self::expectedErrorDuringAddSemaphore( $errCode ) ) {
 				return 0;
 			} else { // fatal DB error
 				throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
@@ -62,16 +62,40 @@ class DBSemaphore extends DBBase
 	}
 
 	/**
+	 * Based on the DBMS error the process to add a semaphore should either continue or be stopped.
+	 *
+	 * Adding a semaphore can fail in case there is already a semaphore. This is expected as this is the basic concept of
+	 * semaphores. Next to that locking errors can occur when different processes are querying, deleting or trying to add
+	 * a semaphore. This is not blocking and the process should continue and try again after a short wait.
+	 *
+	 * @param int $errorCode
+	 * @return bool True if error is expected and not blocking, else false.
+	 */
+	static private function expectedErrorDuringAddSemaphore( $errorCode )
+	{
+		$result = false;
+		if( $errorCode == DB_ERROR_ALREADY_EXISTS ||
+			 $errorCode == DB_ERROR_CONSTRAINT ||
+			 $errorCode == DB_ERROR_DEADLOCK_FOUND ||
+			 $errorCode == DB_ERROR_NOT_LOCKED ) {
+			$result = true;
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Release the semaphore obtained through createSemaphore().
 	 *
 	 * @param integer $semaId Semaphore (id)
+	 * @param bool $logSql Whether or not the resulting SQL must be logged.
 	 * @return boolean
 	 */
-	static public function releaseSemaphore( $semaId )
+	static public function releaseSemaphore( $semaId, $logSql )
 	{
 		$where = "`id` = ?";
 		$params = array( $semaId );
-		return (bool)self::deleteRows( self::TABLENAME, $where, $params );
+		return (bool)self::deleteRows( self::TABLENAME, $where, $params, $logSql );
 	}
 	
 	/**

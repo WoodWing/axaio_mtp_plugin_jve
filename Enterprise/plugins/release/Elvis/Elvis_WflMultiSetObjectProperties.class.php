@@ -67,7 +67,11 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 
 			// Detect objects changing from archived to non-archived statuses
 			foreach( $this->oldStatuses as $objId => $curStatusCfg ) {
-				$objTarStatusName = empty( $targetStatusName ) ? BizAdmStatus::getStatusWithId( $curStatusCfg->NextStatusId )->Name : $targetStatusName;
+				if( empty( $targetStatusName ) && isset($curStatusCfg->NextStatus->Id) ) {
+					$objTarStatusName = BizAdmStatus::getStatusWithId( $curStatusCfg->NextStatus->Id )->Name;
+				} else {
+					$objTarStatusName = $targetStatusName;
+				}
 				if( ElvisObjectUtils::statusChangedToUnarchived( $curStatusCfg->Name, $objTarStatusName ) ) {
 					$changedObjectIds[] = $objId;
 				}

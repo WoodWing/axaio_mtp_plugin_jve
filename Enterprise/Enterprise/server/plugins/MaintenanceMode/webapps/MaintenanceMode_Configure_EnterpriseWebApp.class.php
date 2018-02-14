@@ -181,13 +181,9 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 		$disableFromDateTime = inputvar( 'disablefrom', $this->disableFromDateTimeISO, 'datetime', null, true );
 		$disableLogInMessage = inputvar( 'disableloginmessage', $this->disableLogInMessage, 'area' );
 
-		$this->htmlBody = str_replace( '<!--DISABLE_LOGIN_FIELD-->', BizResources::localize( 'MaintenanceMode.LOGIN_DISABLE_FIELD' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--DISABLE_LOGIN-->', $disableLogIn, $this->htmlBody );
-		$this->htmlBody = str_replace( '<!--DISABLE_FROM_FIELD-->', BizResources::localize( 'MaintenanceMode.LOGIN_DISABLE_DATE_FIELD' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--DISABLE_FROM_DATE_TIME-->', $disableFromDateTime, $this->htmlBody );
-		$this->htmlBody = str_replace( '<!--DISABLE_MESSAGE_FIELD-->', BizResources::localize( 'LIC_MESSAGE' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--DISABLE_MESSAGE-->', $disableLogInMessage, $this->htmlBody );
-		$this->htmlBody = str_replace( '<!--RES:ACT_SAVE-->', BizResources::localize( 'ACT_SAVE' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--MESSAGES-->', $this->message, $this->htmlBody );
 	}
 

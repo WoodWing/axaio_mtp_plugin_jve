@@ -40,6 +40,5 @@ abstract class AdsDeleteQueryField_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsDeleteQueryFieldRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

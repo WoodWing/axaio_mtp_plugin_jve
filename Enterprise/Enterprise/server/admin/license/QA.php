@@ -8,7 +8,7 @@
 // - expiration or renew earlier
 // - the dates can not be set after the MAXTIME definition below:
 
-define( 'MAXTIME', "2014-12-31" );
+define( 'MAXTIME', "2020-12-31" );
 
 require_once dirname( __FILE__ ) . '/../../../config/config.php';
 include_once( BASEDIR . '/server/utils/license/license.class.php' );

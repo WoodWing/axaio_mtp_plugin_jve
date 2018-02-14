@@ -21,8 +21,6 @@ class IdsAutomation_WflCreateObjects  extends WflCreateObjects_EnterpriseConnect
 
 	final public function runBefore( WflCreateObjectsRequest &$req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 
 	final public function runAfter( WflCreateObjectsRequest $req, WflCreateObjectsResponse &$resp )
@@ -75,7 +73,5 @@ class IdsAutomation_WflCreateObjects  extends WflCreateObjects_EnterpriseConnect
 
 	final public function runOverruled( WflCreateObjectsRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 }

@@ -60,7 +60,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 	/** @var AdobeDps2_Utils  $dpsUtils */
 	private $dpsUtils = null;
 
-	public function getDisplayName() { return 'Adobe DPS folios'; }
+	public function getDisplayName() { return 'Adobe DPS folios (Disabled)'; }
 	public function getTestGoals()   { return 'Creates and updates articles (folio files) to test the Adobe DPS integration.'; }
 	public function getTestMethods() { return
 		'Does the following steps:
@@ -79,30 +79,28 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 	
 	final public function runTest()
 	{
-		try {
-			$this->setupTestData();
-			
-			// Clear the queue from pending AdobeDps2 jobs.
-			$this->deletePendingJobs();
-			
-			// Layout create- and save operations.
-			$this->createLayoutObject();
-			$this->saveLayoutWithLayoutStatus();
-			$this->saveLayoutWithReadyPublishLayoutStatus();
-			$this->deleteAdobeDpsArticleAndSaveLayoutWithReadyPublishLayoutStatus( true ); // unlock layout
-			
-			// Layout property tests.
-			$this->setLayoutProperties();
-			$this->createObjectForMultiSetTests();
-			$this->sendToNextStatus();
-			$this->multisetLayoutProperties();
-
-		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
-		}
-
-		$this->tearDownTestData();
+//		try {
+//			$this->setupTestData();
+//
+//			// Clear the queue from pending AdobeDps2 jobs.
+//			$this->deletePendingJobs();
+//
+//			// Layout create- and save operations.
+//			$this->createLayoutObject();
+//			$this->saveLayoutWithLayoutStatus();
+//			$this->saveLayoutWithReadyPublishLayoutStatus();
+//			$this->deleteAdobeDpsArticleAndSaveLayoutWithReadyPublishLayoutStatus( true ); // unlock layout
+//
+//			// Layout property tests.
+//			$this->setLayoutProperties();
+//			$this->createObjectForMultiSetTests();
+//			$this->sendToNextStatus();
+//			$this->multisetLayoutProperties();
+//
+//		} catch( BizException $e ) {
+//		}
+//
+//		$this->tearDownTestData();
 	}
 	
 	/**
@@ -141,8 +139,8 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		
 		$this->editionObjs = @$vars['BuildTest_AdobeDps2']['editions'];
 		$this->assertCount( 2, $this->editionObjs );
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[0] ); // TODO: should be AdmEdition
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[1] ); // TODO: should be AdmEdition
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[0] );
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[1] );
 		$this->editionObjs = array( $this->editionObjs[0] ); // for now just one edition is good enough
 
 		$this->layoutStatus = @$vars['BuildTest_AdobeDps2']['layoutStatus'];
@@ -172,8 +170,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		try {
 			$this->deletePendingJobs();
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 
@@ -194,8 +190,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 				$service->execute( $request );
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 
 		// Delete the layout.
@@ -223,8 +217,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 	

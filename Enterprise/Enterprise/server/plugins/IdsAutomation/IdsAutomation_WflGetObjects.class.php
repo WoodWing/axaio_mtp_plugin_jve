@@ -88,9 +88,6 @@ class IdsAutomation_WflGetObjects extends WflGetObjects_EnterpriseConnector
 
 	final public function runAfter( WflGetObjectsRequest $req, WflGetObjectsResponse &$resp )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		
 		// Update the job with the layout version.
 		if( $this->jobId ) {
 			require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
@@ -111,11 +108,6 @@ class IdsAutomation_WflGetObjects extends WflGetObjects_EnterpriseConnector
 
 	final public function onError( WflGetObjectsRequest $req, BizException $e )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$e = $e; // keep analyzer happy
-
 		// Clear service context data.
 		$this->cleanupResources();
 	}
@@ -123,8 +115,6 @@ class IdsAutomation_WflGetObjects extends WflGetObjects_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( WflGetObjectsRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 	
 	/**

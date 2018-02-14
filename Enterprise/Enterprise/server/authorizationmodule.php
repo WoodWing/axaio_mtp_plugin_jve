@@ -129,11 +129,14 @@ class authorizationmodule
 		$features =
 			BizAccessFeatureProfiles::getFileAccessProfiles() +
 			BizAccessFeatureProfiles::getAnnotationsAccessProfiles() +
-			BizAccessFeatureProfiles::getWorkflowAccessProfiles();
+			BizAccessFeatureProfiles::getWorkflowAccessProfiles() +
+			BizAccessFeatureProfiles::getServerPluginFeatureAccessLists();
 
 		foreach( $featuresByProfiles as $featuresByProfileRow ){
 			$featureId = $featuresByProfileRow['feature'];
-			$rightsByProfiles[$featuresByProfileRow['profile']] .= $features[$featureId]->Flag;
+			if( isset( $features[$featureId] ) ) { // may not be set e.g. when server plug-in (that provides rights) is currently disabled
+				$rightsByProfiles[ $featuresByProfileRow['profile'] ] .= $features[ $featureId ]->Flag;
+			}
 		}
 
 		return $rightsByProfiles;
@@ -207,7 +210,7 @@ class authorizationmodule
 			throw new BizException('ERR_ARGUMENT', 'Server', "Brand not specified");
 		}
 
-		if( strlen($accessRight) > 1 ) {
+		if( mb_strlen($accessRight) > 1 ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server',
 				'No support for checking multiple access rights at once: '.$accessRight );
 		}
@@ -274,7 +277,9 @@ class authorizationmodule
 	 */
 	private function coreCheckRight( $accessRight, $publ, $overruleIssueId, $categoryId, $type, $stateId, $routeToUser )
 	{
-		$hasAccess = $this->ownsPersonalState( $stateId, $routeToUser ) ;
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+		$hasAccess = $this->ownsPersonalState( $stateId, $routeToUser ) ||
+			( DBTicket::getOriginatingApplicationName( BizSession::getTicket() ) == 'InDesign Server' );
 
 		// loop each authorization-record
 		if( !$hasAccess ) {
@@ -282,7 +287,7 @@ class authorizationmodule
 				// check if record matches
 				$match = $this->matchedRight( $right, $publ, $overruleIssueId, $categoryId, $stateId, $type );
 				if( $match ) {
-					if( empty( $accessRight ) || strstr( $right['rights'], $accessRight ) ) {
+					if( empty( $accessRight ) || mb_strstr( $right['rights'], $accessRight ) ) {
 						$hasAccess = true;
 						break;
 					}

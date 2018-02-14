@@ -163,8 +163,6 @@ class BizInDesignServerDispatcher
 	 * Processing phase 1: INITIALIZATION
 	 *
 	 * Gets ready for processing. Should be called once. Starts the stopwatch to measure overall progress.
-	 *
-	 * @return string The logical phase to jump after step.
 	 */
 	private function runInitializationPhase()
 	{
@@ -220,8 +218,6 @@ class BizInDesignServerDispatcher
 	 * using one connection, while other processes keep looking over the fence as long as that dog 
 	 * is sleeping and did not die. In other terms, when the system get quiet, we get quiet, and
 	 * when the system gets busy, we get busy.
-	 *
-	 * @return string The logical phase to jump after step.
 	 */
 	private function runThresholdPhase()
 	{
@@ -266,8 +262,6 @@ class BizInDesignServerDispatcher
 	 * Processing phase 3: DISPATCHING
 	 *
 	 * The processor tries to pick up jobs from the queue and starts processing when found any.
-	 *
-	 * @return string The logical phase to jump after step.
 	 */
 	private function runDispatchingPhase()
 	{
@@ -308,7 +302,10 @@ class BizInDesignServerDispatcher
 				}
 				if ( $server ) {
 					// Start the job processor in background (async cURL).
-					$url = SERVERURL_ROOT . INETROOT . '/idsjobindex.php?command=rundispatchedjob' .
+					// LOCALURL_ROOT: Use LOCALURL_ROOT instead of SERVERURL_ROOT since Enterprise server is calling itself.
+					// This can be an issue ( if using SERVERURL_ROOT ) when Enterprise is sitting behind AWS LB, Enterprise
+					// having https for the outside world but http internally. Also see EN-86509
+					$url = LOCALURL_ROOT . INETROOT . '/idsjobindex.php?command=rundispatchedjob' .
 						'&jobid=' . $jobId . '&serverid=' . $server->Id . '&locktoken=' . $lockToken;
 					$curl = self::getCurlPath();
 					LogHandler::Log( 'idserver', 'INFO', "START background job with CURL [$curl], URL [$url]." );
@@ -351,12 +348,9 @@ class BizInDesignServerDispatcher
 	 * Processing phase 4: FINISHING
 	 *
 	 * Stops playing the Dispatcher (if we did) and stops the process timer.
-	 *
-	 * @return string The logical phase to jump after step.
 	 */
 	private function runFinishingPhase()
 	{
-
 		try {
 			// Write the last used nap index for next session.
 			if ( is_int( $this->napIndex ) ) {
@@ -374,7 +368,7 @@ class BizInDesignServerDispatcher
 
 			// Deal with IDS crashes; Unlock IDS instances and jobs and replan those jobs.
 			require_once BASEDIR . '/server/bizclasses/BizInDesignServerJob.class.php';
-			BizInDesignServerJobs::repairDetachedServersAndJobs();
+			BizInDesignServerJobs::repairDetachedServersAndJobs( false );
 
 			// Kill the Dispatcher to let another process take over that role.
 			$this->killDispatcher();
@@ -389,7 +383,6 @@ class BizInDesignServerDispatcher
 			$this->newPhase = 'stopped';
 			$this->handlePhaseAfterError( $e );
 		}
-
 	}
 
 	/**
@@ -496,7 +489,7 @@ class BizInDesignServerDispatcher
 	 * @param string $command - command to start
 	 * @param string $args    - parameters for command
 	 * 
-	 * @return process handle id ( or -1 when error starting process )
+	 * @return integer process handle id ( or -1 when error starting process )
 	 */	
 	private function execInBackground( $command, $args = "" ) 
 	{

@@ -41,7 +41,7 @@ Improvements since v8.0 with changed behavior:
   So, there is no longer a need to call getDebugBackTrace() or debug_backtrace() and pass it to LogHandler::Log().
 - For raised exceptions (BizException) an ERROR or WARN is always logged. (Before, it was done in DEBUG mode only.)
   Do not call LogHandler::Log() just before raising a BizException, or after catching it, or else you'll have two logs.
-- The debug loglevel can now be configured per client (IP). Therefor, DEBUGLEVEL option is replaced by DEBUGLEVELS (prural).
+- The debug loglevel can now be configured per client (IP). Therefor, DEBUGLEVEL option is replaced by DEBUGLEVELS (plural).
   Making a code fragment debug-only must be done with LogHandler::debugMode() which checks the configured debug
   level for the client (IP) doing the request. The function also checks OUTPUTDIRECTORY option to be configured.
 - Defines/settings made at configserver.php for log configuration became mandatory and are checked at wwtest.
@@ -55,7 +55,7 @@ Improvements since v8.0 with changed behavior:
 - Aside to the current HTML format at log files, there is now support for plain UTF-8 text format too.
   HTML is better readable in web browser, but plain format is easier for searching e.g. using grep.
   To distinguish between both formats, an option named LOGFILE_FORMAT is added to configserver.php file.
-- The header that is now removed from all log files. Instead, much more PHP info is written to log folder 
+- The header that is now removed from all log files. Instead, much more PHP info is written to log folder
   (at _phpinfo.htm file) once the client IP folder gets created, which is a more efficient solution.
 - For each log operation (writing a single line), the log file is flushed in DEBUG mode, to make sure the
   last log is actually written in case of unexpected PHP crash. For production, this delay is unwanted, so skipped.
@@ -78,18 +78,36 @@ Example of avoiding expensive print_r() calls...
 		if( LogHandler::debugMode() ) { // Performance check: Avoid print_r for production !!
 			LogHandler::Log('filestore', 'DEBUG', 'Renditions: '.print_r($renditions, true) );
 		}
+
+Improvements since 10.1.4:
+- Messages are passed in without any formatting for the 'html' format. To ensure secure logging the message is
+  properly encoded before added to the (html) log file.
+  - Instead of using <br/> to enforce line breaks, the log message should contain \r\n. This improves the outline of the
+    plain text log file. In case of the 'html' format the \r\n is replaced by <br/> before the message is written to the
+    (html) log file.
+  - All html tags within the message are ignored and are encoded.
+- Method LogHandler::logRaw is added. This can be used to write the message 'as is' to the log file. It is up to the
+  caller to ensure that the encoding of the message is secure. To create a secure message two helper methods are added:
+  - LogHandler::composeCodeBlock(): To format a (part of the) message to be displayed as a code fragment.
+  - LogHandler::encodeLogMessage(): To ensure that the (rest) message is properly encoded.
+  Example: LogHandler::logRaw(
+            __CLASS__,
+				'DEBUG',
+				LogHandler::encodeLogMessage( "Error: {$e->message}\r\nData: \r\n" ).LogHandler::composeCodeBlock( print_r( $data, 1 ) ) );
+  - The LogHandler::logRaw() should only be used for special cases. LogHandler::Log() is standard way used for logging.
 */
 
 class LogHandler
 {
 	private static $logLevels = array(
-		'NONE' 	=> 0,         // Suppress all logging.
-		'CONTEXT' => 1,       // Indicates the calling context. NOT directly logged; Logged on first best 'normal' log.
-		'ERROR' => 2,         // Exceptional error. Stops execution in most cases.
-		'WARN' 	=> 3,         // Warning. Should NOT happen. Recommened option for production.
-		'INFO' 	=> 4,         // Bus stop. Operation succesfull or found/determined details.
-		'DEBUG' => 5,         // For debugging purposes only. Should not be used in production.
-		'NOTINSTALLED' => 6,	// feature is not installed, used in WWTest
+		'NONE'         => 0, // Suppress all logging.
+		'CONTEXT'      => 1, // Indicates the calling context. NOT directly logged; Logged on first best 'normal' log.
+		'ERROR'        => 2, // Exceptional error. Stops execution in most cases.
+		'WARN'         => 3, // Warning. Should NOT happen. Recommended option for production.
+		'INFO'         => 4, // Bus stop. Operation successful or found/determined details.
+		'DEPRECATED'   => 5, // To inform that the code / function  is deprecated.
+		'DEBUG'        => 6, // For debugging purposes only. Should not be used in production.
+		'NOTINSTALLED' => 7, // feature is not installed, used in WWTest
 	);
 	private static $logged = false;
 	private static $context = '';
@@ -104,6 +122,73 @@ class LogHandler
 	 * Constructor, made private to avoid creating instances.
 	 */
 	private function __construct() {}
+
+	/**
+	 * Builds and returns a single line in html format.
+	 *
+	 * @since 10.1.4
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
+	 * @param string $message Message to write to log file.
+	 * @param string $time Current time stamp of the logged message. Leave empty to auto calculate.
+	 * @param string $logFile File name of the current log file. Use to refer from error log to current log.
+	 * @return string Formatted log line.
+	 */
+	private static function composeHtmlLogLine( $level, $area, $message, &$time, $logFile )
+	{
+		if( $logFile ) {
+			$logFileRef = SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?act=logfile'.
+				'&file='.basename( $logFile ).'#'.$time;
+			$reference = '<br/><a href="'.$logFileRef.'">Show full context</a>';
+		} else {
+			$reference = '';
+		}
+		$levColor = ( $level == 'ERROR' ) ? '#ff0000' : ( ( $level == 'WARN' || $level == 'DEPRECATED' ) ? '#ffaa00' : '#00cc00' ); // red,orange,green
+		$line =
+			'<tr class="d" id="'.$time.'">'.
+			'<td><nobr>'.$time.'</nobr>'.$reference.'</td>'.
+			'<td><font color="'.$levColor.'">'.$level.'</font></td>'.
+			'<td>'.$area.'</td><td>'.$message.'</td>'.
+			'</tr>'.PHP_EOL;
+		return $line;
+	}
+
+	/**
+	 * Builds and returns a single line in plain text format.
+	 *
+	 * @since 10.1.4
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
+	 * @param string $message Plain text string to write to log file.
+	 * @param string $time Current time stamp of the logged message. Leave empty to auto calculate.
+	 * @return string Formatted log line.
+	 */
+	private static function composePlainLogLine( $level, $area, $message, &$time )
+	{
+		return sprintf( '%-25s %-8s %-15s %s'.PHP_EOL, $time, $level, $area, $message );
+	}
+
+	/**
+	 * Composes the error stack.
+	 *
+	 * @since 10.1.4
+	 * @param Exception $exception
+	 * @return string The stack that led to the exception.
+	 */
+	private static function composeStack( $exception )
+	{
+		$stack = "\nStack:\n".self::getDebugBackTrace( 3 );
+		if( $exception ) {
+			$stack .= "\n-------------\nException Message: ".$exception->getMessage();
+			$stack .= "\nException File: ".$exception->getFile() . ' ' . $exception->getLine();
+			if( get_class( $exception ) == '' ) {
+				$stack .= "\nException Details: ".$exception->getDetail();
+			}
+			$stack .= "\nException Stack:\n".self::getExceptionBackTrace( $exception );
+		}
+
+		return self::encodeLogMessage( $stack );
+	}
 
 	/**
 	 * Copy constructor, made private to avoid creating instances.
@@ -255,7 +340,358 @@ class LogHandler
 			}
 		}
 		return self::$logFolder;
-   	}
+	}
+
+	/**
+	 * Validates a given folder name that resides directly under the root log folder.
+	 *
+	 * A valid name should be in 'Ymd' notation representing a date.
+	 *
+	 * @since 10.1.4
+	 * @param string $folder The name of the folder (not the full path).
+	 * @return bool TRUE when valid, else FALSE.
+	 */
+	private static function isValidDailyFolderName( $folder )
+	{
+		return strlen( $folder ) == 8 && ctype_digit( $folder );
+	}
+
+	/**
+	 * Validates a given client ip folder name that resides directly under the daily log folder.
+	 *
+	 * A valid name should represent a valid IP address (either IPv4 or IPv6).
+	 *
+	 * @since 10.1.4
+	 * @param string $folder The name of the folder (not the full path).
+	 * @return bool TRUE when valid, else FALSE.
+	 */
+	private static function isValidClientIpFolderName( $folder )
+	{
+		return filter_var( $folder, FILTER_VALIDATE_IP ) !== false;
+	}
+
+	/**
+	 * Validates a given log file that typically resides directly under the client ip log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $logFile The name of the file (not the full path).
+	 * @return bool TRUE when valid, else FALSE.
+	 */
+	private static function isValidLogFileName( $logFile )
+	{
+		return $logFile &&
+			$logFile[0] !== '.' && // don't reveal hidden files
+			strpos( $logFile, '..' ) === false && // don't allow change dir
+			strpbrk( $logFile, '\\/?*' ) === false; // don't allow suspecious chars
+	}
+
+	/**
+	 * Returns the (daily) folders that resides directly under the root log folder.
+	 *
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listDailyRootFolders()
+	{
+		$dailyFolders = array();
+		$rootDir = OUTPUTDIRECTORY;
+		if( $rootDir && is_dir( $rootDir ) ) {
+			$folders = scandir( $rootDir );
+			if( $folders ) foreach( $folders as $folder ) {
+				if( $folder[0] != '.' && is_dir( $rootDir.$folder ) ) {
+					if( self::isValidDailyFolderName( $folder ) ) { // check 'Ymd' date notation (anti hack)
+						$dailyFolders[] = $folder;
+					}
+				}
+			}
+		}
+		return $dailyFolders;
+	}
+
+	/**
+	 * Returns the (client ip) folders that resides directly under the daily log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listClientIpSubFolders( $dailyFolder )
+	{
+		$clientIpFolders = array();
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+			$rootDir = OUTPUTDIRECTORY;
+			if( $rootDir && is_dir( $rootDir ) ) {
+				$dailyDir = $rootDir.'/'.$dailyFolder;
+				if( is_dir( $dailyDir ) ) {
+					$folders = scandir( $dailyDir );
+					if( $folders ) foreach( $folders as $folder ) {
+						if( $folder[0] != '.' && is_dir( $dailyDir.'/'.$folder ) ) {
+							if( self::isValidClientIpFolderName( $folder ) ) { // check IP notation (anti hack)
+								$clientIpFolders[] = $folder;
+							}
+						}
+					}
+				}
+			}
+		}
+		return $clientIpFolders;
+	}
+
+	/**
+	 * Returns the log files that resides directly under the client ip log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listLogFiles( $dailyFolder, $clientIpFolder )
+	{
+		$logFiles = array();
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+			if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+				$rootDir = OUTPUTDIRECTORY;
+				if( $rootDir && is_dir( $rootDir ) ) {
+					$clientIpDir = $rootDir.'/'.$dailyFolder.'/'.$clientIpFolder;
+					if( is_dir( $clientIpDir ) ) {
+						$files = scandir( $clientIpDir );
+						if( $files ) foreach( $files as $file ) {
+							if( $file[0] != '.' && is_file( $clientIpDir.'/'.$file ) ) {
+								$logFiles[] = $file;
+							}
+						}
+					}
+				}
+			}
+		}
+		return $logFiles;
+	}
+
+	/**
+	 * Returns the content of a log file that typically resides directly under the client ip log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 * @param string $logFile The name of the file (not the full path).
+	 * @return string The file content.
+	 */
+	public static function getLogFileContent( $dailyFolder, $clientIpFolder, $logFile )
+	{
+		$content = '';
+		$rootDir = OUTPUTDIRECTORY;
+		if( $rootDir && is_dir( $rootDir ) ) {
+			if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+				if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+					if( self::isValidLogFileName( $logFile ) ) { // check dangerous chars (anti hack)
+						$file = OUTPUTDIRECTORY."/$dailyFolder/$clientIpFolder/$logFile";
+						if( is_file( $file ) ) {
+							$content = file_get_contents( $file );
+						}
+					}
+				}
+			}
+		}
+		return $content;
+	}
+
+	/**
+	 * Returns the configured OUTPUTDIRECTORY option value (without ending '/'), but only when folder exists.
+	 *
+	 * @since 10.1.4
+	 * @return string Full file path when valid, or EMPTY when not valid.
+	 */
+	private static function getValidRootLogFolder()
+	{
+		$rootDir = OUTPUTDIRECTORY;
+		if( $rootDir && is_dir( $rootDir ) ) {
+			$rootDir = substr( $rootDir, 0, -1 ); // remove '/' from the end
+		} else {
+			$rootDir = '';
+		}
+		return $rootDir;
+	}
+
+	/**
+	 * Returns the folder name of the root log folder.
+	 *
+	 * @since 10.1.4
+	 * @return string Folder name (not the full path).
+	 */
+	public static function getRootLogFolderName()
+	{
+		$rootFolder = '';
+		if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+			$rootFolder = basename( $rootDir );
+		}
+		return $rootFolder;
+	}
+
+	/**
+	 * Returns the (daily) folders that resides directly under the root log folder.
+	 *
+	 * @since 10.1.4
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listDailySubFolders()
+	{
+		$dailyFolders = array();
+		if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+			$folders = scandir( $rootDir );
+			if( $folders ) foreach( $folders as $folder ) {
+				if( $folder[0] != '.' && is_dir( "{$rootDir}/{$folder}" ) ) {
+					if( self::isValidDailyFolderName( $folder ) ) { // check 'Ymd' date notation (anti hack)
+						$dailyFolders[] = $folder;
+					}
+				}
+			}
+		}
+		return $dailyFolders;
+	}
+
+	/**
+	 * Removes the files and folders under the root log folder.
+	 *
+	 * @since 10.1.4
+	 */
+	public static function deleteRootFolder()
+	{
+		if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+			self::deleteDir( $rootDir );
+		}
+	}
+
+	/**
+	 * Archives the files and folders under the root log folder.
+	 *
+	 * @since 10.1.4
+	 * @return string Name of the archived file.
+	 */
+	public static function archiveRootFolder()
+	{
+		$archiveFilePath = '';
+		if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+			$archiveFilePath = self::archiveDir( $rootDir );
+		}
+		return $archiveFilePath;
+	}
+
+	/**
+	 * Removes the files and folders under the given daily log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 */
+	public static function deleteDailyFolder( $dailyFolder )
+	{
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check IP notation (anti hack)
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$dailyDir = "{$rootDir}/{$dailyFolder}";
+				self::deleteDir( $dailyDir );
+			}
+		}
+	}
+
+	/**
+	 * Archives the files and folders under the given daily log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @return string Name of the archived file.
+	 */
+	public static function archiveDailyFolder( $dailyFolder )
+	{
+		$archiveFilePath = '';
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check IP notation (anti hack)
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$dailyDir = "{$rootDir}/{$dailyFolder}";
+				$archiveFilePath = self::archiveDir( $dailyDir );
+			}
+		}
+		return $archiveFilePath;
+	}
+
+	/**
+	 * Removes the given ip log folder and all the log files that resides inside that folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 */
+	public static function deleteClientIpSubFolder( $dailyFolder, $clientIpFolder )
+	{
+		if( self::isValidDailyFolderName( $dailyFolder ) && // check 'Ymd' date notation (anti hack)
+			self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$clientIpDir = "{$rootDir}/{$dailyFolder}/{$clientIpFolder}";
+				self::deleteDir( $clientIpDir );
+			}
+		}
+	}
+
+	/**
+	 * Archives the given ip log folder and all the log files that resides inside that folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 * @return string Name of the archived file.
+	 */
+	public static function archiveClientIpSubFolder( $dailyFolder, $clientIpFolder )
+	{
+		$archiveFilePath = '';
+		if( self::isValidDailyFolderName( $dailyFolder ) && // check 'Ymd' date notation (anti hack)
+			self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$clientIpDir = "{$rootDir}/{$dailyFolder}/{$clientIpFolder}";
+				$archiveFilePath = self::archiveDir( $clientIpDir );
+			}
+		}
+		return $archiveFilePath;
+	}
+
+	/**
+	 * Recursively removes the given folder and any files and folders inside.
+	 *
+	 * @since 10.1.4
+	 * @param string $dirPath
+	 */
+	private static function deleteDir( $dirPath )
+	{
+		if( is_dir( $dirPath ) ) {
+			if( substr( $dirPath, strlen( $dirPath ) - 1, 1 ) != '/' ) {
+				$dirPath .= '/';
+			}
+			$files = glob( $dirPath.'*', GLOB_MARK );
+			if( $files ) foreach( $files as $file ) {
+				if( is_dir( $file ) ) {
+					self::deleteDir( $file );
+				} elseif( is_file( $file ) ) {
+					unlink( $file );
+				}
+			}
+			rmdir( $dirPath );
+		}
+	}
+
+	/**
+	 * Creates a ZIP file of a given folder that contains all files and subfolders inside.
+	 *
+	 * @since 10.1.4
+	 * @param string $dirPath
+	 * @return string Path of created archive file.
+	 */
+	private static function archiveDir( $dirPath )
+	{
+		$archivePath = '';
+		if( is_dir( $dirPath ) ) {
+			$archivePath = $dirPath.'.zip';
+			require_once BASEDIR.'/server/utils/ZipUtility.class.php';
+			$zipUtility = WW_Utils_ZipUtility_Factory::createZipUtility();
+			$zipUtility->createZipArchive( $archivePath );
+			$zipUtility->addDirectoryToArchive( $dirPath.'/' );
+		}
+		return $archivePath;
+	}
 
 	/**
 	 * Builds and returns a file header (single line) with column information that matches with 
@@ -279,41 +715,30 @@ class LogHandler
 
 	/**
 	 * Builds and returns a single line with given logging information.
-	 * Supports plain and html formats.
-	 * Called for every Log operation.
 	 *
-	 * @param string $area    Indication of caller. It is recomended to pass __CLASS__.
-	 * @param string $level   Log level. Should be any value of self::$logLevels.
+	 * Supports plain and html formats. Called for every Log operation.
+	 *
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
 	 * @param string $message HTML formatted string to write to log file.
-	 * @param string $time    Current time stamp of the logged message. Leave empty to auto calculate.
+	 * @param string $time Current time stamp of the logged message. Leave empty to auto calculate.
 	 * @param string $logFile File name of the current log file. Use to refer from error log to current log.
 	 * @return string Formatted log line.
 	 */
 	private static function getLogLine( $level, $area, $message, &$time, $logFile )
 	{
 		if( !$time ) {
-			list($ms, $sec) = explode(" ", microtime()); // get seconds with ms part
-			$msFmt = sprintf( '%03d', round( $ms*1000, 0 ));
-			$time = date('Y-m-d H:i:s',$sec).'.'.$msFmt;
+			list( $microSeconds, $seconds ) = explode( " ", microtime() );
+			$microsecondsFormatted = sprintf( '%03d', round( $microSeconds * 1000, 0 ) );
+			$time = date( 'Y-m-d H:i:s', $seconds ).'.'.$microsecondsFormatted;
 		}
+
 		if( LOGFILE_FORMAT == 'plain' ) {
-			$line = sprintf( '%-25s %-8s %-15s %s'.PHP_EOL, $time, $level, $area, $message );
-		} else { // html (or other?)
-			if( $logFile ) {
-				$logFileRef = SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?act=logfile'.
-								'&file='.basename( $logFile ).'#'.$time;
-				$reference = '<br/><a href="'.$logFileRef.'">Show full context</a>';
-			} else {
-				$reference = '';
-			}
-			$levColor = ($level == 'ERROR') ? '#ff0000' : (($level == 'WARN') ? '#ffaa00' : '#00cc00'); // red,orange,green
-			$line = 
-				'<tr class="d" id="'.$time.'">'.
-					'<td><nobr>'.$time.'</nobr>'.$reference.'</td>'.
-					'<td><font color="'.$levColor.'">'.$level.'</font></td>'.
-					'<td>'.$area.'</td><td>'.nl2br($message).'</td>'.
-				'</tr>'.PHP_EOL;
+			$line = self::composePlainLogLine( $level, $area, $message, $time );
+		} else { // HTML.
+			$line = self::composeHtmlLogLine( $level, $area, $message, $time, $logFile );
 		}
+
 		return $line;
 	}
 
@@ -340,7 +765,7 @@ class LogHandler
 	 *
 	 * @param string $logFile
 	 * @param integer $fileMode The type of access required to the file.
-	 * @return resource Log file handle or false in case of error.
+	 * @return resource|boolean Log file handle or false in case of error.
 	 */
 	private static function openFile( $logFile, $fileMode )
 	{
@@ -403,22 +828,47 @@ class LogHandler
 	}
 
 	/**
-	 * Returns the full file path of the php.log file. This is used for fatal errors.
+	 * Returns the full file path of php.log file.
 	 *
-	 * @return string File path
+	 * The file php.log is used for fatal errors.
+	 *
+	 * @return string File path of the php.log file or empty string when logging is disabled or when php.log file doesn't exist.
 	 */
 	public static function getPhpLogFile()
 	{
-		$logFolder = self::getLogFolder();
-		if( !is_null($logFolder) ) {
-			$logFile = $logFolder.'php.log';
-			if( file_exists( $logFile ) ) {
-				return $logFile;
-			}
+		if( OUTPUTDIRECTORY == '' ) {
+			return ''; // logging disabled
 		}
-		return '';
+
+		$logFile = '';
+		if( is_dir( OUTPUTDIRECTORY )) { // HealthCheck should take care that this directory exists, so no error handling needed when it doesn't exist.
+			$logFile = file_exists( OUTPUTDIRECTORY.'php.log' ) ? OUTPUTDIRECTORY.'php.log' : '';
+		}
+		return $logFile;
 	}
-	
+
+	/**
+	 * Compose a unique file name for an object file.
+	 *
+	 * Can be used e.g. for debugging to copy a native object file into the log folder for further analysis.
+	 *
+	 * @since 10.2.0
+	 * @param string $postfix Name to be added to the filename.
+	 * @param string|null $format Mimetype, used in conjunction with $objectType to resolve the file extension.
+	 * @param string|null $objectType
+	 * @return string Full file path
+	 */
+	public static function composeFileNameInLogFolder( $postfix, $format=null, $objectType=null )
+	{
+		$fileExt = '';
+		if( $format ) {
+			require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
+			$fileExt = MimeTypeHandler::mimeType2FileExt( $format, $objectType );
+		}
+		$phpLogFile = self::getLogFolder().self::getCurrentTimestamp().'_'.$postfix.$fileExt;
+		return $phpLogFile;
+	}
+
 	/**
 	 * Dumps the entire content of a given PHP object into a new temp file at server log folder.
 	 * There are several methods supported to dump the PHP object.
@@ -464,9 +914,29 @@ class LogHandler
 				break;
 		}
 
-		// Determine unique file name at logging folder. When calling within the same milisecond,
-		// increase an internal counter. This counter is converted to [a...z] and later to the ms.
+		$objName = is_object( $phpObject ) ? get_class( $phpObject ) : gettype( $phpObject );
+		$phpLogFile = $logFolder.self::getCurrentTimestamp().'_'.$method.'_'.$objName;
+		if( $postfix ) {
+			$phpLogFile .= '_'.$postfix;
+		}
+		$phpLogFile .= '.txt';
 
+		// Write the dumped PHP object data and return file path to caller.
+		file_put_contents( $phpLogFile, $content );
+		return $phpLogFile;
+	}
+
+	/**
+	 * Compose a string with current time indication in micro seconds.
+	 *
+	 * For example it returns "234500_021A" (which means 23h 45' 00" and 21 ms for the first caller "A").
+	 * When in the very same micro second this function is called again, it will use new postfix "B", etc.
+	 *
+	 * @since 10.2.0
+	 * @return string
+	 */
+	static private function getCurrentTimestamp()
+	{
 		$microTime = explode( ' ', microtime() );
 		$time = sprintf( '%03d', round($microTime[0]*1000) );
 		$currTimeStamp = date('His').'_'.$time;
@@ -481,16 +951,7 @@ class LogHandler
 		$lastTimeStamp = $currTimeStamp;
 		$callerId = chr( $callsCount + 65 );
 
-		$objName = is_object( $phpObject ) ? get_class( $phpObject ) : gettype( $phpObject );
-		$phpLogFile = $logFolder.$currTimeStamp.$callerId.'_'.$method.'_'.$objName;
-		if( $postfix ) {
-			$phpLogFile .= '_'.$postfix;
-		}
-		$phpLogFile .= '.txt';
-
-		// Write the dumped PHP object data and return file path to caller.
-		file_put_contents( $phpLogFile, $content );
-		return $phpLogFile;
+		return $currTimeStamp.$callerId;
 	}
 
 	/**
@@ -550,50 +1011,67 @@ class LogHandler
 
 	/**
 	 * Writes one log entry to the log file.
+	 *
+	 * Before the message is written to the log file it will be encoded in case the log format is HTML.
 	 * Use debugMode() function in case you want to write large amount of data, typically
 	 * through print_r($data,true). See file header of this module how to do such.
 	 *
-	 * @param string $area    Indication of caller. It is recomended to pass __CLASS__.
-	 * @param string $level   Log level. Should be any value of self::$logLevels.
-	 * @param string $message HTML formatted string to write to log file.
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
+	 * @param string $message String to write to log file.
 	 * @param Exception|null $exception Optionally, provide a caught exception to log all details for as well.
 	 */
-	public static function Log( $area, $level, $message, $exception=null )
+	public static function Log( $area, $level, $message, $exception = null )
+	{
+		$message = self::encodeLogMessage( $message );
+		self::logRaw( $area, $level, $message, $exception );
+	}
+
+	/**
+	 * Writes one log entry to the log file.
+	 *
+	 * No encoding is done on the message. Use this method when message is already correctly encoded. Especially in case
+	 * the log format is HTML it is important that the message is correctly encoded to prevent JavaScript injection.
+	 * To prevent injection use the self::encodeLogMessage generate a secure log message. If a (part of the) message
+	 * should not be encoded use the self::composeCodeBlock method to generate a secure message.
+	 * Use debugMode() function in case you want to write large amount of data, typically
+	 * through print_r($data,true). See file header of this module how to do such.
+	 *
+	 * @since 10.1.4
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
+	 * @param string $message String to write to log file.
+	 * @param Exception|null $exception Optionally, provide a caught exception to log all details for as well.
+	 */
+	public static function logRaw( $area, $level, $message, $exception = null )
 	{
 		// Quit when logging feature is disabled
 		if( OUTPUTDIRECTORY == '' || self::$debugLevel == 'NONE' ) {
 			return;
 		}
-   		
+
 		// Quit when given log level is too detailed (compared to configured level by system admin)
-		if( self::$logLevels[self::$debugLevel] < self::$logLevels[$level] ) {
+		if( self::$logLevels[ self::$debugLevel ] < self::$logLevels[ $level ] ) {
 			return;
 		}
-   		// Suppress logging for frequently polling services (except when there are errors or warnings).
-		if( $level != 'ERROR' && $level != 'WARN' && self::suppressLoggingForService() ) {
+		// Suppress logging for frequently polling services (except when there are errors or warnings).
+		if( $level != 'ERROR' && $level != 'WARN' && $level != 'DEPRECATED' && self::suppressLoggingForService() ) {
 			return;
 		}
 
 		// Insert header with calling script name, only for first log of this session
-		if(self::$logged) {
-			$header = '' ;
-		} else  {
+		if( self::$logged ) {
+			$header = '';
+		} else {
 			$header = self::getLogRequestHeader();
 			self::$logged = true;
 		}
 		$msg = $header;
 
 		// Add calling stack information in debug mode for errors and warnings.
-		$isDebugWarnError = (self::$debugLevel == 'DEBUG' && ($level == 'ERROR' || $level == 'WARN'));
+		$isDebugWarnError = ( self::$debugLevel == 'DEBUG' && ( $level == 'ERROR' || $level == 'WARN' || $level == 'DEPRECATED' ));
 		if( $isDebugWarnError ) {
-			$message .= "\nStack:\n".self::getDebugBackTrace();
-			if( $exception ) {
-				$message .= "\n-------------\nException Message: ".$exception->getMessage();
-				if( get_class($exception) == '' ) {
-					$message .= "\nException Details: ".$exception->getDetail();
-				}
-				$message .= "\nException Stack:\n".self::getExceptionBackTrace( $exception );
-			}
+			$message .= self::composeStack( $exception );
 		}
 
 		// Format message to log
@@ -607,7 +1085,7 @@ class LogHandler
 		}
 
 		// Insert cached context when not written before
-		if( !empty(self::$context) && !self::$wroteContext ) {
+		if( !empty( self::$context ) && !self::$wroteContext ) {
 			$msg = self::$context.$msg;
 			self::$wroteContext = true;
 			self::$context = '';
@@ -615,11 +1093,11 @@ class LogHandler
 
 		// Write log to file
 		$logFile = self::getLogFile();
-		if( !empty($logFile) ) {
+		if( !empty( $logFile ) ) {
 			$handle = self::openFile( $logFile, 'a+' );
 			if( $handle ) {
 				fwrite( $handle, $msg );
-				// In debug mode, make sure the last log is written to file, so in case of an 
+				// In debug mode, make sure the last log is written to file, so in case of an
 				// unexpected PHP crash, we know what happened right before that point.
 				// For production, we do not like the penalty for the delay.
 				if( self::$debugLevel == 'DEBUG' ) {
@@ -631,13 +1109,13 @@ class LogHandler
 		// For debugging convenience, collect errors and warning to higher level error log file
 		if( $isDebugWarnError ) {
 			$logFolder = self::getLogFolder();
-			if( !empty($logFolder) ) {
-				$fileExt = (LOGFILE_FORMAT == 'plain') ? '.txt' : '.htm';
+			if( !empty( $logFolder ) ) {
+				$fileExt = ( LOGFILE_FORMAT == 'plain' ) ? '.txt' : '.htm';
 				$handle = self::openFile( $logFolder.'ent_log_errors'.$fileExt, 'a+' );
 				if( $handle ) {
 					$errMsg = $header.self::getLogLine( $level, $area, $message, $time, $logFile );
 					fwrite( $handle, $errMsg );
-					// In debug mode, make sure the last log is written to file, so in case of an 
+					// In debug mode, make sure the last log is written to file, so in case of an
 					// unexpected PHP crash, we know what happened right before that point.
 					// For production, we do not like the penalty for the delay.
 					if( self::$debugLevel == 'DEBUG' ) {
@@ -646,6 +1124,46 @@ class LogHandler
 				}
 			}
 		}
+	}
+
+	/**
+	 * Ensures that a string is properly encoded before sending it to the log file.
+	 *
+	 * This is especially needed when the log format is 'html'. All special characters are converted to html entities.
+	 * The new line markers (\r\n) are replaced by '<br/>' to support line breaks in case of 'html' format.
+	 *
+	 * @since 10.1.4
+	 * @param string $message
+	 * @return string encode message
+	 */
+	public static function encodeLogMessage( $message )
+	{
+		$result = $message;
+		if( LOGFILE_FORMAT == 'html' ) {
+			$result = htmlentities( $message, ENT_SUBSTITUTE );
+			$result = nl2br( $result );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Adds formatting to a 'code' fragment so it is nicely displayed.
+	 *
+	 * @since 10.1.4
+	 * @param string $codeBlock
+	 * @return string code fragment ready for display.
+	 */
+	public static function composeCodeBlock( $codeBlock )
+	{
+		$result = $codeBlock;
+		if( LOGFILE_FORMAT == 'html' ) {
+			$result = self::encodeLogMessage( $codeBlock );
+			$result = str_replace( '    ', '&nbsp;&nbsp;&nbsp;&nbsp;', $result ); // show print_r() indents in HTML
+			$result = "<code>$result</code>";
+		}
+
+		return $result;
 	}
 
 	/**
@@ -665,7 +1183,6 @@ class LogHandler
 	 */
 	public static function suppressLoggingForService( $serviceName = null )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( !$serviceName ) {
 			$serviceName = BizSession::getServiceName();
 		}
@@ -747,7 +1264,7 @@ class LogHandler
 			self::Log('errorhandler', 'ERROR', 'User Error: '.$file.' '.$line.' '.$errmsg);
 			// fatal user error has been set explicitly, so we continue to return SOAP fault
 		} else {
-			// Let's be robust here on the newbees (we are in error mode, so let's try to get most out of it)
+			// Let's be robust here on the newbies (we are in error mode, so let's try to get most out of it)
 			if( !defined('E_RECOVERABLE_ERROR') ) define('E_RECOVERABLE_ERROR', 4096 ); // PHP v5.2
 			if( !defined('E_DEPRECATED') )        define('E_DEPRECATED',        8192 ); // PHP v5.3
 			if( !defined('E_USER_DEPRECATED') )   define('E_USER_DEPRECATED',  16384 ); // PHP v5.3
@@ -758,10 +1275,10 @@ class LogHandler
 				// but did not leave the Engine in an unstable state. So we quit here to continue production.
 				return;
 			} else if( $errno == E_DEPRECATED ) {
-				self::Log('errorhandler', 'WARN', 'Deprecated: '.$file.' '.$line.' '.$errmsg);
+				self::Log('errorhandler', 'DEPRECATED', 'Deprecated: '.$file.' '.$line.' '.$errmsg);
 				return;
 			} else if( $errno == E_USER_DEPRECATED ) {
-				self::Log('errorhandler', 'WARN', 'User Deprecated: '.$file.' '.$line.' '.$errmsg);
+				self::Log('errorhandler', 'DEPRECATED', 'User Deprecated: '.$file.' '.$line.' '.$errmsg);
 				return;
 			} else { // should not happen...
 				self::Log('errorhandler', 'ERROR', 'Unknown Error: '.$file.' '.$line.' '.$errmsg);
@@ -843,7 +1360,7 @@ class LogHandler
 				$msg = '<a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?act=logfile'.
 						'&file='.basename($fileName).'">'.$methodName.' '.
 						($isRequest ? 'request' : 'response' ).'</a>';
-				LogHandler::Log( 'webservice', 'DEBUG',  $msg );
+				self::logRaw( 'webservice', 'DEBUG',  $msg );
 			}
 		}
 	}
@@ -866,11 +1383,11 @@ class LogHandler
 	 * systems (non-BizExceptions) to get details of the thrower's stack.
 	 * See {@link markupBackTrace()} for details.
 	 *
-	 * @param Exception The caught exception for which to compose the stack trace.
+	 * @param Exception|Throwable $exception The caught exception for which to compose the stack trace. Since PHP7 it can be any kind of Throwable exceptions.
 	 * @param integer $hideToplevels Number of rows on top of stack to hide. E.g. pass 2 to hide getDebugBackTrace() function call and yourself.
 	 * @return string The stack with \n separations.
 	 */
-	public static function getExceptionBackTrace( Exception $exception, $hideToplevels = 1 )
+	public static function getExceptionBackTrace( $exception, $hideToplevels = 1 )
 	{
 		return self::markupBackTrace( $exception->getTrace(), $hideToplevels );
 	}
@@ -910,6 +1427,10 @@ class LogHandler
 	/**
 	 * Check on LogOn request, to replace password value with asterisk *
 	 *
+	 * Even in case of empty passwords the password needs to be replaced by asterisk. When the logon is done by using
+	 * a ticket instead of a user/password combination the password is also set to asterisk. So the replacement should
+	 * never fail.
+	 *
 	 * @param string $methodName
 	 * @param string|object $transData Could be string or object
 	 * @param string $protocol
@@ -918,23 +1439,38 @@ class LogHandler
 	public static function replacePasswordWithAsterisk( $methodName, $transData, $protocol )
 	{
 		$logonMethods = array( 'LogOn', 'WflLogOn', 'LogOnRequest', 'AdmLogOn', 'PlnLogOn' );
+		$expression = '';
+		$replacement = '';
 		if( in_array($methodName, $logonMethods) ) {
 			if( $protocol == 'SOAP' ) {
 				// e.g. <Password>xxx</Password> => <Password>***</Password>
-				$transData = preg_replace('/<Password>(.*)<\/Password>/is', '<Password>***</Password>', $transData, 1 );
+				$expression = '/<Password>(.*)<\/Password>/is';
+				$replacement = '<Password>***</Password>';
 			} elseif( $protocol == 'Service' ) {
 				// e.g. [Password] => xxx => [Password] => ***
-				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
+				$expression = '/Password => (.*)\n(.*)/i';
+				$replacement = "Password => ***\n$2";
 			} elseif( $protocol == 'AMF' ) {
 				// e.g. [Password] => xxx => [Password] => ***
-				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
+				$expression = '/\[Password\] => (.*)\n(.*)/i';
+				$replacement = "[Password] => ***\n$2";
 			} elseif( $protocol == 'JSON' ) {
 				// e.g. "Password":"xxx" => "Password":"***"
-				$transData = preg_replace('/\"Password\":\"(.*)\"/i', "\"Password\":\"***\"", $transData, 1 );
+				$expression = '/\"Password\":\s*\"(.*)\"/i';
+				$replacement = "\"Password\": \"***\"";
 			}
 		}
 		if( $methodName == 'RabbitMQ_createOrUpdateUser' && $protocol == 'REST' ) {
-			$transData = preg_replace('/\"password\":\"(.*)\"/i', "\"password\":\"***\"", $transData, 1 );
+			$expression = '/\"password\":\"(.*)\"/i';
+			$replacement = "\"password\":\"***\"";
+		}
+
+		if( $expression ) {
+			$count = 0;
+			$transData = preg_replace( $expression, $replacement, $transData, 1, $count );
+			if( $count == 0 ) {
+				self::Log( 'Security', 'ERROR', $methodName.': Logged password is not obfuscated. This is a potential security risk when the log folder is accessed by unauthorized people.' );
+			}
 		}
 
 		return $transData;

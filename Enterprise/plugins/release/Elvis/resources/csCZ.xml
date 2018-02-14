@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LocalizationMap language="csCZ">
+  <Term key="Elvis.ERR_CONNECT">Při získávání souboru ze systému Elvis došlo k chybě z důvodu ztráty spojení. (S1144)#EOL##EOL#Obraťte se na správce systému.#EOL##EOL#DŮLEŽITÉ: Důrazně doporučujeme, abyste do chvíle, než bude spojení znovu navázáno, v systému nepracovali na ŽÁDNÉM ze souborů ani neprováděli ŽÁDNOU jinou akci (například přerušení odhlášení, registrace, uložení verze, odhlášení, otevření souborů nebo svazků apod.).#EOL##EOL#Pokud budete se soubory jakkoliv pracovat, může dojít ke ztrátě dat nebo k poškození souborů.</Term>
   <Term key="Elvis.PRODUCTION_ZONE">Zóna produkce</Term>
 </LocalizationMap>

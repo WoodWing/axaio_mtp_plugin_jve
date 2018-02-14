@@ -210,7 +210,7 @@ class Lucene
 	private function addToIndex( $id, $type, $name, $pubName, $pubId, $catName, $format, $modified, $slugline, $description, $plainContent, $keywords )
 	{
 		// Debug output:
-		LogHandler::Log( 'Lucene', 'DEBUG', "Add to index: <br/>id: $id<br/>type: $type<br/>name: $name<br/>pubname: $pubName<br/>pubid: $pubId<br/>catName: $catName<br/>format:$format<br/>modified:$modified<br/>slug:$slugline<br/>descr:$description<br/>plaincontent:$plainContent<br/>keywords:$keywords" );
+		LogHandler::Log( 'Lucene', 'DEBUG', "Add to index:\r\nid: {$id}\r\ntype: {$type}\r\nname: {$name}\r\npubname: {$pubName}\r\npubid: {$pubId}\r\ncatName: {$catName}\r\nformat: {$format}\r\nmodified: {$modified}\r\nslug: {$slugline}\r\ndescr: {$description}\r\nplaincontent: {$plainContent}\r\nkeywords: {$keywords}" );
 		
 		$this->ids[] = $id;
 		// We only index articles, image, audio and video.

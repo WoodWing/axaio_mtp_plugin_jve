@@ -291,7 +291,7 @@ class BizImageConverter
 	 *
 	 * @param string $inputImageFormat
 	 * @param string $outputImageFormat
-	 * @return ImageConverter_EnterpriseConnector|null
+	 * @return EnterpriseConnector|null The best ImageConverter_EnterpriseConnector, or null when not found
 	 */
 	private function getBestConnector( $inputImageFormat, $outputImageFormat )
 	{

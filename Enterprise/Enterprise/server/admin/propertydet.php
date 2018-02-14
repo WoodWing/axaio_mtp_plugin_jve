@@ -129,26 +129,7 @@ if( ($mode == "insert" || $mode == "update") ) {
 if( $mode == 'delete' ) {
 	if( $id > 0 ) {
 		try {
-			if( BizProperty::isCustomPropertyName($name) ) {
-				require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
-				DBActionproperty::deletePropFromActionProperties( $name, $publ );
-
-				$foundDbType = BizProperty::getCustomPropType( $id, $type, $name );
-				if( !$foundDbType ) { // BZ#33742 - Delete DB field only when type is not found in DB
-					BizCustomField::deleteFieldAtModel( 'objects', $name );
-				} else { // Reset custom property value when the property removed from particular publication
-					require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
-					$updateValues = array( $name => '' );
-					$where = '`publication` = ?';
-					$params = array( $publ );
-
-					$updateResult = DBObject::updateRow( 'objects', $updateValues, $where, $params );
-					if( $updateResult ) {
-						DBObject::updateRow( 'deletedobjects', $updateValues, $where, $params );
-					}
-				}
-			}
-			BizProperty::deleteProperty( $id );
+			BizProperty::checkAndRemoveRelatedDataBeforeDeleteProperty( $id, $type, $name, $publ );
 		} catch( BizException $e ) {
 			$errorString = $e->getMessage();
 	}

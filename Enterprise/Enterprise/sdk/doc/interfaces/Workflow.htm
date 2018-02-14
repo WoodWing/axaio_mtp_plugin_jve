@@ -17,7 +17,7 @@
 		td.fcc {} /* foot-comment-column */
 	</style>
 </head>
-<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Workflow interface - Enterprise v10.1</h1></td></table>
+<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Workflow interface - Enterprise v10.2</h1></td></table>
 <br/><h2>Web Services</h2>
 <div class="section"><h3>AddObjectLabels</h3><p> 
 				Assigns an existing dossier label to one or more objects it contains.
@@ -231,6 +231,11 @@
 <tr><td class="bpc">IDs</td><td class="btc">array of string</td><td class="bcc"> Successfully deleted objects. </td></tr>
 <tr><td class="bpc">Reports</td><td class="btc">array of <a href="#ErrorReport">ErrorReport</a>*</td><td class="bcc"> Objects that could not be deleted. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>DeleteUserSettings</h3><p>
+				v10.3: Remove user settings in DB for the current client appplication.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Settings</td><td class="btc">array of string</td><td class="bcc"></td></tr>
 </table></div><div class="section"><h3>GetArticleFromWorkspace</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">WorkspaceId</td><td class="btc">string</td><td class="bcc"></td></tr>
@@ -428,6 +433,14 @@
 <tr><td class="bpc">WordsToCheck</td><td class="btc">array of string</td><td class="bcc"></td></tr>
 </table></div><div class="section"><h3>GetSuggestionsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Suggestions</td><td class="btc">array of <a href="#Suggestion">Suggestion</a></td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>GetUserSettings</h3><p>
+				v10.3: Retrieve the cached user settings stored in DB for the current client appplication.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Settings</td><td class="btc">array of string*</td><td class="bcc"> nil mean all settings </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>GetUserSettingsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Settings</td><td class="btc">array of <a href="#Setting">Setting</a></td><td class="bcc"></td></tr>
 </table></div><div class="section"><h3>GetVersion</h3><p> Retrieves information of a specified version of a object. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">ID</td><td class="btc">string</td><td class="bcc"></td></tr>
@@ -504,13 +517,19 @@
 <tr><td class="bpc">RequestTicket</td><td class="btc">boolean*</td><td class="bcc"> Obsoleted. Pass nil for TicketOnly and pass empty array for RequestInfo to obtain a ticket only. </td></tr>
 <tr><td class="bpc">RequestInfo</td><td class="btc">array of string*</td><td class="bcc"> v9.7: Which kind of information to resolve for the LogOnResponse.
 						Supported values: 
-							Publications, NamedQueries, ServerInfo, Settings, 
+							Publications, NamedQueries, ServerInfo, Settings, PreferNoSettings,
 							Users, UserGroups, Membership, ObjectTypeProperties, ActionProperties, 
 							Terms, FeatureProfiles, Dictionaries, MessageList, CurrentUser, MessageQueueConnections (v10.0)
 						And, when 'Publications' is NOT specified:
 							Publications->ObjectTypeProperties, Publications->ActionProperties, 
 							Publications->FeatureAccessList, Publications->CurrentIssue,
 							Publications->PubChannels, Publications->Categories, Publications->Dictionaries
+						Since 10.3 the PreferNoSettings option is added which enables client applications handling user
+						settings through the LogOn/LogOff services to migrate to the Get/SaveUserSettings services that
+						are introduced with ES 10.3 and meanwhile support both 10.2 and 10.3. By passing both Settings
+						and PreferNoSettings, ES 10.2 returns the settings through the LogOnResponse->Settings while
+						ES 10.3 does not. The client can check if LogOnResponse->ServerInfo->Version >= 10.3 and call
+						the new GetUserSettings services instead.
 					</td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>LogOnResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
@@ -551,7 +570,7 @@
 <tr><td class="bpc">Params</td><td class="btc">array of <a href="#QueryParam">QueryParam</a></td><td class="bcc"></td></tr>
 <tr><td class="bpc">FirstEntry</td><td class="btc">unsigned integer*</td><td class="bcc"> v4.2: Index of first requested object of total count (TotalEntries) </td></tr>
 <tr><td class="bpc">MaxEntries</td><td class="btc">unsigned integer*</td><td class="bcc"> v4.2: Max count of requested objects (zero for all, nil for DBMAXQUERY) </td></tr>
-<tr><td class="bpc">Hierarchical</td><td class="btc">boolean*</td><td class="bcc"> v4.2: Requests to include ChildRows (placements/components) - Default false! </td></tr>
+<tr><td class="bpc">Hierarchical</td><td class="btc">boolean*</td><td class="bcc"> v4.2: Requests to include ChildRows/ChildColumns (placements) and ComponentRows/ComponentColumns (text components) - Default false! </td></tr>
 <tr><td class="bpc">Order</td><td class="btc">array of <a href="#QueryOrder">QueryOrder</a>*</td><td class="bcc"> v4.2 </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>NamedQueryResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
@@ -616,7 +635,7 @@
 <tr><td class="bpc">Params</td><td class="btc">array of <a href="#QueryParam">QueryParam</a></td><td class="bcc"></td></tr>
 <tr><td class="bpc">FirstEntry</td><td class="btc">unsigned integer*</td><td class="bcc"> v4.2: Index of first requested object of total count (TotalEntries) </td></tr>
 <tr><td class="bpc">MaxEntries</td><td class="btc">unsigned integer*</td><td class="bcc"> v4.2: Max count of requested objects (zero for all, nil for server defined default) </td></tr>
-<tr><td class="bpc">Hierarchical</td><td class="btc">boolean*</td><td class="bcc"> v4.2: Requests to include ChildRows (placements/components) - Default false! </td></tr>
+<tr><td class="bpc">Hierarchical</td><td class="btc">boolean*</td><td class="bcc"> v4.2: Requests to include ChildRows/ChildColumns (placements) and ComponentRows/ComponentColumns (text components) - Default false! </td></tr>
 <tr><td class="bpc">Order</td><td class="btc">array of <a href="#QueryOrder">QueryOrder</a>*</td><td class="bcc"> v4.2 </td></tr>
 <tr><td class="bpc">MinimalProps</td><td class="btc">array of string*</td><td class="bcc"> v6.0: Minimal properties that should be returned even if these are not configured </td></tr>
 <tr><td class="bpc">RequestProps</td><td class="btc">array of string*</td><td class="bcc"> v6.0: Which properties to return, be cautious, this overrules server configuration and overrules MinimalProps </td></tr>
@@ -679,6 +698,11 @@
 <tr><td class="bpc">Objects</td><td class="btc">array of <a href="#Object">Object</a></td><td class="bcc"></td></tr>
 <tr><td class="bpc">Reports</td><td class="btc">array of <a href="#ErrorReport">ErrorReport</a>*</td><td class="bcc"> v8.0: Errors and warnings of saving the Messages. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>SaveUserSettings</h3><p>
+				v10.3: Store user settings in DB for the current client appplication.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Settings</td><td class="btc">array of <a href="#Setting">Setting</a></td><td class="bcc"></td></tr>
 </table></div><div class="section"><h3>SendMessages</h3><p> Sends messages to objects or users. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">Messages</td><td class="btc">array of <a href="#Message">Message</a>*</td><td class="bcc"> DEPRECATED since v8.0. Use Objects->Object->MessageList->Messages instead. </td></tr>
@@ -995,6 +1019,7 @@
 			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Id</td><td class="btc">string</td><td class="bcc"> Unique id within the layout (UID) </td></tr>
 <tr><td class="bpc">Name</td><td class="btc">string*</td><td class="bcc"> Unique name within the layout. (User can change.) </td></tr>
+<tr><td class="bpc">SplineIDs</td><td class="btc">array of string*</td><td class="bcc"> v10.2: Refers to Placement->SplineID and tells the sequence of the frames as organized in the InDesign Article palette. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="Issue"><h3>Issue</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Id</td><td class="btc">string</td><td class="bcc"></td></tr>
@@ -1020,6 +1045,9 @@
 <tr><td class="bpc">State</td><td class="btc"><a href="#State">State</a></td><td class="bcc"></td></tr>
 <tr><td class="bpc">Version</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">LockedBy</td><td class="btc">string</td><td class="bcc"> v6.1 </td></tr>
+<tr><td class="bpc">Flag</td><td class="btc">integer*</td><td class="bcc"> v10.1.3 Will be 0 when layout has no flag. </td></tr>
+<tr><td class="bpc">FlagMsg</td><td class="btc">string*</td><td class="bcc"> v10.1.3 Will be an empty string when layout has no flag message. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="Message"><h3>Message</h3><p> For messages, the ObjectID -OR- UserID must be given. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">ObjectID</td><td class="btc">string*</td><td class="bcc"> object to which the message was sent </td></tr>
 <tr><td class="bpc">UserID</td><td class="btc">string*</td><td class="bcc"> user or group to which the message was sent </td></tr>
@@ -1440,6 +1468,8 @@
 <tr><td class="bpc">UserID</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">FullName</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">TrackChangesColor</td><td class="btc">color (3-byte, hexadecimal)</td><td class="bcc"> v8.0: User's track changes color in RGB format (without # prefix) </td></tr>
+<tr><td class="bpc">EmailAddress</td><td class="btc">string*</td><td class="bcc"> v10.2: Only populated for LogOnResponse->CurrentUser for CSDE publish to email. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="UserGroup"><h3>UserGroup</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"></td></tr>
 </table></div><div class="section" id="VersionInfo"><h3>VersionInfo</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
@@ -1585,7 +1615,6 @@
 <tr><td class="btc">"print"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"web"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"sms"</td><td class="bcc"></td></tr>
-<tr><td class="btc">"dps"</td><td class="bcc"> v7.5 Digital Publishing System </td></tr>
 <tr><td class="btc">"dps2"</td><td class="bcc"> v9.6 Adobe DPS (2015) integration </td></tr>
 <tr><td class="btc">"other"</td><td class="bcc"></td></tr>
 </table></div><div class="section" id="RelationType"><h3>RelationType</h3><p></p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
@@ -1603,6 +1632,6 @@
 <tr><td class="btc">"native"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"output"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"trailer"</td><td class="bcc"></td></tr>
-</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 20 Oct 2016</p>
-<p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2016 WoodWing Software bv. All rights reserved.</p></div>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 17 Jan 2018</p>
+<p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2018 WoodWing Software bv. All rights reserved.</p></div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>

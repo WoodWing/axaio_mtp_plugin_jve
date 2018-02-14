@@ -24,7 +24,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	}
     public function getPrio()        { return 100; }
 
-	// TODO: Read field lenghts from dbmodel.php instead of these defines:
+	// TODO: Read field lenghts from WW_DbModel_Definition instead of these defines:
 	const ADMTEST_USER_SHORTNAMELEN = 40;
 	const ADMTEST_USER_FULLNAMELEN  = 255;
 	const ADMTEST_USERGROUP_NAMELEN = 100;
@@ -32,14 +32,17 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	private $userIds = array(); // created user ids (for garbage collector)
 	private $groupIds = array(); // created user group ids (for garbage collector)
 	private $postfix = 0; // internal counter to make users and groups unique
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 	
 	final public function runTest()
 	{
 		// Init utils.
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
+
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Retrieve the Ticket that has been determined by AdmInitData TestCase.
    		$vars = $this->getSessionVariables();
@@ -142,7 +145,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 
 		/*
 		// >>> Example to init Enterprise Server when needed to call biz/db layer (by-passing services):
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::startSession( $ticket );
 		$user = BizSession::checkTicket( $ticket );
 		$this->setResult( 'INFO',  'Working in the name of user: '.$user, '' );
@@ -176,6 +178,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		for( $i = 1; $i <= 9; $i++ ) {
 			$user = $this->buildUser();
 			$action = $this->updateMode ? 'Update' : 'Create';
+			$stepInfo = '';
 			switch( $i ) {
 				case 1:
 					// => rely on default $user->Name
@@ -244,6 +247,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 
 	/**
 	 * Attempts to create/modify users with all kind of bad names.
+	 *
+	 * @param string $existingName
 	 */
 	private function testUsersWithBadNames( $existingName )
 	{
@@ -252,6 +257,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		for( $i = 1; $i <= 5; $i++ ) {
 			$user = $this->buildUser();
 			$action = $this->updateMode ? 'Update' : 'Create';
+			$stepInfo = '';
+			$expError = '';
 			switch( $i ) {
 				case 1:
 					$user->Name = null;
@@ -304,6 +311,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		for( $i = 1; $i <= 6; $i++ ) {
 			$user = $this->buildUser();
 			$action = $this->updateMode ? 'Update' : 'Create';
+			$stepInfo = '';
+			$expError = '';
 			switch( $i ) {
 				case 1:
 					$user->Password = null;
@@ -358,6 +367,10 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	{
 		require_once BASEDIR.'/server/services/adm/AdmGetUsersService.class.php';
 		for( $i = 1; $i <= 5; $i++ ) {
+			$userIds = null;
+			$groupId = null;
+			$stepInfo = '';
+			$expError = '';
 			switch( $i ) {
 				case 1;
 					$userIds = null;
@@ -379,12 +392,12 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 					break;
 				case 4;
 					$userIds = null;
-					$groupId = -3;
+					$groupId = PHP_INT_MAX-3;
 					$stepInfo = 'Get all users for a non-existing group.';
 					$expError = '(S1056)';
 					break;
 				case 5;
-					$userIds = array(-3,-4);
+					$userIds = array( PHP_INT_MAX-3, PHP_INT_MAX-4 );
 					$groupId = null;
 					$stepInfo = 'Get a specified list of non-existing users.';
 					$expError = '(S1056)';
@@ -486,6 +499,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		require_once BASEDIR.'/server/services/adm/AdmModifyUserGroupsService.class.php';
 		$groups = array();
 		for( $i = 1; $i <= 6; $i++ ) {
+			$stepInfo = '';
 			$group = $this->buildUserGroup();
 			$action = $this->updateMode ? 'Update' : 'Create';
 			switch( $i ) {
@@ -544,6 +558,10 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	{
 		require_once BASEDIR.'/server/services/adm/AdmGetUserGroupsService.class.php';
 		for( $i = 1; $i <= 5; $i++ ) {
+			$userId = null;
+			$groupIds = null;
+			$stepInfo = '';
+			$expError = '';
 			switch( $i ) {
 				case 1;
 					$userId = null;
@@ -564,14 +582,14 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 					$expError = null;
 					break;
 				case 4;
-					$userId = -3;
+					$userId = PHP_INT_MAX-3;
 					$groupIds = null;
 					$stepInfo = 'Get all user groups for a non-existing user.';
 					$expError = '(S1056)';
 					break;
 				case 5;
 					$userId = null;
-					$groupIds = array(-3,-4);
+					$groupIds = array( PHP_INT_MAX-3, PHP_INT_MAX-4 );
 					$stepInfo = 'Get a specified list of non-existing user groups.';
 					$expError = '(S1056)';
 					break;
@@ -587,6 +605,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 
 	/**
 	 * Attempts to create/update user groups with all kind of bad names.
+	 *
+	 * @param string $existingName
 	 */
 	private function testUserGroupsWithBadNames( $existingName )
 	{
@@ -595,6 +615,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		for( $i = 1; $i <= 4; $i++ ) {
 			$group = $this->buildUserGroup();
 			$action = $this->updateMode ? 'Update' : 'Create';
+			$stepInfo = '';
+			$expError = '';
 			switch( $i ) {
 				case 1:
 					$group->Name = null;
@@ -757,9 +779,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		$response = $this->utils->callService( $this, $request, 'Build user for self delete test' );
 		//We will delete this user in a test, but to sure we also add it to the garbage collector
 		$this->collectUsers( @$response->Users );
-		if( $response && count($response->Users) ) {
-			$this->selfUser = $response->Users[0];
-		}
+		$this->selfUser = @$response->Users[0];
 
 		//Create an userGroup that has admin rights
 		$group = $this->buildUserGroup();
@@ -772,9 +792,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		$response = $this->utils->callService( $this, $request, $stepInfo );
 		//The garbage collector takes care of deleting this usergroup
 		$this->collectUserGroups( @$response->UserGroups );
-		if( $response && count($response->UserGroups) ) {
-			$adminGroup = $response->UserGroups[0];
-		}
+		$adminGroup = @$response->UserGroups[0];
+
 		//Make the user an admin
 		$request = new AdmAddUsersToGroupRequest();
 		$request->Ticket = $this->ticket;
@@ -874,6 +893,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	private function testAllWithEndUserRights()
 	{
 		for( $i = 1; $i <= 12; $i++ ) {
+			$request = null;
 			switch( $i ) {
 				case 1:
 					require_once BASEDIR.'/server/services/adm/AdmCreateUsersService.class.php';
@@ -937,11 +957,13 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 					require_once BASEDIR.'/server/services/adm/AdmDeleteUserGroupsService.class.php';
 					$request = new AdmDeleteUserGroupsRequest();
 					$request->GroupIds = array();
+					$request->UserId = 0;
 					break;
 				case 12:
 					require_once BASEDIR.'/server/services/adm/AdmDeleteUsersService.class.php';
 					$request = new AdmDeleteUsersRequest();
 					$request->UserIds = array();
+					$request->UserId = 0;
 					break;
 			}
 			$request->Ticket = $this->ticket;
@@ -1089,6 +1111,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	 * Tries to logon.
 	 * 
 	 * @param WflLogOnRequest $request
+	 * @param string $stepInfo
+	 * @param string|null $expError
 	 * @return WflLogOnResponse
 	 */
 	private function logon( WflLogOnRequest $request, $stepInfo, $expError = null )
@@ -1101,8 +1125,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	
 	/**
 	 * When the test user is logged in, do a logout request
-	 *
-	 * @param string $ticket
 	 */
 	private function logoff()
 	{

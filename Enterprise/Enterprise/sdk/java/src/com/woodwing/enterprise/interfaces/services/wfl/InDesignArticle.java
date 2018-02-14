@@ -12,14 +12,18 @@ public class InDesignArticle  implements java.io.Serializable {
 
     private java.lang.String name;
 
+    private java.lang.String[] splineIDs;
+
     public InDesignArticle() {
     }
 
     public InDesignArticle(
            java.lang.String id,
-           java.lang.String name) {
+           java.lang.String name,
+           java.lang.String[] splineIDs) {
            this.id = id;
            this.name = name;
+           this.splineIDs = splineIDs;
     }
 
 
@@ -62,6 +66,26 @@ public class InDesignArticle  implements java.io.Serializable {
         this.name = name;
     }
 
+
+    /**
+     * Gets the splineIDs value for this InDesignArticle.
+     * 
+     * @return splineIDs
+     */
+    public java.lang.String[] getSplineIDs() {
+        return splineIDs;
+    }
+
+
+    /**
+     * Sets the splineIDs value for this InDesignArticle.
+     * 
+     * @param splineIDs
+     */
+    public void setSplineIDs(java.lang.String[] splineIDs) {
+        this.splineIDs = splineIDs;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof InDesignArticle)) return false;
@@ -79,7 +103,10 @@ public class InDesignArticle  implements java.io.Serializable {
               this.id.equals(other.getId()))) &&
             ((this.name==null && other.getName()==null) || 
              (this.name!=null &&
-              this.name.equals(other.getName())));
+              this.name.equals(other.getName()))) &&
+            ((this.splineIDs==null && other.getSplineIDs()==null) || 
+             (this.splineIDs!=null &&
+              java.util.Arrays.equals(this.splineIDs, other.getSplineIDs())));
         __equalsCalc = null;
         return _equals;
     }
@@ -96,6 +123,17 @@ public class InDesignArticle  implements java.io.Serializable {
         }
         if (getName() != null) {
             _hashCode += getName().hashCode();
+        }
+        if (getSplineIDs() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getSplineIDs());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getSplineIDs(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -118,6 +156,14 @@ public class InDesignArticle  implements java.io.Serializable {
         elemField.setXmlName(new javax.xml.namespace.QName("", "Name"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("splineIDs");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "SplineIDs"));
+        elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "String"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("", "String"));
         typeDesc.addFieldDesc(elemField);
     }
 

@@ -40,6 +40,5 @@ abstract class AdmDeleteUsers_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmDeleteUsersRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

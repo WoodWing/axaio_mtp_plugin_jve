@@ -19,9 +19,13 @@ class DBUser extends DBBase
 		$dbu = $dbdriver->tablename('users');
 
 		// Check on name
-		$sql = "SELECT * FROM $dbu WHERE (`user` = '" . $dbdriver->toDBString($user) . "' OR `fullname` = '" . $dbdriver->toDBString($fullname) . "')";
-		if( $id ) { $sql .= " AND `id` != $id"; }
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT * FROM $dbu WHERE (`user` = ? OR `fullname` = ? )";
+		$params = array( strval( $user ), strval( $fullname ) );
+		if( $id ) {
+			$sql .= " AND `id` != ? ";
+			$params[] = intval( $id );
+		}
+		$sth = $dbdriver->query($sql, $params );
 		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 			return null; // failed
@@ -40,8 +44,8 @@ class DBUser extends DBBase
 		$dbdriver = DBDriverFactory::gen();
 		$dbg = $dbdriver->tablename('groups');
 
-		$sql = "SELECT `id` FROM $dbg WHERE `name` = '" . $dbdriver->toDBString($group) . "'";
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT `id` FROM $dbg WHERE `name` = ? ";
+		$sth = $dbdriver->query($sql, array( strval( $group ) ) );
 		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 			return null; // failed
@@ -82,7 +86,6 @@ class DBUser extends DBBase
 		// save password
 		$pass = ww_crypt($pass, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
 		if( !self::setPassword( $user, $pass, $expiredays ) ) {
-			self::setError( $dbdriver->error() );
 			return null;
 		}
 		return $newid;
@@ -104,8 +107,8 @@ class DBUser extends DBBase
 		$sql .= "`expiredays` = '$expiredays', `email` = '" . $dbdriver->toDBString($email) . "', `emailgrp` = '$emailgrp', ";
 		$sql .= "`emailusr` = '$emailusr', `fixedpass` = '$fixedpass', `trackchangescolor` = '$trackchangescolor', ";
 		$sql .= "`organization` = '" . $dbdriver->toDBString($organization) . "', `location` = '" . $dbdriver->toDBString($location) . "' ";
-		$sql .= " WHERE `id` = $id";
-		$sth = $dbdriver->query($sql);
+		$sql .= " WHERE `id` = ? ";
+		$sth = $dbdriver->query($sql, array( intval( $id ) ) );
 		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 		}
@@ -113,9 +116,7 @@ class DBUser extends DBBase
 		// save password
 		if( $pass ) {
 			$pass = ww_crypt($pass, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
-			if( !self::setPassword( $user, $pass, $expiredays ) ){
-				self::setError( $dbdriver->error() );
-			}
+			self::setPassword( $user, $pass, $expiredays );
 		}
 	}
 
@@ -135,20 +136,13 @@ class DBUser extends DBBase
 				require_once BASEDIR.'/server/bizclasses/BizMessage.class.php';
 				BizMessage::deleteMessagesForUser( $id );
 
-				$where = '`id` = ?';
-				$params = array( $id );
-				self::deleteRows( self::TABLENAME, $where, $params );
-
-				// cascading delete usrgrp
-				self::deleteUsrgrpByUserId( $id );
-
 				// cascading delete locks (on name, not id!)
 				require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 				DBObjectLock::deleteLocksByUser( $user );
 
-				// cascading delete tickets (on name, not id!)
-				require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-				DBTicket::DbPurgeTicketsByUser( $user );
+				require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+				$bizTicket = new BizTicket();
+				$bizTicket->deleteTicketsAndAffiliatedStructuresByUser( $user );
 
 				// cascading delete settings (on name, not id!)
 				require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
@@ -156,6 +150,14 @@ class DBUser extends DBBase
 
 				// cascading delete routing(on name)
 				self::deleteRows( 'routing', '`routeto` = ?', array( $user ) );
+
+				// Cascading delete on users by user groups.
+				self::deleteUsrgrpByUserId( $id );
+
+				// Lastly delete the user from the users table.
+				$where = '`id` = ?';
+				$params = array( $id );
+				self::deleteRows( self::TABLENAME, $where, $params );
 			}
 		}
 	}
@@ -166,6 +168,7 @@ class DBUser extends DBBase
 	 *
 	 * @param string $userId
 	 * @return array|boolean Array of UserGroups or false on error.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function getMemberships( $userId )
 	{
@@ -185,8 +188,8 @@ class DBUser extends DBBase
 		$dbx = $dbdriver->tablename('usrgrp');
 
 		$sql = 'SELECT x.`id` as `ix`, g.`id`, g.`name`, g.`descr`, g.`externalid` ';
-		$sql .= "FROM $dbg g, $dbx x WHERE x.`usrid` = $userId AND x.`grpid` = g.`id` ORDER BY g.`name`";
-		$sth = $dbdriver->query($sql);
+		$sql .= "FROM $dbg g, $dbx x WHERE x.`usrid` = ? AND x.`grpid` = g.`id` ORDER BY g.`name`";
+		$sth = $dbdriver->query($sql, array( intval( $userId ) ) );
 
 		if (!$sth) {
 			self::setError( $dbdriver->error() );
@@ -211,6 +214,7 @@ class DBUser extends DBBase
 	 * @param int $userId
 	 * @param array $groupsToDelete
 	 * @param array $groupsToAdd
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function resetMemberships( $userId, $groupsToDelete, $groupsToAdd )
 	{
@@ -227,14 +231,16 @@ class DBUser extends DBBase
 		// Remove given memberships
 		if( !is_null($groupsToDelete) && is_array($groupsToDelete) && sizeof($groupsToDelete)>0 ) {
 			$or = '';
-			$sql = "DELETE FROM $dbx WHERE `usrid` = $userId AND (";
+			$sql = "DELETE FROM $dbx WHERE `usrid` = ? AND (";
+			$params = array( intval( $userId ) );
 			foreach( $groupsToDelete as $groupId ) {
-				$sql .= " $or `grpid` = $groupId ";
+				$sql .= " $or `grpid` = ? ";
+				$params[] = intval( $groupId );
 				$or = 'OR';
 			}
 			$sql .= ')';
 
-			$sth = $dbdriver->query($sql);
+			$sth = $dbdriver->query( $sql, $params );
 			if (!$sth) {
 				self::setError( $dbdriver->error() );
 				return;
@@ -258,70 +264,179 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * Returns users assigned to given publication and/or issue. <br>
-	 * * Note that null must be given when overrulepub is disabled for that issue !
+	 * Returns users authorized for a given publication or overrule brand issue.
 	 *
-	 * @param string $publ  publication id (null implies all users for all publications)
-	 * @param string $issue issue id (null* implies all users for given publication)
-	 * @param string $sortBy sorting column either by user or fullname, default sort by fullname column
+	 * If $issueId is set this issue has to be an overrule brand issue.
+	 *
+	 * @param int $publicationId  publication id (null implies all users for all publications)
+	 * @param int $issueId issueId id (null implies all users for given publication)
+	 * @param string $sortBy sorting column either by 'user' or 'fullname', default sort by 'fullname' column
 	 * @param boolean $activeOnly Only return active users (true) or all users (activated and deactivated)
-	 * @return array of smart_user db rows.
+	 * @return array|null db user rows or null in case of a database error
+	 * @throws BizException
 	 */
-	public static function getUsers( $publ = null, $issue = null, $sortBy = 'fullname', $activeOnly = false )
+	public static function getUsers( $publicationId = null, $issueId = null, $sortBy = 'fullname', $activeOnly = false )
 	{
 		self::clearError();
 		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename('users');
 		$params = array();
+		$activeOnlyWhere = $activeOnly ? '( u.`disable` != ? OR u.`disable` IS NULL )' : '';
 
-		if ($publ)
-		{
-			$dbx = $dbdriver->tablename('usrgrp');
-			$dba = $dbdriver->tablename('authorizations');
-			if( !$issue ) { $issue = 0; }
+		if ($publicationId) {
+			if( !$issueId ) { $issueId = 0; }
 			// beware: admin rights do NOT count
-
-			$sql = 	"SELECT DISTINCT u.* FROM $db u, $dbx x "
-				. 	"WHERE u.`id` = x.`usrid` AND x.`grpid` IN ( "
-				. 		"SELECT a.`grpid` FROM $dba a WHERE a.`publication` = ? AND a.`issue` = ? "
-				. 	") ";
-			$params[] = $publ;
-			$params[] = $issue;
-			$keyword = 'AND';
+			$sql = self::makeSelectStatementForAuthorizedUsers( array( $publicationId ), array( $issueId ));
+			if( $activeOnly ) {
+				$sql .= "AND {$activeOnlyWhere} ";
+				$params[] = 'on';
+			}
 		} else {
-			$sql = "SELECT * FROM $db u ";
-			$keyword = 'WHERE';
+			$db = $dbdriver->tablename('users');
+			$sql = "SELECT * ".
+					 "FROM {$db} u ";
+			if( $activeOnly ) {
+				$sql .= "WHERE {$activeOnlyWhere} ";
+				$params[] = 'on';
+			}
 		}
-		if ( $activeOnly ) {
-			$sql .= "$keyword ( u.`disable` != ? OR u.`disable` IS NULL ) "; // Oracle empty string is equal to NULL
-			$params[] = 'on';
-		}
-		$sql .= "ORDER BY " . self::toColname( 'u.'. $sortBy );
+		$sql .= "ORDER BY ".self::toColname( 'u.'.$sortBy );
 
+		return self::queryUsersAndRepairTrackChangesColor( $sql, $params );
+	}
+
+	/**
+	 * Returns users that are authorized for one of the passed in brands.
+	 *
+	 * @since 10.1.5
+	 * @param int[] $brandIds
+	 * @return array|null db user rows or null in case of a database error
+	 * @throws BizException
+	 */
+	static public function getAuthorizedUsersForBrands( array $brandIds )
+	{
+		$result = array();
+		if( $brandIds ) {
+			$sql = self::makeSelectStatementForAuthorizedUsers( $brandIds, array( 0 ) );
+			$result = self::queryUsersAndRepairTrackChangesColor( $sql );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Returns users that are authorized for one of the passed in overrule brand issues.
+	 *
+	 * @since 10.1.5
+	 * @param int[] $overruleBrandIssueIds
+	 * @return array|null db user rows or null in case of a database error
+	 * @throws BizException
+	 */
+	static public function getAuthorizedUsersForOverruleBrandIssues( array $overruleBrandIssueIds )
+	{
+		$result = array();
+		if( $overruleBrandIssueIds ) {
+			$sql = self::makeSelectStatementForAuthorizedUsers( array(), $overruleBrandIssueIds );
+			$result = self::queryUsersAndRepairTrackChangesColor( $sql );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Returns users rows based on the provided sql. If the 'trackchangescolor' is not set the default is added.
+	 *
+	 * No checking on the sql is done. The $sql is executed as is.
+	 *
+	 * @param string $sql
+	 * @param array $params Optional parameters that will be substituted in the sql.
+	 * @return array|null DB user rows or null in case of error.
+	 * @throws BizException
+	 */
+	static private function queryUsersAndRepairTrackChangesColor( $sql, $params = array() )
+	{
+		$result = array();
+		self::clearError();
+		$dbdriver = DBDriverFactory::gen();
 
 		$sth = $dbdriver->query( $sql, $params );
-		if (!$sth) {
+		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 			return null;
 		}
 
-		// fetch into array
-		$ret = array();
-		while( ($row = $dbdriver->fetch($sth)) ) {
-			// Fix for trackchangecolor, put a default one when there's no data
-			if( !$row['trackchangescolor'] ) {
-				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
-			}
-			$ret[] = $row;
+		$rows = self::fetchResults( $sth );
+		if( $rows ) foreach( $rows as $row ) {
+			$result[] = self::repairTrackChangesColor( $row );
 		}
-		return $ret;
+
+		return $result;
 	}
 
 	/**
-	 * Returns the brands and the overrule brand issues for which the user has an authorization profile.
+	 * Composes a sql-statement to query users that are authorised for certain brands or overrule brand issues.
+	 *
+	 * To query for brands pass in the brand Ids and pass one issue Id that is set to zero ( $iissueIds = array( 0 ) ).
+	 * The reason is that the issue Id for authorizations on brand level is always zero ( 0 ).
+	 * To query for overrule brand issues pass in the issue ids and leave brand ids empty ( $pubIds = array()).
+	 * Alternatively you can pass in one brand Id and one issue Id to get the authorization of the overrule brand issue
+	 * that resides in the specified brand. E.g. $pubIds = array( 1 ) and $issueIds = array( 5 ) gives the authorizations
+	 * for issue 5 in brand 1. If issue 5 doesn't belong to brand 1 an empty result set will be returned if the sql is
+	 * executed.
+	 *
+	 * @param int[] $pubIds
+	 * @param int[] $issueIds
+	 * @return string SQL-statement
+	 * @throws BizException
+	 */
+	static private function makeSelectStatementForAuthorizedUsers( array $pubIds, array $issueIds )
+	{
+		$wheres = array();
+		if( $pubIds ) {
+			$wheres[] = self::addIntArrayToWhereClause( 'a.publication', $pubIds, false );
+		}
+		if( $issueIds ) {
+			$wheres[] = self::addIntArrayToWhereClause( 'a.issue', $issueIds, false );
+		}
+
+		$where = $wheres ? "WHERE " . implode( "AND ", $wheres ) : "";
+
+		$dbdriver = DBDriverFactory::gen();
+		$db = $dbdriver->tablename('users');
+		$dbx = $dbdriver->tablename('usrgrp');
+		$dba = $dbdriver->tablename('authorizations');
+
+		$sql = "SELECT DISTINCT u.* ".
+			"FROM {$db} u, {$dbx} x ".
+			"WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
+			"( SELECT a.`grpid` ".
+			"FROM {$dba} a ".
+			"{$where} ) ";
+
+		return $sql;
+	}
+
+	/**
+	 * Sets the 'trackchangescolor' to the default user color if no 'trackchangescolor' is set.
+	 *
+	 * @since 10.1.5
+	 * @param array $dbUserRow db user row
+	 * @return array db user row.
+	 */
+	static private function repairTrackChangesColor( array $dbUserRow )
+	{
+		if( !$dbUserRow['trackchangescolor'] ) {
+			$dbUserRow['trackchangescolor'] = DEFAULT_USER_COLOR;
+		}
+
+		return $dbUserRow;
+	}
+
+	/**
+	 * Returns the unique brands and the unique overrule brand issues for which the user has an authorization profile.
 	 *
 	 * @param int $userId
 	 * @return array Brands, overrule brand issues for which the user is authorized.
+	 * @throws BizException
 	 */
 	public static function getBrandIssueAuthorizationForUser( $userId )
 	{
@@ -330,11 +445,12 @@ class DBUser extends DBBase
 		$usergrp = $dbDriver->tablename('usrgrp');
 		$authorization = $dbDriver->tablename('authorizations');
 
-		$sql =  'SELECT a.`publication`, a.`issue` '.
+		$sql = 'SELECT a.`publication`, a.`issue` '.
 			'FROM '.$authorization.' a '.
 			'INNER JOIN '.$usergrp.' usrgrp ON ( a.`grpid` = usrgrp.`grpid` ) '.
 			'INNER JOIN '.$users.' u ON ( u.`id` = usrgrp.`usrid` ) '.
-			'WHERE u.`id` = ? ';
+			'WHERE u.`id` = ? '.
+			'GROUP BY a.`publication`, a.`issue` ';
 
 		$params = array( $userId );
 		$sth = $dbDriver->query( $sql, $params );
@@ -351,6 +467,7 @@ class DBUser extends DBBase
 	 * @param string  $issue issue id, set to null returns groups assigned to given publication (null MUST be given if overrule option is NOT set !)
 	 * @param boolean $onlyrouting only include groups you can send to, else include all (default)
 	 * @return array of smart_group db rows
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function getUserGroups( $publ = null, $issue = null, $onlyrouting = false )
 	{
@@ -467,37 +584,32 @@ class DBUser extends DBBase
 	}
 
 	/*
-	 * Remove the given user group from the database. <br>
+	 * Remove a given user group from the database.
 	 *
-	 * @param string $id
+	 * @param integer $id
 	 */
 	public static function deleteUserGroup( $id )
 	{
-		if( !$id ) {
-			self::setError( BizResources::localize( 'ERR_ARGUMENT' ) );
-		} else {
-			// first get user group name (needed later)
-			$where = '`id` = ?';
-			$params = array( $id );
-			$row = self::getRow( 'groups', $where, array( 'name' ), $params );
+		// first get user group name (needed later)
+		$where = '`id` = ?';
+		$params = array( intval( $id ) );
+		$row = self::getRow( 'groups', $where, array( 'name' ), $params );
 
-			if( $row ) {
-				$userGroupName = $row['name'];
+		if( $row ) {
+			$userGroupName = $row['name'];
 
-				self::deleteRows( 'groups', '`id` = ?', $params );						// Delete groups
-				self::deleteRows( 'usrgrp', '`grpid` = ?', $params ); 					// cascading delete usrgrp
-				self::deleteRows( 'authorizations', '`grpid` = ?', $params ); 			// cascading delete authorizations
-				self::deleteRows( 'publadmin', '`grpid` = ?', $params ); 				// cascading delete publadmin
-				self::deleteRows( 'publobjects', '`grpid` = ?', $params );				// cascading delete publobjets
-				self::deleteRows( 'routing', '`routeto` = ?', array( $userGroupName) ); // cascading delete routing
-			}
+			self::deleteRows( 'groups', '`id` = ?', $params );						// Delete groups
+			self::deleteRows( 'usrgrp', '`grpid` = ?', $params ); 					// cascading delete usrgrp
+			self::deleteRows( 'authorizations', '`grpid` = ?', $params ); 			// cascading delete authorizations
+			self::deleteRows( 'publadmin', '`grpid` = ?', $params ); 				// cascading delete publadmin
+			self::deleteRows( 'publobjects', '`grpid` = ?', $params );				// cascading delete publobjets
+			self::deleteRows( 'routing', '`routeto` = ?', array( $userGroupName) ); // cascading delete routing
 		}
-
 	}
 
 	public static function listPublAuthorizations($publid, $fieldnames = '*')
 	{
-		return self::listRows('authorizations', 'id', 'grpid', "`publication` = '$publid' ", $fieldnames);
+		return self::listRows('authorizations', 'id', 'grpid', "`publication` = ? ", $fieldnames, array( intval( $publid ) ) );
 	}
 
 	public static function listIssueAuthorizations($issueid, $fieldnames = '*', $nopubldefs = false)
@@ -505,7 +617,7 @@ class DBUser extends DBBase
 		$issue = DBIssue::getIssue($issueid);
 		if ($issue['overrulepub'] === true)
 		{
-			return self::listRows('authorizations', 'id', 'grpid', "`issue` = '$issueid' ");
+			return self::listRows('authorizations', 'id', 'grpid', "`issue` = ?", '*', array( intval( $issueid ) ) );
 		}
 		else
 		{
@@ -525,6 +637,7 @@ class DBUser extends DBBase
 	 * @param boolean $adminOnly Pass TRUE for admin users, or FALSE for non-admin users, or NULL for all users.
 	 * @param bool $isAdmin To determine if the user is a System admin.
 	 * @return array of AdmUser objects. Returns empty array when none found, or NULL on SQL error.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function listUsersObj( $grpId, $adminOnly = null, $isAdmin = null )
 	{
@@ -572,14 +685,32 @@ class DBUser extends DBBase
 	}
 
 	/**
+	 * Returns the count of users who are member of a given user group.
+	 *
+	 * @since 10.2.0
+	 * @param integer $groupId
+	 * @return integer User count.
+	 */
+	public static function countUsersInGroup( $groupId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$dbu = $dbDriver->tablename('usrgrp');
+		$sql =  "SELECT COUNT(*) AS `c` FROM {$dbu} WHERE `grpid` = ? ";
+		$params = array( intval( $groupId ) );
+		$sth = self::query( $sql, $params );
+		$row = self::fetch( $sth );
+		return $row['c'];
+	}
+
+	/**
 	 *  Gets exactly one user object with specific user id $usrId
 	 *  @param string $usrId Id of the user
 	 *  @param bool $isAdmin To determine if the user is a System admin
-	 *  @return object of publication if succeeded
+	 *  @return AdmUser|null User object or null when not found.
 	 */
 	public static function getUserObj( $usrId, $isAdmin = null )
 	{
-		$usrId = intval($usrId); //Convert to integer
+		$usrId = intval( $usrId );
 		self::clearError();
 		$user = null;
 		$params = array();
@@ -587,12 +718,8 @@ class DBUser extends DBBase
 		$params[] = $usrId;
 		$row = self::getRow( self::TABLENAME, $where, '*', $params );
 		if( $row ) {
-			// Fix for trackchangecolor, put a default one when there's no data
-			if( !$row['trackchangescolor'] ) {
-				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
-			}
-
-			$user = self::rowToUserObj($row, $isAdmin);
+			$row = self::repairTrackChangesColor( $row );
+			$user = self::rowToUserObj( $row, $isAdmin );
 		}
 		return $user;
 	}
@@ -603,6 +730,7 @@ class DBUser extends DBBase
 	 * @param string $usrId Id of the user used to filter groups this user is member of. When NULL, all groups are returned.
 	 * @param boolean $adminOnly Pass TRUE for admin groups, or FALSE for non-admin groups, or NULL for all groups.
 	 * @return array of AdmUserGroup objects. Returns empty array when none found or NULL on SQL error.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function listUserGroupsObj( $usrId, $adminOnly = null )
 	{
@@ -644,54 +772,56 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 *  Gets exactly one user object with specific user id $usrId
-	 *  @param string $grpId Id of the usergroup
-	 *  @return object of usergroup if succeeded, null if no record returned
+	 * Gets exactly one user group object with specific user group id $grpId.
+	 *
+	 * @param int $grpId Id of the user group.
+	 * @return AdmUserGroup, null if no record is found.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function getUserGroupObj( $grpId )
 	{
-		$grpId = intval($grpId); //Convert to integer
-
+		$grpId = intval( $grpId );
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();
-		$dbg = $dbdriver->tablename('groups');
-		$usergroup = null;
+		$dbDriver = DBDriverFactory::gen();
+		$dbg = $dbDriver->tablename( 'groups' );
+		$userGroup = null;
 
-		$sql = "SELECT * FROM $dbg where `id` = ?";
-		$params = array($grpId);
-		$sth = $dbdriver->query($sql, $params);
+		$sql = "SELECT * FROM $dbg where `id` = ? ";
+		$params = array( $grpId );
+		$sth = $dbDriver->query( $sql, $params );
 
-		if (!$sth) {
-			self::setError( $dbdriver->error() );
+		if( !$sth ) {
+			self::setError( $dbDriver->error() );
 			return null;
 		}
 
-		while( ($row = $dbdriver->fetch($sth)) ) {
-			$usergroup = self::rowToGroupObj($row);
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$userGroup = self::rowToGroupObj( $row );
 		}
 
-		return $usergroup;
+		return $userGroup;
 	}
 
 	/**
-	 *  Create new user object
+	 *  Create new user object.
 	 *
-	 *  @param AdmUser $user new user
-	 *  @param bool $isAdmin System admin indicator
-	 *  @return new created User object - throws BizException on failure
+	 * @param AdmUser $user new user.
+	 * @param bool $isAdmin System admin indicator.
+	 * @return AdmUser|null Created user, or null when user is not created.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function createUserObj( $user, $isAdmin = null )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();
+		$dbDriver = DBDriverFactory::gen();
 		$values = self::objToUserRow( $user );
 
-		self::insertRow('users', $values );
-		if(self::hasError()){ // insertion ok
+		self::insertRow( self::TABLENAME, $values );
+		if( self::hasError() ) {
 			return null;
 		}
-		$newid = $dbdriver->newid('users', true);
-		if( is_null($newid) ){
+		$newId = $dbDriver->newid( 'users', true );
+		if( is_null( $newId ) ) {
 			return null;
 		}
 		// save password
@@ -701,83 +831,88 @@ class DBUser extends DBBase
 			$user->Password = $user->EncryptedPassword; // Set the password as encrypted password
 		}
 		if( !self::setPassword( $user->Name, $user->Password, $user->PasswordExpired ) ) {
-			self::setError( $dbdriver->error() );
 			return null;
 		}
-		return DBUser::getUserObj($newid, $isAdmin);
+
+		return DBUser::getUserObj( $newId, $isAdmin );
 	}
 
 	/**
-	 *  Create new usergroup object
+	 *  Create new user group object.
 	 *
-	 *  @param $usergroup new usergroup
-	 *  @return new created UserGroup object - throws BizException on failure
+	 * @param AdmUserGroup $userGroup new user group.
+	 * @return AdmUserGroup|null Created group or null when group is not created.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
-	public static function createUserGroupObj( $usergroup )
+	public static function createUserGroupObj( $userGroup )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();
-		$newusergroup = null;
+		$dbDriver = DBDriverFactory::gen();
+		$newUserGroup = null;
 
-		$values = self::objToGroupRow( $usergroup );
+		$values = self::objToGroupRow( $userGroup );
 
-		self::insertRow('groups', $values );
-		if(!self::hasError()){ // insertion ok
-			$newid = $dbdriver->newid('groups', true);
-			if( !is_null($newid) ){
-				$newusergroup = DBUser::getUserGroupObj($newid);
+		self::insertRow( 'groups', $values );
+		if( !self::hasError() ) {
+			$newId = $dbDriver->newid( 'groups', true );
+			if( !is_null( $newId ) ) {
+				$newUserGroup = DBUser::getUserGroupObj( $newId );
 			}
 		}
-		return $newusergroup;
+		return $newUserGroup;
 	}
 
 	/**
-	 *  Modify users object
+	 * Modify users objects.
 	 *
-	 *  @param $users array of values to modify existing users
-	 *  @return array of modified User objects - throws BizException on failure
+	 * @param AdmUser[] $users Users objects to be modified.
+	 * @return AdmUser[] Modified user objects.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured or
+	 * when the affected objects that need to be re-indexed ( due to user modification ) fails.
 	 */
 	public static function modifyUsersObj( $users )
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$modifyusers = array();
+		$modifyUsers = array();
 
-		foreach($users as $user) {
-			// get old user for later
-			$oldUser = self::getUserById($user->Id);
+		foreach( $users as $user ) {
+			$oldUser = self::getUserById( $user->Id );
+			if( !$oldUser ) {
+				LogHandler::Log( __CLASS__, 'ERROR', "Cannot modify user with Id = {$user->Id}. The user does not exist." );
+				continue;
+			}
 			$values = self::objToUserRow( $user );
+			$result = self::updateRow( self::TABLENAME, $values, " `id` = ? ", array( $user->Id ) );
 
-			$result = self::updateRow('users', $values, " `id` = '$user->Id'");
-
-			if( $result === true){
-				if(!is_null($user->Password)){
-					// save password
-					$user->Password = ww_crypt( $user->Password, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
+			if( $result === true ) {
+				if( !is_null( $user->Password ) ) {
+					// Save password, EN-20845 - Always store the password with SHA-512 hash type.
+					$user->Password = ww_crypt( $user->Password, null, true );
 					if( !self::setPassword( $user->Name, $user->Password ) ) {
-						self::setError( $dbdriver->error() );
 						return null;
 					}
 				}
-				// if username has been changed update linked tables too
-				if (! is_null($user->Name) && $user->Name != $oldUser['user']){
-					self::updateUserNameLinks($oldUser['user'], $user->Name);
+				// Update linked tables.
+				if( !is_null( $user->Name ) && $user->Name != $oldUser['user'] ) {
+					self::updateUserNameLinks( $oldUser['user'], $user->Name );
 				}
-				// Update object index when fullname is change
+				// Update linked objects when 'fullname' has changed.
 				if( $user->FullName != $oldUser['fullname'] ) {
 					self::updateUserNameLinksObjectsIndex( $user->Name );
 				}
-				$modifyuser = DBUser::getUserObj($user->Id);
-				$modifyusers[] = $modifyuser;
+				$modifyUser = DBUser::getUserObj( $user->Id );
+				$modifyUsers[] = $modifyUser;
 			}
 		}
-		return $modifyusers;
+		return $modifyUsers;
 	}
 
 	/**
-	 *  Modify usergroup object
+	 * Modify usergroup object
 	 *
-	 *  @param $groups array of values to modify existing user groups
-	 *  @return array of modified UserGroup objects - throws BizException on failure
+	 * @param $groups array of values to modify existing user groups
+	 * @return array of modified UserGroup objects - throws BizException on failure
+	 * @throws BizException  when DBDriverFactory fails to create a DB driver due to invalid Database type configured or
+	 * when the affected objects that need to be re-indexed ( due to user group modification ) fails
 	 */
 	public static function modifyUserGroupsObj( $groups )
 	{
@@ -786,7 +921,7 @@ class DBUser extends DBBase
 			$oldUserGroup = DBUser::getUserGroupObj( $usergroup->Id );
 			$values = self::objToGroupRow( $usergroup );
 
-			$result = self::updateRow( 'groups', $values, " `id` = '$usergroup->Id'" );
+			$result = self::updateRow( 'groups', $values, "`id` = ?", array( intval( $usergroup->Id ) ) );
 
 			if( $result === true ) {
 				if( $usergroup->Name != $oldUserGroup->Name ) {
@@ -839,8 +974,8 @@ class DBUser extends DBBase
 	 */
 	public static function removeUsersFromGroup( $usrId, $grpId )
 	{
-		$where = 'usrid = ' . $usrId . ' AND grpid = ' . $grpId;
-		self::deleteRows('usrgrp', $where);
+		$where = 'usrid = ? AND grpid = ?';
+		self::deleteRows('usrgrp', $where, array( intval( $usrId), intval( $grpId) ) );
 	}
 
 	/*
@@ -883,9 +1018,9 @@ class DBUser extends DBBase
 	 */
 	public static function removeGroupsFromUser( $grpId, $usrId )
 	{
-		$where = 'usrid = ' . $usrId . ' AND grpid = ' . $grpId;
+		$where = 'usrid = ? AND grpid = ? ';
 
-		self::deleteRows('usrgrp', $where);
+		self::deleteRows('usrgrp', $where, array( intval( $usrId), intval( $grpId) ) );
 	}
 
 
@@ -958,6 +1093,7 @@ class DBUser extends DBBase
 	 *
 	 * @param integer $usrId User DB id.
 	 * @return array of AdmUserGroup objects.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	static public function getNonMemberGroupsObj( $usrId )
 	{
@@ -984,6 +1120,7 @@ class DBUser extends DBBase
 	 *
 	 * @param integer $grpId User group DB id.
 	 * @return array of AdmUser objects.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	static public function getNonMemberUsersObj( $grpId )
 	{
@@ -1004,9 +1141,9 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 *  Converts row value to user object
-	 *  Ir return an object with the mapping value for row to object
-	 *  @param array $row row contains key values
+	 *  Converts db row into a user object.
+	 *
+	 *  @param array $row DB row contains key values.
 	 *  @param bool $isAdmin To determine if the user is a System admin
 	 *  @return AdmUser
 	 */
@@ -1030,6 +1167,7 @@ class DBUser extends DBBase
 		$user->Organization			= $row['organization'];
 		$user->Location				= $row['location'];
 		$user->EncryptedPassword	= $isAdmin ? $row['pass'] : null;
+		/** @noinspection PhpUndefinedFieldInspection */
 		$user->ExternalId			= $row['externalid'];
 		$user->ImportOnLogon        = ($row['importonlogon'] == 'on' ? true : false);
 		return $user;
@@ -1085,35 +1223,30 @@ class DBUser extends DBBase
 	static public function getLanguage($username)
 	{
 		$dbdriver = DBDriverFactory::gen();
-		$username = $dbdriver->toDBString($username);
 		$db = $dbdriver->tablename('users');
 
-		$sql = "SELECT `language` FROM $db WHERE `user` = '$username'";
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT `language` FROM $db WHERE `user` = ? ";
+		$sth = $dbdriver->query($sql, array( strval( $username ) ));
 		$row = $dbdriver->fetch($sth);
 		return $row['language'];
 	}
 
 	/**
-	 * Checks if pass in user is known as username or full name.
-	 * If so, and user is not disabled the user DB row is returned
-	 * BizException is thrown in case of error
+	 * Checks if the passed user name is known as short user name or full name.
+	 * If so, and user is not disabled, the user DB row is returned
 	 *
-	 * @param string $inuser user name, modified to shortname if it turns out to be long name
+	 * @param string $userName user name, modified to short name if it turns out to be the full name.
+	 * @returns array DB row.
 	 * @throws BizException
-	 * @returns the row found, exception in case of error
 	 */
-	static public function checkUser( &$inuser )
+	static public function checkUser( &$userName )
 	{
-		require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename('users');
+		$db = $dbDriver->tablename( self::TABLENAME );
 
-		$user = $inuser;
-		$user = $dbDriver->toDBString($user);
-
-		$sql = "SELECT * FROM $db WHERE `user`='$user' OR `fullname`='$user'";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT * FROM $db WHERE `user` = ? OR `fullname`= ? ";
+		$params = array( strval( $userName ), strval( $userName ) );
+		$sth = $dbDriver->query($sql, $params);
 		if (!$sth) {
 			throw new BizException( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE', 'Client', '' );
 		}
@@ -1121,7 +1254,7 @@ class DBUser extends DBBase
 		if (!$row) {
 			throw new BizException( 'ERR_WRONGPASS', 'Client', '' );
 		}
-		$inuser = $row['user'];		// normalize
+		$userName = $row['user'];
 
 		if (trim($row['disable'])) {
 			throw new BizException( 'ERR_USERDISABLED', 'Client', '' );
@@ -1131,21 +1264,18 @@ class DBUser extends DBBase
 
 	static public function setPassword( $user, $pass, $expiredays=null )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename('users');
-
-		$user = $dbDriver->toDBString($user);
-		$pass = $dbDriver->toDBString($pass);
-
-		if(!empty($expiredays))
-			$expire = date('Y-m-d\TH:i:s', time()+$expiredays*3600*24 );
-		else
+		if( !empty( $expiredays ) ) {
+			$expire = date( 'Y-m-d\TH:i:s', time() + $expiredays * 3600 * 24 );
+		} else {
 			$expire = '';
-
-		$sql = "UPDATE $db SET `pass`='$pass', `expirepassdate` = '$expire' WHERE `user`='$user'";
-		$sth = $dbDriver->query($sql);
-
-		return $sth;
+		}
+		$values = array(
+			'pass' => strval( $pass ),
+			'expirepassdate' => strval( $expire )
+		);
+		$where = '`user` = ?';
+		$params = array( strval( $user ) );
+		return self::updateRow( self::TABLENAME, $values, $where, $params );
 	}
 
 	static public function setUserLanguage( $user, $lang )
@@ -1153,11 +1283,9 @@ class DBUser extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename('users');
 
-		$user = $dbDriver->toDBString($user);
-		$lang = $dbDriver->toDBString($lang);
-
-		$sql = "UPDATE $db SET `language`='$lang' WHERE `user`='$user'";
-		$sth = $dbDriver->query($sql);
+		$sql = "UPDATE $db SET `language`= ? WHERE `user` = ? ";
+		$params = array( strval( $lang ), strval( $user ) );
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
@@ -1169,39 +1297,31 @@ class DBUser extends DBBase
 	 */
 	static public function getUser( $user )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename( 'users' );
+		$where = "`user`= ? OR `fullname`= ?";
+		$params = array( strval( $user), strval( $user ) );
+		$row = self::getRow( self::TABLENAME, $where, '*', $params );
 
-		$user = $dbDriver->toDBString( $user );
-
-		$sql = "SELECT * FROM $db WHERE `user`='$user' OR `fullname`='$user' ";
-		$sth = $dbDriver->query( $sql );
-		if ( !$sth )
-			return null;
-		$row = $dbDriver->fetch( $sth );
-
-		// Fix for trackchangecolor, put a default one when there's no data
 		if ( $row ) { //User info found.
-			if ( !$row['trackchangescolor'] ) {
-				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
-			}
+			$row = self::repairTrackChangesColor( $row );
 		}
 		return $row;
 	}
 
 	/**
-	 * Gets user record for specied user id.
+	 * Get db record for specified user id.
 	 *
 	 * @param integer $userId user id
-	 * @return array containing user atributes and values
+	 * @return array|null DB record or null if not found.
 	 */
-	static public function getUserById($userId)
+	static public function getUserById( $userId )
 	{
 		$where = '`id` = ?';
-		$row = self::getRow(self::TABLENAME, $where, '*', array($userId));
-		// Fix for trackchangecolor, put a default one when there's no data
-		if( !$row['trackchangescolor'] ) {
-			$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
+		$row = self::getRow( self::TABLENAME, $where, '*', array( intval( $userId ) ) );
+		if( $row ) {
+			// Fix for trackchangecolor, put a default one when there's no color set.
+			if( !$row['trackchangescolor'] ) {
+				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
+			}
 		}
 		return $row;
 	}
@@ -1213,11 +1333,9 @@ class DBUser extends DBBase
 		$db2 = $dbDriver->tablename("usrgrp");
 		$db3 = $dbDriver->tablename("groups");
 
-		$user = $dbDriver->toDBString($user);
+		$sql = "SELECT COUNT(*) as `c` FROM $db1 u, $db2 x, $db3 g WHERE u.`user` = ? AND u.`id` = x.`usrid` AND g.`id` = x.`grpid` AND g.`admin` != '' ";
 
-		$sql = "SELECT COUNT(*) as `c` FROM $db1 u, $db2 x, $db3 g WHERE u.`user` = '$user' AND u.`id` = x.`usrid` AND g.`id` = x.`grpid` AND g.`admin` != '' ";
-
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, array( strval( $user ) ));
 		if (!$sth) return false;
 		$row = $dbDriver->fetch($sth);
 		if (!$row) return false;
@@ -1232,8 +1350,8 @@ class DBUser extends DBBase
 		$dbu = $dbDriver->tablename("users");
 		$dbx = $dbDriver->tablename("usrgrp");
 
-		$sql = "SELECT u.* FROM $dbu u, $dbx x, $dbg g WHERE x.`usrid` = u.`id` AND x.`grpid` = g.`id` AND g.`name` = '$grpname'";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT u.* FROM $dbu u, $dbx x, $dbg g WHERE x.`usrid` = u.`id` AND x.`grpid` = g.`id` AND g.`name` = ? ";
+		$sth = $dbDriver->query( $sql, array( strval( $grpname ) ));
 
 		return $sth;
 	}
@@ -1248,6 +1366,7 @@ class DBUser extends DBBase
 	 * @param integer|string $type Optional: Object type
 	 * @param integer $state Optional: Status id
 	 * @return array Authorization records of the user.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	static public function getRights( $user, $pubIds, $issue = 0, $sect = 0, $type = 0, $state = 0 )
 	{
@@ -1258,33 +1377,37 @@ class DBUser extends DBBase
 		$db4 = $dbDriver->tablename('states');
 		$db5 = $dbDriver->tablename('profiles');
 
-		$user = $dbDriver->toDBString($user);
-
 		$sql =  "SELECT DISTINCT a.*, s.`type`, p.`profile` as `profilename` ".
 			"FROM $db1 u, $db2 x, $db3 a ".
 			"LEFT JOIN $db4 s ON s.`id` = a.`state` ".
 			"INNER JOIN $db5 p ON p.`id` = a.`profile` ".
-			"WHERE u.`user` = '$user' AND u.`id` = x.`usrid` AND x.`grpid` = a.`grpid` ";
+			"WHERE u.`user` = ? AND u.`id` = x.`usrid` AND x.`grpid` = a.`grpid` ";
+		$params = array( strval( $user ) );
 		if( $pubIds ) {
 			if( is_array($pubIds) ) {
 				$sql .= " AND a.`publication` IN (".implode(',',$pubIds).") ";
 			} else {
-				$sql .= " AND a.`publication` = $pubIds ";
+				$sql .= " AND a.`publication` = ? ";
+				$params[] = intval( $pubIds );
 			}
 		}
 		if( $issue ) {
-			$sql .= " AND (a.`issue` = $issue OR a.`issue` = 0) ";
+			$sql .= " AND (a.`issue` = ? OR a.`issue` = 0) ";
+			$params[] = intval( $issue );
 		}
 		if( $sect ) {
-			$sql .=	" AND (a.`section` = $sect OR a.`section` = 0) ";
+			$sql .=	" AND (a.`section` = ? OR a.`section` = 0) ";
+			$params[] = intval( $sect );
 		}
 		if( $type ) {
-			$sql .=	" AND (s.`type` = '$type' OR s.`type`  =  '' OR s.`type` IS NULL ) ";
+			$sql .=	" AND (s.`type` = ? OR s.`type`  =  '' OR s.`type` IS NULL ) ";
+			$params[] = strval( $type );
 		}
 		if( $state ) {
-			$sql .=	" AND (a.`state` = $state OR a.`state` = 0) ";
+			$sql .=	" AND (a.`state` = ? OR a.`state` = 0) ";
+			$params[] = intval( $state );
 		}
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, $params );
 
 		$result = array();
 		if ( $sth ) {
@@ -1299,18 +1422,18 @@ class DBUser extends DBBase
 	 *
 	 * @param String $usershortname
 	 * @return String Full name of the user
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	static public function getFullName($usershortname)
 	{
-		$dbDriver = DBDriverFactory::gen();
 		self::clearError();
 		$dbdriver = DBDriverFactory::gen();
 		$dbu = $dbdriver->tablename('users');
 		$result = '';
 
 		// Check on name
-		$sql = "SELECT `fullname` FROM $dbu WHERE `user` = '" . $dbDriver->toDBString($usershortname) . "'";
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT `fullname` FROM $dbu WHERE `user` = ? ";
+		$sth = $dbdriver->query($sql, array( strval( $usershortname ) ) );
 		if( !$sth ) {
 			self::setError($dbdriver->error());
 		}
@@ -1329,6 +1452,7 @@ class DBUser extends DBBase
 	 *
 	 * @param string $shortName The short name of the user.
 	 * @return string The full name of the user
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	static public function getCachedUserFullName( $shortName )
 	{
@@ -1378,21 +1502,21 @@ class DBUser extends DBBase
 	 * @param $user
 	 * @param $pubid
 	 * @return boolean true if brand admin else false
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	static public function isPubAdmin($user, $pubid)
 	{
 		$dbDriver = DBDriverFactory::gen();
-		$user = $dbDriver->toDBString($user);
 		$usertable = $dbDriver->tablename('users');
 		$grouptable = $dbDriver->tablename('usrgrp');
 		$publadmintable = $dbDriver->tablename('publadmin');
-		$params = array($user, $pubid);
 
 		$sql  = "SELECT usr.`id` ";
 		$sql .= "FROM $usertable usr ";
 		$sql .= "INNER JOIN $grouptable usrgrp ON (usr.`id` = usrgrp.`usrid`) ";
 		$sql .= "INNER JOIN $publadmintable pad ON (usrgrp.`grpid` = pad.`grpid`) ";
 		$sql .= "WHERE usr.`user` = ? AND pad.`publication` = ? ";
+		$params = array( strval( $user ), intval( $pubid ));
 
 		$sth = $dbDriver->query($sql, $params);
 		$row = $dbDriver->fetch($sth);
@@ -1405,11 +1529,11 @@ class DBUser extends DBBase
 	 * rights.
 	 * @param string $user
 	 * @return array
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	static public function getListBrandsByPubAdmin($user)
 	{
 		$dbDriver = DBDriverFactory::gen();
-		$user = $dbDriver->toDBString($user);
 		$usertable = $dbDriver->tablename('users');
 		$grouptable = $dbDriver->tablename('usrgrp');
 		$publadmintable = $dbDriver->tablename('publadmin');
@@ -1419,7 +1543,7 @@ class DBUser extends DBBase
 		$sql .= "INNER JOIN $grouptable usrgrp ON (usr.`id` = usrgrp.`usrid`) ";
 		$sql .= "INNER JOIN $publadmintable pad ON (usrgrp.`grpid` = pad.`grpid`) ";
 		$sql .= "WHERE usr.`user` = ?";
-		$params = array($user);
+		$params = array( strval( $user ) );
 
 		$sth = $dbDriver->query($sql, $params);
 		$rows = self::fetchResults($sth);
@@ -1430,15 +1554,20 @@ class DBUser extends DBBase
 	/**
 	 * Returns array of AdmUser objects matching where clause
 	 *
-	 * @param string $where
-	 * @param array $params
+	 * E.g: $orderBy = array( 'code' => true, 'id' => true );
+	 * Keys: DB fields; Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
+	 * 
+	 * @param string $where The where clause to query from the smart_users table.
+	 * @param array $params Contains list of parameters to be substituted for the placeholders in the where clause.
+	 * @param array|null $orderBy List of fields to order. See function header for more details.
 	 * @throws BizException
 	 * @return AdmUser[]
 	 */
-	public static function getUsersByWhere($where, $params = array())
+	public static function getUsersByWhere($where, $params = array(), $orderBy = null )
 	{
 		$users = array();
-		$rows = self::listRows('users', 'id', null, $where, '*', $params);
+		$rows = self::listRows( self::TABLENAME, 'id', null, $where, '*', $params, $orderBy );
+
 		if (is_null($rows)){
 			throw new BizException('', '', self::getError(), self::getError());
 		}
@@ -1500,6 +1629,8 @@ class DBUser extends DBBase
 	 * So the short name is stored into the database and the full name is indexed.
 	 *
 	 * @param string $userName
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured or
+	 * when the affected objects that need to be re-indexed ( due to user modification ) fails
 	 */
 	protected static function updateUserNameLinksObjectsIndex( $userName )
 	{
@@ -1523,6 +1654,8 @@ class DBUser extends DBBase
 	 *
 	 * @param string $oldName
 	 * @param string $newName
+	 * @throws BizException  when DBDriverFactory fails to create a DB driver due to invalid Database type configured or
+	 * when the affected objects that need to be re-indexed ( due to user group modification ) fails
 	 */
 	protected static function updateUsergroupNameLinks( $oldName, $newName )
 	{
@@ -1557,6 +1690,7 @@ class DBUser extends DBBase
 	 * @param integer $listRight checked profile feature (right), Listed in Search Results = 1,
 	 * Listed in Publication Overview = 11.
 	 * @return array with Brand/Category/State combinations
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function getListReadAccessBrandLevel($user, $listRight)
 	{
@@ -1594,6 +1728,7 @@ class DBUser extends DBBase
 	 * @param integer $listRight checked profile feature (right), Listed in Search Results = 1,
 	 * Listed in Publication Overview = 11.
 	 * @return array with Issue/Category/State combinations
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function getListReadAccessIssueLevel($user, $listRight)
 	{
@@ -1626,6 +1761,7 @@ class DBUser extends DBBase
 	 *
 	 * @param array $userGroupIds
 	 * @return array Authorization records of the user group.
+	 * @throws BizException when DBDriverFactory fails to create a DB driver due to invalid Database type configured.
 	 */
 	public static function getRightsByUserGroups(array $userGroupIds)
 	{
@@ -1636,7 +1772,8 @@ class DBUser extends DBBase
 			$features =
 				BizAccessFeatureProfiles::getFileAccessProfiles() +
 				BizAccessFeatureProfiles::getAnnotationsAccessProfiles() +
-				BizAccessFeatureProfiles::getWorkflowAccessProfiles();
+				BizAccessFeatureProfiles::getWorkflowAccessProfiles() +
+				BizAccessFeatureProfiles::getServerPluginFeatureAccessLists();
 			$dbDriver = DBDriverFactory::gen();
 			$authorizations = $dbDriver->tablename("authorizations");
 			$profilefeatures = $dbDriver->tablename("profilefeatures");

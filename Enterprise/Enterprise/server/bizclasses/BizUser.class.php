@@ -143,13 +143,11 @@ class BizUser
 	{
 		$usrLang = trim($usrLang);
 		
-		require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
-		$allLanguages = BizResources::getLanguageCodes(); 
+		$allLanguages = BizResources::getLanguageCodes();
 		if ( array_key_exists( $usrLang, $allLanguages ) ) { // user language still valid language
 			return $usrLang;
 		}
 		
-		require_once BASEDIR.'/server/bizclasses/BizSettings.class.php';
 		$compLang = BizSettings::getFeatureValue( 'CompanyLanguage' );
 		if (array_key_exists( $compLang, $allLanguages )) { // company language stil valid
 			return $compLang;
@@ -179,7 +177,7 @@ class BizUser
 	 *
 	 * @param string $userId
 	 * @throws BizException
-	 * @return array of UserGroup
+	 * @return UserGroup[]
 	 */
 	public static function getMemberships( $userId )
 	{
@@ -226,19 +224,40 @@ class BizUser
 	 * Returns the users which have an authorization profile for the same brands or overrule brand issues as the
 	 * specified user.
 	 *
+	 * Authorizations on brand level apply to all non-overrule brand issues in the brand. The issue Id is in that case 0.
+	 * If authorizations are defined on overrule brand issue level the issue is set to the issue Id. The brand Id can
+	 * then be ignored as the issue Id is unique within the system.
+	 *
 	 * @param int $userId
 	 * @return array of User objects.
+	 * @throws BizException
 	 */
 	public static function getUsersWithCommonAuthorization( $userId )
 	{
 		$brandsOrOverruleBrandIssues = DBUser::getBrandIssueAuthorizationForUser( $userId );
-
-		$uniqueUserRows = array();
-		if ( $brandsOrOverruleBrandIssues ) foreach ( $brandsOrOverruleBrandIssues as $brandOrOverruleBrandIssue ) {
-			$userRows = DBUser::getUsers( $brandOrOverruleBrandIssue['publication'], $brandOrOverruleBrandIssue['issue'] );
-			foreach ( $userRows as $userRow ) {
-				$uniqueUserRows[$userRow['id']] = $userRow;
+		$brandIds = array();
+		$overruleBrandIssueIds = array();
+		if( $brandsOrOverruleBrandIssues ) foreach ($brandsOrOverruleBrandIssues as $brandOrOverruleBrandIssue) {
+			if ($brandOrOverruleBrandIssue['publication'] && !$brandOrOverruleBrandIssue['issue'] ) {
+				$brandIds[] = intval($brandOrOverruleBrandIssue['publication']);
 			}
+			if ($brandOrOverruleBrandIssue['issue']) {
+				$overruleBrandIssueIds[] = intval($brandOrOverruleBrandIssue['issue']);
+			}
+		}
+
+		$userRowsBrands = array();
+		$userRowsOverruleBrandIssues = array();
+		$uniqueUserRows = array();
+		if ($brandIds) {
+			$userRowsBrands = DBUser::getAuthorizedUsersForBrands($brandIds );
+		}
+		if ($overruleBrandIssueIds) {
+			$userRowsOverruleBrandIssues = DBUser::getAuthorizedUsersForOverruleBrandIssues( $overruleBrandIssueIds );
+		}
+		$userRows = array_merge($userRowsBrands, $userRowsOverruleBrandIssues);
+		if( $userRows )foreach ($userRows as $userRow) {
+			$uniqueUserRows[$userRow['id']] = $userRow;
 		}
 
 		$users = array();
@@ -280,7 +299,7 @@ class BizUser
 	 * @param string $issue issue id, set to null returns groups assigned to given publication (null MUST be given if overrule option is NOT set !)
 	 * @param boolean $onlyrouting only include groups you can send to, else include all (default)
 	 * @throws BizException
-	 * @return array of UserGroup objects
+	 * @return UserGroup[]
 	 */
 	public static function getUserGroups( $publ = null, $issue = null, $onlyrouting = false )
 	{
@@ -350,7 +369,6 @@ class BizUser
 	{
 		// Check if requested name is current user.
 		// If so, BizSession has cached user info
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( BizSession::getShortUserName() == $userName ) {
 			$userLang = BizSession::getUserInfo('language');
 		} else {
@@ -383,8 +401,7 @@ class BizUser
 		self::validatePassword( $new );
 		
 		$pass = ww_crypt( $new, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
-		$sth = DBUser::setPassword( $user, $pass, trim($row["expiredays"]) );
-		if (!$sth) {
+		if( !DBUser::setPassword( $user, $pass, trim($row["expiredays"]) ) ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 		}
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
@@ -403,57 +420,40 @@ class BizUser
 	}
 
 	/**
-	 * Get user settings for an application.
+	 * Get user settings for a client application.
 	 *
-	 * @param string $shortUser User id (short name). Mandatory!
-	 * @param string $appName   Name of (current) application. Mandatory!
-	 * @return array List of Setting objects
+	 * @deprecated since 10.3.0 Please use WW_BizClasses_UserSetting->getSettings() instead.
+	 * @param string $userShortName
+	 * @param string $clientAppName
+	 * @return Setting[]
 	 * @since v6.0 [BZ#8744]
 	 */
-	public static function getSettings( $shortUser, $appName )
+	public static function getSettings( $userShortName, $clientAppName )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'Please use WW_BizClasses_UserSetting->getSettings() instead.' );
 
-		// Smart Mover has no GUI to define User Queries. However, it wants to access them,
-		// no matter if created by any other application. So here we return the user settings
-		// for all applications. Note that Smart Mover operates under "Mover" name followed by
-		// some process id. So here we check if the application name *start* with "Mover".
-		// Note: Since Mover never *saves* settings, we can safely do this without the risk returning 
-		//       same settings twice, which could happen after logon+logoff+logon.
-		if( stripos( $appName, 'mover' ) === 0 ) { // Smart Mover client?
-			$userSettings = DBUserSetting::getSettings( $shortUser, null ); // null = ALL user settings, except migrated settings
-		} else {
-			$userSettings = DBUserSetting::getSettings( $shortUser, $appName ); // Filled = APPLICATION user settings
-		}
-		// When customers are migrated from old SCE version to v6 (or higher), the appname column
-		// will be empty for migrated user settings! To get out these old user settings,
-		// we check if there are *no* settings for the current application, in which case we 
-		// ask for all user settings that have *no* appname set (= the old migrated settings).
-		// This typically happens, when user does logon with ID/IC for the first time after migration.
-		// The next time, the settings are saved with InDesign or InCopy appname (which then are duplicated).
-		if( count($userSettings) == 0 ) {
-			$userSettings = DBUserSetting::getSettings( $shortUser, '' ); // '' = MIGRATED user settings
-		}
-		return $userSettings;
+		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		return $bizUserSettings->getSettings( $userShortName, $clientAppName, null );
 	}
 
-	/*
-	 * Add/Update user setting
+	/**
+	 * Update user settings for a client application.
 	 *
-	 * @param string $user
-	 * @param array  $settings 
+	 * @deprecated since 10.3.0 Please use WW_BizClasses_UserSetting->saveSettings() instead.
+	 * @param string $userShortName
+	 * @param Setting[] $settings
+	 * @param string $clientAppName
 	 */
-	public static function updateSettings( $user, $settings, $appname )
+	public static function updateSettings( $userShortName, $settings, $clientAppName )
 	{
-		require_once BASEDIR."/server/dbclasses/DBUserSetting.class.php";
-		foreach( $settings->Setting as $setting ) {
-			if(DBUserSetting::hasSetting( $user, $setting->Setting, $appname )) {
-				DBUserSetting::updateSetting( $user, $setting->Setting, $setting->Value, $appname);
-			} 
-			else {
-				DBUserSetting::addSetting( $user, $setting->Setting, $setting->Value, $appname );	
-			}
-		}
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'Please use WW_BizClasses_UserSetting->getSettings() instead.' );
+
+		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		$bizUserSettings->saveSettings( $userShortName, $clientAppName, $settings );
 	}
 	
 	/**
@@ -467,7 +467,6 @@ class BizUser
     {
     	// First check if requested name is the current user.
     	// If so, BizSession has cached user info
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( BizSession::getShortUserName() == $user ) {
 			return BizSession::getUserInfo('fullname');
 		} else {

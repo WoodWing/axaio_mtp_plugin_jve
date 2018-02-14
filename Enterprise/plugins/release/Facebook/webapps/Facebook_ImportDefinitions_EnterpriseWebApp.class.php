@@ -44,7 +44,6 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 	public function getHtmlBody()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once dirname( __FILE__ ).'/../FacebookPublisher.class.php';
 		require_once BASEDIR.'/server/utils/htmlclasses/TemplateSection.php';
 		require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
@@ -79,22 +78,27 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 		}
 
 		if( $channelId ) {
-			if( $register ) {
-				$faceConn = new FacebookPublisher( $channelId );
+			if( $register ) { // Register button pressed.
 				try {
+					$faceConn = new FacebookPublisher( $channelId );
 					// Get Facebook access token
 					if( !$faceConn->getAccessToken( $channelId ) ) {
 						// Go to the login page of Facebook to log in and get an access-code
 						$faceConn->loginToFacebook( $channelId );
 					}
-					echo 'Authorized at Facebook. Enterprise is ready to publish through Facebook.';
 				} catch( Exception $e ) {
-					echo 'ERROR: '.$e->getMessage();
+					if( $faceConn ) {
+						$faceConn->releaseAccessToken( $channelId );
+					}
+					LogHandler::Log( 'Facebook', 'ERROR', ':Error retrieving access token:'.$e->getMessage() );
 				}
-			} else {
-				$faceConn = new FacebookPublisher();
-				// Unregister, by releasing the access token.
-				$faceConn->releaseAccessToken( $channelId );
+			} else { // Un-register button pressed.
+				try {
+					$faceConn = new FacebookPublisher();
+					$faceConn->releaseAccessToken( $channelId ); // Un-register, by releasing the access token.
+				} catch( Exception $e ) {
+					// Unlikely to happen, but when happens, just be silent here ( since no extra action needed by the user ).
+				}
 			}
 		}
 
@@ -104,7 +108,6 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 		$htmlBody = str_replace( '<!--CONTENT-->', $message, $htmlBody );
 		$channelRowsObj = new WW_Utils_HtmlClasses_TemplateSection( 'CHANNEL_ROWS' );
 		$channelRowsTxt = '';
-		$accessError = false;
 
 		if( $this->pubChannelInfos ) foreach( $this->pubChannelInfos as $channelInfo ) {
 			require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
@@ -120,8 +123,18 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 			$channelUrl = SERVERURL_ROOT.INETROOT.'/server/admin/editChannel.php?publid='.$publId.'&channelid='.$channelInfo->Id;
 			$channelTxt = str_replace( '<!--PAR:PUBCHANNELURL-->', $channelUrl, $channelTxt );
 
-			$faceConn = new FacebookPublisher( $channelInfo->Id );
-			$registered = $faceConn->getAccessToken( $channelInfo->Id ) ? true : false;
+			$registered = null;
+			$faceConn = null;
+			try{
+				$faceConn = new FacebookPublisher( $channelInfo->Id );
+				$registered = $faceConn->getAccessToken( $channelInfo->Id ) ? true : false;
+			} catch( Exception $e ) {
+				if( !$faceConn ) {
+					$faceConn = new FacebookPublisher(); // No param to avoid Exception, just to release the access token.
+				}
+				$faceConn->releaseAccessToken( $channelInfo->Id );
+				$channelTxt = str_replace ( '<!--PAR:ERROR_MESSAGE-->', $e->getMessage(), $channelTxt );
+			}
 
 			//Check if the user is a valid user and if he has access to the application, if you don't do this you'll get an error by Facebook.
 			//If the user has no access the access error is triggered and the user will be unregistered.
@@ -129,7 +142,10 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 				if( $faceConn->checkUser() == null ) {
 					$faceConn->releaseAccessToken( $channelInfo->Id );
 					$registered = false;
-					$accessError = true;
+
+					// Access error
+					$error = BizResources::localize('FACEBOOK_ERROR_MESSAGE_NO_ACCESS');
+					$channelTxt = str_replace ( '<!--PAR:ERROR_MESSAGE-->', $error, $channelTxt );
 				}
 			}
 
@@ -149,11 +165,6 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 			$channelTxt = str_replace( '<!--PAR:FACEBOOKACCOUNT-->', $userName ? formvar( $userName ) : '&nbsp;', $channelTxt );
 			$channelTxt = str_replace( '<!--PAR:BUTTON-->', '<input type="submit" value="'.$btnTitle.'" id="'.$btnId.'" name="'.$btnId.'" />', $channelTxt );
 			$channelRowsTxt .= $channelTxt;
-		}
-
-		if( $accessError ) {
-			$error = BizResources::localize( 'FACEBOOK_ERROR_MESSAGE_NO_ACCESS' );
-			$htmlBody = $htmlBody.'<body class="warning" onLoad="javascript:myFunction(\''.$error.'\')">';
 		}
 
 		$htmlBody = $channelRowsObj->replaceSection( $htmlBody, $channelRowsTxt );

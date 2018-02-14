@@ -40,6 +40,5 @@ abstract class PubOperationProgress_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PubOperationProgressRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

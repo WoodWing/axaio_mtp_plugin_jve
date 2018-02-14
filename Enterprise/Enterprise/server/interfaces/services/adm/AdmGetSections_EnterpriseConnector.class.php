@@ -40,6 +40,5 @@ abstract class AdmGetSections_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmGetSectionsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

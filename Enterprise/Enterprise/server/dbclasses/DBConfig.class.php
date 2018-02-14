@@ -34,16 +34,17 @@ class DBConfig extends DBBase
 	 */
 	static public function getValue( $property, $checkTableSpace = false )
 	{
-		$dbDriver = DBDriverFactory::gen();
 		if( $checkTableSpace ) {
+			$dbDriver = DBDriverFactory::gen();
 			$continue = $dbDriver->tableExists( self::TABLENAME );
 		} else {
 			$continue = true;
 		}
 		$value = null;
 		if( $continue ) {
+			$where = '`name` = ?';
 			$params = array( $property );
-			$row = DBConfig::getRow( self::TABLENAME, 'name = ?', '*', $params );
+			$row = self::getRow( self::TABLENAME, $where, array('value'), $params );
 			if( $row ) {
 				$value = $row['value'];
 			}
@@ -73,24 +74,20 @@ class DBConfig extends DBBase
 	 * Inserts or updates the database value for a specific
 	 * DbConfig variable.
 	 *
-	 * @static
 	 * @param string $name The name of the DBConfig setting.
 	 * @param string $value The value to store for the DBConfig setting.
-	 * @return bool whether the insert/update was succesful or not.
+	 * @return bool whether the insert/update was successful or not.
 	 */
-	static public function storeValue($name, $value)
+	static public function storeValue( $name, $value )
 	{
-		$result = false;
-
-		$where = "name = ?";
-		$params = array( $name );
-		$row = DBBase::getRow(self::TABLENAME, $where, array( 'id' ), $params);
+		$where = '`name` = ?';
+		$params = array( strval( $name ) );
+		$row = self::getRow(self::TABLENAME, $where, array( 'id' ), $params);
 		if (!$row) {
-			$result = DBBase::insertRow(self::TABLENAME, array( 'name' => $name, 'value' => '#BLOB#'), true, $value );
+			$result = self::insertRow(self::TABLENAME, array( 'name' => $name, 'value' => '#BLOB#'), true, $value );
 		} else {
-			$result = DBBase::updateRow(self::TABLENAME, array('value' => '#BLOB#'), $where, $params, $value );
+			$result = self::updateRow(self::TABLENAME, array('value' => '#BLOB#'), $where, $params, $value );
 		}
-	
 		return $result;
 	}	
 }

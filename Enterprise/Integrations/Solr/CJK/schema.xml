@@ -160,7 +160,7 @@
         <field name="Columns" 				type="tint" 	indexed="true" 	stored="true"/>
         <field name="Width"				    type="tdouble"  indexed="true" 	stored="true"/>
         <field name="Height" 				type="tdouble"  indexed="true" 	stored="true"/>
-        <field name="Dpi" 				    type="tint" 	indexed="true" 	stored="true"/>
+        <field name="Dpi" 				    type="tdouble" 	indexed="true" 	stored="true"/>
         <field name="LengthWords" 			type="tint" 	indexed="true" 	stored="true"/>
         <field name="LengthChars" 			type="tint" 	indexed="true" 	stored="true"/>
         <field name="LengthParas" 			type="tint" 	indexed="true" 	stored="true"/>
@@ -171,8 +171,8 @@
         <field name="KeyFrameEveryFrames" 	type="string" 	indexed="true" 	stored="true"/>
         <field name="Channels" 				type="string" 	indexed="true" 	stored="true"/>
         <field name="AspectRatio" 			type="string" 	indexed="true" 	stored="true"/>
-        <field name="Deadline" 				type="string" 	indexed="true" 	stored="true"/><!-- Can be empty, so may not be a date -->
-        <field name="DeadlineSoft" 			type="string" 	indexed="true" 	stored="true"/><!-- Can be empty, so may not be a date -->
+        <field name="Deadline" 				type="tdate" 	indexed="true" 	stored="true"/>
+        <field name="DeadlineSoft" 			type="tdate" 	indexed="true" 	stored="true"/>
         <field name="Urgency" 				type="string" 	indexed="true" 	stored="true"/>
         <field name="Version" 				type="tdouble" 	indexed="true" 	stored="true"/>
         <field name="Rating" 				type="tint" 	indexed="true" 	stored="true"/>

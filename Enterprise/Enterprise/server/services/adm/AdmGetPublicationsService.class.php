@@ -29,7 +29,7 @@ class AdmGetPublicationsService extends EnterpriseService
 	public function runCallback( AdmGetPublicationsRequest $req )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-		$pubs = BizAdmPublication::listPublicationsObj( $this->User, $req->RequestModes, $req->PublicationIds );
+		$pubs = BizAdmPublication::listPublicationsObj( $req->RequestModes, $req->PublicationIds );
 		return new AdmGetPublicationsResponse( $pubs );
 	}
 }

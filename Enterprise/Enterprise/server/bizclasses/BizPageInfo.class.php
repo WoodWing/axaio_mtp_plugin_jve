@@ -71,6 +71,9 @@ class BizPageInfo
 		// This is used to figure out which children go on which page when we work through the pages below.
 		$relations = BizRelation::getPlacementsByRelationalParentIds( $layoutIdsAuth );
 
+		// Get layouts' flag and its message (all at once).
+		$layoutsFlagAndMessage = ( $layoutIds ) ? DBObject::getMultipleObjectsFlags( $layoutIds ) : array();
+
 		// Get essential metadata of all placed objects (all at once).
 		$childIds = array();
 		if( $relations ) foreach( $relations as $layoutIds ) {
@@ -101,6 +104,8 @@ class BizPageInfo
 			$layoutObject->State    = $layoutMetaData->WorkflowMetaData->State;
 			$layoutObject->Version  = $layoutMetaData->WorkflowMetaData->Version;
 			$layoutObject->LockedBy = strval($layoutMetaData->WorkflowMetaData->LockedBy);
+			$layoutObject->Flag = isset( $layoutsFlagAndMessage[$layoutId]['flag'] ) ? $layoutsFlagAndMessage[$layoutId]['flag'] : 0;
+			$layoutObject->FlagMsg = isset( $layoutsFlagAndMessage[$layoutId]['message'] ) ? $layoutsFlagAndMessage[$layoutId]['message'] : '';
 			$layoutObject->Modified = $layoutMetaData->WorkflowMetaData->Modified;
 
 			$layoutPages = array();			//  array for all the pages in this layout
@@ -134,30 +139,30 @@ class BizPageInfo
 				if( $layoutRelations ) foreach( $layoutRelations as $relation ) {
 					$childId = $relation->Child;
 					if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
-						$editionMatch = ($placement->Edition == null || $placement->Edition->Id == $edition->Id);
+						$editionMatch = ( $placement->Edition == null || $placement->Edition->Id == $edition->Id );
 						// Since 7.6: Placement can have tiles when one text frame is placed on both pages of spread.
 						if( $placement->Tiles ) { // Placement is on both pages of a spread.
 							foreach( $placement->Tiles as $tile ) { // Build extra PlacementInfo based on placement tile.
-								if( ($tile->PageSequence == $pageObject->PageSequence) && $editionMatch ) {
+								if( ( $tile->PageSequence == $pageObject->PageSequence ) && $editionMatch ) {
 									$placementInfos[] = self::buildPlacementInfoObject( $childId, $tile );
 								}
 							}
 						} else { // No tiles: Placement fits onto one page.
-							if( ($placement->PageSequence == $pageObject->PageSequence) && $editionMatch ){
+							if( ( $placement->PageSequence == $pageObject->PageSequence ) && $editionMatch ) {
 								$placementInfos[] = self::buildPlacementInfoObject( $childId, $placement );
 							}
 						}
-						if( !empty($placementInfos) ) {
+						if( !empty( $placementInfos ) ) {
 							//  Also add the child to the PlacedObjects, if we have not already done so.
 							$dup = false;
-							foreach ($placedObjects as $po) {
-								if ($po->Id == $childId) {
+							foreach( $placedObjects as $po ) {
+								if( $po->Id == $childId ) {
 									$dup = true;
 									break;
 								}
 							}
-							if ($dup == false) {
-								$childMetaData = array_key_exists( $childId, $childMetaDatas ) ? $childMetaDatas[$childId] : null;
+							if( $dup == false ) {
+								$childMetaData = array_key_exists( $childId, $childMetaDatas ) ? $childMetaDatas[ $childId ] : null;
 								if( $childMetaData ) {
 									$childStatus = $childMetaData->WorkflowMetaData->State;
 									$po = new PlacedObject();
@@ -170,8 +175,8 @@ class BizPageInfo
 									$po->State->Type = $childStatus->Type;
 									$po->State->Color = $childStatus->Color;
 									$po->Version = $childMetaData->WorkflowMetaData->Version;
-									$po->LockedBy = strval($childMetaData->WorkflowMetaData->LockedBy);
-									$po->Format = $childMetaData->ContentMetaData->Format ;
+									$po->LockedBy = strval( $childMetaData->WorkflowMetaData->LockedBy );
+									$po->Format = $childMetaData->ContentMetaData->Format;
 									$placedObjects[] = $po;
 								}
 							}
@@ -196,8 +201,9 @@ class BizPageInfo
 		$editionPages = new EditionPages();
 		$editionPages->Edition = $edition;
 
-		//  sort the layouts in the order they should appear
-		//  6.1.6  now sorting layout by modified date... newest to oldest... so when we hit a dup page it is the older one with that number and thus considered the duplicate.
+		// Sort the layouts in the order they should appear.
+		// Now sorting layout by modified date. Newest to oldest.
+		// So when we hit a duplicate page, it is the older one with that number that is considered to be the duplicate.
 		usort($layoutObjects, 'cmp');
 		//  take the pages of each of those layouts and build array of all pages ($pageObjects) to be passed back....
 		$usedPageNumbers = array();
@@ -205,8 +211,9 @@ class BizPageInfo
 		$nonDuplicatePageObjects = array();
 		$samePageOrderByNumberingSystem = false; //Indicates if for the same Numbering System duplicate Real Page Numbers are used.
 												 //E.g. C1 and B1 (different prefix (C, B) but same system (arabic) and same number (1).
-		$pageOrderByNumberingSystem = array(); // Contains all Numbering System and Real Page Number (Page Order) combinations.
-											   // The SortOrder refers to the used Numbering System (e.g 30000000 is arabic). 
+		$pageOrderSectionPrefixByNumberingSystems = array(); // Contains all Numbering System and Real Page Number (Page Order) plus
+		// Section prefix combinations. The SortOrder refers to the used Numbering System (e.g 30000000 is arabic).
+		// Typical entry could be [3000000][15]["B"] ([SortOrder][Page Order][Section Prefix]
 		if ( $layoutObjects) foreach ($layoutObjects as $layoutObject){
 			foreach ($layoutObject->layoutPages as $layoutPageRow){
 				//  put the dup pages in $duplicatePageObjects and the nondups in $nonDuplicatePageObjects
@@ -216,10 +223,10 @@ class BizPageInfo
 					$nonDuplicatePageObjects[] = $layoutPageRow;
 				}
 				if( ! $samePageOrderByNumberingSystem ) {
-					if( isset($pageOrderByNumberingSystem[$layoutPageRow->ppn->SortOrder][$layoutPageRow->ppn->RealPageNumber]) ) {
+					if( isset($pageOrderSectionPrefixByNumberingSystems[$layoutPageRow->ppn->SortOrder][$layoutPageRow->ppn->RealPageNumber]) ) {
 						$samePageOrderByNumberingSystem = true; // found
 					} else {
-						$pageOrderByNumberingSystem[$layoutPageRow->ppn->SortOrder][$layoutPageRow->ppn->RealPageNumber] = true;
+						$pageOrderSectionPrefixByNumberingSystems[$layoutPageRow->ppn->SortOrder][$layoutPageRow->ppn->RealPageNumber] = $layoutPageRow->ppn->PagePrefix;
 					}
 				}		
 				$usedPageNumbers[] = $layoutPageRow->PageNumber;
@@ -227,16 +234,27 @@ class BizPageInfo
 			unset($layoutObject->layoutPages);  //  do not need this anymore....  now that the pages are in the 2 arrays
 		}
 
-		if ($samePageOrderByNumberingSystem) {
-			/** In case pages are numbered like C1, B1, C2, B2 they must be sorted like
+		if ( $samePageOrderByNumberingSystem || !self::adjacentSections( $pageOrderSectionPrefixByNumberingSystems ) ) {
+			/**
+			 * Caution: Do not switch the above expressions. Adjacent needs only to be checked if the expression
+			 * $samePageOrderByNumberingSystem is false.
+			 * In case pages are numbered like C1, B1, C2, B2 they must be sorted like
 			 * B1, B2, C1, C2. (BZ#17773). Pages have the same Number System (arabic) and
 			 * duplicate Page Order (1, 2). The prefix is different (C versus B) so don't
-			 * confuse this with duplicate pages. 
-			 */ 
+			 * confuse this with duplicate pages.
+			 * Normally pages are sorted by using the Section Prefix. There is one exception. If the pages are adjacent per
+			 * Section Prefix and there are no duplicate pages per numbering system we just order the pages by their Page
+			 * Order:
+			 * E.g. 3 Section Perfixes ('A', 'B', 'D'), 6 pages with prefix and all 10 pages with arababic number system:
+			 * A1, A2, C3, C4, B5, B6, 7, 8, 9, 10 is seen as 'adjacent' as Section Prefixes to not mix. Sorted as:
+			 * A1, A2, C3, C4, B5, B6, 7, 8, 9, 10 and not like A1, A2, B5, B6, C3, C5, 7 , 8, 9, 10
+			 * A1, B2, C3, C4, A5, B6, 7, 8, 9, 10 is seen as not adjacent as Section Prefixes mix. Sorted as:
+			 * A1, A5, B2, B6, C3, C4, 7, 8, 9, 10
+			 */
 			usort($nonDuplicatePageObjects, 'cmpDuplicatePagesBySystem');
 			usort($duplicatePageObjects, 'cmpDuplicatePagesBySystem');
 		} else {
-			// sort each array by page number
+//			Sort each array by page number
 			usort($nonDuplicatePageObjects, 'cmpPages');
 			usort($duplicatePageObjects, 'cmpPages');
 		}
@@ -279,6 +297,60 @@ class BizPageInfo
 	}
 
 	/**
+	 * Checks if per numbering system the pages per Section Prefix are adjacent.
+	 *
+	 * Adjacent means that if the page are sorted by their page order the pages which have a section prefix are not
+	 * mixed up.
+	 * E.g.:
+	 * Two Prefixes, 'A' and 'B', 6 pages:
+	 * A1, A2, A3, B4, B5, B6 => adjacent.
+	 * Two Prefixes, 'A' and 'B', 6 pages but with gaps:
+	 * A1, A3, A5, B7, B9, B10 => adjacent.
+	 * Two Prefixes, 'A' and 'B', 6 pages:
+	 * A1, B2, A3, B4, A5, B6 => not adjacent.
+	 *
+	 * $pageOrderSectionPrefixByNumberingSystems
+	 * List of Page order with its prefix grouped by Sort Order: [SortOrder][Page Order][Section Prefix]
+	 * E.g:
+	 *    [3000000] => Array(
+	 *                   1 => A
+	 *                   2 => A
+	 *                   3 => ""
+	 *                   5 => ""
+	 *                   6 => B
+	 *                )
+	 *    [4000000] => Array(
+	 *                   7 => C
+	 *                   8 => C
+	 *                )
+	 *
+	 * @param array $pageOrderSectionPrefixByNumberingSystems See function header for its structure.
+	 * @return bool Returns true when the pages are adjacent, false otherwise.
+	 */
+	static private function adjacentSections( $pageOrderSectionPrefixByNumberingSystems )
+	{
+		$adjacent = true;
+		if( $pageOrderSectionPrefixByNumberingSystems ) foreach( $pageOrderSectionPrefixByNumberingSystems as $pageOrderByNumberingSystem ) {
+			$sortedPageOrderByNumberingSystem = $pageOrderByNumberingSystem;
+			ksort( $sortedPageOrderByNumberingSystem); // Pages sorted by Page Order (aka real page number).
+			$previousPrefix = array_shift( $sortedPageOrderByNumberingSystem );
+			$foundPrefixes = array( $previousPrefix );
+			foreach( $sortedPageOrderByNumberingSystem as /* $pageOrder => */ $sectionPrefix ) {
+				if( $sectionPrefix != $previousPrefix && array_search( $sectionPrefix, $foundPrefixes) !== false ) {
+					$adjacent = false;
+					break 2;
+				}
+				if( $previousPrefix != $sectionPrefix ) {
+					$foundPrefixes[] = $sectionPrefix;
+				}
+				$previousPrefix = $sectionPrefix;
+			}
+		}
+
+		return $adjacent;
+	}
+
+	/**
 	 * Composes a placement info data object (from a given placement or placement tile).
 	 *
 	 * @param integer $id Child object id
@@ -300,7 +372,7 @@ class BizPageInfo
 }
 
 /**
- * Sorts layouts based on the modified date. Lastly modified first and then perviously modified layouts. 
+ * Sorts layouts based on the modified date. Lastly modified first and then previously modified layouts.
  *
  * @param LayoutObject $a
  * @param LayoutObject $b
@@ -311,8 +383,11 @@ function cmp( $a, $b )
 	$aModified = $a->Modified;
 	$bModified = $b->Modified;
 	
-	if ($aModified == $bModified){ 
-		return 0;
+	if ($aModified == $bModified){
+		// Invoke object ids to avoid random layout object order (e.g. after refresh of the Publication Overview)
+		// when two layouts happen to have the exact same Modified value. This check is added for the BuildTest running
+		// on fast machines which could have two layouts saved within the same second.
+		return $a->Id == $b->Id ? 0 : ($a->Id > $b->Id ? -1 : 1);
 	}
 	return ($aModified > $bModified) ? -1 : 1; 
 }
@@ -396,7 +471,7 @@ class PageNumInfo
  * - Alphabetical, either lower (a, b, c etc.) or upper (A, B, C etc.)
  * Prefixes can be anything.
  * Based on the style a sort order is calculated so that all pages using the same style end up in the same range.
- * Next to that the prefix is determined so that all pages using the same style but a different prefix can be seperated
+ * Next to that the prefix is determined so that all pages using the same style but a different prefix can be separated
  * from each other.
  * Some examples:
  * Display Number		Real Number		Sort Order				Page Prefix

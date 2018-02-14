@@ -33,7 +33,6 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 	public function getHtmlBody()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 		$this->pubChannelInfos = BizAdmPublication::getPubChannelInfosForPublishSystem( 'WordPress' );

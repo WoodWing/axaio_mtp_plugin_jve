@@ -21,9 +21,34 @@ class MetadataHandler
 		$meta = $this->prepareMetadataObject( $smartObject );
 
 		$this->_initFieldHandlers();
-		foreach( $this->fieldHandlers as $fieldHandler ) {
-			$fieldHandler->read( $meta, $elvisMetadata );
+		foreach($this->fieldHandlers as $fieldHandler) {
+			if( $this->fieldsCanBeMapped( $smartObject->MetaData->BasicMetaData, $fieldHandler ) ) {
+				$fieldHandler->read($meta, $elvisMetadata);
+			}
 		}
+	}
+
+	/**
+	 * Checks if there is a mapping between an Elvis property and Enterprise.
+	 *
+	 * Fields can be mapped on an overall level (all brands) or just for one brand.
+	 * If no publication (brand) is specified the mapping holds for all publications (brands). If a specific brand
+	 * is specified then the brand must be the same as the one already set on the Enterprise metadata.
+	 *
+	 * @param BasicMetaData $basicMetaData
+	 * @param ReadWriteFieldHandler $fieldHandler
+	 * @return bool
+	 */
+	private function fieldsCanBeMapped( BasicMetaData $basicMetaData, ReadWriteFieldHandler $fieldHandler  )
+	{
+		$result = false;
+		if( empty( $fieldHandler->mappedToBrand() )  ) {
+			$result = true;
+		} elseif( ( intval($fieldHandler->mappedToBrand() ) == intval( $basicMetaData->Publication->Id ) ) ) {
+			$result = true;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -84,7 +109,7 @@ class MetadataHandler
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
 	 * @param Attachment|null $file
 	 */
-	public function update( $elvisId, $entMetadataOrValues, $file = null )
+	public function update( $elvisId, $entMetadataOrValues, $file=null )
 	{
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
@@ -94,22 +119,25 @@ class MetadataHandler
 			$elvisMetadata['clearCheckoutState'] = 'false';
 		}
 
-		// enum editable fields
-		$possibleAddFields = array();
-		$allAssetInfo = ElvisSessionUtil::getAllAssetInfo();
-		if( $allAssetInfo != null ) {
-			foreach( $allAssetInfo->fieldInfoByName as $field => $fieldInfo ) {
+		require_once dirname( __FILE__ ).'/../util/ElvisSessionUtil.php';
+		// Determine the Elvis fields the user is allowed to edit.
+		$editableFields = ElvisSessionUtil::getEditableFields();
+		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
+			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
+			$fieldInfos = ElvisRESTClient::fieldInfo();
+			if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
 				if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
 					( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
 				) {
-					array_push( $possibleAddFields, $field );
+					$editableFields[] = $field;
 				}
 			}
+			ElvisSessionUtil::setEditableFields( $editableFields );
 		}
-		// send to Elvis only editable matadata fields
-		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $possibleAddFields ) );
 
-		if( !empty( $elvisMetadata ) ) {
+		// Send to Elvis only editable metadata fields.
+		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $editableFields ) );
+		if( $elvisMetadata ) {
 			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
 			ElvisRESTClient::update( $elvisId, $elvisMetadata, $file );
 		}
@@ -158,7 +186,7 @@ class MetadataHandler
 		if( isset( $this->fieldHandlers ) ) {
 			return;
 		}
-		//FieldHandler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname 
+		//FieldHandler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname
 
 		//Get configurable field handlers from config
 		$this->fieldHandlers = unserialize( ELVIS_FIELD_HANDLERS );
@@ -194,7 +222,7 @@ class MetadataHandler
 // 		$this->fieldHandlers['Brand'] = BasicMetadata
 // 		$this->fieldHandlers['Category'] = BasicMetadata
 // 		$this->fieldHandlers['Status'] = WorkflowMetadata
-// 		$this->fieldHandlers['Issue'] = 
+// 		$this->fieldHandlers['Issue'] =
 // 		$this->fieldHandlers['Targets'] = Targets
 
 //		Not mapped because complexity > importance

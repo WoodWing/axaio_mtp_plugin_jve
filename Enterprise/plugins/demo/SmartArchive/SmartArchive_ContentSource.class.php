@@ -12,7 +12,6 @@
 
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_EnterpriseConnector.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizDataClasses.php';  
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 
 require_once dirname(__FILE__).'/config.php';
 require_once dirname(__FILE__).'/SmartArchiveProxy.class.php';
@@ -111,9 +110,6 @@ class SmartArchive_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		// Keep code analyzer happy
-		$query=$query; $firstEntry=$firstEntry; $maxEntries=$maxEntries; $order=$order;
-		
 		// Create SOAP client and logon when needed
 		$this->initProxy();
 
@@ -396,7 +392,6 @@ class SmartArchive_ContentSource extends ContentSource_EnterpriseConnector
 	private function getEnterpriseContext( &$publication,  &$category, &$status, $objType)
 	{
 		// Get list of publications from Enterpise. If available we use WW News
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		$username = BizSession::getShortUserName();
 

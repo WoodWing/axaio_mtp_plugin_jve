@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">Os dados armazenados nas tabelas do Enterprise foram migrados com êxito.</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">Banco de dados - Instalação / Atualização</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Informação do Modelo de Banco de dados do Enterprise:</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Informação do Modelo de Banco de dados do Enterprise:</Term>
   <Term key="DBINSTALLER_DBSELECT">Nome do Banco de dados</Term>
   <Term key="DBINSTALLER_DBSERVER">Servidor de Banco de dados</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. Cheque as opções que define a conexão ao Banco de dados:\n• configserver.php arquivo: DBSERVER e DBTYPE\n• config.php arquivo: DBSELECT, DBUSER e DBPASS\n2. Cheque se o Banco de dados está ligado, ativo e accessível através da conexão configurada '%1'.\n3. Certifique-se de que o usuário '%2' tem acesso ao Banco de dados.\n4. No caso de uma nova instalação, certifique-se de que um Banco de dados vazio (table space) denominado '%3' foi manualmente pré-definido.\n5. Ao finalizar a configuração, clique '%4'.</Term>
@@ -1113,7 +1114,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">Nenhuma configuração ativa do InDesign Server encontrada para o trabalho %1. Configurar um InDesign Server %2 que serve prioridade %3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">O servidor InDesign não responde. (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">Tarefas com as seguintes prioridades não serão executadas: %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
+  <Term key="IDS_PICKUP_FROM">Hora de coleta</Term>
   <Term key="IDS_PORTNUMBER">Número da Porta:</Term>
   <Term key="IDS_PRIO">Prioridades de Tarefa</Term>
   <Term key="IDS_PRIO_1">Muito alto</Term>
@@ -1449,6 +1450,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="MNU_REPORTING">Relatório</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Configurações de Serviçøs</Term>
   <Term key="MNU_SERVER_JOBS">Fila de Serviços</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Fazer upload</Term>
   <Term key="MNU_USER">Usuários</Term>
   <Term key="MNU_USER_QUERY">Consultas do Usuário</Term>

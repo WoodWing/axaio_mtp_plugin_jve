@@ -299,6 +299,7 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 		// Image
 		$properties[] = new PropertyValue('image/png', '.png', 'Format');
 		$properties[] = new PropertyValue('image/jpeg', '.jpg', 'Format');
+		$properties[] = new PropertyValue('image/gif', '.gif', 'Format');
 		return $properties;
 	}
 

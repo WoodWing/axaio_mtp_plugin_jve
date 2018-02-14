@@ -20,10 +20,11 @@ class ElvisObjectUtils
 	public static function filterElvisShadowObjects( $objectIds )
 	{
 		require_once BASEDIR .'/server/dbclasses/DBBase.class.php';
+		require_once dirname( __FILE__ ).'/../config.php';
 
 		$elvisShadowObjectIds = array();
 
-		if( !is_null( $objectIds ) ) {
+		if( $objectIds ) {
 			$dbDriver = DBDriverFactory::gen();
 			$dbo = $dbDriver->tablename( 'objects' );
 			$sql = 'SELECT `id`, `documentid` FROM ' . $dbo . ' ';

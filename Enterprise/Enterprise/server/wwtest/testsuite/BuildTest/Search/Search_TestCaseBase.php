@@ -43,6 +43,8 @@ abstract class WW_TestSuite_BuildTest_Search_Base extends TestCase
 	 * @param string $query Query term on which is being searched
 	 * @param string $stepInfo Info added to any error
 	 * @param bool $expected Whether or not it is expected to find the tested Object
+	 * @param QueryParam[] Extra query parameters to filter.
+	 * @param string[] $areas Either Workflow or Trash
 	 * @return bool True on success.
 	 */
 	public function testSearch( $objectID, $query, $stepInfo, $expected = true, $queryParams = null, $areas = array("Workflow") )

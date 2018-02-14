@@ -4,7 +4,7 @@ if( !defined('SOLR_SERVER_URL') ) {
 	define( 'SOLR_SERVER_URL', 'http://localhost:8983/solr' ); // Solr home
 }
 if( !defined('SOLR_CORE') ) {
-	define( 'SOLR_CORE', 'woodwing' ); // Solr core to use, default collection1.
+	define( 'SOLR_CORE', 'collection1' ); // Solr core to use, default collection1.
 }
 
 /**
@@ -133,18 +133,7 @@ if( !defined('SOLR_GENERAL_FACETS') ) {
 			'State',
 	)));
 }
-// Facets used when searching for Dossiers only, leave empty to use general set 
-if( !defined('SOLR_DOSSIER_FACETS') ) {
-	define ('SOLR_DOSSIER_FACETS', serialize(array(
-			'Publication',	// Brand
-			'Category',
-			'IssueIds',
-			'Modified',
-			'Rating',
-			'State',
-			)));
-}
-// Facets used when searching for Images only, leave empty to use general set 
+// Facets used when searching for Images only, leave empty to use general set
 if( !defined('SOLR_IMAGE_FACETS') ) {
 	define ('SOLR_IMAGE_FACETS', serialize(array(
 			'Publication',	// Brand

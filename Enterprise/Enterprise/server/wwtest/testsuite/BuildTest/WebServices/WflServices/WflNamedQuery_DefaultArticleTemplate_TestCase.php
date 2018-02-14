@@ -63,7 +63,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_DefaultArticl
 		}
 		if( !$this->articleTemplateId || !$this->articleTemplateName ) {
 			LogHandler::Log( 'WflNamedQuery', 'ERROR', 
-							'Could not create article template object.', 'Check server logging.' );
+							'Could not create article template object. Check the server logging.' );
 		}
 		
 		// Search for any article templates in the system.

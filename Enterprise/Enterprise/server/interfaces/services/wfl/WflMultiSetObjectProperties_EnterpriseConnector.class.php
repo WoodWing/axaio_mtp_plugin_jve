@@ -40,6 +40,5 @@ abstract class WflMultiSetObjectProperties_EnterpriseConnector extends ServiceCo
 	 */
 	public function onError( WflMultiSetObjectPropertiesRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

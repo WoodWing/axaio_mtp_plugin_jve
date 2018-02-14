@@ -530,21 +530,31 @@ class InDesignArticle
 {
 	public $Id;
 	public $Name;
+	public $SplineIDs;
 
 	/**
 	 * @param string               $Id                   
 	 * @param string               $Name                 Nullable.
+	 * @param string[]             $SplineIDs            Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null)
+	public function __construct( $Id=null, $Name=null, $SplineIDs=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
+		$this->SplineIDs            = $SplineIDs;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflInDesignArticle'; } // AMF object type mapping
 
 	public function sanitizeProperties4Php()
 	{
+		if (0 < count($this->SplineIDs)){
+			if (is_object($this->SplineIDs[0])){
+				foreach ($this->SplineIDs as $complexField){
+					$complexField->sanitizeProperties4Php();
+				}
+			}
+		}
 	}
 }
 class Relation
@@ -837,17 +847,20 @@ class User
 	public $UserID;
 	public $FullName;
 	public $TrackChangesColor;
+	public $EmailAddress;
 
 	/**
 	 * @param string               $UserID               
 	 * @param string               $FullName             
 	 * @param string               $TrackChangesColor    
+	 * @param string               $EmailAddress         Nullable.
 	 */
-	public function __construct( $UserID=null, $FullName=null, $TrackChangesColor=null)
+	public function __construct( $UserID=null, $FullName=null, $TrackChangesColor=null, $EmailAddress=null)
 	{
 		$this->UserID               = $UserID;
 		$this->FullName             = $FullName;
 		$this->TrackChangesColor    = $TrackChangesColor;
+		$this->EmailAddress         = $EmailAddress;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflUser'; } // AMF object type mapping
@@ -3144,6 +3157,8 @@ class LayoutObject
 	public $State;
 	public $Version;
 	public $LockedBy;
+	public $Flag;
+	public $FlagMsg;
 
 	/**
 	 * @param string               $Id                   
@@ -3152,8 +3167,10 @@ class LayoutObject
 	 * @param State                $State                
 	 * @param string               $Version              
 	 * @param string               $LockedBy             
+	 * @param int                  $Flag                 Nullable.
+	 * @param string               $FlagMsg              Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Category=null, $State=null, $Version=null, $LockedBy=null)
+	public function __construct( $Id=null, $Name=null, $Category=null, $State=null, $Version=null, $LockedBy=null, $Flag=null, $FlagMsg=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
@@ -3161,12 +3178,15 @@ class LayoutObject
 		$this->State                = $State;
 		$this->Version              = $Version;
 		$this->LockedBy             = $LockedBy;
+		$this->Flag                 = $Flag;
+		$this->FlagMsg              = $FlagMsg;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflLayoutObject'; } // AMF object type mapping
 
 	public function sanitizeProperties4Php()
 	{
+		if (is_nan($this->Flag)){ $this->Flag = null; }
 		if( is_object( $this->Category ) ) {
 			$this->Category->sanitizeProperties4Php();
 		}

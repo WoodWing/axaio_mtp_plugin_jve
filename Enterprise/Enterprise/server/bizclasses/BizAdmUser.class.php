@@ -1,44 +1,50 @@
 <?php
 /**
- * @package     Enterprise
- * @subpackage  BizClasses
- * @since       v6.0
- * @copyright   WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage BizClasses
+ * @since      v6.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
-
-require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
 class BizAdmUser
 {
+	/**
+	 * Checks whether or not the user is a system administrator.
+	 *
+	 * @param string $usr Short username
+	 * @throws BizException when user is not a system admin
+	 */
+	static private function checkSystemAdminAccess( $usr )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$isadmin = hasRights( $dbDriver, $usr );
+		if( !$isadmin ) {
+			throw new BizException( 'ERR_AUTHORIZATION', 'Client' );
+		}
+	}
 
 	// -----------------------------
 	// ---    USER OPERATIONS    ---
 	// -----------------------------
 
 	/**
-     * Create User Object
+     * Create users in the database.
      *
      * Returns new created users object
      *
      * @param string $usr Acting admin user used to check service access rights
-     * @param  array $subReq RequestModes
-     * @param  array $users array of new users that will create
-	 * @throws BizException Throws BizException on failure
-     * @return array of new created user objects - throws BizException on failure
+     * @param string[] $subReq RequestModes
+     * @param AdmUser[] $users new users to create
+	  * @throws BizException on authorization failure or SQL error
+     * @return array of new created user objects
      */
 	public static function createUsersObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq,
 	                                       $users )
 	{
-		$dbDriver = DBDriverFactory::gen();
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
-		// Check user whether is a system admin user
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
-
+		self::checkSystemAdminAccess( $usr );
 		$newusers = array();
-
 		foreach( $users as $user ) {
 			/* BZ#3211: When this BZ is resolved, uncomment this fragment of code and 
 			remove the 'Temporary solution' below this fragement of code.
@@ -59,8 +65,8 @@ class BizAdmUser
 			} elseif( is_null( $user->TrackChangesColor ) ) { // when not given during user creation.
 				$user->TrackChangesColor = DEFAULT_USER_COLOR; // default user color defined in configserver.php
 			}
-			
-			$newUser = DBUser::createUserObj( $user, $isadmin );
+
+			$newUser = DBUser::createUserObj( $user, true );
 			if( !is_null($newUser->TrackChangesColor) ) {
 				$newUser->TrackChangesColor = substr($newUser->TrackChangesColor,1); // skip # prefix
 			}
@@ -73,26 +79,23 @@ class BizAdmUser
 	}
 
 	/**
-     * Returns users (AdmUser objects). Can be all users, specified users, or users that are 
-     * member of a given group.
-     *
-     * @param string $usr Acting admin user used to check service access rights
-     * @param array $subReq RequestModes (currently not used)
-     * @param string $grpId User group id to return user that are member of one group. Null to return all users.
-     * @param array $usrIds User ids to return specific users only. Null to return all users (or all users that are member of the group).
-     * @param boolean $adminOnly Pass TRUE for admin users, or FALSE for non-admin users, or NULL for all users.
-     * @return AdmUser[] array of AdmUser objects
-     * @throws BizException on failure
-     */
+	 * Retrieve users from the database.
+	 *
+	 * Returns all users, specified users, or users that are member of a given group.
+	 *
+	 * @param string $usr Acting admin user used to check service access rights
+	 * @param string[] $subReq RequestModes (currently not used)
+	 * @param string $grpId User group id to return user that are member of one group. Null to return all users.
+	 * @param integer[]|null $usrIds User ids to return specific users only. Null to return all users (or all users that are member of the group).
+	 * @param boolean $adminOnly Pass TRUE for admin users, or FALSE for non-admin users, or NULL for all users.
+	 * @return AdmUser[] users found
+	 * @throws BizException on authorization failure, user/group not found or SQL error
+	 */
 	public static function listUsersObj( $usr, $subReq, $grpId, $usrIds, $adminOnly = null )
 	{
-		// Check user whether is a system admin user
-		$dbDriver = DBDriverFactory::gen();
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
+		self::checkSystemAdminAccess( $usr );
   		if( $grpId ) {
 			$grpId = intval($grpId); // security
 			$usergroup = DBUser::getUserGroupObj( $grpId );
@@ -103,7 +106,7 @@ class BizAdmUser
 
     	$users = array();
   		if( is_null($usrIds) ) {
-  			$users = DBUser::listUsersObj( $grpId, $adminOnly, $isadmin );
+  			$users = DBUser::listUsersObj( $grpId, $adminOnly, true );
 			foreach( $users as $user ) {
 				if( !is_null($user->TrackChangesColor) ) {
 					$user->TrackChangesColor = substr($user->TrackChangesColor,1); // skip # prefix
@@ -112,7 +115,7 @@ class BizAdmUser
 		} else {
 			foreach( $usrIds as $usrId ) {
 				$usrId = intval($usrId); // security
-   				$user = DBUser::getUserObj( $usrId, $isadmin );
+   				$user = DBUser::getUserObj( $usrId, true );
    				if ( is_null($user) ) {
 					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrId ) );
 				}
@@ -126,29 +129,27 @@ class BizAdmUser
 		// For each user, resolve all user groups, but only when requested and we actually have users.
 		if( $users && $subReq && in_array( 'GetUserGroups', $subReq ) ) {
 			foreach( $users as $user ) {
-				$user->UserGroups = DBUser::listUserGroupsObj( $user->Id, $adminOnly );
+				// Returns all user groups, including admin groups
+				$user->UserGroups = DBUser::listUserGroupsObj( $user->Id );
 			}
 		}
   		return $users;
 	}
 
 	/**
-	 * Modify User Object
+	 * Modify users in the database.
 	 *
 	 * @param string $usr Acting admin user used to check service access rights
-     * @param array $subReq RequestModes
-     * @param array $users array of users that need to modify
-	 * @throws BizException Throws BizException on failure
-	 * @return array of modified User objects - throws BizException on failure
+	 * @param string[] $subReq RequestModes
+	 * @param AdmUser[] $users users to modify
+	 * @throws BizException on authorization failure, user/group not found or SQL error
+	 * @return AdmUser[] modified users
 	 */
 	public static function modifyUsersObj( $usr, $subReq, $users )
 	{
-		// Check user whether is a system admin user
-		$dbDriver = DBDriverFactory::gen();
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+
+		self::checkSystemAdminAccess( $usr );
 		$attemptToDeactivateOurSelf = false;
 		foreach( $users as $user ) {
 			/* BZ#3211: When this BZ is resolved, uncomment this fragment of code and 
@@ -220,18 +221,18 @@ class BizAdmUser
 	/**
 	 * Remove the given users from the database.
 	 *
+	 * To prevent the whole system to become inaccessible the acting user can not be deleted.
+	 * When RabbitMQ is configured, the users are also removed from the RMQ administration.
+	 *
 	 * @param string $usr Acting admin user used to check service access rights
-	 * @param array $userIds Array of user id
-	 * @throws BizException Throws BizException on failure
+	 * @param integer[] $userIds users (ids) to remove
+	 * @throws BizException on authorization failure, attempt on removing the acting user, or SQL error
 	 */
 	public static function deleteUsersObj( $usr, $userIds )
 	{
-		// Check user whether is a system admin user
-		$dbDriver = DBDriverFactory::gen();
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+
+		self::checkSystemAdminAccess( $usr );
 
 		// Raise error when attempt to delete ourselves.
 		$usrId = DBUser::getUserDbIdByShortName( $usr );
@@ -267,15 +268,17 @@ class BizAdmUser
 	}
 	
 	/**
-	 * Method validate attributes of a newly created or modified user
+	 * Validate attributes of a created or modified user.
 	 *
-	 * @param user object $user 
-	 * @param boolean $new true if new user, false if updated user
+	 * @param AdmUser $user
+	 * @param boolean $new true if created user, false if updated user
 	 * @throws BizException Throws BizException on failure
 	 */
 	private static function validateUserObj( &$user, $new )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
+
 		BizUser::validateEmail( $user->EmailAddress ); // check email format
 		BizUser::validateName( $user->Name, $user->FullName ); // check name format
 		BizUser::checkDuplicates( $user->Id, $user->Name, $user->FullName ); // check uniqueness
@@ -415,30 +418,22 @@ class BizAdmUser
 	// -----------------------------
 
 	/**
-     * Create UserGroup Object
-     *
-     * Returns new created usergroups object
-     *
-     * @param string $usr Acting admin user used to check service access rights
-     * @param  array $subReq RequestModes
-     * @param  array $usergroups array of new usergroups that will create
-	 * @throws BizException Throws BizException on failure
-     * @return array of new created usergroup objects
-     */
+	  * Create user groups in the database.
+	  *
+	  * @param string $usr Acting admin user used to check service access rights
+	  * @param string[] $subReq RequestModes
+	  * @param AdmUserGroup[] $usergroups user groups to create
+	  * @throws BizException on SQL error
+	  * @return AdmUserGroup[] created user groups
+	  */
 	public static function createUserGroupsObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq,
 	                                            $usergroups )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-		$dbDriver = DBDriverFactory::gen();
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
-		// Check user whether is a system admin user
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
-
+		self::checkSystemAdminAccess( $usr );
 		$newusergroups = array();
-
 		foreach( $usergroups as $usergroup ) {
 			/* BZ#3211: When this BZ is resolved, uncomment this fragment of code
 			We cannot trim the Name yet due to BZ#3211			
@@ -450,30 +445,30 @@ class BizAdmUser
 				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 			}
 		}
-
 		return $newusergroups;
 	}
 
 	/**
-     * Returns user groups (AdmUserGroup objects). Can be all groups, specified groups, or groups
-     * a given user is member of.
+     * Retrieve all user groups, specified groups, or groups a given user is member of.
      *
      * @param string $usr Acting admin user used to check service access rights
-     * @param array $subReq RequestModes (currently not used)
-     * @param string $usrId User id to return groups user is member of. Null to return all user groups.
-     * @param array $grpIds User group ids to return specific groups only. Null to return all user groups (or all groups the user is member of).
+     * @param string[] $subReq RequestModes (currently not used)
+     * @param integer|null $usrId User id to return groups user is member of. Null to return all user groups.
+     * @param integer[]|null $grpIds User group ids to return specific groups only. Null to return all user groups (or all groups the user is member of).
      * @param boolean $adminOnly Pass TRUE for admin groups, or FALSE for non-admin groups, or NULL for all groups.
-     * @return array of AdmUserGroup objects
-     * @throws BizException on failure
+     * @return AdmUserGroup[]
+     * @throws BizException on authorization failure, user/group not exists or SQL error
      */
 	public static function listUserGroupsObj( $usr, $subReq, $usrId, $grpIds, $adminOnly = null )
 	{
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+
 		// Check rights with publRights because a brand admin can manage users/groups for the brands
 		// that he/she is administrator for (BZ#16419).
 		$dbDriver = DBDriverFactory::gen();
 		$isadmin = publRights( $dbDriver, $usr );
 		if( !$isadmin ) {
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
+			throw new BizException( 'ERR_AUTHORIZATION', 'Client' );
 		}
 
 		if( !is_null($usrId) ) {
@@ -509,27 +504,20 @@ class BizAdmUser
 	}
 
 	/**
-     * Modify UserGroup Object
-     *
-     * Returns modified usergroup object
-     *
-	 * @param string $usr Short user name
-     * @param array $subReq RequestModes
-     * @param array $groups array of groups that need to modify
-	 * @throws BizException Throws BizException on failure
-     * @return array List of modified UserGroup objects
-     */
+	  * Modify user groups in the database.
+	  *
+	  * @param string $usr Short name of acting admin user (used for authorization)
+	  * @param array $subReq RequestModes
+	  * @param AdmUserGroup[] $groups user groups to modify
+	  * @throws BizException on authorization failure or SQL error
+	  * @return AdmUserGroup[] modified user groups
+	  */
 	public static function modifyUserGroupsObj( $usr, $subReq, $groups )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
-		// Check user whether is a system admin user
-		$dbDriver = DBDriverFactory::gen();
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
-
+		self::checkSystemAdminAccess( $usr );
 		foreach( $groups as $usergroup) {
 			/* BZ#3211: When this BZ is resolved, uncomment this fragment of code
 			We cannot trim the Name yet due to BZ#3211			
@@ -554,234 +542,199 @@ class BizAdmUser
 	}
 	
 	/**
-	 * Remove the given user group from the database.
+	 * Remove a given user group from the database.
 	 *
-	 * @param string $id
-	 * @throws BizException on SQL error.
+	 * @param integer $id user group id
+	 * @throws BizException on bad parameter or SQL error.
 	 */
 	public static function deleteUserGroup( $id )
 	{
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+
+		if( !$id ) {
+			throw new BizException( 'ERR_DATABASE', 'Client', 'No user group id provided.' );
+		}
 		DBUser::deleteUserGroup( $id );
 		if( DBUser::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 		}
 	}
+
 	/**
-	 * Loop the $ids and call the delete for every $id
+	 * Remove user groups (by ids) from the database.
 	 *
-	 * @param string $usr
-	 * @param array|null $ids
-	 * @throws BizException Throws BizException on SQL error.
-	 * @return boolean Returns true on success.
+	 * @param string $usr Short name of acting admin user (used for authorization)
+	 * @param integer[]|null $ids
+	 * @throws BizException on authorization failure or SQL error
 	 */
 	public static function deleteUserGroupsByIds( $usr,  $ids )
 	{
-		$dbDriver = DBDriverFactory::gen();
-
-		// Check user whether is a system admin user
-		$isAdmin = hasRights( $dbDriver, $usr );
-		if( !$isAdmin ) {
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', '' );
-		}
-
-		if ($ids) foreach ($ids as $id) {
+		self::checkSystemAdminAccess( $usr );
+		if( $ids ) foreach( $ids as $id ) {
 			self::deleteUserGroup( $id );
 		}
-		return true;
 	}
+
 	// -----------------------------
 	// --- MEMBERSHIP OPERATIONS ---
 	// -----------------------------
 
 	/**
-     * Add Groups to User
-     *
-     * Returns nothing
-     *
-	 * @param string $usr Short username.
-     * @param array $grpIds array of group id that added to user
-     * @param int $usrId 	user id that group will be added to
-	 * @throws BizException Throws BizException on failure
-     */
+	 * Make an user member of user groups.
+	 *
+	 * @param string $usr Short name of acting admin user (used for authorization)
+	 * @param integer[] $grpIds groups (ids) to make user member of
+	 * @param integer $usrId user (id) to make member of the groups
+	 * @throws BizException on authorization failure, user/group not exists, or SQL error
+	 */
 	public static function addGroupsToUser( $usr, $grpIds, $usrId )
 	{
-		// Check user whether is a system admin user
-		$dbDriver = DBDriverFactory::gen();
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
-		if( is_null($grpIds) ) {
+		self::checkSystemAdminAccess( $usr );
+		if( is_null( $grpIds ) ) {
 			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{GRP_GROUPS}' ) );
-  		}
-  		elseif ( is_null($usrId) ){
-  			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{USR_USER}' ) );
-  		}
-  		else {
-			foreach( $grpIds as $grpid ) {
-				$group = DBUser::getUserGroupObj( $grpid );
-	   			if ( is_null($group) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpid ) );
-				}
-
-				$user = DBUser::getUserObj( $usrId );
-				if ( is_null($user) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrId ) );
-				}
-
-				DBUser::addGroupsToUser( $grpid, $usrId );
-				if( DBUser::hasError() ) {
-					throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
-				}
+		}
+		if( is_null( $usrId ) ) {
+			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{USR_USER}' ) );
+		}
+		foreach( $grpIds as $grpid ) {
+			$group = DBUser::getUserGroupObj( $grpid );
+			if( is_null( $group ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpid ) );
+			}
+			$user = DBUser::getUserObj( $usrId );
+			if( is_null( $user ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrId ) );
+			}
+			DBUser::addGroupsToUser( $grpid, $usrId );
+			if( DBUser::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 			}
 		}
 	}
 	
 	/**
-     * Add Users to Group
-     *
-     * Returns nothing
-     *
-     * @param string $usr Acting admin user used to check service access rights
-     * @param array $usrIds array of user id that added to group
-     * @param int $grpId 	group id that user will be added to
-	 * @throws BizException Throws BizException on failure
-     */
+	  * Make users member of a user group.
+	  *
+	  * @param string $usr Acting admin user used to check service access rights
+	  * @param integer[] $usrIds users (ids) to make member of the group
+	  * @param integer $grpId group (id) to make users member of
+	  * @throws BizException on authorization failure, user/group not exists, or SQL error
+	  */
 	public static function addUsersToGroup( $usr, $usrIds, $grpId )
 	{
-		// Check user whether is a system admin user
-		$dbDriver = DBDriverFactory::gen();
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
+		self::checkSystemAdminAccess( $usr );
 		if( is_null($usrIds) ) {
 			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{USR_USERS}' ) );
   		}
-  		elseif ( is_null($grpId) ){
+  		if ( is_null($grpId) ){
   			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{GRP_GROUP}' ) );
   		}
-  		else {
-			foreach( $usrIds as $usrid) {
-				$user = DBUser::getUserObj( $usrid );
-	   			if ( is_null($user) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrid ) );
-				}
-
-				$group = DBUser::getUserGroupObj( $grpId );
-				if ( is_null($group) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpId ) );
-				}
-
-				DBUser::addUsersToGroup( $usrid, $grpId );
-				if( DBUser::hasError() ) {
-					throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
-				}
+		foreach( $usrIds as $usrid) {
+			$user = DBUser::getUserObj( $usrid );
+			if( is_null( $user ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrid ) );
 			}
-  		}
+
+			$group = DBUser::getUserGroupObj( $grpId );
+			if( is_null( $group ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpId ) );
+			}
+
+			DBUser::addUsersToGroup( $usrid, $grpId );
+			if( DBUser::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
+			}
+		}
 	}
 
 	/**
-     * Remove Groups from User
-     *
-     * Returns nothing
-     *
-     * @param string $usr Acting admin user used to check service access rights
-     * @param array $grpIds array of group id that remove from user
-     * @param string $usrId user id that group will be remove from
-	 * @throws BizException Throws BizException on failure
-     */
+	  * Remove user from groups.
+	  *
+	  * @param string $usr Acting admin user used to check service access rights
+	  * @param integer[] $grpIds groups (ids) to remove user from
+	  * @param integer $usrId user (id) to remove from groups
+	  * @throws BizException on authorization failure, user/group not exists, or SQL error
+	  */
 	public static function removeGroupsFromUser( $usr, $grpIds, $usrId )
 	{
-		// Check user whether is a system admin user
-		$dbDriver = DBDriverFactory::gen();
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
-		if( is_null($grpIds) ) {
+		self::checkSystemAdminAccess( $usr );
+		if( is_null( $grpIds ) ) {
 			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{GRP_GROUPS}' ) );
-  		}
-  		elseif ( is_null($usrId) ){
-  			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{USR_USER}' ) );
-  		}
-  		else {
-			foreach( $grpIds as $grpid ) {
-				$group = DBUser::getUserGroupObj( $grpid );
-	   			if ( is_null($group) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpid ) );
-				}
+		}
+		if( is_null( $usrId ) ) {
+			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{USR_USER}' ) );
+		}
+		foreach( $grpIds as $grpid ) {
+			$group = DBUser::getUserGroupObj( $grpid );
+			if( is_null( $group ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpid ) );
+			}
 
-				$user = DBUser::getUserObj( $usrId );
-				if ( is_null($user) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrId ) );
-				}
+			$user = DBUser::getUserObj( $usrId );
+			if( is_null( $user ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrId ) );
+			}
 
-				DBUser::removeGroupsFromUser( $grpid, $usrId );
-				if( DBUser::hasError() ) {
-					throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
-				}
+			DBUser::removeGroupsFromUser( $grpid, $usrId );
+			if( DBUser::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 			}
 		}
 	}
 
 	/**
-     * Remove Users from Group
-     *
-     * Returns nothing
-     *
-     * @param string $usr Acting admin user used to check service access rights
-     * @param array $usrIds array of user id that remove from group
-     * @param int $grpId 	group id that user will be removed from
-	 * @throws BizException Throws BizException on failure
-     */
+	  * Remove users from a group.
+	  *
+	  * @param string $usr Acting admin user used to check service access rights
+	  * @param integer[] $usrIds users (ids) to remove from the group
+	  * @param integer $grpId group (id) to remove the users from
+	  * @throws BizException on authorization failure, user/group not exists, or SQL error
+	  */
 	public static function removeUsersFromGroup( $usr, $usrIds, $grpId )
 	{
-		// Check user whether is a system admin user
-		$dbDriver = DBDriverFactory::gen();
-		$isadmin = hasRights($dbDriver, $usr);
-		if(!$isadmin){
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
-		if( is_null($usrIds) ) {
+		self::checkSystemAdminAccess( $usr );
+		if( is_null( $usrIds ) ) {
 			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{USR_USERS}' ) );
-  		}
-  		elseif ( is_null($grpId) ){
-  			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{GRP_GROUP}' ) );
-  		}
-  		else {
-			foreach( $usrIds as $usrid) {
-				$user = DBUser::getUserObj( $usrid );
-	   			if ( is_null($user) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrid ) );
-				}
-
-				$group = DBUser::getUserGroupObj( $grpId );
-				if ( is_null($group) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpId ) );
-				}
-
-				DBUser::removeUsersFromGroup( $usrid, $grpId );
-				if( DBUser::hasError() ) {
-					throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
-				}
+		}
+		if( is_null( $grpId ) ) {
+			throw new BizException( 'ERR_NOT_AVAILABLE', 'Client', null, null, array( '{GRP_GROUP}' ) );
+		}
+		foreach( $usrIds as $usrid ) {
+			$user = DBUser::getUserObj( $usrid );
+			if( is_null( $user ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrid ) );
 			}
-  		}
+
+			$group = DBUser::getUserGroupObj( $grpId );
+			if( is_null( $group ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpId ) );
+			}
+
+			DBUser::removeUsersFromGroup( $usrid, $grpId );
+			if( DBUser::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
+			}
+		}
 	}
 
 	/**
 	 * Determines the users that are NO members of a given group.
 	 *
 	 * @param integer $grpId User group DB id.
-	 * @throws BizException Throws BizException on failure.
-	 * @return AdmUserGroup object for which the Users property hold the non-memberships.
+	 * @return AdmUserGroup group for which the Users property hold the non-memberships.
+	 * @throws BizException on group not exists or SQL error
 	 */
 	static public function getUserGroupObjWithNonMemberUsers( $grpId )
 	{
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		$group = DBUser::getUserGroupObj( $grpId );
 		if( is_null($group) ) {
 			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpId ) );
@@ -794,11 +747,12 @@ class BizAdmUser
 	 * Determines the groups for which given user is NOT a member.
 	 *
 	 * @param integer $usrId User DB id.
-	 * @throws BizException Throws BizException on failure.
-	 * @return AdmUser object for which the UserGroups property hold the non-memberships.
+	 * @return AdmUser user for which the UserGroups property hold the non-memberships.
+	 * @throws BizException on user not exists or SQL error
 	 */
 	static public function getUserObjWithNonMemberGroups( $usrId )
 	{
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		$user = DBUser::getUserObj( $usrId );
 		if( is_null($user) ) {
 			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrId ) );

@@ -52,7 +52,6 @@ class DBLog extends DBBase
 		if ($loglevel <= LOGLEVEL) {
 
 			if( is_null( $user ) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getUserInfo('user');
 			}
 
@@ -163,14 +162,11 @@ class DBLog extends DBBase
 
 		if( $loglevel <= LOGLEVEL ) {
 			if( is_null( $user ) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getUserInfo('user');
 			}
 
 			require_once BASEDIR.'/server/utils/UrlUtils.php';
-			$dbDriver = DBDriverFactory::gen();
 
-			$user = $dbDriver->toDBString($user);
 			$date = date('Y-m-d\TH:i:s', time());
 			$ip = WW_Utils_UrlUtils::getClientIP();
 
@@ -195,18 +191,18 @@ class DBLog extends DBBase
 				DBVersion::splitMajorMinorVersion( $versions[$key], $verRow );
 
 				$values[] = array(
-					$user,
-					$service,
-					$date,
-					$ip,
-					$id,
-					$publ,
-					$sections[$key],
-					$states[$key],
-					$type,
-					$verRow['minorversion'],
-					$verRow['majorversion'],
-					$routeTos[$key],
+					strval( $user ),
+					strval( $service ),
+					strval( $date ),
+					strval( $ip ),
+					intval( $id ),
+					intval( $publ ),
+					intval( $sections[$key] ),
+					intval( $states[$key] ),
+					strval( $type ),
+					intval( $verRow['minorversion'] ),
+					intval( $verRow['majorversion'] ),
+					strval( $routeTos[$key] ),
 				);
 			}
 

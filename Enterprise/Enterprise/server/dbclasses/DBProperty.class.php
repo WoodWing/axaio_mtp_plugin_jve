@@ -886,4 +886,37 @@ class DBProperty extends DBBase
 
 		return $rows;
 	}
+
+	/**
+	 * Returns a list of publication ids of the requested property ($propName).
+	 *
+	 * ﻿The publication ids listed in $pubIdsToBeExcluded will be excluded from being returned.
+	 *
+	 * @since 10.1.6 Introduced since the fix for EN-84515.
+	 * @param string $propName Name of the property to retrieve. In case of custom props, it starts with C_.
+	 * @param int[] $pubIdsToBeExcluded See function header.
+	 * @return int[] List of publication ids where the property belongs to.
+	 */
+	public static function getPropertyPubIds( $propName, $pubIdsToBeExcluded = array() )
+	{
+		$params = array();
+		$whereConditions = array();
+
+		$whereConditions[] = " `name` = ? ";
+		$params[] = strval( $propName );
+
+		if( $pubIdsToBeExcluded ) {
+			$whereConditions[] = "`publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) ";
+		}
+
+		$where = implode( " AND ", $whereConditions );
+		$fieldNames = array( 'publication' );
+		$rows = DBBase::listRows( self::TABLENAME, '', '', $where, $fieldNames, $params );
+
+		$publications = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$publications[] = $row['publication'];
+		}
+		return $publications;
+	}
 }

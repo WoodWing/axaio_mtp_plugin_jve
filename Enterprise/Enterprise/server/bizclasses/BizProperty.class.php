@@ -1078,7 +1078,6 @@ class BizProperty
 
 		// Debug: Just check these hugh lists if there are any keys missing (against each other)
 		if( LogHandler::debugMode() ) {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			$a = array_diff( array_keys(self::$InfoProps), array_keys(self::$MetaProps) );
 			if( count( $a ) ) {
 				throw new BizException( '', 'Server', '', __METHOD__.' - InfoProps and MetaProps are different: '.implode(',',$a) );
@@ -2008,7 +2007,7 @@ class BizProperty
 	 * @param bool $filtered Whether or not to exclude certain fields defined in the function or to return a full set.
 	 * @param bool $customOnly Whether or not to exclude any properties that do not have a database field.
 	 * @param bool $onlyAllObjType Only return "All" object type property.
-	 * @return array of PropertyInfo  PropertyInfo definitions as used in workflow WSDL.
+	 * @return PropertyInfo[] PropertyInfo definitions as used in workflow WSDL.
 	 */
 	public static function getProperties( $publ, $objType, $publishSystem = null, $templateId = null, $filtered = true,
 	                                      $customOnly = false, $onlyAllObjType=false )
@@ -2058,14 +2057,19 @@ class BizProperty
 	 * @param string	$objectID
 	 * @param string 	$publishSystem
 	 * @param integer 	$templateId
-	 * @return array of PropertyInfo  PropertyInfo definitions as used in workflow WSDL.
+	 * @return PropertyInfo[] PropertyInfo definitions as used in workflow WSDL.
 	 */
 	public static function getPropertiesForObject( $objectID, $publishSystem = null, $templateId = null )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		$isWorkflow = false;
 		$objProps = DBObject::getObjectRow( $objectID, $isWorkflow );
-		return self::getProperties( $objProps['publication'], $objProps['type'], $publishSystem, $templateId );
+
+		$propertyInfos = array();
+		if( $objProps ) {
+			$propertyInfos = self::getProperties( $objProps['publication'], $objProps['type'], $publishSystem, $templateId );
+		}
+		return $propertyInfos;
 	}
 
 	/**
@@ -2286,6 +2290,7 @@ class BizProperty
 		}
 		if ( $doPlacedOn || $doPlacedOnPage ) {
 			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
 			$rowsAll = DBObject::getPlacedOnRowsByObjIds( $objIds );
 			if ( $objIds ) foreach ( $objIds as $objId ) {
 				if ( array_key_exists( $objId, $rowsAll ) ) {
@@ -2294,24 +2299,20 @@ class BizProperty
 					$rows = $rowsAll[$objId];
 					if ( $rows ) foreach ( $rows as $row ) {
 						$placedOn[] = $row['name'];
-						// BZ#31032: Pagerange 1 => 001; Pagerange 2-5 => 002-005; 4,45-46,48 => 004,045-046,048
-						$placedOnPageStr = '';
-						$placedOnPageRanges = preg_split( '/([,-])/', $row['pagerange'], -1, PREG_SPLIT_DELIM_CAPTURE );
-						if ($placedOnPageRanges ) foreach ( $placedOnPageRanges as $pageElem ) {
-							if ( is_numeric( $pageElem ) ) {
-								$paddedPageElem = str_pad( $pageElem, 3, "0", STR_PAD_LEFT );
-								$placedOnPageStr .= $paddedPageElem;
-							} else {
-								$placedOnPageStr .= $pageElem; // add ',' or '-'
-							}
-						}
-						$placedOnPage[] = $placedOnPageStr;
+						$placedOnPage[] = BizPage::addZeroPaddingToPageNumberRange( $row['pagerange'] ); // BZ#31032
 					}
 					if ( $doPlacedOn ) {
 						$specialData[$objId]['PlacedOn'] = implode( ', ', $placedOn );
 					}
 					if ( $doPlacedOnPage ) {
 						$specialData[$objId]['PlacedOnPage'] = implode( ', ', $placedOnPage );
+					}
+				} else { // Object is not placed.
+					if ( $doPlacedOn ) {
+						$specialData[$objId]['PlacedOn'] = '';
+					}
+					if ( $doPlacedOnPage ) {
+						$specialData[$objId]['PlacedOnPage'] = '';
 					}
 				}
 			}
@@ -2415,27 +2416,6 @@ class BizProperty
 		 */
 
 		switch (DBTYPE) {
-			case 'oracle':
-				$dbTypeMap = array(
-					"string"			=> "varchar(255) default ''",
-					"multistring"		=> "clob",
-					"multiline"			=> "clob",
-					"bool"				=> ($theTable == 'objects' || $theTable == 'deletedobjects' || $theTable == '') ? "integer default 0" : "varchar(2) default ''",
-					"int"				=> "integer default 0",
-					"double"			=> "float default 0.0",
-					"date"				=> "varchar(20) default ''",
-					"datetime"			=> "varchar(20) default ''",
-					"list"				=> "varchar(255) default ''",
-					"multilist"			=> "clob",
-					"password"			=> "varchar(40) default ''",
-					"language"			=> "varchar(4) default ''",
-					"color"				=> "varchar(11) default ''",
-					"fileselector"		=> "varchar(255) default ''",
-					"file"		        => "varchar(255) default ''",
-					"articlecomponentselector" => "varchar(255) default ''",
-					"articlecomponent"	=> "varchar(255) default ''",
-				);
-				break;
 			case 'mssql':
 				$dbTypeMap = array(
 					"string"			=> "varchar(255) default ''",
@@ -2618,7 +2598,7 @@ class BizProperty
 	 * Checks if the default value is an element of the (multi)list.
 	 *
 	 * @param string $type Type of the property.
-	 * @param array $list List containing allowed values.
+	 * @param string $list List containing allowed values (packed as comma separated string).
 	 * @param string $default Default value.
 	 * @throws BizException Throws BizException when the validation fails.
 	 */
@@ -2790,5 +2770,86 @@ class BizProperty
 	{
 		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		DBProperty::deleteProperties( $ids );
+	}
+
+	/**
+	 * Returns a list of publication ids of the requested property ($propName).
+	 *
+	 * ﻿The publication ids listed in $pubIdsToBeExcluded will be excluded from being returned.
+	 *
+	 * @since 10.1.6 Introduced since the fix for EN-84515.
+	 * @param string $propName Name of the property to retrieve. In case of custom props, it starts with C_.
+	 * @param int[] $pubIdsToBeExcluded See function header.
+	 * @return int[] List of publication ids where the property belongs to.
+	 */
+	private static function getPropertyPubIds( $propName, array $pubIdsToBeExcluded )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
+		return DBProperty::getPropertyPubIds( $propName, $pubIdsToBeExcluded );
+	}
+
+	/**
+	 * Checks and deletes the property($propertyName) defined in dialog setup(smart_actionproperties)
+	 * before the property is removed from the MetaData setup(smart_properties).
+	 *
+	 * This function does not remove the property($propertyName) from MetaData setup, but only remove
+	 * from the dialog setup.
+	 * This function is typically called just right before the property is going to be removed from
+	 * the MetaData setup.
+	 *
+	 * @since 10.1.6 Introduced since the fix for EN-84515.
+	 * @param string $propertyName Property name to be removed soon, first check if any deletion needed in smart_actionproperties table.
+	 * @param int $pubId Publication id of which the property name belongs to, 0 for all publications.
+	 */
+	private static function checkAndRemoveActionPropertiesBeforePropertyDeletion( $pubId, $propertyName )
+	{
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		if( $pubId == 0 ) {
+			$pubIdsToBeExcludedFromPropDeletion = self::getPropertyPubIds( $propertyName, array( $pubId ));
+			if( $pubIdsToBeExcludedFromPropDeletion ) {
+				DBActionproperty::deleteActionPropertiesGivenPropName( $propertyName, $pubIdsToBeExcludedFromPropDeletion );
+			} else {
+				DBActionproperty::deletePropFromActionProperties( $propertyName, null );
+			}
+		} else {
+			DBActionproperty::deletePropFromActionProperties( $propertyName, $pubId );
+		}
+	}
+
+	/**
+	 * Checks and remove the relevant data from database before deleting the property.
+	 *
+	 * When a property is introduced, the property will be added as a database field in
+	 * smart_objects and smart_deletedobjects table.
+	 * Optionally, the property can also be added in the Dialog Setup.
+	 * Therefore the above mentioned data needs to be first removed before the property is deleted.
+	 *
+	 * @since 10.1.6
+	 * @param int $propId Id of the property to be deleted.
+	 * @param string $propType The type of the property to be removed.
+	 * @param string $propName The name of the property to be removed.
+	 * @param int $publ The Publication of the property, 0 to indicate all publications.
+	 */
+	public static function checkAndRemoveRelatedDataBeforeDeleteProperty( $propId, $propType, $propName, $publ )
+	{
+		if( BizProperty::isCustomPropertyName( $propName )) {
+			BizProperty::checkAndRemoveActionPropertiesBeforePropertyDeletion( $publ, $propName );
+
+			$foundDbType = BizProperty::getCustomPropType( $propId, $propType, $propName );
+			if( !$foundDbType ) { // BZ#33742 - Delete DB field only when type is not found in DB
+				BizCustomField::deleteFieldAtModel( 'objects', $propName );
+			} else { // Reset custom property value when the property removed from particular publication
+				require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
+				$updateValues = array( $propName => '' );
+				$where = '`publication` = ?';
+				$params = array( $publ );
+
+				$updateResult = DBObject::updateRow( 'objects', $updateValues, $where, $params );
+				if( $updateResult ) {
+					DBObject::updateRow( 'deletedobjects', $updateValues, $where, $params );
+				}
+			}
+		}
+		BizProperty::deleteProperty( $propId );
 	}
 }

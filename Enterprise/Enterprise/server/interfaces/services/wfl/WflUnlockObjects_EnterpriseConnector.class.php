@@ -40,6 +40,5 @@ abstract class WflUnlockObjects_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflUnlockObjectsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

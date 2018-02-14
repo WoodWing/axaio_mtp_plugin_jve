@@ -13,32 +13,19 @@
 }
 </style>
 
-<script language="javascript" type="text/javascript" src="../../server/utils/javascript/CookieManager.js" ></script>
 <script src="../../server/jquery/nhpup_1.1.js"></script>
 
 <script language="javascript" type="text/javascript">
 <!--
-		function readCookie(name)
-		{
-			var nameEQ = name + "=";
-			var ca = document.cookie.split(';');
-			for(var i=0;i < ca.length;i++) {
-				var c = ca[i];
-				while (c.charAt(0)==' ') c = c.substring(1,c.length);
-				if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-			}
-			return '';
+	function init()
+	{
+		// init numeric field "Refresh" (auto-refresh interval in seconds)
+		var refreshObject = document.getElementById('refreshInt');
+		refreshObject.value = sessionStorage.getItem('idsjobsrefresh');
+		if ( refreshObject.value && refreshObject.value > 0 ) {
+			setTimeout('location.reload(true);',refreshObject.value*1000);
 		}
-
-		function init()
-		{
-			// init numeric field "Refresh" (auto-refresh interval in seconds)	
-			var refreshObject = document.getElementById('refreshInt');
-			refreshObject.value = readCookie('idsjobsrefresh');	
-			if ( refreshObject.value > 0 ) {
-				setTimeout('location.reload(true);',refreshObject.value*1000);
-			}
-		}
+	}
 // -->
 </script>
 
@@ -55,7 +42,7 @@
 			<td valign="middle" align="right"><a href="indesignserverjobs.php"><img src="../../config/images/ref_32.gif" border="0" title="<!--RES:ACT_REFRESH-->" width="32" height="32"/></a></td>
 			<td valign="middle" align="right">
 				<!--RES:ACT_REFRESH-->:<br/>
-				<input id="refreshInt" style='width:30px' onChange="CookieManager.prototype.setCookie('idsjobsrefresh', this.value); setTimeout('location.reload(true);',this.value*1000)"
+				<input id="refreshInt" style='width:30px' onChange="sessionStorage.setItem('idsjobsrefresh', this.value); setTimeout('location.reload(true);',this.value*1000)"
 					title="<!--RES:IDS_AUTOREFRESH_INFO-->"/>
 			</td>
 		</tr>
@@ -110,6 +97,7 @@
 				<th><!--RES:OBJECT--></th>
 				<th><!--RES:IDS_INDSERVER--></th>
 				<th><!--RES:IDS_QUEUED_SINCE--></th>
+				<th><!--RES:IDS_PICKUP_FROM--></th>
 				<th><!--RES:IDS_STARTED_AT--></th>
 				<th><!--RES:IDS_FINISHED_AT--></th>
 				<th><!--RES:SVR_ATTEMPTS--></th>

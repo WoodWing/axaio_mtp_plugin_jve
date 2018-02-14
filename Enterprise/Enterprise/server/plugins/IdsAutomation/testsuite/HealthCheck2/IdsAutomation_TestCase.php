@@ -26,8 +26,6 @@ class WW_TestSuite_HealthCheck2_IdsAutomation_TestCase extends TestCase
 
 	/**
 	 * Validate the CLIENTFEATURES setting option that required by Ids Automation
-	 *
-	 * @return bool True when feature found else false
 	 */
 	private function validateClientFeatureOptions()
 	{

@@ -78,7 +78,6 @@ class MaintenanceMode_WflLogOn extends WflLogOn_EnterpriseConnector
 	 */
 	private function isSystemUser( $ticket )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
 		if( DBUser::isAdminUser( BizSession::getShortUserName() ) ) {
@@ -87,7 +86,9 @@ class MaintenanceMode_WflLogOn extends WflLogOn_EnterpriseConnector
 		if ( BizSession::getRunMode() == BizSession::RUNMODE_BACKGROUND  ) {
 			return true;
 		}
-		if( BizSession::isAppInTicket( null, 'mover-' ) || BizSession::isAppInTicket( null, 'indesign server'  ) ) {
+		if( BizSession::isAppInTicket( null, 'mover-' ) ||
+			BizSession::isAppInTicket( null, 'indesign server'  ) ||
+			BizSession::isAppInTicket( null, 'elvis' )) {
 			return true;
 		}
 

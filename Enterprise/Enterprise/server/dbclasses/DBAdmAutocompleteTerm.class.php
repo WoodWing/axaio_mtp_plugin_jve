@@ -52,7 +52,7 @@ class DBAdmAutocompleteTerm extends DBBase
 	 *
 	 * @param AdmTerm $term The AdmTerm to be retrieved from the database.
 	 * @throws BizException Throws an exception when there's an error retrieving the records.
-	 * @return AdmTerm[]|null The requested AdmTerm.
+	 * @return AdmTerm|null The requested AdmTerm.
 	 */
 	public static function getTerm( AdmTerm $term )
 	{

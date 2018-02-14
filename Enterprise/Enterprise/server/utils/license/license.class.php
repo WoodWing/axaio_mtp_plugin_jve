@@ -36,8 +36,7 @@
 	//Location of the license information in the Filestore	
 	define('FSLICENSEDIR', WOODWINGSYSTEMDIRECTORY . '/ProductInfo' );
 	define('FSLICENSEDIRTIMESTAMP', FSLICENSEDIR. '/_system_' );
-	define('FSLICENSE_SEMAPHORE_FILE', FSLICENSEDIR . '/_sema' );
-	
+
 	define( 'DB_CONTACT_PREFIX', 'contactinfo_' );
 	define( 'DB_PROXY_PREFIX', 'proxyinfo_' );
 
@@ -122,7 +121,10 @@ class License
 	 * Avoid recursion in auto renew function
 	 */
 
-	private $mInAutoRenew = false; 
+	private $mInAutoRenew = false;
+
+	/** @var bool $defaultSemaId Set when a semaphore is created with the 'default' postfix. */
+	private $defaultSemaId = null;
 
 	/**
 	 * Construct the License.
@@ -356,40 +358,6 @@ class License
 						}
 						break;
 						
-					case 'oracle':
-						$dbh = oci_connect ($dbuser, $dbpass, $dbserver, 'UTF8');
-						if (!$dbh) 
-							return null;
-		//				$sql = "SELECT \"CREATED\" FROM user_objects WHERE \"OBJECT_TYPE\"='TABLE' AND \"OBJECT_NAME\"='SMART_OBJECTS'";
-						$tablename = 'smart_objects';
-						$sql = "SELECT to_char(\"CREATED\",'YYYY-MM-DD HH24:MI:SS') FROM user_objects WHERE \"OBJECT_TYPE\"='TABLE' AND \"OBJECT_NAME\"='$tablename'";
-		
-						$statement = oci_parse($dbh, $sql);
-						$ret = @oci_execute($statement,OCI_COMMIT_ON_SUCCESS);
-						if ($ret)
-						{
-					        $row = oci_fetch_array($statement, OCI_ASSOC | OCI_RETURN_NULLS | OCI_RETURN_LOBS );
-					        //If no row, try uppercase table name
-					        if ( $row === false )
-					        {
-								$tablename = strtoupper($tablename);
-								$sql = "SELECT to_char(\"CREATED\",'YYYY-MM-DD HH24:MI:SS') FROM user_objects WHERE \"OBJECT_TYPE\"='TABLE' AND \"OBJECT_NAME\"='$tablename'";
-								$statement = oci_parse($dbh, $sql);
-								$ret = @oci_execute($statement,OCI_COMMIT_ON_SUCCESS);
-								if ($ret)
-							        $row = oci_fetch_array($statement, OCI_ASSOC | OCI_RETURN_NULLS | OCI_RETURN_LOBS );
-					        }
-							if (is_array($row)) {
-								$keys = array_keys( $row );
-								$dbstamp = $row[ $keys[0] ];
-								$dbstampunix = strtotime( $dbstamp );
-								if ( $dbstampunix === false ) {
-									$dbstampunix = '';
-								}
-							}			
-						}
-						break;
-						
 					case 'mssql':
 						$connectionInfo = array( "UID"=>$dbuser,
                         				 		 "PWD"=>$dbpass,
@@ -580,7 +548,6 @@ class License
 				{
 					case 'mysql': $code = 0; break;
 					case 'mssql': $code = 1; break;
-					case 'oracle': $code = 2; break;
 				}
 				$key3Arr[ 1 ] = $code;
 
@@ -607,55 +574,63 @@ class License
 	/**
 	 * To make reading and writing the license info in both the DB and FS an 'atomic' action, we use a semaphore.
 	 * Be sure that the user (web browser) can not stop the execution half way: call ignore_user_abort() before!
+	 * The interval between two attempts should be long enough to ensure that a second or third attempt is successful.
+	 * So instead of using intervals of 1 or 2 milliseconds, the intervals are set to at least more than 10 milliseconds.
 	 *
-	 * @param int index/name to distinguish more semaphores
-	 * @param int maxAttempts; when > 1: retry to obtain the semaphore
-	 * @return int handle
+	 * @param string $semaPostfix to distinguish more semaphores
+	 * @param int $maxAttempts Maximum number of tries to get the semaphore. Maximum is 20.
+	 * @return integer|null Semaphore (id) when created, NULL when failed.
+	 * a semaphore.
 	 *
 	 */
-	private function lo_getSema( $semaName = 0, $maxAttempts = 20 )
+	private function lo_getSema( $semaPostfix = 'default', $maxAttempts = 20 )
 	{
-		$n = 0;
-		$filename = FSLICENSE_SEMAPHORE_FILE . $semaName;
-		
-		//Avoid time outs in case the semaphore directory is not writable at once
-		//When logging on, an error message should occur after 40 seconds.
-		set_time_limit( 0 );
+		$semaId = null;
+		if( $semaPostfix === 'default' && $this->defaultSemaId ) {
+			$semaId = $this->defaultSemaId;
+		} else {
+			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+			// During testing it became clear that the intervals between attempts must not be too short as this will lead
+			// to too many failing attempts on MSSQL.
+			$attempts = array( 20, 30, 50, 90, 260, 420, 740, 745, 425, 265, 95, 55, 35, 25, 205, 305, 505, 905, 505, 305 );
 
-		do {
-			$fh = @fopen( $filename, "w" );
-			if ( !$fh ) {
-				if( $this->mLicLog ) {
-					LogHandler::Log('license', 'DEBUG', 'Waiting for semaphore' );
-				}
-				if ( $maxAttempts > 1 ) {
-					sleep( 1 ); //In seconds; I wish I could specify this in milliseconds...
-				}
-				$n++;
+			if( $maxAttempts < 20 ) {
+				$attempts = array_slice( $attempts, 0, $maxAttempts );
 			}
-		} while( !$fh && ($n < $maxAttempts));
+			$bizSema = new BizSemaphore();
+			$bizSema->setAttempts( $attempts );
+			$bizSema->setLifeTime( 120 );
+			$semaEntityId = 'license_'.$semaPostfix;
+			$previousLogSqlState = BizSemaphore::suppressSqlLogging();
+			$semaId = $bizSema->createSemaphore( $semaEntityId );
+			BizSemaphore::restoreSqlLogging( $previousLogSqlState );
 
-		if ( $n >= $maxAttempts )
-		{
-			$this->mWWLError = WWL_ERR_FILESTORE_SYSDIR;
-			return false;
+			if( !$semaId ) {
+				$this->mWWLError = WWL_ERR_SET_SEMAPHORE;
+			} elseif( $semaPostfix === 'default' ) {
+				$this->defaultSemaId = $semaId;
+			}
 		}
-		return $fh;
+
+		return $semaId;
 	}
 
 	/**
-	 * Release the semaphore obtained by lo_getSema()
+	 * Deletes the semaphore from the database.
 	 *
-	 * @param int sema handle obtained by lo_getSema()
-	 * @param int index/name; the same value when calling lo_getSema()
-	 *
+	 * @param int $semaId to distinguish semaphores.
 	 */
-	private function lo_releaseSema( $sema, $semaName=0 )
+	private function lo_releaseSema( $semaId )
 	{
-		fclose( $sema );
-		$filename = FSLICENSE_SEMAPHORE_FILE . $semaName;
-		@unlink( $filename );
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$previousLogSqlState = BizSemaphore::suppressSqlLogging();
+		BizSemaphore::releaseSemaphore( $semaId );
+		BizSemaphore::restoreSqlLogging( $previousLogSqlState );
+		if( $semaId === $this->defaultSemaId ){
+			$this->defaultSemaId = null;
+		}
 	}
+
 
 	/**
 	 * return the value of the given field from the database
@@ -718,47 +693,79 @@ class License
 	}
 	
 	/**
-	 * return the value of the given field
+	 * Return the value of the given field.
+	 *
 	 * The value is retrieved from both the database and filestore, and these values should match. 
-	 * If not, someome is trying to fool us, or someone restored backups that are different for FS and DB
+	 * If not, someone is trying to fool us, or someone restored backups that are different for FS and DB
 	 *
-	 * @param string field
-	 * @return string value or false on failure
-	 *
+	 * @param string $field
+	 * @return bool|string value or false on failure
 	 */
 	public function getLicenseField( $field ) 
 	{
 		$this->mWWLError = 0;
-
-		if ( !$this->initDirectories() )
+		if( !$this->initDirectories() ) {
 			return false;
-
+		}
 		ignore_user_abort();
 
-		$sema = $this->lo_getSema();
-		if ( !$sema )
-			return false;
+		if( $this->defaultSemaId ) {
+			$result = $this->getLicenseFieldWithSemaphoreInHand( $field );
+		} else {
+			$result = $this->getLicenseFieldWithoutSemaphoreInHand( $field );
+		}
 
+		return $result;
+	}
+
+	/**
+	 * Return the value of the given field.
+	 *
+	 * The value is retrieved from both the database and filestore, and these values should match.
+	 * To ensure that both read actions are done in a consistent way a semaphore is set around the read actions.
+	 *
+	 * @param string $field
+	 * @return bool|string value or false on failure
+	 */
+	private function getLicenseFieldWithoutSemaphoreInHand( $field )
+	{
+		$semaId = $this->lo_getSema();
+		if( !$semaId ) {
+			return false;
+		}
+
+		$result = $this->getLicenseFieldWithSemaphoreInHand( $field );
+
+		$this->lo_releaseSema( $semaId );
+
+		return $result;
+	}
+
+	/**
+	 * Return the value of the given field.
+	 *
+	 * The value is retrieved from both the database and filestore, and these values should match.
+	 * To ensure that both read actions are done in a consistent way a semaphore is set around the read actions.
+	 * This method can be called if the semaphore is already set and will be released by the caller.
+	 *
+	 * @param string $field
+	 * @return bool|string value or false on failure
+	 */
+	private function getLicenseFieldWithSemaphoreInHand( $field )
+	{
 		$val = $this->lo_getFieldDB( $field );
-		if ( $val === false )
-		{
-			$this->lo_releaseSema( $sema );
-			return false;
+		$result = $val;
+		if( $val !== false ) {
+			$val2 = $this->lo_getFieldFS( $field );
+			if( $val2 === false ) {
+				$result = false;
+			} elseif( $val != $val2 ) {
+				$this->mWWLError = WWL_ERR_FILESTORE_DB_MISMATCH;
+				$result = false;
+			}
 		}
-		$val2 = $this->lo_getFieldFS( $field );
-		if ( $val2 === false )
-		{
-			$this->lo_releaseSema( $sema );
-			return false;
-		}
-		if ( $val != $val2 )
-		{
-			$this->lo_releaseSema( $sema );
-			$this->mWWLError = WWL_ERR_FILESTORE_DB_MISMATCH;
-			return false;
-		}
-		$this->lo_releaseSema( $sema );
-		return $val;
+
+		return $result;
 	}
 
 	/**
@@ -884,24 +891,24 @@ class License
 
 		ignore_user_abort();
 
-		$sema = $this->lo_getSema();
-		if ( !$sema )
+		$semaId = $this->lo_getSema();
+		if ( !$semaId )
 			return false;
 			
 		$curval = $this->lo_getFieldFS( $field );
 		if ( !$this->lo_setFieldFS( $field, $val ))
 		{
-			$this->lo_releaseSema( $sema );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		if ( !$this->lo_setFieldDB( $field, $val ))
 		{
 			//restore old FS value
 			$this->lo_setFieldFS( $field, $curval );
-			$this->lo_releaseSema( $sema );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
-		$this->lo_releaseSema( $sema );
+		$this->lo_releaseSema( $semaId );
 		return true;
 	}
 
@@ -919,21 +926,21 @@ class License
 
 		ignore_user_abort();
 
-		$sema = $this->lo_getSema();
-		if ( !$sema )
+		$semaId = $this->lo_getSema();
+		if ( !$semaId )
 			return false;
 			
 		if ( !$this->lo_removeFieldDB( $field ))
 		{
-			$this->lo_releaseSema( $sema );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		if ( !$this->lo_removeFieldFS( $field ))
 		{
-			$this->lo_releaseSema( $sema );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
-		$this->lo_releaseSema( $sema );
+		$this->lo_releaseSema( $semaId );
 		return true;
 	}
 	
@@ -1066,9 +1073,9 @@ class License
 		$productname = $this->safeName( $productname );
 
 		ignore_user_abort();
-		$semaIdx = 1;
-		$sema = $this->lo_getSema( $semaIdx );
-		if ( !$sema )
+		$semaPostfix = 'set';
+		$semaId = $this->lo_getSema( $semaPostfix );
+		if ( !$semaId )
 			return false;
 
 		//First, check whether the product is already known
@@ -1094,7 +1101,7 @@ class License
 			
 			if ( !$this->setLicenseField( "productcodes", $productcodes ))
 			{
-				$this->lo_releaseSema( $sema, $semaIdx );
+				$this->lo_releaseSema( $semaId );
 				return false;
 			}
 		}
@@ -1106,10 +1113,10 @@ class License
 		$productinfo = $this->mLicenseString->makeProductInfo( $productname, $enc_serial, $license );
 		if ( !$this->setLicenseField( $productcode, $productinfo ))
 		{
-			$this->lo_releaseSema( $sema, $semaIdx );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
-		$this->lo_releaseSema( $sema, $semaIdx );
+		$this->lo_releaseSema( $semaId );
 		return true;
 	}
 	
@@ -1248,9 +1255,9 @@ class License
 		ignore_user_abort();
 
 		$now_enc = $now . '-' . $now_enc; //Handy for comparing timestamps: put the current time in front as a prefix
-		$semaIdx = 1;
-		$sema = $this->lo_getSema( $semaIdx );
-		if ( !$sema )
+		$semaPostfix = 'set';
+		$semaId = $this->lo_getSema( $semaPostfix );
+		if ( !$semaId )
 			return false;
 
 		//Check whether the current value is less;
@@ -1274,11 +1281,11 @@ class License
 		{
 			if ( !$this->setLicenseField( 'local', $now_enc ))
 			{
-				$this->lo_releaseSema( $sema, $semaIdx );
+				$this->lo_releaseSema( $semaId );
 				return false;
 			}
 		}
-		$this->lo_releaseSema( $sema, $semaIdx );
+		$this->lo_releaseSema( $semaId );
 		return true;
 	}
 
@@ -1399,124 +1406,147 @@ class License
 	}
 
 	/**
-	 *	Return the number of concurrent users for the given productcode
-	 *	If the productcode is empty, return the number of connections (all applications).
-	 *	Note that if a user is logged on twice to the same application, the oldest ticket will be deleted.
-	 *  Exception example:
+	 *	Return the number of concurrent users for the given productcode. If the productcode is empty, return the number
+	 * of connections (all applications).
+	 *
+	 *	If a user is logged on twice to the same application, the oldest ticket will be deleted.
+	 *
+	 * Exception example:
 	 *    ID/IC have the same appproductcode, however, the appname will be different.
 	 *    A user that is logged on to both applications is counted as 1, without one of the tickets being deleted.
-	 *	If a user is about to log on to certain application, 
-	 *	and an old ticket for that user and application is still present in the tickets table,
-	 *  that ticket will be deleted, and thus doesn't count.
 	 *
-	 * @param string $appproductcode
+	 *	If a user is about to log on to certain application and an old ticket for that user and application is still
+	 * present in the tickets table, that ticket will be deleted, and thus doesn't count.
+	 *
+	 * @param string $appProductCode
 	 * @param string $logonUser
-	 * @param string $logonApp
+	 * @param string $logonAppName
+	 * @param string $logonAppVersion [Since 10.1.6/10.3.0]
 	 * @return int number of users/connections
 	 */
-	private function getNumConnections( $appproductcode='', $logonUser='', $logonApp='' )
+	private function getNumConnections( $appProductCode='', $logonUser='', $logonAppName='', $logonAppVersion='' )
 	{
-//		$this->mDBDriver->DBpurgetickets();
+		require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 
-		$db = $this->mDBDriver->tablename("tickets");
-		$sql = "SELECT `usr`, `appname`, `expire`, `id`, `appserial`, `appproductcode`  from $db";
-
-		//Ignore the footprint of the installation. Will be removed as soon as 'purgeTickets' is called.
-		$installkey = $this->mInstallTicketID;
-		$sql .= " WHERE `usr` <> '$installkey' AND `usr` NOT LIKE '%_system_%' AND `appname` <> '$installkey'";
-
-		if ( $appproductcode )
-		{
-			$sql .= " AND `appproductcode`='$appproductcode'";
-			$orderfield = 'appproductcode';
+		// Ignore the footprint of the installation. Will be removed as soon as 'purgeTickets' is called.
+		$where = "`usr` <> ? AND `appname` <> ? ";
+		$params = array( strval( $this->mInstallTicketID ), strval( $this->mInstallTicketID ) );
+		if( $appProductCode ) {
+			$where .= "AND `appproductcode` = ? ";
+			$params[] = strval( $appProductCode );
 		}
-		else 
-		{
-			$orderfield = 'appname';
-		}
-		
-		//Multiple connections of 1 user count as 1 as long as the application name/productcode differs
-		$sql .= " ORDER BY `usr`, `$orderfield`, `expire` DESC";
-		
-		$sth = $this->mDBDriver->query($sql, array(), null, $this->mLicLog ); //false: do not write in the log file
-		if (!$sth) 
-			return false;
-		$n = 0;
-		$prevUsr = '';
-		$prevAppname = '';
-		while(($row = $this->mDBDriver->fetch($sth))) {
-			$usr = $row[ 'usr' ];
-			$appname = $row[ 'appname' ];
-//			print "<br>Testing user $usr ($productcode; $appname)...";
 
-			$bDeleteTicket = false;
-			$sDeleteReason = '';
-			if ( $logonUser && ($logonUser == $usr) &&
-				 $logonApp && ($logonApp == $appname) )
-			{
-				//In case the user wants to logon for a certain application (except IDS), 
-				//and an old ticket is still present for that user and application,
-				//remove that old ticket. This way it doesn't count.
-				$bDeleteTicket = true;
-				$sDeleteReason = "Deleting old ticket for the user + application that logs on now.";
+		// Compose SQL fragment such as: "ORDER BY `usr`, `appname`, `expire` DESC"
+		$orderBy = array( 'usr' => false );
+		if( $appProductCode ) {
+			$orderBy['appproductcode'] = false;
+		} else {
+			$orderBy['appname'] = false;
+		}
+		$orderBy['expire'] = false;
+
+		$fields = array( 'usr', 'appname', 'appversion', 'expire', 'id', 'appserial', 'appproductcode' );
+		$rows = DBBase::listRows( 'tickets', '', '', $where, $fields, $params, $orderBy,
+			null, null, null, $this->mLicLog );
+
+		// Multiple connections of 1 user count as 1 as long as the application name/productcode differs
+		$count = 0;
+		$prevUser = '';
+		$prevAppName = '';
+		$prevAppVersion = '';
+		if( $rows ) foreach( $rows as $row ) {
+			$iterUser = $row[ 'usr' ];
+			$iterAppName = $row[ 'appname' ];
+			$iterAppVersion = $row[ 'appversion' ];
+
+			$deleteTicket = false;
+			$deleteReason = '';
+			if ( $logonUser && ($logonUser == $iterUser) &&
+				$logonAppName && $this->isSameApplication( $logonAppName, $logonAppVersion, $iterAppName, $iterAppVersion ) ) {
+				// In case the user wants to logon for a certain application (except IDS), and an old ticket is still
+				// present for that user and application, remove that old ticket. This way it doesn't count.
+				$deleteTicket = true;
+				$deleteReason = "Deleting old ticket for the user + application that logs on now.";
 			}
 
-			if ( !$bDeleteTicket )
-			{
-				//Only update the counter (n) in case the user differs from the previous user
-				if ( $usr != $prevUsr )
-				{
-					$n++;
-					$prevUsr = $usr;
-					$prevAppname = '';
+			if( !$deleteTicket ) {
+				// Only update the counter (n) in case the user differs from the previous user
+				if( $iterUser != $prevUser ) {
+					$count++;
+					$prevUser = $iterUser;
+					$prevAppName = '';
+					$prevAppVersion = '';
 				}
 	
 				if( $this->mLicLog ) {
-					$productcode = $row[ 'appproductcode' ];
-					LogHandler::Log('license', 'DEBUG', "Testing user $n, $usr, appname $appname (code $productcode)..." );
+					$productCode = $row[ 'appproductcode' ];
+					LogHandler::Log('license', 'DEBUG',  "Testing user {$iterUser} ({$count}), ".
+						"app name {$iterAppName}, app version {$iterAppVersion} (code $productCode)..." );
 				}
 	
-				if ( $appname != $prevAppname )
-				{
-					if( $this->mLicLog ) {
-						LogHandler::Log('license', 'DEBUG', "$appname != $prevAppname" );
-					}
-					$prevAppname = $appname;
-				}
-				else
-				{
-					//In case the user is logged on twice (or more) for the same application, 
-					//remove tickets and remain only the first (for this application)
-					//Because the row are ordered by `expire` DESC, the first one is the most recent one, 
-					//and the older ones can be removed...
-					$bDeleteTicket = true;
-					$sDeleteReason = "Deleting old ticket for the same application (logged on twice or more to the same application).";
+				if( !$this->isSameApplication( $prevAppName, $prevAppVersion, $iterAppName, $iterAppVersion ) ) {
+					$prevAppName = $iterAppName;
+					$prevAppVersion = $iterAppVersion;
+				} else {
+					// In case the user is logged on twice (or more) for the same application, remove tickets and remain only
+					// the first (for this application). Because the row are ordered by `expire` DESC, the first one is the
+					// most recent one, and the older ones can be removed.
+					$deleteTicket = true;
+					$deleteReason = "Deleting old ticket for the same application (logged on twice or more to the same application).";
 				}
 			}
 			
-			if ( $bDeleteTicket )
-			{
+			if( $deleteTicket ) {
 				// We allow InDesign Server to logon as many times as needed.
 				// Example: when user stores layout, it could trigger background IDS jobs to generate PDFs.
 				// There could be many jobs running at the same time for that single user. Those jobs
 				// can run at the same IDS machine, or even dispatched over different machines.
 				// We do not want to clear those ticket or else one job could break other running job half way!
-				if( stripos( $appname, 'indesign server' ) === false && // no IDS?
-					stripos( $appname, 'mover' ) !== 0 ) { // no Smart Mover? (It operates under "Mover" name followed by some process id.)
-					$id = $row[ 'id' ];
-					$sql = "DELETE FROM $db WHERE `id`=$id";
+				if( stripos( $iterAppName, 'indesign server' ) === false && // no IDS?
+					stripos( $iterAppName, 'mover' ) !== 0 ) { // no Smart Mover? (It operates under "Mover" name followed by some process id.)
 					if( $this->mLicLog ) {
-						LogHandler::Log('license', 'INFO', $sDeleteReason );
+						LogHandler::Log('license', 'INFO', $deleteReason );
 					}
-					$sth2 = $this->mDBDriver->query($sql, array(), null, $this->mLicLog);
-					if ( !$sth2 )
+					$where = '`id` = ?';
+					$params = array( intval( $row[ 'id' ] ) );
+					if( !DBBase::deleteRows( 'tickets', $where, $params, $this->mLicLog ) ) {
 						return false;
+					}
 				}
 			}
 		}
-		return $n;
+		return $count;
 	}
 
+	/**
+	 * Tells whether two client applications are equal.
+	 *
+	 * CS9 is technically a totally different production than CS10. Even the license of CS9 differs from CS10.
+	 * CS10 is not yet a full replacement of CS9 and so they may be used side by side during transition phases.
+	 * All this makes that a CS9 seat should NOT be cleared automatically when that user takes a CS10 seat.
+	 * In other words a CS9 (or before) client must be seen as a different than a CS10 (or later) client.
+	 *
+	 * @since 10.1.6/10.3.0
+	 * @param string $appNameA
+	 * @param string $appVersionA The client application version of $appNameA.
+	 * @param string $appNameB
+	 * @param string $appVersionB The client application version of $appNameB.
+	 * @return bool
+	 */
+	private function isSameApplication( $appNameA, $appVersionA, $appNameB, $appVersionB )
+	{
+		$same = false;
+		if( $appNameA == $appNameB ) {
+			if( $appNameA == 'Content Station' ) {
+				$csMajorVersionA = intval( BizSession::formatClientVersion( $appVersionA, 1 ) );
+				$csMajorVersionB = intval( BizSession::formatClientVersion( $appVersionB, 1 ) );
+				$same = ($csMajorVersionA <= 9) === ($csMajorVersionB <= 9);
+			} else {
+				$same = true;
+			}
+		}
+		return $same;
+	}
 
 	/**
 	 *	Delete old tickets one by one, that are older than "mKeepAliveMinutes" minutes.
@@ -1804,7 +1834,8 @@ class License
 		if( $this->mLicLog ) {
 			LogHandler::Log('license', 'ERROR', 'Error message: '.$errorMessage);
 		}
-		if ( $logoff ) {
+		if ( $logoff && ( $this->mWWLError != WWL_ERR_SET_SEMAPHORE ) ) { // Sometimes a check fails because a semaphore
+			// could not be set. Such a technical issue should not result in a log off of all users.
 			$this->logOffAllUsers( $logoffProdcode, $logoffAppserial );
 		}
 		return $code;
@@ -1818,17 +1849,52 @@ class License
 	 *  usageLimitReached: true if the maxusage limit has been reached
 	 *  expires: if set, the expiration date
 	 *  renew: if set, the date of renewal
+	 * In case InDesign Server is the client application the license status is checked randomly. To know when a check is
+	 * done a log statement is added. This registers the time needed to do the check.
 	 * 
-	 * @param string productcode
-	 * @param string appserial
-	 * @param array info
-	 * @param string errorMessage
-	 * @param string logonTime Optional.
-	 * @param string logonUser Optional.
-	 * @param string logonApp  Optional.
-	 * @return int license status, see codes at the start of this module
+	 * @param string $productcode
+	 * @param string $appserial
+	 * @param array $info
+	 * @param string $errorMessage
+	 * @param string $logonTime Optional.
+	 * @param string $logonUser Optional.
+	 * @param string $logonApp  Optional.
+	 * @param string $logonAppVersion Optional. [Since 10.1.6/10.3.0]
+	 * @return string license status, see codes at the start of this module
 	 */
-	public function getLicenseStatus( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '', $logonUser='', $logonApp='' )
+	public function getLicenseStatus( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '',
+	                                  $logonUser='', $logonApp='', $logonAppVersion='' )
+	{
+		$semaId = $this->lo_getSema();
+		$status = false;
+		if( $semaId ){
+			$startTime = microtime( true );
+			$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,
+				$logonUser, $logonApp, $logonAppVersion );
+			$this->lo_releaseSema( $semaId ); // Note that the default semaphore can already be released by a call to lo_releaseSema() in between.
+			$endTime = microtime( true );
+			LogHandler::Log('license', 'DEBUG', sprintf( 'Execution time for detecting the license status: %.4f seconds.', $endTime - $startTime ) );
+		}
+
+		return $status;
+	}
+
+	/**
+	 * @see getLicenseStatus()
+	 * @since 10.1.3
+	 *
+	 * @param string $productcode
+	 * @param string $appserial
+	 * @param array $info
+	 * @param string $errorMessage
+	 * @param string $logonTime
+	 * @param string $logonUser
+	 * @param string $logonApp
+	 * @param string $logonAppVersion [Since 10.1.6/10.3.0]
+	 * @return string
+	 */
+	private function getLicenseStatusNoTiming( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '',
+	                                           $logonUser='', $logonApp='', $logonAppVersion='' )
 	{
 		$info = Array( 'curusage' => -1, 
 						'maxusage' => -1,
@@ -1839,7 +1905,7 @@ class License
 		$errorMessage = '';
 		$warningMessage = '';
 
-		//Obtained via getSerial() while no license is installed?		
+		//Obtained via getSerial() while no license is installed?
 		if ( $appserial === false )
 		{
 			$mainErrorCode = WW_LICENSE_ERR_INVALID_DATA;
@@ -1872,7 +1938,7 @@ class License
 		if ( !$this->IsConcurrent( $productcode, $appserial ) )
 			return WW_LICENSE_OK;
 
-		//Generic test for SCE Server: the 'hardware ID' should match the 'hardware ID'(key1) in the license
+		//Generic test for Enterprise Server: the 'hardware ID' should match the 'hardware ID'(key1) in the license
 		$key1db = $this->getLicenseField( "key1" );
 //		print "key1db=$key1db";
 		if ( $key1db === false )
@@ -1911,7 +1977,7 @@ class License
 		
 		$productcode = $this->safeName( $productcode );
 
-		//Check whether this concurrent productcode is already known (registered on SCE Server)
+		//Check whether this concurrent productcode is already known (registered on Enterprise Server)
 		$productcodes = $this->getLicenseField( "productcodes" );
 		if ( $productcodes === false || !$productcodes )
 		{
@@ -2037,11 +2103,11 @@ class License
 			$thelog .= "- key1=$key1\r\n";
 			$thelog .= "- key1src=$key1src\r\n";
 			if ( $starttime )
-				$thelog .= "- starttime=$starttime (" . date( "Y-m-d H:i:s", $starttime ) . ")\r\n";
+				$thelog .= "- starttime=$starttime (" . date( "Y-m-d H:i:s", intval($starttime) ) . ")\r\n";
 			if ( $expiretime )
-				$thelog .= "- expiretime=$expiretime (" . date( "Y-m-d H:i:s", $expiretime ) . ")\r\n";
+				$thelog .= "- expiretime=$expiretime (" . date( "Y-m-d H:i:s", intval($expiretime) ) . ")\r\n";
 			if ( $renewtime )
-				$thelog .= "- renewtime=$renewtime (" . date( "Y-m-d H:i:s", $renewtime ) . ")\r\n";
+				$thelog .= "- renewtime=$renewtime (" . date( "Y-m-d H:i:s", intval($renewtime) ) . ")\r\n";
 			$thelog .= "- expiremaxobj=$expiremaxobj\r\n";
 			$thelog .= "- errorstart=$errorstart\r\n";
 			$thelog .= "- testflags=" . $this->mTestFlags . "\r\n";
@@ -2074,7 +2140,7 @@ class License
 		}
 		
 		// AAA 2007-7
-		// Let clients logon that have a different 'appserial' than the serial on the SCE Server (for a certain product)
+		// Let clients logon that have a different 'appserial' than the serial on the Enterprise Server (for a certain product)
 		// Scenario: an InDesign client C1 with serial A
 		//	 SCE Server S1 with serial A
 		//   another SCE Server (S2) with serial B
@@ -2162,10 +2228,16 @@ class License
 										'', true, $productcode, $appserial );
 		}
 
+		// NFR subscription may have an expire but no renew
+		$renewOrExpireTime = $renewtime;
+		if ( !$renewOrExpireTime && $expiretime ) {
+			$renewOrExpireTime = $expiretime;
+		}
+
 		//Subscription?
-		if ( $renewtime )
+		if ( $renewOrExpireTime )
 		{
-			$togoSeconds = $renewtime - $thistime;
+			$togoSeconds = $renewOrExpireTime - $thistime;
 			$days = intval( $togoSeconds / (60 * 60 * 24) );
 			//Try to renew a few weeks before expiration
 			if ( $days < TRYRENEW_DAYSBEFOREEXPIRATION ) 
@@ -2194,7 +2266,8 @@ class License
 					{
 						LogHandler::Log('license', 'DEBUG', "Autorenew: returning new status (recursively)." );
 						//In case a forced auto renew would be necessary again (which is not normal), the recursion proctection will avoid a loop.
-						$newLicenseStatus = $this->getLicenseStatus( $productcode, $appserial, $info, $errorMessage, $logonTime, $logonUser, $logonApp );
+						$newLicenseStatus = $this->getLicenseStatus( $productcode, $appserial, $info, $errorMessage, $logonTime,
+							$logonUser, $logonApp, $logonAppVersion );
 						$this->mInAutoRenew = false;
 						return $newLicenseStatus;
 					}
@@ -2387,7 +2460,7 @@ class License
 			//Check only connections for this appproductcode
 			$checkProductcode = $productcode;
 		}
-		$curusage = $this->getNumConnections( $checkProductcode, $logonUser, $logonApp );
+		$curusage = $this->getNumConnections( $checkProductcode, $logonUser, $logonApp, $logonAppVersion );
 		$info[ 'curusage' ] = $curusage;
 		$tooManyUsers = $curusage >= $maxusage;
 		if ( $tooManyUsers )
@@ -3172,10 +3245,9 @@ class License
 	}
 	
 	/**
-	 * Return an HTML string that can be used to display the current license status
+	 * Outputs an HTML string that can be used to display the current license status
 	 * 
 	 * @param boolean inAdminTickets
-	 * @return string HTML string
 	 */
 	public function showStatusInHTML( $inAdminTickets=false )
 	{
@@ -3225,6 +3297,7 @@ class License
 			$pcname = $this->getName( $pc );
 			$licenseStatus = $this->getLicenseStatus( $pc, $serial, $info, $errorMessage );
 			$limitsArr[ $i ] = $info;
+			$limitsArr[ $i ]['serial' ] = $serial;
 			$limitsArr[ $i ]['licensestatus' ] = $licenseStatus;
 			
 //			print "<br>$pc, $serial, $curusage, $maxusage, $usageLimitReached, $errorMessage, $expires";
@@ -3267,10 +3340,10 @@ class License
 	
 		print "<h2>" . BizResources::localize("LIC_LICENSE_STATUS") . "</h2>";
 
-		$tablebg = '#dddddd';
+		$tablebg = '#dddddd'; // Grey
 		$clientAppUserLimit = false;
 		if ( count( $limitsArr ) > 0 ) {
-			print "<table class='text' width='820'>";
+			print "<table class='text' width='100%'>";
 			$maxmax = 0;
 			$maxcur = 0;
 			$hasNoLimit = false;
@@ -3301,37 +3374,37 @@ class License
 				$max = $nolimit;
 			}
 			
-			$tabwidth = 400;
+			$tabwidth = 50000; // Just a very high random number.
 			if ( $max ) {
 				$scale = intval( $tabwidth/$max );
 			} else {
 				$scale = 1;
 			}
-			
+
 			print "<tr bgcolor='#cccccc'>";
 			print "<th class='text'>" . BizResources::localize('LIC_APPLICATION') . "</th>";
+			print "<th class='text'>" . BizResources::localize('LIC_THE_SERIAL') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_STATUS') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_MESSAGE') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_RENEW') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_EXPIRES') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_CURRENT') . "</th>";
-			print "<th class='text'>" . BizResources::localize('LIC_USAGE') . "</th>";
+			print "<th class='text' width='300'>" . BizResources::localize('LIC_USAGE') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_LIMIT') . "</th>";
-			print "<th class='text'>" . BizResources::localize('LIC_ACTION') . "</th>";
+			print "<th class='text' width='10'>" . BizResources::localize('LIC_ACTION') . "</th>";
 			print "</tr>";
 			foreach( $limitsArr as $idx => $limitArr2 )
 			{
 				$cur = $limitArr2[ 'curusage' ];
 				$max = $limitArr2[ 'maxusage' ];
 				if ( $cur >= $max ) {
-					$c1 = 'red';
+					$c1 = 'red'; // Reached the maximum usage.
 				} else {
-					$c1 = 'green';
+					$c1 = 'green'; // Currently used license
 				}
 				$w1 = $cur * $scale;
-		
-//				$c2 = 'darkgrey';
-				$c2 = '#8A8A8A';
+
+				$c2 = '#8A8A8A'; // dark grey // Un-used license
 				if ( $max == '*' ) {
 					$maxval = $limitsArr[ $idx ][ 'maxval' ];
 				} else {
@@ -3339,11 +3412,11 @@ class License
 				}
 				$w2 = $maxval * $scale - $w1;
 
-//				$c3 = 'grey';
-				$c3 = $tablebg;
+				$c3 = $tablebg; // Grey // Background color - to filled up the space not drawn by the used/unused license bar
 				$w3 = $tabwidth - $w2 - $w1;
-		
+
 				$name = $limitArr2[ 'name' ];
+				$serial = $limitArr2[ 'serial' ];
 				$pcode = $limitArr2[ 'pcode' ];
 				
 				if ( ($max == '0') && ($max != '*' ) ) {
@@ -3359,6 +3432,7 @@ class License
 
 				print "<tr bgcolor='$tablebg'>";
 				print "<td><font color='$fontcolor'>$name</font></td>";
+				print "<td><font color='$fontcolor'>$serial</font></td>";
 				print "<td><img src='images/" . $limitArr2['color' ] . ".gif' width='10' height='10'>" . $limitArr2[ 'status' ] . "</td>";
 				print "<td>" . $limitArr2[ 'error' ] . "</td>";
 				print "<td>" . $limitArr2[ 'renew' ] . "</td>";
@@ -3367,11 +3441,11 @@ class License
 //				print "<td><img src='images/$c1.gif' width='$w1' height='10'><img src='images/$c2.gif' width='$w2' height='10'><img src='images/$c3.gif' width='$w3' height='10'></td>";
 				print "<td><table cellpadding=0 cellspacing=0 border='0' bgcolor='#d3d3d3'><tr>";
 				if ( $w1 )
-					print "<td bgcolor='$c1' width='$w1' height='10'></td>";
+					print "<td bgcolor='$c1' width='$w1' height='10' style=\"min-width:1px\"></td>";
 				if ( $w2 )
-					print "<td bgcolor='$c2' width='$w2' height='10'></td>";
+					print "<td bgcolor='$c2' width='$w2' height='10' style=\"min-width:1px\"></td>";
 				if ( $w3 )
-					print "<td bgcolor='$c3' width='$w3' height='10'></td>";
+					print "<td bgcolor='$c3' width='$w3' height='10' style=\"min-width:1px\"></td>";
 				print "</tr></table></td>\n";
 				print "<td align='center'><font color='$fontcolor'>$max</font></td>";
 				
@@ -3389,7 +3463,7 @@ class License
 					}
 				}
 
-				if ( $limitArr2[ 'renew' ] != '&nbsp;' )
+				if ( $limitArr2[ 'renew' ] != '&nbsp;' || $limitArr2[ 'expires' ] != '&nbsp;' )
 					$manageStr .= "<input type='button' value='" . BizResources::localize("LIC_RENEW") . "' onClick=\"r('renew.php', '$pcode', '$name', 'renew');\">";
 
 				if ( $limitArr2[ 'licensestatus' ] == WW_LICENSE_OK_TMPCONFIG )
@@ -3794,7 +3868,7 @@ class License
 	}
 	
 	/**
-	 * Check whether the files that need to be encrypted realy are encrypted.
+	 * Check whether the files that need to be encrypted really are encrypted.
 	 * If not encrypted, return true
 	 * 
 	 * @param int mode
@@ -4021,23 +4095,7 @@ class License
 					}
 				}
 				break;
-			case 'oracle':
-				$dbh = oci_connect ($dbuser, $dbpass, $dbserver, 'UTF8');
-				if (!$dbh) {
-					$error = 'connect error';
-				} else {
-					$sql = "SELECT TO_CHAR(CURRENT_TIMESTAMP AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')".' "UTCTIME"'.' FROM DUAL';
-					// Returns the current time converted to the UTC timezone.
-					$statement = oci_parse($dbh, $sql);
-					$ret = @oci_execute($statement,OCI_COMMIT_ON_SUCCESS);
-					if (!$ret) {
-						$error = 'parse or execute error ' . $sql;
-					} else {
-				        $row = @oci_fetch_array($statement, OCI_ASSOC | OCI_RETURN_NULLS | OCI_RETURN_LOBS );
-						$dbtime = strtotime( $row['UTCTIME'].' UTC' );
-				    }
-			    }
-				break;
+
 			case 'mssql':
 				$dbh = $connectionInfo = array( "UID"=>$dbuser,
                         				 		"PWD"=>$dbpass,
@@ -4118,7 +4176,7 @@ class License
 	 *
 	 * @param string $productcode (can be handy in the future to send extra info to SmartReg)
 	 * @param string $errorMessage contains error message afterwards
-	 * @return success
+	 * @return bool success
 	 */
 	public function SmartRegContact( $productcode, &$errorMessage )
 	{
@@ -4153,17 +4211,17 @@ class License
 	 * @param boolean $force. If true, ignore the 'once a day' check, and always do it
 	 * @param string $errorMessage, returns the errorMessage associated with the new licenseStatus
 	 * @param integer $licenseStatus, returns the new licenseStatus
-	 * @return success
+	 * @return bool success
 	 */
 	public function tryAutoRenew( $productcode, $force, &$licenseStatus, &$errorMessage )
 	{
 		$debug = 0;
-		$semaName = "autorenew";
+		$semaPostfix = "autorenew";
 		
 		//No need to wait until it is free: If someone else is already updating, then we can ignore it now.
 		$maxAttempts = 1;
-		$sema = $this->lo_getSema( $semaName, $maxAttempts );
-		if ( !$sema )
+		$semaId = $this->lo_getSema( $semaPostfix );
+		if ( !$semaId )
 		{
 			//Someone else is already busy now...
 			LogHandler::Log('license', 'DEBUG', "Auto renew: could not get sema" );
@@ -4194,13 +4252,13 @@ class License
 					if ( $debug ) {
 						//In one logon call, the auto renew may be called twice. Ignore the second one.
 						if ( $diff < 60 * 1 ) {
-							$this->lo_releaseSema( $sema, $semaName );
+							$this->lo_releaseSema( $semaId );
 							return false;
 						} else {
 							LogHandler::Log('license', 'DEBUG', 'TEST: CONTINUE NOW (not returning)' );
 						}
 					} else {
-						$this->lo_releaseSema( $sema, $semaName );
+						$this->lo_releaseSema( $semaId );
 						return false;
 					}
 				}
@@ -4212,7 +4270,7 @@ class License
 		$parameters = $this->getRenewParameters( $productcode );
 		if ( $parameters === false ) {
 			LogHandler::Log('license', 'ERROR', 'Error creating license renew parameters' );
-			$this->lo_releaseSema( $sema, $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 
@@ -4224,13 +4282,13 @@ class License
 		$response = $this->postRenew( $parameters, $errorMessage );
 		if ( $response === false ) {
 			LogHandler::Log('license', 'ERROR', 'Error in license renewal request to WoodWing registration server.' );
-			$this->lo_releaseSema( $sema, $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 
 		if ( !$response ) {
 			LogHandler::Log('license', 'ERROR', 'No response from WoodWing registration server.' );
-			$this->lo_releaseSema( $sema, $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		
@@ -4238,7 +4296,7 @@ class License
 		$confirmParameters = $this->installLicenseFromResponse( $response );
 		if ( $confirmParameters === false ) {
 			LogHandler::Log('license', 'ERROR', 'Error handling license renew response from WoodWing registration server.' );
-			$this->lo_releaseSema( $sema, $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		
@@ -4251,14 +4309,14 @@ class License
 		$ok = $this->postConfirmRenew( $confirmParameters );
 		if ( $ok === false ) {
 			LogHandler::Log('license', 'ERROR', 'Error confirming license renewal to WoodWing registration server.' );
-			$this->lo_releaseSema( $sema, $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		
 		$lastAttempt = date( 'Y-m-d\TH:i:s', $now );
 		$this->lo_setFieldDB( $dbkey, $lastAttempt );
 		
-		$this->lo_releaseSema( $sema, $semaName );
+		$this->lo_releaseSema( $semaId );
 		LogHandler::Log('license', 'INFO', 'License has been renewed automatically.' );
 		return true;
 	}

@@ -144,7 +144,7 @@ class BizAdminDatasource
 	 * Get the basic information of a data source
 	 *
 	 * @param DataSource ID $datasourceid
-	 * @return DataSource
+	 * @return AdsDataSourceInfo
 	 */
 	public static function getDatasourceInfo( $datasourceid )
 	{

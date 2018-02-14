@@ -13,14 +13,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 {
 	/** @var TestCase $testCase */
 	private $testCase = null;
-	/** @var string[] $vars  */
+	/** @var array $vars  */
 	private $vars = null;
 	/** @var string $ticket  */
 	private $ticket = null;
 	/** @var WW_Utils_TestSuite $utils */
 	private $utils = null;
-	/** @var callable $requestComposer  */
-	private $requestComposer = null;
 	/** @var string $namePrefix  */
 	private $namePrefix = null;
 
@@ -104,7 +102,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 */
 	public function setRequestComposer( $callback ) 
 	{
-		$this->requestComposer = $callback;
+		$this->utils->setRequestComposer( $callback );
 	}
 	
 	/**
@@ -120,15 +118,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		// Copy and clear expected error since callService() can throw exception.
 		$expectedError = $this->expectedError;
 		$this->expectedError = null; // reset (has to be set per function call)
-		
-		// Copy and clear request composer since it can throw exception.
-		$requestComposer = $this->requestComposer;
-		$this->requestComposer = null; // reset (has to be set per function call)
-		
-		// Let caller overrule request composition.
-		if( $requestComposer ) {
-			call_user_func( $requestComposer, $request );
-		}
 		
 		// Call the web service.
 		$response = $this->utils->callService( $this->testCase, $request, $stepInfo, $expectedError, true );
@@ -252,55 +241,70 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 */
 	public function createStatus( $statusName, $objectType, $publicationId, $nextStatusId = 0, $issueId = 0 )
 	{
-		$this->testCase->assertNull( $this->expectedError ); // not supported by this function
-
-		// TODO: call web service layer (instead of calling biz layer)
-		$statusCreated = null;
-
-		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-		$status = new AdmStatus(null, $statusName, $objectType, false, null, 'WoodWing Software');
+		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmStatus
+		$status = new AdmStatus();
 		$status->Id = 0;
-		$status->PublicationId	= $publicationId;
 		$status->Type = $objectType;
 		$status->Phase = 'Production';
 		$status->Name = $statusName;
 		$status->Produce = false;
-		$status->Color = '#FFFF99';
-		$status->NextStatusId = $nextStatusId;
+		$status->Color = 'FFFF99';
+		$status->NextStatus = new AdmIdName( $nextStatusId );
 		$status->SortOrder = 0;
-		$status->IssueId = $issueId;
-		$status->SectionId = 0;
-		$status->DeadlineStatusId = 0;
 		$status->DeadlineRelative = 0;
 		$status->CreatePermanentVersion = false;
 		$status->RemoveIntermediateVersions = false;
 		$status->AutomaticallySendToNext = false;
 		$status->ReadyForPublishing = false;
 		$status->SkipIdsa = false;
-		try {
-			$statusCreated = BizAdmStatus::createStatus( $status );
 
-		} catch( BizException $e ) {
-			$this->testCase->throwError( $e->getMessage().'<br/>'.$e->getDetail() );
-		}
-		$this->testCase->assertInstanceOf( 'stdClass', $statusCreated );
-		$statusId = $statusCreated->Id;
-		$this->testCase->assertGreaterThan( 0, $statusId );
-		
-		// TODO: call web service layer (instead of calling biz layer)
-		try {
-			$statusCreated = BizAdmStatus::getStatusWithId( $statusId );
-		} catch( BizException $e ) {
-			$this->testCase->throwError( $e->getMessage().'<br/>'.$e->getDetail() );
-			throw $e;
-		}
-		$this->testCase->assertInstanceOf( 'stdClass', $statusCreated );
+		require_once BASEDIR.'/server/services/adm/AdmCreateStatusesService.class.php';
+		$request = new AdmCreateStatusesRequest();
+		$request->Ticket = $this->ticket;
+		$request->PublicationId = $publicationId;
+		$request->IssueId = $issueId;
+		$request->Statuses = array( $status );
 
-		BizAdmStatus::restructureMetaDataStatusColor( $statusCreated->Id, $status->Color);
-		$statusCreated->Color = $status->Color;
-		$statusCreated->DefaultRouteTo = null;
+		$stepInfo = "Create status {$statusName}";
+		/** @var AdmCreateStatusesResponse $response */
+		$response = $this->callService( $request, $stepInfo );
 
-		return $statusCreated;
+		$this->testCase->assertInstanceOf( 'AdmCreateStatusesResponse', $response );
+		$this->testCase->assertCount( 1, $response->Statuses );
+		$this->testCase->assertInstanceOf( 'AdmStatus', $response->Statuses[0] );
+		$this->testCase->assertGreaterThan( 0, $response->Statuses[0]->Id );
+
+		return $response->Statuses[0];
+	}
+
+	/**
+	 * Deletes a status
+	 *
+	 * @param integer $statusId
+	 * @throws BizException on failure
+	 */
+	public function deleteStatus( $statusId )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
+		$request = new AdmDeleteStatusesRequest();
+		$request->Ticket = $this->ticket;
+		$request->StatusIds = array( $statusId );
+
+		$stepInfo = "Delete status {$statusId}";
+		/** @var AdmDeleteStatusesResponse $response */
+		$this->callService( $request, $stepInfo );
+
+		// Try to retrieve the deleted test Status, which should fail.
+		require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+		$request = new AdmGetStatusesRequest();
+		$request->Ticket = $this->ticket;
+		$request->StatusIds = array( $statusId );
+
+		$this->expectedError = '(S1056)';
+		$stepInfo = 'Calling AdmGetStatuses to validate AdmDeleteStatusesRequest as called before.';
+		$this->callService( $request, $stepInfo );
+
+		LogHandler::Log( 'BuildTestUtils', 'INFO', 'Completed validating AdmDeleteStatusesRequest.' );
 	}
 
 	/**
@@ -332,11 +336,28 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	}
 
 	/**
-	 * Gets a list of group id for user $userId.
+	 * Gets a list of group id(s) for which user $userId belongs to.
 	 *
+	 * @since 10.1.5 Function name has been adjusted from getUserGroups to getUserGroupsIds.
 	 * @param string $stepInfo Extra logging info.
 	 * @param int $userId User id where the user's group to be retrieved.
 	 * @return array List of group ids where the $userId belongs to, when success expected. Null when error is expected.
+	 * @throws BizException on unexpected system response
+	 */
+	public function getUserGroupsIds( $stepInfo, $userId )
+	{
+		$userGrps = $this->getUserGroups( $stepInfo, $userId );
+		$groupIds = array_map( function( $userGrp ) { return $userGrp->Id; }, $userGrps );
+		return $groupIds;
+	}
+
+	/**
+	 * Gets a list of Group(s) for which user $userId belongs to.
+	 *
+	 * @since 10.1.5 getUserGroups returns list of AdmUserGroup object instead of list of group ids.
+	 * @param string $stepInfo Extra logging info.
+	 * @param int $userId User id where the user's group to be retrieved.
+	 * @return AdmUserGroup[]|null Null is returned when user belongs to no group.
 	 * @throws BizException on unexpected system response
 	 */
 	public function getUserGroups( $stepInfo, $userId )
@@ -352,14 +373,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 
 		$groupIds = null;
 		if( !$expectedError ) {
-			$groupIds = array();
 			$this->testCase->assertAttributeInternalType( 'array', 'UserGroups', $response );
-			$userGrps = $response->UserGroups;
-			foreach( $userGrps as $userGrp ) {
-				$groupIds[] = $userGrp->Id;
-			}
 		}
-		return $groupIds;
+		return $response->UserGroups;
 	}
 
 	/**
@@ -518,7 +534,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	public function createArticleObject( $stepInfo, $articleName=null, $relations=null, $targets=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		// The WSDL expects a Publication object, a PublicationInfo object is given, so transform
@@ -598,7 +613,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	public function createDossierObject( $stepInfo, $dossierName=null, $relations=null, $targets=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		$publication = $this->getPublication();
@@ -644,7 +658,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	public function createDossierTemplateObject( $stepInfo, $dossierTemplateName=null, $relations=null, $targets=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		$publication = $this->getPublication();
@@ -760,25 +773,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->callService( $request, $stepInfo );
 
 		LogHandler::Log( 'BuildTestUtils', 'INFO', 'Completed validating AdmDeleteUsers.' );
-	}
-
-	/**
-	 * Deletes a status
-	 *
-	 * @param integer $statusId
-	 * @throws BizException on failure
-	 */
-	public function deleteStatus( $statusId )
-	{
-		$this->testCase->assertNull( $this->expectedError ); // not supported by this function
-
-		// TODO: call web service layer (instead of calling biz layer)
-		try {
-			require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
-			BizCascadePub::deleteStatus( $statusId );
-		} catch( BizException $e ) {
-			$this->testCase->throwError( $e->getMessage().'<br/>'.$e->getDetail() );
-		}
 	}
 
 	/**
@@ -1150,7 +1144,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$pubChan->Name              = !is_null($pubChannelName) ? $pubChannelName : $this->composeName();
 		$pubChan->Description       = 'Created by BuildTest class '.__CLASS__;
 		$pubChan->Type              = 'print';
-		$pubChan->PublishSystem     = 'Enterprise';
+		$pubChan->PublishSystem     = ''; // Enterprise
 		$pubChan->CurrentIssueId    = 0;
 		$pubChan->SuggestionProvider = 'OpenCalais';
 		$pubChan->ExtraMetaData     = array();
@@ -1241,7 +1235,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		if( !$expectedError ) {
 			$this->testCase->assertAttributeInternalType( 'array', 'Editions', $response );
 			$this->testCase->assertAttributeCount( 1, 'Editions', $response ); // check $response->Editions[0]
-			$this->testCase->assertInstanceOf( 'stdClass', $response->Editions[0] ); // TODO: should be AdmEdition
+			$this->testCase->assertInstanceOf( 'AdmEdition', $response->Editions[0] );
 		}
 		return isset($response->Editions[0]) ? $response->Editions[0] : null;
 	}

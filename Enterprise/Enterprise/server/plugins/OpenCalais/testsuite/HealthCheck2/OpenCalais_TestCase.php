@@ -69,8 +69,6 @@ class WW_TestSuite_HealthCheck2_OpenCalais_TestCase extends TestCase
 		try {
 			$httpClient->request();
 		} catch ( Exception $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // To make analyzer happy.
 			$adapter = $httpClient->getAdapter();
 			if ( $adapter instanceof Zend_Http_Client_Adapter_Curl ) {
 				$curl = $adapter->getHandle();

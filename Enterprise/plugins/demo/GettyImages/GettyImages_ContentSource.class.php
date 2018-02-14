@@ -25,7 +25,6 @@
 require_once dirname(__FILE__) . '/config.php';	// Plug-in config file
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_EnterpriseConnector.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizDataClasses.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once dirname(__FILE__) . '/GettyImages.class.php';
 
 define ('GI_CONTENTSOURCEID'     , 'GI');		// Unique content source ID
@@ -78,8 +77,6 @@ class GettyImages_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{		
-		$query=$query; $maxEntries=$maxEntries; $order=$order; // keep analyzer happy
-
 		LogHandler::Log('GettyImages', 'DEBUG', 'GettyImages::queryObjects called for: '.$params[0]->Value );
 
 		// Create array with column definitions
@@ -105,8 +102,6 @@ class GettyImages_ContentSource extends ContentSource_EnterpriseConnector
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
 		LogHandler::Log('GettyImages', 'DEBUG', "GettyImages::getAlienObject called for $alienID - $rendition" );
-
-		$lock=$lock ; // keep analyzer happy
 
 		PerformanceProfiler::startProfile( 'GettyImages - getAlienObject', 3 );
 

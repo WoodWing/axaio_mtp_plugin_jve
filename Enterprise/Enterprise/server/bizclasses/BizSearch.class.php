@@ -36,7 +36,6 @@ class BizSearch
 			// scripts that query objects -directly- after saving to check if all saved data 
 			// is reflected.
 			if( is_null($directCommit) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$directCommit = BizSession::getDirectCommit();
 			}
 			
@@ -54,8 +53,11 @@ class BizSearch
 				LogHandler::Log('BizSearch', 'DEBUG', 'Connector completed.' );
 			}
 			// All connectors did index at this point, so we flag them at Enterprise DB. See Note#001!
-			self::setIndexFlag($connRetVals, $areas);
+			self::setIndexAndUnindexFlag( $objects, $connRetVals, $areas );
 		} catch( BizException $e ) {
+			// Objects that are supposed to be (re)indexed did not get (re)indexed, so un-indexed them.
+			$unhandledObjectIds = self::filterUnhandledObjectIds( array(), $objects );
+			self::setUnindexFlag( $unhandledObjectIds, $areas );
 			if( $suppressExceptions ) {
 				LogHandler::Log( 'Search', 'ERROR', 'Index error: '.$e->getMessage().' '.$e->getDetail() );
 			} else {
@@ -70,6 +72,11 @@ class BizSearch
 	 * We assume that default a search engine is installed, that's why we don't check this first before doing the get.
 	 * In the exceptional case that no search engine is installed these gets were a waste, but otherwise the plugin
 	 * test (requiring DB access) would most of times be of waste.
+	 * The object properties to be indexed are restricted to a minimum. This improves performance but also limits the
+	 * the risk on failure. So no renditions are requested as files are not indexed. There is no need to access a
+	 * content source as Solr should just reflect the data stored in the database (this limits the risk on failure when
+	 * the content source is not available). Also no need to check access rights as the index process should always
+	 * be able to access the object.
 	 *
 	 * @param string[] $objectIds List of object ids
 	 * @param boolean $suppressExceptions Whether or not the suppress throwing exceptions
@@ -83,12 +90,11 @@ class BizSearch
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$objects = array();
 		$user = BizSession::getShortUserName();
 		foreach( $objectIds as $objectId ) {
-			$objects[] = BizObject::getObject($objectId, $user, false/*lock*/, 'none'/*rendition*/, array('Targets','MetaData', 'Relations')/*requestInfo */, 
-				null/*haveVersion*/, false/*checkRights*/, $areas); // no lock, no rendition
+			$objects[] = BizObject::getObject( $objectId, $user, false, 'none', array( 'Targets','MetaData', 'Relations' ),
+				null, false, $areas, null, false );
 			// By asking for Targets and Relations also child object targets are added.
 		}
 		self::indexObjects( $objects, $suppressExceptions, $areas );
@@ -110,8 +116,12 @@ class BizSearch
 			$connRetVals = array();
 			BizServerPlugin::runDefaultConnectors( 'Search', null, 'updateObjects', array($objects, $areas), $connRetVals );
 			// All connectors did index at this point, so we flag them at Enterprise DB. See Note#001!
-			self::setIndexFlag( $connRetVals, $areas );
+
+			self::setIndexAndUnindexFlag( $objects, $connRetVals, $areas );
 		} catch( BizException $e ) {
+			// Objects that are supposed to be (re)indexed did not get (re)indexed, so un-indexed them.
+			$unhandledObjectIds = self::filterUnhandledObjectIds( array(), $objects );
+			self::setUnindexFlag( $unhandledObjectIds, $areas );
 			if( $suppressExceptions ) {
 				LogHandler::Log( 'Search', 'ERROR', 'Index error: '.$e->getMessage().' '.$e->getDetail() );
 			} else {
@@ -138,7 +148,6 @@ class BizSearch
 			// scripts that query objects -directly- after saving to check if all saved data
 			// is reflected.
 			if( is_null($directCommit) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$directCommit = BizSession::getDirectCommit();
 			}
 
@@ -178,7 +187,6 @@ class BizSearch
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$objects = array();
 		$user = BizSession::getShortUserName();
 		foreach( $objectIds as $objectId ) {
@@ -204,33 +212,37 @@ class BizSearch
 			$connRetVals = array();
 			BizServerPlugin::runDefaultConnectors( 'Search', null, 'unIndexObjects', array($objectsIds, false/*$deletedObject= true/false also doesn't matter as it is not used*/), $connRetVals );
 			// All connectors did unindex at this point, so we flag them at Enterprise DB. See Note#001!
-			self::setUnindexFlag( $connRetVals, $areas);
+			$handledObjectIds = self::collectHandledObjectIds( $connRetVals );
+			self::setUnindexFlag( $handledObjectIds, $areas );
 			self::setLastOptimized( '' ); // clear!
 		} catch( BizException $e ) {
+			// BizException caught, no un-indexed needs to be done here.
+
 			if( $suppressExceptions ) {
-				LogHandler::Log( 'Search', 'ERROR', 'Index error: '.$e->getMessage().' '.$e->getDetail() );
+				LogHandler::Log( 'Search', 'ERROR', 'unIndexObjects error: '.$e->getMessage().' '.$e->getDetail() );
 			} else {
 				throw $e;
 			}
 		}
 	}
 
-	/*
+	/**
 	 * Gets objects from DB that are marked to be indexed and indexes them.
-	 * 
-	 * The biz layer is bypassed on purpose; It reads directly from DB to bypass the access rights 
+	 *
+	 * The biz layer is bypassed on purpose; It reads directly from DB to bypass the access rights
 	 * and to limit the number of SQL calls. Note that going through the biz layer would slow due to
-	 * access rights checking and due to explosion of number of SQL calls; Test for 100 objects 
+	 * access rights checking and due to explosion of number of SQL calls; Test for 100 objects
 	 * shows 28 vs 1800 SQL calls.
-	 * 
-	 * @param integer	$lastObjId The last (max) object id that was indexed the previous time. Used for pagination.
-	 * @param integer	$maxCount  Maximum number of object to index. Used for pagination.
-	 * @return integer the amount of indexed documents. Note: non-index documents (like dossiers) are included in this count.
-	*/
-	static public function indexObjectsFromDB( &$lastObjId, &$lastDeletedObjId, $maxCount, $areas=array('Workflow') )
+	 *
+	 * @param int $lastObjId [In/Out] The last (max) object id that was indexed the previous time. Used for pagination.
+	 * @param int $lastDeletedObjId [In/Out] The last (max) deletedobject id that was indexed the previous time. Used for pagination.
+	 * @param int $maxCount Maximum number of object to index. Used for pagination.
+	 * @param array $areas Whether it is Workflow or Trash area.
+	 * @param int $totalObjectsIndexed [In/Out]Total numbers of objects that were successfully indexed.
+	 * @throws BizException
+	 */
+	static public function indexObjectsFromDB( &$lastObjId, &$lastDeletedObjId, $maxCount, $areas, &$totalObjectsIndexed )
 	{
-		$i = 0;
-		
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
 		if( in_array('Trash', $areas ) ){
@@ -257,12 +269,11 @@ class BizSearch
 			}
 			$propertiesToIndex = self::getPropertiesToIndex( false );
 			$objects = BizObject::getObjectsToIndexForObjectIds( $objectIds, $areas, $propertiesToIndex );
+			$totalObjectsIndexed = count( $objects );
 			self::indexObjects( $objects, false, $areas );
 			PerformanceProfiler::stopProfile( 'Search', 3 );
 		}
-		
-		return $i;
-	}	
+	}
 	
 	/**
 	 * Same as indexObjectsFromDB method, but then removing indexes.
@@ -382,12 +393,8 @@ class BizSearch
 	 */
 	static public function setLastOptimized( $value )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-		if( DBUserSetting::hasSetting( '', 'LastOptimized', 'BizSearch' ) ) {
-			DBUserSetting::updateSetting( '', 'LastOptimized', $value, 'BizSearch' );
-		} else {
-			DBUserSetting::addSetting( '', 'LastOptimized', $value, 'BizSearch' );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+		DBConfig::storeValue( 'BizSearch_LastOptimized', $value );
 		return $value;
 	}
 
@@ -398,14 +405,9 @@ class BizSearch
 	 */
 	static public function getLastOptimized()
 	{
-		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-		$settings = DBUserSetting::getSettings( '', 'BizSearch' );
-		foreach( $settings as $setting ) {
-			if( $setting->Setting == 'LastOptimized' ) {
-				return $setting->Value;
-			}
-		}
-		return '';
+		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+		$value = DBConfig::getValue( 'BizSearch_LastOptimized' );
+		return is_null( $value ) ? '' : $value;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - SEARCHING - - - - - - - - - - - - - - - - - - - - 
@@ -531,41 +533,97 @@ class BizSearch
 		}
 
 		return $isImplemented;
-	}	
-	
-	private static function setIndexFlag($connRetVals, array $areas=null)
+	}
+
+	/**
+	 * Flag objects as indexed in the database.
+	 *
+	 * @param int[] $objectIds Object ids to be flagged as indexed.
+	 * @param array|null $areas
+	 */
+	private static function setIndexFlag( $objectIds, array $areas=null )
 	{
 		// Mark objects as indexed.  We also include the object types that we skipped to 
 		// prevent seeing them again and again in a growing list
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		if( !empty( $connRetVals) ) {
-			$handledObjectIds = self::createIntersection($connRetVals);
-			$deletedObjects = in_array('Trash',$areas) ? true : false;
-			DBObject::setIndexed( $handledObjectIds,  $deletedObjects);
-		}
-	}		
-	
-	private static function setUnindexFlag($connRetVals, array $areas)
+		$deletedObjects = in_array('Trash',$areas) ? true : false;
+		DBObject::setIndexed( $objectIds,  $deletedObjects);
+	}
+
+	/**
+	 * Flag objects as not indexed in the database.
+	 *
+	 * @param int[] $objectIds Object ids to be flagged as not indexed.
+	 * @param array $areas
+	 */
+	private static function setUnindexFlag( $objectIds, array $areas)
 	{
 		// Mark objects as indexed.  We also include the object types that we skipped to 
 		// prevent seeing them again and again in a growing list
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		if( !empty( $connRetVals) ) {
-			$handledObjectIds = self::createIntersection($connRetVals);
-			DBObject::setNonIndex($handledObjectIds , $areas);
-		}
-	}		
-	
-	private static function createIntersection($inputArrays)
+		DBObject::setNonIndex( $objectIds , $areas );
+	}
+
+	/**
+	 * Collect the object ids that have been successfully handled by ALL Search connectors.
+	 *
+	 * @param array $inputArrays
+	 * @return array
+	 */
+	private static function collectHandledObjectIds( $inputArrays )
 	{
-		//Initalize with first array
-		$intersectionArray = array_shift($inputArrays);
+		$intersectionArray = array();
 		if (!empty($inputArrays)) {
+			$intersectionArray = array_shift($inputArrays); // Initalize with first array
 			foreach ($inputArrays as $inputArray) {
 				$intersectionArray =  array_intersect($intersectionArray, $inputArray);
 			}
 		}
 		return  $intersectionArray;
+	}
+
+	/**
+	 * Setting list of objects to indexed or not-indexed depending on if the reindexing was successful.
+	 *
+	 * @param Object[] $objects Full list of objects sent to all Search connectors for reindexing.
+	 * @param int[] $objectIds List of Key(Search connector)=>Values(object ids) that were successfully handled by all Search connectors.
+	 * @param string[] $areas Workflow or Trash, to determine which database table to set the indexed/not-indexed for the objects.
+	 */
+	private static function setIndexAndUnindexFlag( $objects, $objectIds, $areas )
+	{
+		$handledObjectIds = self::collectHandledObjectIds( $objectIds );
+		$unhandledObjectIds = self::filterUnhandledObjectIds( $handledObjectIds, $objects );
+		if( $handledObjectIds ) {
+			self::setIndexFlag( $handledObjectIds, $areas );
+		}
+		if( $unhandledObjectIds ) {
+			self::setUnindexFlag( $unhandledObjectIds, $areas );
+		}
+	}
+
+	/**
+	 * Filter the object ids that have not been successfully handled by Search connectors.
+	 *
+	 * Function iterates through the list of Objects and filter out the ids that are not
+	 * present in the successfully handled object ids ( $handledObjectIds ).
+	 * The filtered list will be returned to the caller.
+	 *
+	 * @param int[] $handledObjectIds List of object ids that have been successfully handled by all Search connectors.
+	 * @param Object[] $objects List of Objects to be searched which has not been handled yet.
+	 * @return int[]
+	 */
+	private static function filterUnhandledObjectIds( $handledObjectIds, $objects )
+	{
+		$notHandledObjectIds = array();
+		if( count( $handledObjectIds ) != count( $objects )) {
+			foreach( $objects as $object ) {
+				$id = $object->MetaData->BasicMetaData->ID;
+				if( !in_array( $id, $handledObjectIds ) ) {
+					$notHandledObjectIds[] = $id;
+				}
+			}
+		}
+		return $notHandledObjectIds;
 	}
 	
 	/**
@@ -576,7 +634,6 @@ class BizSearch
 	 *
 	 * @param string $query [in/out]
 	 * @param array $params [in/out]
-	 * @return boolean true if any change made
 	 */
 	private static function resolveQueryName( &$query, &$params )
 	{

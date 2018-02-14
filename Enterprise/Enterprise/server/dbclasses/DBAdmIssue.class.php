@@ -24,6 +24,7 @@ class DBAdmIssue extends DBBase
 	 *
 	 * @param integer $issueId
 	 * @return AdmIssue|null Returns NULL when issue not found.
+	 * @throws BizException on SQL error.
 	 */
 	static public function getIssueObj( $issueId )
 	{
@@ -31,12 +32,15 @@ class DBAdmIssue extends DBBase
 		$where = '`id` = ?';
 		$params  = array( intval( $issueId ) );
 		$issueRow = self::getRow( self::TABLENAME, $where, '*', $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		if( !$issueRow ) {
 			return null;
 		}
 
 		// Add the custom properties
-		self::getCustomPropertiesForIssue( $issueId, $issueRow );
+		self::getCustomPropertiesForIssue( intval($issueId), $issueRow );
 		
 		// Return all issue properties to caller.
 		return self::rowToObj( $issueRow );
@@ -97,7 +101,8 @@ class DBAdmIssue extends DBBase
 	 * Retrieves the first configured issue object (from smart_issues table) that is active and owned by the given channel.
 	 *
 	 * @param int $channelId
-	 * @return Issue object or null when none found
+	 * @return AdmIssue object or null when none found
+	 * @throws BizException on SQL error.
 	 */
 	public static function getFirstActiveChannelIssueObj( $channelId )
 	{
@@ -105,6 +110,9 @@ class DBAdmIssue extends DBBase
 		$params = array( 'on', intval( $channelId ) );
 		$orderBy = array( 'code' => true, 'id' => true );
 		$row = self::getRow( self::TABLENAME, $where, '*', $params, $orderBy );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		return $row ? self::rowToObj( $row ) : null;
 	}
 
@@ -112,16 +120,15 @@ class DBAdmIssue extends DBBase
 	 *  Retrieves all issues from smart_issues table that are owned by given channel.
 	 *
 	 *  @param int $channelId
-	 *  @return array of issue objects. Empty when none found. Null on failure.
+	 *  @return array of issue objects. Empty when none found.
 	 */
 	static public function listChannelIssuesObj( $channelId )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
 		$rows = DBIssue::listChannelIssues( $channelId );
-		if (!$rows) return null;
 
 		$issues = array();
-		foreach( $rows as $row ) {
+		if( $rows ) foreach( $rows as $row ) {
 			// Add the custom properties as well
 			self::getCustomPropertiesForIssue( $row['id'], $row );
 
@@ -130,13 +137,54 @@ class DBAdmIssue extends DBBase
 		return $issues;
 	}
 
+	/**
+	 * Requests the parent publication id of an issue by the issue id.
+	 *
+	 * @param integer $issueId
+	 * @param bool|null $isOverrule If true: Overrule issue; if false: Regular issue; if null: Either.
+	 * @param bool|null $isActive If true: Active issue; if false: Non-active issue; if null: Either.
+	 * @return integer|null The parent publication id of the given issue, null if not found.
+	 * @since 10.2.0
+	 */
+	public static function getPubIdForIssueId( $issueId, $isOverrule = null, $isActive = null )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$issuesTable = $dbDriver->tablename( self::TABLENAME );
+		$channelsTable = $dbDriver->tablename( 'channels' );
+		$sql =
+			"SELECT c.`publicationid` ".
+			"FROM {$issuesTable} i, {$channelsTable} c ".
+			"WHERE i.`channelid` = c.`id` ".
+			"AND i.`id` = ? ";
+		$params = array( intval( $issueId ) );
+
+		if( $isOverrule === true ) { //overrule
+			$sql .= 'AND i.`overrulepub` = ? ';
+			$params[] = 'on';
+		} elseif( $isOverrule === false ) {
+			$sql .= 'AND i.`overrulepub` = ? ';
+			$params[] = '';
+		}//else: either overrule or non-overrule
+
+		if( $isActive === true ) { //active issue
+			$sql .= 'AND i.`active` = ? ';
+			$params[] = 'on';
+		} elseif( $isActive === false ) { //non-active issue
+			$sql .= 'AND i.`active` = ? ';
+			$params[] = '';
+		}//else: either active or non-active
+
+		$sth = self::query( $sql, $params );
+		$row = self::fetch( $sth );
+		return $row ? intval($row['publicationid']) : null;
+	}
 
 	/**
 	 * Creates a new issue into smart_issues table
 	 *
 	 * @param int $channelId publication channel to become owner of the new issue
-	 * @param array $issues array of new sections to create
-	 * @return array of new created AdmIssue objects
+	 * @param AdmIssue[] $issues new issues to create
+	 * @return AdmIssue[] new created issues
 	 * @throws BizException on failure
 	 */
 	static public function createIssuesObj( $channelId, $issues )
@@ -173,13 +221,19 @@ class DBAdmIssue extends DBBase
 			$where = '`channelid` = ? and `name` = ?';
 			$params = array( intval( $issueRow['channelid'] ), $issueRow['name'] );
 			$row = self::getRow( self::TABLENAME, $where, '*', $params );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
 			if( $row ) {
 				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
 			}
 			
 			// create the issue at DB
 			$issueId = self::insertRow( self::TABLENAME, $issueRow );
-			if( $issueId ) {			
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
+			if( $issueId ) {
 				// add the custom properties
 				if( !empty( $extraMetaData ) ) {
 					foreach( $extraMetaData as $name => $value ) {
@@ -222,6 +276,9 @@ class DBAdmIssue extends DBBase
 			$where = "`name` = ? AND `channelid` = ? AND `id` != ?";
 			$params = array( $issue->Name, intval( $issueRow['channelid'] ), intval( $issue->Id ) );
 			$row = self::getRow( self::TABLENAME, $where, '*', $params );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
 			if( $row ) {
 				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
 			}
@@ -254,13 +311,53 @@ class DBAdmIssue extends DBBase
 				unset( $issueRow['SectionMapping'] );
 			}
 
-			$result = self::updateRow( self::TABLENAME, $issueRow, " `id` = '$issue->Id'" );
+			$where = '`id` = ?';
+			$params = array( $issue->Id );
+			$result = self::updateRow( self::TABLENAME, $issueRow, $where, $params );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
 			if( $result === true){
 				$modifyissue = self::getIssueObj( $issue->Id );
 				$modifyissues[] = $modifyissue;
 			}
 		}
 		return $modifyissues;
+	}
+
+	/**
+	 * Calculate the issue count for each brand.
+	 *
+	 * @since 10.2.0
+	 * @param integer[] $pubIds
+	 * @return array with publication ids in keys and issue counts in values.
+	 */
+	static public function  countIssuesPerPublication( $pubIds )
+	{
+		$rows = null;
+		$where = self::addIntArrayToWhereClause( 'pub.id', $pubIds );
+		if( $where ) {
+			$dbh = DBDriverFactory::gen();
+			$publicationTable = $dbh->tablename( 'publications' );
+			$channelsTable = $dbh->tablename( 'channels' );
+			$issuesTable = $dbh->tablename( 'issues' );
+			$sql = "SELECT COUNT(1) AS `issuecnt`, pub.`id` AS `pubid` FROM {$issuesTable} iss ".
+				"LEFT JOIN {$channelsTable} chn ON ( chn.`id` = iss.`channelid` ) ".
+				"LEFT JOIN {$publicationTable} pub ON ( pub.`id` = chn.`publicationid` ) ".
+				"WHERE $where ".
+				"GROUP BY pub.`id` ";
+			$sth = self::query( $sql );
+			$rows = self::fetchResults( $sth );
+		}
+
+		$result = array();
+		if( $rows ) {
+			$result = array_combine( $pubIds, array_fill( 0, count( $pubIds ), 0 ) );
+			foreach( $rows as $row ) {
+				$result[ $row['pubid'] ] = $row['issuecnt'];
+			}
+		}
+		return $result;
 	}
 
 	/**
@@ -276,31 +373,31 @@ class DBAdmIssue extends DBBase
 		$fields = array();
 
 		if(!is_null($obj->Name)){
-			$fields['name']		 	= $obj->Name;
+			$fields['name']		 	= strval($obj->Name);
 		}
 
 		if (!is_null($channelId)) {
-			$fields['channelid'] = $channelId;
+			$fields['channelid'] = intval($channelId);
 		}
 
 		if(!is_null($obj->PublicationDate)){
-			$fields['publdate']			= $obj->PublicationDate ? $obj->PublicationDate : '';
+			$fields['publdate']			= $obj->PublicationDate ? strval($obj->PublicationDate) : '';
 		}
 
 		if(!is_null($obj->Deadline)){
-			$fields['deadline']			= $obj->Deadline ? $obj->Deadline : '';
+			$fields['deadline']			= $obj->Deadline ? strval($obj->Deadline) : '';
 		}
 
 		if(!is_null($obj->ExpectedPages)){
-			$fields['pages'] 	  		= (is_numeric($obj->ExpectedPages) ? $obj->ExpectedPages : 0);
+			$fields['pages'] 	  		= (is_numeric($obj->ExpectedPages) ? intval($obj->ExpectedPages) : 0);
 		}
 
 		if(!is_null($obj->Subject)){
-			$fields['subject']			= $obj->Subject ? $obj->Subject : '';
+			$fields['subject']			= $obj->Subject ? strval($obj->Subject) : '';
 		}
 
 		if(!is_null($obj->Description)){
-			$fields['description'] 		= $obj->Description ? $obj->Description : '';
+			$fields['description'] 		= $obj->Description ? strval($obj->Description) : '';
 		}
 
 		if(!is_null($obj->Activated)){
@@ -316,7 +413,7 @@ class DBAdmIssue extends DBBase
 		}
 
 		if(!is_null($obj->SortOrder)){
-			$fields['code'] 			= (is_numeric($obj->SortOrder )? $obj->SortOrder : 0);
+			$fields['code'] 			= (is_numeric($obj->SortOrder )? intval($obj->SortOrder) : 0);
 		}
 
 		if( !is_null( $obj->CalculateDeadlines ) ) {
@@ -333,6 +430,8 @@ class DBAdmIssue extends DBBase
 		if( isset($obj->ExtraMetaData) ) { // isset also check for null values
 			require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php'; // TODO: DB calling Biz = against architecture!
 			/** @noinspection PhpDeprecationInspection */
+			// This can be ignored by the analyzer, the deprecated function should not be called by the functions going
+			// to be created in the future, the existing ones will still use the deprecated ones.
 			BizAdmProperty::enrichDBRowWithCustomMetaData( 'Issue', $obj->ExtraMetaData, $fields );
 		}
 		return $fields;
@@ -342,13 +441,13 @@ class DBAdmIssue extends DBBase
 	 *  Converts row value to an object
 	 *  It return an object with the mapping value for row to object
 	 *  @param array $row row contains key values
-	 *  @return object of issue
+	 *  @return AdmIssue of issue
 	 */
 	static public function rowToObj( $row )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$issue = new AdmIssue();
-		$issue->Id 					= $row['id'];
+		$issue->Id 					= intval($row['id']);
 		$issue->Name				= $row['name'];
 		$issue->Description			= $row['description'];
 		$issue->PublicationDate		= $row['publdate'];
@@ -358,13 +457,15 @@ class DBAdmIssue extends DBBase
 		$issue->Activated			= ($row['active'] == 'on' ? true : false);
 		$issue->ReversedRead		= ($row['readingorderrev'] == 'on' ? true : false);
 		$issue->OverrulePublication = ($row['overrulepub'] == 'on' ? true : false);
-		$issue->SortOrder			= $row['code'];
+		$issue->SortOrder			= intval($row['code']);
 		$issue->CalculateDeadlines   = ( $row['calculatedeadlines'] == 'on' ? true : false );
 
 		// custom admin properties
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php'; // TODO: DB calling Biz = against architecture!
 		if( isset( $row['ExtraMetaData'] ) ) {
 			/** @noinspection PhpDeprecationInspection */
+			// This can be ignored by the analyzer, the deprecated function should not be called by the functions going
+			// to be created in the future, the existing ones will still use the deprecated ones.
 			$issue->ExtraMetaData = BizAdmProperty::buildCustomMetaDataFromDBRow( 'Issue', $row['ExtraMetaData'] );
 		} else {
 			$issue->ExtraMetaData = array();

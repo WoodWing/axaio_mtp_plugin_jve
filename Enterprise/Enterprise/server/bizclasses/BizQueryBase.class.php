@@ -68,6 +68,7 @@ class BizQueryBase
 		if( $forceapp ) {
 			$mode = $forceapp;
 		} else {
+			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 			$app = DBTicket::DBappticket( $ticket );
 			if( stristr( $app, 'web' ) ) {
 				$mode = 'web';
@@ -236,7 +237,6 @@ class BizQueryBase
 				/*
 				if( LogHandler::debugMode() ) {
 					if( (!array_key_exists( $qo->Property, $objFields ) || !$objFields[$qo->Property]) && stripos( $qo->Property, 'c_' ) !== 0  && !$joins[$qo->Property]) {
-						require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 						throw new BizException( '', 'Server', '', __METHOD__.' - Sorting on unknown property: '.$qo->Property );
 					}
 				}
@@ -316,7 +316,7 @@ class BizQueryBase
 
     static protected function getComponents($rows)
     {
-        $returnrows = '';
+        $returnrows = array();
         foreach ($rows as $row) {
         	$returnrows[] = self::getComponentChildRow($row);
         }
@@ -365,7 +365,7 @@ class BizQueryBase
 
     static protected function getChildRows($rows)
     {
-        $returnrows = '';
+        $returnrows = array();
         foreach ($rows as $row) {
         	$returnrows[] = self::getChildRow($row);
         }
@@ -374,7 +374,7 @@ class BizQueryBase
 
     static protected function row2string($row)
     {
-        $result = '';
+        $result = array();
 		$row = self::replaceBooleans($row);
 
         $values = array_values( $row );
@@ -386,7 +386,7 @@ class BizQueryBase
 
     static protected function childrow2string($row)
     {
-		$result = '';
+		$result = array();
 		$row = self::replaceBooleans($row);
 
         $values = array_values( $row );
@@ -584,12 +584,11 @@ class BizQueryBase
 	 * Only fills these values if they are in $reqprops. Method is called more than once for the same set of objects.
 	 * To prevent that value, set in the first call, are overwritten special precautions had to be made.
 	 *
-	 * @param &array $rows rows to add the target-info to
+	 * @param &array $rows rows to add the target-info to ($rows are adjusted by reference!!!)
 	 * @param $targets array of array Target, indexed by objectid
 	 * @param $reqprops array of props to fill.
 	 * @param bool $keepRowValue
-	 * @return nothing (but $rows are adjusted by reference!!!)
-	**/
+	 */
 	static public function resolveTargets(&$rows, $targets, $reqprops, $keepRowValue=false)
 	{
 		$reqIssueIds = in_array('IssueIds', $reqprops) ? true : false;
@@ -868,6 +867,7 @@ class BizQueryBase
 	{
 		$publicationIds = array();
 		$specialParams = array();
+		$existingIssueIds = array();
 		foreach( $params as $paramKey => $param ) {
 			if( strtolower($param->Property) == 'publicationid' ) {
 				if( !empty($param->Value) && is_numeric($param->Value) ) {
@@ -880,6 +880,9 @@ class BizQueryBase
 				}
 				$specialParams[] = $param;
 				unset( $params[$paramKey] );
+			}
+			if( strtolower( $param->Property ) == 'issueid' && !$param->Special) { // Param is sent in as "real" IssueId
+				$existingIssueIds[] = $param->Value;
 			}
 		}
 		if ( !$specialParams ) {
@@ -919,10 +922,12 @@ class BizQueryBase
 				if( is_null( $modifiedParamValue )) {
 					$modifiedParamValue = -1;
 				}
-				$newParam = clone( $specialParam );
-				$newParam->Value = $modifiedParamValue;
-				$newParam->Special = false;
-				$newParams[] = $newParam; // Add new param object when multiple brand selected
+				if( !in_array( $modifiedParamValue, $existingIssueIds )) {
+					$newParam = clone( $specialParam );
+					$newParam->Value = $modifiedParamValue;
+					$newParam->Special = false;
+					$newParams[] = $newParam; // Add new param object when multiple brand selected
+				}
 			}
 		}
 		$params = array_merge( $params, $newParams ); // Merge with new query params when multiple brand selected.
@@ -932,19 +937,73 @@ class BizQueryBase
 
 	static public function resolvePublicationNameParams($params)
 	{
-		require_once BASEDIR . '/server/dbclasses/DBPublication.class.php';
-
-		$pubrows = DBPublication::listPublications(array('id','publication'));
+		$pubrows = null;
 		foreach ($params as &$param) {
 			if (strtolower($param->Property == 'publication')) {
+				if( is_null($pubrows)) {
+					require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
+					$pubrows = DBPublication::listPublications( array( 'id', 'publication' ) );
+				}
 				foreach ($pubrows as $pubrow) {
 					if (strtolower($pubrow['publication']) == strtolower($param->Value) && $param->Operation == '=') {
 						$param->Property = 'publicationid';
 						$param->Value = $pubrow['id'];
+						break; // found the corresponding publication id
 					}
 				}
 			}
 		}
+		return $params;
+	}
+
+	/**
+	 * Resolve QueryParam that contains Issue as the Property.
+	 *
+	 * When the Property is sent in as Issue ( the Issue name(s) ),
+	 * function resolves the name(s) to its corresponding Issue id(s).
+	 *
+	 * @param QueryParam[] $params
+	 * @return QueryParam[] With the resolved Issue names to Issue ids when necessary.
+	 */
+	public static function resolveIssueNameParams( $params )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		$issueNames = array();
+		if( $params ) foreach( $params as $param ) {
+			if( strtolower( $param->Property == 'Issue' )) {
+				$issueNames[] = $param->Value;
+			}
+		}
+		$issueIds = $issueNames ? DBIssue::resolveIssueIdsByNameAndParams( $issueNames, $params ) : array();
+		if( $issueIds ) {
+			// Re-construct the QueryParams.
+			$newParams = array();
+			$existingIssueIds = array();
+
+			// Collect QueryParam that is/are not Issue
+			foreach( $params as $param ) {
+				if( strtolower( $param->Property != 'Issue' )) {
+					$newParams[] = $param;
+				}
+				if( strtolower( $param->Property == 'IssueId' )) {
+					$existingIssueIds[] = $param->Value;
+				}
+			}
+
+			// Filling in the Issue id(s)
+			require_once BASEDIR .'/server/interfaces/services/wfl/DataClasses.php';
+			foreach ( $issueIds as $issueId ) {
+				if( !in_array( $issueId, $existingIssueIds )) { // Add in the IssueId only when it does not exist yet to avoid duplicates.
+					$queryParam = new QueryParam();
+					$queryParam->Property = 'IssueId';
+					$queryParam->Operation = '=';
+					$queryParam->Value = $issueId;
+					$newParams[] = $queryParam;
+				}
+			}
+			$params = $newParams;
+		}
+
 		return $params;
 	}
 
@@ -999,7 +1058,7 @@ class BizQueryBase
 	 * @param string $limitPlacedView identifier for subselect on temporary table with limited placed objects.
 	 * @param string $allView identifier of the temporary table containing all object ids.
 	 * @param array $componentrows element information
-	 * @param bool $returnComponentRows true if function should return $componentrows else false (BZ#17057)
+	 * @param bool $returnComponentRows true if function should return component rows else false (BZ#17057)
 	 * @param array $areas 'Workflow' or 'Trash'
 	 * @param string $orientation
 	 * @return array processed object rows
@@ -1018,9 +1077,9 @@ class BizQueryBase
 
 		self::resolveRouteTo($resultRows);
 
-		$elementNameRequested = in_array('ElementName', $requestedpropnames); // bool
+		$elementNameRequested = in_array('ElementName', $requestedpropnames);
 		if ($elementNameRequested || $returnComponentRows){
-			$componentrows = DBQuery::getElementsByView($limitPlacedView);
+			$componentrows = DBQuery::getElementsByView( $allView );
 		}
 		if ($elementNameRequested) {
 			self::resolveElementName($resultRows, $componentrows);

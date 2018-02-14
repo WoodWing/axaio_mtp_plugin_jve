@@ -31,17 +31,18 @@ class WflGetPagesInfoService extends EnterpriseService
 		require_once BASEDIR.'/server/bizclasses/BizPageInfo.class.php';
 
 		// Making a valid assumption here that layout ids are always integers instead of strings.
-		$ids = array_map("intval", $req->IDs);
+		// But note that IDs can be set to null when an Issue is passed in.
+		$ids = $req->IDs ? array_map('intval', $req->IDs ) : null;
 
-		$retobj = BizPageInfo::getPages( 
+		$retobj = BizPageInfo::getPages(
 			$req->Ticket,
 			$this->User,
 			$req->Issue,
 			$ids,
 			$req->Edition,
 			$req->Category,
-			$req->State);
-			
+			$req->State );
+
 		return $retobj;
 	}
 }

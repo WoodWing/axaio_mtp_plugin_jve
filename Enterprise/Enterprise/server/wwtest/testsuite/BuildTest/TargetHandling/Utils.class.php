@@ -107,7 +107,7 @@ class WW_TestSuite_BuildTest_TargetHandling_Utils
 	 *
 	 * @param Object $object
 	 */
-	public function sortObjectDataForCompare( Object $object )
+	public function sortObjectDataForCompare( /** @noinspection PhpLanguageLevelInspection */ Object $object )
 	{
 		if( isset( $object->Placements) && $object->Placements ) foreach( array_keys($object->Placements) as $key ) {
 			sort( $object->Placements[$key]->InDesignArticleIds );

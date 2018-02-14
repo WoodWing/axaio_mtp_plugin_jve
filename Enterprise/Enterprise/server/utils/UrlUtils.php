@@ -114,6 +114,11 @@ class WW_Utils_UrlUtils
 	 * - the client could be a forwarded, for which the address needs to be taken from HTTP_X_FORWARDED_FOR.
 	 * - there could be localhost or 127.0.0.1 which are the same, but could lead to mismatches in string compares.
 	 *
+	 * Note that for HTTP_X_FORWARDED_FOR, the format can be like below:
+	 * X-Forwarded-For: client, proxy1, proxy2
+	 * where the value is a comma+space separated list of IP addresses,
+	 * only the 'client' is retrieved and set as the Client IP.
+	 *
 	 * @return string
 	 */
 	static public function getClientIP()
@@ -121,7 +126,8 @@ class WW_Utils_UrlUtils
 		if( self::getServerOpt('HTTP_CLIENT_IP') ) {
 			$clientIP = self::getServerOpt('HTTP_CLIENT_IP');
 		} else if( self::getServerOpt('HTTP_X_FORWARDED_FOR') ) {
-			$clientIP = self::getServerOpt('HTTP_X_FORWARDED_FOR');
+			$clientIPs = self::getServerOpt('HTTP_X_FORWARDED_FOR');
+			list( $clientIP, ) = explode( ", ", $clientIPs );
 		} else {
 			$clientIP = self::getServerOpt('REMOTE_ADDR');
 		}
@@ -187,7 +193,6 @@ class WW_Utils_UrlUtils
 	 * @param string|null $result The response body of the call, passed by reference.
 	 * @param string|null $httpCode The HTTP Code returned by the call, passed by reference.
 	 * @param string $methodName The name of the method calling this function, used for logging, defaults to '';
-	 * @return null|DomDocument $response The call response as a DomDocument.
 	 */
 	static public function callService( Zend\Http\Client $httpClient, &$result=null, &$httpCode=null, $methodName='')
 	{

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LocalizationMap language="frFR">
+  <Term key="Elvis.ERR_CONNECT">Une erreur s'est produite lors de l'obtention d'un fichier dans Elvis en raison d'une perte de connexion. (S1144)#EOL##EOL#Veuillez contacter votre administrateur système.#EOL##EOL#IMPORTANT : Nous vous recommandons instamment d'arrêter de travailler sur TOUT fichier du système jusqu'à ce que la connexion soit rétablie et de n'effectuer AUCUNE action, comme une interruption de retrait, un dépôt, un enregistrement de version, un retrait, une ouverture de fichier ou de dossier, etc.#EOL##EOL#Poursuivre le travail sur les fichiers est susceptible d'entraîner une perte de données ou une corruption des fichiers.</Term>
   <Term key="Elvis.PRODUCTION_ZONE">Zone de production</Term>
 </LocalizationMap>

@@ -1,17 +1,33 @@
-# Default task
-all: install
+NJS := `which node`
+PWD := `pwd`
+PID := $(PWD)/.pid
 
-# Install dependencies
-install:
-	@composer install --dev
+.PHONY: cs test
 
-# Run test suites
-tests: tests-unit
+all: deps
 
-# Run the unit tests
-tests-unit:
-	@./vendor/bin/phpunit --testsuite unit
+cs:
+	@vendor/bin/php-cs-fixer fix src
 
-# Run the unit tests
-tests-unit-coverage:
-	@./vendor/bin/phpunit --testsuite unit --coverage-text --coverage-html ./.report
+deps: deps-php deps-js
+
+deps-js:
+	@cd test/server && npm install
+
+deps-php:
+	@composer install
+
+server-start:
+	@start-stop-daemon -S -b -m -o -p $(PID) -d $(PWD)/test/server -x $(NJS) -- index.js
+
+server-stop:
+	@start-stop-daemon -K -p $(PID)
+
+test: test-unit test-functional
+
+test-functional: server-start
+	@vendor/bin/phpunit --testsuite functional
+	@$(MAKE) server-stop
+
+test-unit:
+	@vendor/bin/phpunit --testsuite unit

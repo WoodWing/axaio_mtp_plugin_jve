@@ -214,9 +214,16 @@ class BizPage
 			$queryParams[] = new QueryParam( 'Type', '=', 'Layout', false );
 
 			// This could be more efficient, but this is easy:
+			require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+			$request = new WflQueryObjectsRequest();
+			$request->Ticket = $ticket;
+			$request->Params = $queryParams;
+			$request->FirstEntry = 1;
+			$request->MaxEntries = 0;
+			$request->Hierarchical = false;
+			$request->RequestProps = array( 'ID', 'Type', 'Name' );
 			require_once BASEDIR."/server/bizclasses/BizQuery.class.php";
-			$resp = BizQuery::queryObjects(
-				$ticket, $user, $queryParams, 1, 0, null, false, null, null, array( 'ID', 'Type', 'Name' ), null, 11 );
+			$resp = BizQuery::queryObjects2( $request, $user, 11 );
 
 	// Determine the object ID column index
 			$idIdx = 0;
@@ -360,98 +367,207 @@ class BizPage
 		return $objectPages;
 	}
 
-    /**
-     * Calculates the page ranges based on the page order. If there are pages for different editions the page range is
-     * calculated for each edition. If a page is the same for all editions then the edition of the page is set to null.
-     * Three combinations are possible:
-     * - All editions are null, pages are the same for all editions or no editions are used.
-     * - Some pages have an edition while others have an edition is null. Pages with edition is null are applicable for
-     *  all editions and must be added to the editions.
-     * - All pages have editions.
-     * The page ranges are returned per edition. The order is the same as the sorting order of the editions. If two
-     * editions in sequence have the same page range than only one page range is returned for both editions. Of course
-     * if no editions are used than only one page range is returned.
-     * Page ranges per editions are separated by by semicolon. Contiguous pages are formatted as from_page-to_page.
-     * For example 1-4,6;1-4,7 means page 1 to 4 for both editions and page 6 for the first and 7 for the second.
-     *
-     * @param array Array of Page
-     * @return string The page range.
-     */
-	public static function calcPageRange($pages)
+	/**
+	 * Calculates the page range property based on the page order of a layout.
+	 *
+	 * A layout can have different page ranges. This happens when the page order numbers of the pages are not adjacent.
+	 * Contiguous pages are formatted as from_page-to_page. E.g. 1,2,3,7,10,11,12. This results in the page range 1-3,7,11-12.
+	 * If there are pages for different editions the page range is calculated for each edition. If a page is the same for
+	 * all editions then the edition of the page is set to null.
+	 * Three combinations are possible:
+	 * - All editions are null, pages are the same for all editions or no editions are used.
+	 * - Some pages have an edition while others have an edition is null. Pages with edition is null are applicable for
+	 *  all editions and must be added to the editions.
+	 * - All pages have editions.
+	 * The page ranges are returned per edition. The order is the same as the sorting order of the editions. If two
+	 * editions in sequence have the same page range than only one page range is returned for both editions. Of course
+	 * if no editions are used than only one page range is returned.
+	 * Page ranges per editions are separated by by semicolon.
+	 * For example 1-4,6;1-4,7 means page 1 to 4 for both editions and page 6 for the first and 7 for the second.
+	 *
+	 * @param Pages[] $pages
+	 * @return string The calculated page range.
+	 *
+	 */
+	static public function calcPageRange( array $pages )
 	{
-		$pagerange = '';
-		$editions = array();
-		
-		if (!empty($pages)) {
-			require_once BASEDIR . '/server/utils/NumberUtils.class.php';
-			require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
-			foreach ($pages as $page) {
-				if ($page->Edition != null) {
-					$editionid = $page->Edition->Id;
-					if (!array_key_exists($editionid, $editions)) {
-						$editions[$editionid] = array();
+		$pageRangeByEditions = array();
+		if( $pages ) {
+			$editionIds = self::getEditionsFromPages( $pages );
+			$pagesByEditionsSorted = self::assignPagesByEditionsSorted( $pages, $editionIds );
+			require_once BASEDIR.'/server/utils/NumberUtils.class.php';
+			if( $pagesByEditionsSorted ) foreach( $pagesByEditionsSorted as $pagesByEdition ) {
+				$prevPageOrder = reset( $pagesByEdition );
+				$pagesPerRange = array();
+				$separator = '';
+				$pageRangeString = '';
+				if( $pagesByEdition ) foreach( $pagesByEdition as $pageOrder ) {
+					if( $pageOrder < $prevPageOrder ) { // New page order is applied.
+						$pageRangeString .= $separator.NumberUtils::createNumberRange( $pagesPerRange );
+						$separator = ',';
+						$pagesPerRange = array();
 					}
-					$editions[$editionid][$page->PageOrder] = $page->PageOrder;
+					$pagesPerRange[] = str_pad( $pageOrder, 3, "0", STR_PAD_LEFT );;
+					$prevPageOrder = $pageOrder;
 				}
-				else {
-					$editions[0][$page->PageOrder] = $page->PageOrder; // edition = 0 => no editions or all editions
-				}
-			}
-
-			//Sort the $editions by their code...
-			if (count($editions) > 1) { //Only if more than one edition
-				$sortededitions = DBEdition::sortEditionIdsByCode(array_keys($editions));
-				$sorted = array();
-				foreach (array_keys($sortededitions) as $editionid) {
-					$sorted[$editionid] = $editions[$editionid];
-                    if ( isset( $editions[0] )) {
-                        $sorted[ $editionid ] = $sorted[ $editionid ] + $editions[0];
-                        // Add pages for all editions to a specific edition. By using + operator the keys are not
-                        // renumbered.
-                        asort( $sorted[ $editionid] );
-                    }
-				}
-				$editions = $sorted;
-			}	
-
-			$prevrange = '';
-            $allrange = '';
-			$morethen1range = false;
-			$firsttime = true;
-			if (count($editions)) {
-				foreach ($editions as $editionPageOrders) {
-					$zeroPrefixedEditionPageOrders = array();
-					foreach( $editionPageOrders as $editionPageOrder ){
-						// BZ#22793: Add leading zeros for varchar field type to be sorted 'numerically'
-						// Always ensure the page order has three digits (fill in with leading zeros to make it three digits)
-						$zeroPrefixedEditionPageOrders[] = str_pad( $editionPageOrder, 3, "0", STR_PAD_LEFT );
-					}
-				
-					$editionrange = NumberUtils::createNumberRange( $zeroPrefixedEditionPageOrders );
-					if ($editionrange != $prevrange && !$firsttime) {
-						$morethen1range = true;	
-					}
-					$firsttime = false;
-					$allrange .= $editionrange . '; ';
-					$prevrange = $editionrange;	
-				}
-			}
-			if ($morethen1range == true) {
-				$pagerange = substr($allrange, 0, -2); //Remove last semicolon and space character
-			}
-			else {
-				$pagerange = $prevrange;
+				$pageRangeString .= $separator.NumberUtils::createNumberRange( $pagesPerRange );
+				$pageRangeByEditions[] = $pageRangeString;
 			}
 		}
-		
-		return $pagerange;
+
+		return self::composePageRangeOverAllEditions( $pageRangeByEditions );
+	}
+
+	/**
+	 * Converts a page range to a page range padded with zeros on the left.
+	 *
+	 * Padding is done up to three digits.
+	 * Pagerange 1 => 001; Pagerange 2-5 => 002-005; 4,45-46,48 => 004,045-046,048.
+	 *
+	 * @param string $pageRange
+	 * @return string Page range padded with zeros.
+	 */
+	static public function addZeroPaddingToPageNumberRange( $pageRange )
+	{
+		$placedOnPageRangePadded = '';
+		$placedOnPageRanges = preg_split( '/([,-])/', $pageRange, -1, PREG_SPLIT_DELIM_CAPTURE );
+		if( $placedOnPageRanges ) foreach( $placedOnPageRanges as $pageElem ) {
+			if( is_numeric( $pageElem ) ) {
+				$paddedPageElem = str_pad( $pageElem, 3, "0", STR_PAD_LEFT );
+				$placedOnPageRangePadded .= $paddedPageElem;
+			} else {
+				$placedOnPageRangePadded .= $pageElem; // add ',' or '-'
+			}
+		}
+
+		return $placedOnPageRangePadded;
+	}
+
+	/**
+	 * Returns the page range of a layout based on the page ranges by edition.
+	 *
+	 * Page ranges of editions are concatenated using ';' as a separator. If two page ranges of adjacent editions are the
+	 * same the page range is only added once.
+	 *
+	 * @param array $pageRangeByEditions
+	 * @return string The page range of all editions.
+	 */
+	static private function composePageRangeOverAllEditions( array $pageRangeByEditions )
+	{
+		$prevRange = '';
+		$uniquePageRangeByEditions = array();
+		if( $pageRangeByEditions ) foreach( $pageRangeByEditions as $pageRangeByEdition ) {
+			if( $pageRangeByEdition !== $prevRange ) {
+				$uniquePageRangeByEditions[] = $pageRangeByEdition;
+			}
+			$prevRange = $pageRangeByEdition;
+		}
+
+		return implode( ';', $uniquePageRangeByEditions );
+	}
+
+	/**
+	 * Returns the edition ids of all editions of the pages.
+	 *
+	 * The pages can be assigned to specific editions or all/no editions. In case of no specific edition the page edition
+	 * is set to null.
+	 *
+	 * @param Pages[] $pages
+	 * @return int[]
+	 */
+	static private function getEditionsFromPages( array $pages )
+	{
+		$editionIds = array();
+		if( $pages ) foreach( $pages as $page ) {
+			$editionId = $page->Edition == null ? 0 : intval( $page->Edition->Id );
+			$editionIds[$editionId] = $editionId;
+		}
+
+		return array_values( $editionIds );
+	}
+
+	/**
+	 * Sorts the pages by (sorted) edition.
+	 *
+	 * The pages are sorted according to the page sequence. The page sequence is just the sequence of the pages in the
+	 * layout. The page order is the number assigned to the sequence. A sequence can have different orders e.g.:
+	 * Sequence Order Number
+	 *    1       2     II
+	 *    2       3     III
+	 *    3       4     IV
+	 *    4       1     1
+	 *    5       2     2
+	 *    6       3     3
+	 * So after the third page (sequence = 3) a new order is applied.
+	 * Note that the page number ($page->PageNumber) is the formatted page order. So page order 3 can be formatted to
+	 * B III, where prefix B is applied plus roman styling. Page numbers are not taken into account.
+	 * If multiple editions are used the sorted pages are assigned to the sorted editions. Sorting is not needed in case
+	 * one edition is used or all pages are assigned to all editions (only edition = 0).
+	 * If some pages are assigned to a specific editions and others to all editions the pages for all editions are
+	 * assigned to all the specific editions.
+	 *
+	 * @param Pages[] $pages
+	 * @param int[] $editionIds
+	 * @return array Sorted pages by (sorted) editions.
+	 */
+	private static function assignPagesByEditionsSorted( array $pages, array $editionIds )
+	{
+		$allAndSpecificMixed = self::allAndSpecificEditionsMixed( $editionIds );
+		if( $allAndSpecificMixed ) {
+			$key = array_search( 0, $editionIds );
+			unset( $editionIds[$key] );
+		}
+
+		// Assigning pages to editions.
+		$pagesByEdition = array_fill_keys( $editionIds, array() );
+		if( $pages ) foreach( $pages as $page ) {
+			$editionId = $page->Edition == null ? 0 : intval( $page->Edition->Id );
+			if( $allAndSpecificMixed && $editionId == 0 ) {
+				if( $editionIds ) foreach( $editionIds as $editionId ) {
+					$pagesByEdition[ $editionId ][ $page->PageSequence ] = $page->PageOrder;
+				}
+			} else {
+				$pagesByEdition[ $editionId ][ $page->PageSequence ] = $page->PageOrder;
+			}
+		}
+
+		// Sorting pages by (sorted) editions.
+		$sortedPagesBySortedEditions = array();
+		if( count( $editionIds ) > 1 ) {
+			require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+			$sortedEditionIds = array_keys( DBEdition::sortEditionIdsByCode( $editionIds ) );
+			if( $sortedEditionIds ) foreach( $sortedEditionIds as $sortedEditionId ) {
+				$sortedPagesBySortedEditions[ $sortedEditionId ] = array();
+			}
+		} else {
+			$sortedPagesBySortedEditions[reset( $editionIds )] = array();
+		}
+		if( $pagesByEdition ) foreach( $pagesByEdition as $editionId => $pageOrderByPageSequence ) {
+			/*success = */ ksort( $pageOrderByPageSequence, SORT_NUMERIC );
+			$sortedPagesBySortedEditions[ $editionId ] = $pageOrderByPageSequence;
+		}
+
+		return $sortedPagesBySortedEditions;
+	}
+
+	/**
+	 * Checks if specific editions ( id != 0 ) are mixed up with marker for all editions ( id = 0 ).
+	 *
+	 * The $editionsIds parameter contains unique ids of editions and/or 0 to indicate all editions.
+	 *
+	 * @param array $editionIds
+	 * @return bool
+	 */
+	static private function allAndSpecificEditionsMixed( array $editionIds )
+	{
+		return ( in_array( 0, $editionIds ) && count( $editionIds ) > 1 );
 	}
 	
 	/**
 	 * Inserts object pages into database and filestore
 	 *
-	 * @param string $storename Original object name (used in storage)
-	 * @param string $objid     Object ID (used in DB)
+	 * @param string $storeName Original object name (used in storage)
+	 * @param string $objId     Object ID (used in DB)
 	 * @param string $instance  Page instance ('Production' or 'Planning')
 	 * @param array  $pages     List of Page objects (from workflow WSDL)
 	 * @param boolean $deleteExisting Pass true for Save- or false for Create- operations
@@ -459,21 +575,20 @@ class BizPage
 	 * @param string $newObjVerNr  New object version (major.minor)
 	 * @throws BizException on failure
 	 */
-	public static function savePages( $storename, $objid, $instance, $pages, $deleteExisting, $oldObjVerNr, $newObjVerNr )
+	public static function savePages( $storeName, $objId, $instance, $pages, $deleteExisting, $oldObjVerNr, $newObjVerNr )
 	{
 		if( $deleteExisting ) { // to differentiate between create and save
-			self::cleanPages( $storename, $objid, $instance, $oldObjVerNr );
+			self::cleanPages( $storeName, $objId, $instance, $oldObjVerNr );
 		}
 		
 		if (!empty($pages)) {
 			foreach ($pages as $page) {
-				self::insertPage( $storename, $objid, $page, $newObjVerNr );
+				self::insertPage( $storeName, $objId, $page, $newObjVerNr );
 			}
+			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			$pagerange = self::calcPageRange($pages);
+			DBObject::updatePageRange($objId, $pagerange, $instance);
 		}
-
-		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		$pagerange = self::calcPageRange($pages);
-		DBObject::updatePageRange($objid, $pagerange, $instance);
 	}
 	
 	/**
@@ -563,7 +678,7 @@ class BizPage
 	 *	@param $pageordered boolean: if false, the pages are just ordered by layout. If true, pages will be ordered by pageorder.
 	 *	@param $instance, either empty, production or ???planning???
 	 *
-	 *	@return associative array of pagerows, the keys being the pageindex where we would expect to show the individual pages.
+	 *	@return array associative array of pagerows, the keys being the pageindex where we would expect to show the individual pages.
 	 *			For each pagerow some information is returned: layoutid, pagesequence, pageorder, pagenumber, sectionid, editionid, visible
 	 *			The visible-flag can only be set to false if either a sectionid or a layoutid was given, only pages in that section or layout are visible then.
 	 *			When $pageordered = true it gets a bit more complicated, it may be that some pages have the same pageindex (pageorder):

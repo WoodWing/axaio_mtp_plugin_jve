@@ -21,7 +21,6 @@ class WW_TestSuite_HealthCheck2_ImageMagick_TestCase extends TestCase
 	
 	final public function runTest()
 	{
-		require_once BASEDIR . '/server/interfaces/services/BizException.class.php';
 		require_once BASEDIR . '/server/plugins/ImageMagick/ImageMagick.class.php';
 		require_once BASEDIR . '/server/plugins/ImageMagick/ImageMagick_MetaData.class.php';
 		require_once BASEDIR . '/server/utils/TestSuite.php';

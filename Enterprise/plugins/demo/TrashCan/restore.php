@@ -9,8 +9,6 @@ if( file_exists('../../../config/config.php') ) {
 } else { // fall back at symbolic link to Perforce source location of server plug-in
 	require_once '../../../Enterprise/config/config.php';
 }
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-
 $ticket = $_REQUEST['ticket'];
 
 // init authorization

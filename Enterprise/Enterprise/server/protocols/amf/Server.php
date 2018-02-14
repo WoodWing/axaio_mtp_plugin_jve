@@ -43,7 +43,7 @@ class WW_AMF_Server extends Zend_Amf_Server
 	/**
 	 * Does AMF logging of a request/response at Enterprise Server log folder.
 	 *
-	 * @param object $obj AMF request or response data object to be logged.
+	 * @param Zend_Amf_Request|Zend_Amf_Server_Response $obj AMF request or response data object to be logged.
 	 */
 	private function logAmf( $obj )
 	{
@@ -66,6 +66,7 @@ class WW_AMF_Server extends Zend_Amf_Server
 					// We do NOT classmap the request, since that would require in include ALL request
 					// definitions! The side effect of this is that the request is a stdClass. So here
 					// we replace the stdClass with the request name, for debugging convenience.
+					/** @noinspection PhpParamsInspection */
 					if( count($data->body) == 1 ) { // for Enterprise, there should be just one param, which is the request
 						$reqStream = print_r($data->body[0],true);
 						if( substr( $reqStream, 0, strlen('stdClass Object') ) == 'stdClass Object' ) {
@@ -86,7 +87,8 @@ class WW_AMF_Server extends Zend_Amf_Server
 				if( $debug ) {
 					LogHandler::logService( $serviceName, print_r($data,true), null, 'AMF' );
 				}
-				LogHandler::Log( 'WW_AMF_Server', 'ERROR', 'Error occurred: '.$data->faultString.' Detail: '.$data->faultDetail );
+				//	LogHandler::Log( 'WW_AMF_Server', 'ERROR', 'Error occurred: '.$data->faultString.' Detail: '.$data->faultDetail );
+				// Only relevant if the error is AMF related. In case of normal BizExceptions this logging pollutes the error log.
 			} else if( $data instanceof Zend_Amf_Value_Messaging_AcknowledgeMessage ) { // response
 				if( is_null($interfaceName) || is_null($serviceName) ) {
 					LogHandler::Log( 'WW_AMF_Server', 'DEBUG', 'AMF hand-shake completed.' ); // happens before first request

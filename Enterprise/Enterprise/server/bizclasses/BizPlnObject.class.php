@@ -16,6 +16,15 @@ define( 'FLAG_PLACEMENT_DELETED', 6 );
 
 class BizPlnObject
 {
+	/**
+	 * Create layouts.
+	 * Based on the planned layout(s) and a template the layouts are created.
+	 *
+	 * @param string $user Acting user.
+	 * @param PlnLayoutFromTemplate[] $layouts
+	 * @return PlnLayout[] Created layouts.
+	 * @throws BizException
+	 */
 	static public function createLayouts( $user, $layouts )
 	{
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'CreateLayouts started >>>' );
@@ -79,7 +88,7 @@ class BizPlnObject
 			$createdLayout->Section = $layout->NewLayout->Section;
 			$createdLayout->Status = $layout->NewLayout->Status;
 			$createdLayout->Editions = $layout->NewLayout->Editions;
-			$createdLayout->Editions = $layout->NewLayout->Deadline;
+			$createdLayout->Deadline = $layout->NewLayout->Deadline;
 			$createdLayout->Version = $layout->NewLayout->Version;
 			$createdLayouts[] = $createdLayout;
 		}
@@ -138,6 +147,15 @@ class BizPlnObject
 		}
 	}
 
+	/**
+	 * Modifies layouts.
+	 * The properties of the layouts are directly updated in the database. No service is invoked.
+	 *
+	 * @param string $user Acting user.
+	 * @param PlnLayout[] $layouts
+	 * @return PlnLayout[] Modified layouts.
+	 * @throws BizException
+	 */
 	static public function modifyLayouts( $user, $layouts )
 	{
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'ModifyLayouts started >>>' );
@@ -172,7 +190,9 @@ class BizPlnObject
 			isset( $layout->Section ) ? $lay_props['section_name'] = $layout->Section : $lay_props['section_name'] = '';
 			isset( $layout->Status ) ? $lay_props['state_name'] = $layout->Status : $lay_props['state_name'] = '' ; // EN-4014
 			isset( $layout->Editions ) ? $lay_props['editions'] = $layout->Editions : $lay_props['editions'] = '';
-			isset( $layout->Deadline ) ? $lay_props['deadline'] = $layout->Deadline : $lay_props['deadline'] = '';
+			if ( isset( $layout->Deadline ) ) {
+				$lay_props['deadline'] = $layout->Deadline;
+			}
 			$lay_props['type'] = 'Layout';
 			self::modifyObject( $lay_props, $user );
 			$layout->Version = $lay_props['version'];
@@ -180,7 +200,6 @@ class BizPlnObject
 			// Tell layouter that his/her layout needs to be cuddled since planner has infected layout.
 			$sMsg = BizResources::localize( 'PLAN_MESS_LAYOUT_MODIFIED', true, array( $lay_props['name'] ) );
 			DBObjectFlag::setObjectFlag( $layout->Id, 'Plan System', FLAG_OBJECT_UPDATED, 1, $sMsg );
-			self::sendMessage( $layout->Id, $sMsg, 'Info', 'ModifyLayouts' );
 			self::resolvePublishData( $lay_props );
 			self::copyResolvedPropsFromArray( $layout, $lay_props );
 
@@ -218,9 +237,10 @@ class BizPlnObject
 			$modifiedLayout->Section = $layout->Section;
 			$modifiedLayout->Status = $layout->Status;
 			$modifiedLayout->Editions = $layout->Editions;
-			$modifiedLayout->Editions = $layout->Deadline;
+			$modifiedLayout->Deadline = $layout->Deadline;
 			$modifiedLayout->Version = $layout->Version;
 			$modifiedLayouts[] = $modifiedLayout;
+			self::sendMessage( $layout->Id, $sMsg, 'Info', 'ModifyLayouts' ); //This also takes care of reindexing the object.
 		}
 
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'ModifyLayouts completed <<<' );
@@ -643,12 +663,6 @@ class BizPlnObject
 
 	static private function createLayoutFromTemplate( $type, $name, &$arr, $user )
 	{
-		self::convertPublishNamesIntoIds( $arr, $user );
-
-		$err = self::resolveEditions( $arr['editions'], $arr['publication'], $arr['issue'] );
-		if( !empty( $err ) ) {
-			throw new BizException( 'ERR_NOTFOUND', 'Client', "Edition:$err" );
-		}
 		$dbDriver = DBDriverFactory::gen();
 
 		// find template with given name
@@ -1236,66 +1250,36 @@ class BizPlnObject
 
 	/**
 	 * Resolves channel data and adds it to the properties array.
+	 *
 	 * If a channel name is passed in that channel name (plus brand) is used to resolve the channel data.
-	 * If also an existing issue is provided then that issue must belong to the channel.
-	 * If no channel name is provided the channel data is taken from the channel the issue belongs to.
-	 * If the issue does not exists yet the default channel of the brand is used to resolve the channel data.
+	 * If no channel name is provided the channel data is taken from the print channel of the brand (publication).
+	 * If a brand has more than one print channel the name of the channel is required to resolve the channel.
 	 *
 	 * @param array $arr Contains all kind of information passed in by the request.
 	 * @throws BizException
 	 */
 	private static function resolveChannelProperties( &$arr )
 	{
-		$arr['pubChannelId'] = 0;
-		$arr['pubChannelType'] = 'print';
-		if( $arr['pubChannelName'] ) {
+		if( isset( $arr['publication'] ) ) {
 			require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
-			$channelObject = DBChannel::getPubChannelObjByBrandAndName( $arr['publication'], $arr['pubChannelName'] );
-			if( $channelObject ) {
-				$arr['pubChannelId'] = $channelObject->Id;
-				$arr['pubChannelType'] = $channelObject->Type;
-			} else {
-				throw new BizException( 'ERR_NOTFOUND', 'Client', 'Channel Name: '.$arr['pubChannelName'] );
-			}
-		}
-
-		if( $arr['issue_name'] ) {
-			require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-			if( $arr['pubChannelId'] ) {
-				$issueRow = DBIssue::getIssuesByNameAndChannel( $arr['issue_name'], $arr['pubChannelId'] );
-			} else {
-				$issueRow = DBIssue::getIssuesByName( $arr['issue_name'] );
-			}
-			if( $issueRow ) {
-				if( !$arr['pubChannelName'] ) {
-					$channelId = DBIssue::getChannelId( $issueRow[0]['id'] );
-					require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
-					$channelObject = DBChannel::getPubChannelObj( $channelId );
-					$arr['pubChannelId'] = $channelObject->Id;
-					$arr['pubChannelType'] = $channelObject->Type;
-					$arr['pubChannelName'] = $channelObject->Name;
+			if( $arr['pubChannelName'] ) {
+				$channelObject = DBChannel::getPubChannelObjByBrandAndName( $arr['publication'], $arr['pubChannelName'] );
+				if( !$channelObject ) {
+					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{CHANNEL}', $arr['pubChannelName'] ) );
 				}
 			} else {
-				if( !$arr['pubChannelName'] ) {
-					$arr['pubChannelId'] = self::resolveDefaultChannelOfIssue( $arr );
-					if( $arr['pubChannelId'] ) {
-						require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
-						$channelObject = DBChannel::getPubChannelObj( $arr['pubChannelId'] );
-						$arr['pubChannelType'] = $channelObject->Type;
-						$arr['pubChannelName'] = $channelObject->Name;
-					}
+				$printChannels = DBChannel::getChannelsBydBrandIdAndType( $arr['publication'], 'print' );
+				if( count( $printChannels ) === 1 ) {
+					$channelObject = array_shift( $printChannels );
+				} else {
+					throw new BizException( 'ERR_INVALID_OPERATION', 'Client', '' );
 				}
 			}
+
+			$arr['pubChannelId'] = $channelObject->Id;
+			$arr['pubChannelType'] = $channelObject->Type;
+			$arr['pubChannelName'] = $channelObject->Name;
 		}
-	}
-
-	private static function resolveDefaultChannelOfIssue( $arr )
-	{
-		$publicationId = $arr['publication'];
-		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		$publicationRow = DBPublication::getPublication( $publicationId );
-
-		return $publicationRow['defaultchannelid'];
 	}
 
 	// Copies named Pub/Iss/Sec/Status properties from $props into $obj, as well as Name+Id

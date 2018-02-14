@@ -106,42 +106,42 @@ class SolariumClient
 	 *
 	 * @param array $documents An array of object representations, each containing key => value pairs to be indexed.
 	 * @param bool $directCommit Whether or not to directly commit the created documents, default false.
+	 * @throws BizException
+	 * @return bool True when the indexing is successful, false otherwise.
 	 */
 	public function indexObjects( array $documents, $directCommit = false )
 	{
-		try {
-			// Create an update Query Instance.
-			$update = $this->client->createUpdate();
+		// Create an update Query Instance.
+		$update = $this->client->createUpdate();
 
-			$docs = array();
-			foreach( $documents as $fields ) {
-				$document = $update->createDocument();
-				$document->setKey( 'ID' );
+		$docs = array();
+		foreach( $documents as $fields ) {
+			$document = $update->createDocument();
+			$document->setKey( 'ID' );
 
-				foreach( $fields as $key => $value ) {
-					// Skip null values. These don't need to indexed.
-					if( is_null( $value ) ) {
-						continue;
-					}
-					$document->addField( $key, $value );
+			foreach( $fields as $key => $value ) {
+				// Skip null values. These don't need to indexed.
+				if( is_null( $value ) ) {
+					continue;
 				}
-
-				$docs[] = $document;
+				$document->addField( $key, $value );
 			}
 
-			// Add the documents and a commit command to the update query.
-			$update->addDocuments( $docs );
-
-			// If DirectCommit, add the commit line to it.
-			if ( $directCommit ) {
-				$update->addCommit();
-			}
-
-			// Execute the query.
-			$this->executeUpdate( $update );
-		} catch (Exception $e ) {
-			LogHandler::Log(self::LOG_IDENTIFIER, 'ERROR', $e->getMessage());
+			$docs[] = $document;
 		}
+
+		// Add the documents and a commit command to the update query.
+		$update->addDocuments( $docs );
+
+		// If DirectCommit, add the commit line to it.
+		if ( $directCommit ) {
+			$update->addCommit();
+		}
+
+		// Execute the query.
+		$resultStatus = $this->executeUpdate( $update );
+
+		return $resultStatus;
 	}
 
 	/**
@@ -149,43 +149,37 @@ class SolariumClient
 	 *
 	 * Removes the documents matching the supplied ids from the Solr index.
 	 *
-	 * @param array|null $ids An array of ids to be removed, or empty to empty out the whole index.
+	 * @param int[]|null $ids List of ids to be removed, or empty to empty out the whole index.
+	 * @throws BizException
 	 */
 	public function unindexObjects( $ids )
 	{
-		try {
-			// get an update query instance
-			$update = $this->client->createUpdate();
+		// get an update query instance
+		$update = $this->client->createUpdate();
 
-			if (count( $ids ) == 0) {
-				$update->addDeleteQuery( '*:*' );
-			} else {
-				$update->addDeleteByIds( $ids );
-			}
-
-			$update->addCommit();
-			$this->executeUpdate( $update );
-		} catch (Exception $e ) {
-			LogHandler::Log(self::LOG_IDENTIFIER, 'ERROR', $e->getMessage());
+		if (count( $ids ) == 0) {
+			$update->addDeleteQuery( '*:*' );
+		} else {
+			$update->addDeleteByIds( $ids );
 		}
+
+		$update->addCommit();
+		$this->executeUpdate( $update );
 	}
 
 	/**
 	 * Optimizes the Solr index.
 	 *
 	 * Calls the default Optimize on the Solr index.
+	 * @throws BizException
 	 */
 	public function optimize()
 	{
-		try {
-			// Get an update query instance.
-			// See Solr documentation for used options: http://wiki.apache.org/solr/UpdateXmlMessages
-			$update = $this->client->createUpdate();
-			$update->addOptimize(true /* softCommit */, false /* waitSearcher */, 5 /* maxSegments */);
-			$this->executeUpdate( $update );
-		} catch (Exception $e ) {
-			LogHandler::Log(self::LOG_IDENTIFIER, 'ERROR', $e->getMessage());
-		}
+		// Get an update query instance.
+		// See Solr documentation for used options: http://wiki.apache.org/solr/UpdateXmlMessages
+		$update = $this->client->createUpdate();
+		$update->addOptimize(true /* softCommit */, false /* waitSearcher */, 5 /* maxSegments */);
+		$this->executeUpdate( $update );
 	}
 
 	/**
@@ -195,47 +189,43 @@ class SolariumClient
 	 * @param array $fields key/value array of fields, containing the updated properties
 	 * @param boolean $directCommit Optional indicates if the change should be directly committed
 	 * @throws BizException
-	 * @return Solarium/QueryType/Update/Result|null $result Solarium result object
+	 * @return bool True when the indexing is successful, false otherwise.
 	 */
 	public function updateObjectsFields( array $objectIDs, array $fields, $directCommit = false )
 	{
 		$result = null;
 
-		try {
-			if( empty( $fields ) ) {
-				$errMsg = 'updateObjectsFields: Trying to update objects without specifying changed fields';
-				throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($errMsg), 'ERROR' );
-			}
-			$update = $this->client->createUpdate();
-
-			$docs = array();
-			foreach( $objectIDs as $id ) {
-				$document = $update->createDocument();
-				$document->ID = $id;
-
-				// The key must be set when updating with 'atomic updates'
-				$document->setKey( 'ID' );
-
-				foreach( $fields as $key => $value ) {
-					$document->setField( $key, $value, null /* boost */, 'set' /* modifier */ );
-				}
-
-				$docs[] = $document;
-			}
-
-			// Add the documents and a commit command to the update query.
-			$update->addDocuments( $docs );
-
-			// If DirectCommit, add the commit line to it.
-			if ( $directCommit ) {
-				$update->addCommit();
-			}
-
-			// this executes the query and returns the result
-			$result = $this->executeUpdate( $update );
-		} catch (Exception $e ) {
-			LogHandler::Log(self::LOG_IDENTIFIER, 'ERROR', $e->getMessage());
+		if( empty( $fields ) ) {
+			$errMsg = 'updateObjectsFields: Trying to update objects without specifying changed fields';
+			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($errMsg), 'ERROR' );
 		}
+		$update = $this->client->createUpdate();
+
+		$docs = array();
+		foreach( $objectIDs as $id ) {
+			$document = $update->createDocument();
+			$document->ID = $id;
+
+			// The key must be set when updating with 'atomic updates'
+			$document->setKey( 'ID' );
+
+			foreach( $fields as $key => $value ) {
+				$document->setField( $key, $value, null /* boost */, 'set' /* modifier */ );
+			}
+
+			$docs[] = $document;
+		}
+
+		// Add the documents and a commit command to the update query.
+		$update->addDocuments( $docs );
+
+		// If DirectCommit, add the commit line to it.
+		if ( $directCommit ) {
+			$update->addCommit();
+		}
+
+		// this executes the query and returns the result
+		$result = $this->executeUpdate( $update );
 
 		return $result;
 	}
@@ -244,7 +234,7 @@ class SolariumClient
 	 * Creates a new select and returns the query object.
 	 *
 	 * @param array|null $options Array with initial options for select
-	 * @return Solarium/QueryType/Select/Query/Query|null $query
+	 * @return Solarium\QueryType\Select\Query\Query|null $query
 	 */
 	public function createSelect( $options = null )
 	{
@@ -266,7 +256,7 @@ class SolariumClient
 	 *
 	 * @param Solarium/QueryType/Select/Query/Query $query
 	 * @throws BizException
-	 * @return Solarium/QueryType/Select/Result|null $resultSet
+	 * @return Solarium\QueryType\Select\Result\Result|null $resultSet
 	 */
 	public function executeSelect( $query )
 	{
@@ -311,11 +301,11 @@ class SolariumClient
 	 *
 	 * @param Solarium/QueryType/Update/Query/Query $update
 	 * @throws BizException
-	 * @return Solarium/QueryType/Update/Result|null $resultSet
+	 * @return bool True when the update was successful, false otherwise.
 	 */
 	private function executeUpdate( $update )
 	{
-		$resultSet = null;
+		$updateStatus = false;
 		$area = 'Solr'; // Service log name
 
 		try {
@@ -326,20 +316,24 @@ class SolariumClient
 				$debugRequest = print_r( $update, true );
 				LogHandler::logService( $area, $debugRequest, true, 'txt', 'txt' );
 			}
-
-			/** @noinspection PhpInternalEntityUsedInspection */
-			$resultSet = $this->client->update($update);
-
+			$resultSet = $this->client->update( $update );
+			if( !is_null( $resultSet ) && $resultSet instanceof Solarium\QueryType\Update\Result ) {
+				$updateStatus = $resultSet->getStatus() == 0 && // 0 indicates successful.
+					$resultSet->getResponse()->getStatusCode() == "200"; // HTTP status code for OK
+			}
 			if( $debugMode ) {
 				// Log Solr response
 				$debugResponse = json_decode( $resultSet->getResponse()->getBody(), true );
 				$debugResponse = print_r( $debugResponse, true );
 				LogHandler::logService( $area, $debugResponse, false, 'txt', 'txt' );
 			}
+		} catch ( Solarium\Exception\HttpException $e ) {
+			$errorMessageJson = json_decode( $e->getBody() );
+			$errorMessage = $errorMessageJson->error->msg;
+			throw new BizException ( null, 'Server', '', '[Solr] ' . $errorMessage, null, 'ERROR' );
 		} catch (Exception $e ) {
-			LogHandler::Log(self::LOG_IDENTIFIER, 'ERROR', $e->getMessage());
+			throw new BizException ( null, 'Server', '', $e->getMessage(), null, 'ERROR' );
 		}
-
-		return $resultSet;
+		return $updateStatus;
 	}
 }

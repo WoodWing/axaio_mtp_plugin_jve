@@ -1,36 +1,37 @@
 {
     "name": "graze/guzzle-jsonrpc",
-    "description": "JSON-RPC client for Guzzle",
-    "keywords": ["json", "jsonrpc", "guzzle", "http", "rpc"],
+    "description": "JSON-RPC 2.0 client for Guzzle",
+    "keywords": ["guzzle", "guzzlehttp", "http", "json", "json-rpc", "jsonrpc", "ring", "rpc"],
     "homepage": "https://github.com/graze/guzzle-jsonrpc",
-
-    "version": "0.2.3",
-
     "license": "MIT",
     "type": "library",
-
     "authors": [
         {
-            "name": "Andrew Lawson",
-            "email": "andrew.lawson@graze.com",
-            "homepage": "http://graze.com"
+            "name": "Graze tech team",
+            "homepage": "https://github.com/graze/guzzle-jsonrpc/graphs/contributors"
         }
     ],
-
     "autoload": {
-        "psr-0": {
-            "Graze\\Guzzle\\JsonRpc": "./lib"
+        "files": ["src/functions_include.php"],
+        "psr-4": {
+            "Graze\\GuzzleHttp\\JsonRpc\\": "src"
         }
     },
-
-    "require": {
-        "guzzle/guzzle": "~3.7.0",
-        "php": ">=5.3.3"
+    "autoload-dev": {
+        "psr-4": {
+            "Graze\\GuzzleHttp\\JsonRpc\\Test\\": "test/src"
+        }
     },
-
+    "require": {
+        "php": ">=5.5",
+        "guzzlehttp/guzzle": "^6.0",
+        "guzzlehttp/promises": "^1.0",
+        "psr/http-message": "^1.0"
+    },
     "require-dev": {
-        "ext-xdebug": "~2.2.1",
-        "mockery/mockery": "~0.8.0",
-        "phpunit/phpunit": "~3.7.21"
+        "adlawson/timezone": "~1.0",
+        "fabpot/php-cs-fixer": "~0.5",
+        "mockery/mockery": "~0.9",
+        "phpunit/phpunit": "~4.3"
     }
 }

@@ -263,7 +263,6 @@ class SmartArchiveProxy
 	 */
 	static public function getSessionData( $key )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$vars = BizSession::getSessionVariables();
 		return isset($vars[$key]) ? $vars[$key] : null;
 	}
@@ -276,7 +275,6 @@ class SmartArchiveProxy
 	 */
 	static public function setSessionData( $key, $data )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$vars = array( $key => $data );
 		BizSession::setSessionVariables( $vars );
 	}

@@ -20,7 +20,6 @@ function main ()
 	require_once BASEDIR . '/server/bizclasses/BizStorage.php';
 	require_once BASEDIR . '/server/dbclasses/DBVersion.class.php';
 	require_once BASEDIR . '/server/bizclasses/BizDeletedObject.class.php';
-	require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 	require_once BASEDIR . '/server/secure.php';
 	
 	$clean = intval( @$_REQUEST['clean'] );
@@ -211,8 +210,7 @@ function cleanObjectsInDB ( $clean )
 			if ($clean){
 				require_once BASEDIR . '/server/services/wfl/WflDeleteObjectsService.class.php';
 				require_once BASEDIR . '/server/interfaces/services/wfl/WflDeleteObjectsRequest.class.php';
-				require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-				
+
 				$ticket = BizSession::getTicket();
 				$service = new WflDeleteObjectsService();
 
@@ -240,8 +238,7 @@ function purgeObjects ()
 		//To purge Objects
 		require_once BASEDIR . '/server/services/wfl/WflDeleteObjectsService.class.php';
 		require_once BASEDIR . '/server/interfaces/services/wfl/WflDeleteObjectsRequest.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-				
+
 		$ticket = BizSession::getTicket();
 		$service = new WflDeleteObjectsService();
 		

@@ -44,7 +44,7 @@ class DBPubPublishedIssues extends DBBase
 	 * convenience for the time being. 
 	 *
 	 * @param PubPublishedIssue $publishIssue publish issue to be added.
-	 * @return id of newly added publish issue or false in case of failure.
+	 * @return int|bool id of newly added publish issue or false in case of failure.
 	 */
 	static public function addPublishIssue( PubPublishedIssue $publishIssue )
 	{

@@ -1,7 +1,7 @@
 <?php
 
-require_once dirname(__FILE__).'/../../../config/config.php';
-include_once( BASEDIR . '/server/utils/license/license.class.php' );
+require_once dirname( __FILE__ ).'/../../../config/config.php';
+include_once( BASEDIR.'/server/utils/license/license.class.php' );
 require_once BASEDIR.'/server/secure.php';
 
 ob_start();
@@ -29,7 +29,7 @@ if( $hasLicense ) { // One or more licenses installed?
 	} else {
 		$info = array();
 		$licenseStatus = $lic->getLicenseStatus( PRODUCTKEY, $appSerial, $info, $errMsg );
-		
+
 		// The user should only be an administrator if he can logon as an administrator.
 		// In case of an license error, he is not able to logon as administrator.
 		if( $licenseStatus <= WW_LICENSE_OK_MAX ) {
@@ -51,21 +51,20 @@ if( $hasLicense ) { // One or more licenses installed?
 			} else {
 				// License not OK, then the admin user is not able to logon normally.
 				// Then verify whether this is a valid admin user via the session!
-				$user = @$_GET[ 'adminUser' ];
-				if( !$user ) {
-					$user = @$_POST[ 'adminUser' ];
-				}
+				require_once BASEDIR.'/server/utils/HttpRequest.class.php';
+				$requestParams = WW_Utils_HttpRequest::getHttpParams( 'GP' );
+				$user = isset( $requestParams['adminUser'] ) ? $requestParams['adminUser'] : '';
 				// Admin user should always logon AFTER the max usage limit has been reached.
 				// If necessary he should first logoff.
 				// By logging on, the _install_ user will be removed from the tickets table, 
 				// and his lastlogon timestamp will be set!
 				if( $user ) {
-					$sessionname = 'ww_userlimit_admin_session';
-					session_name( $sessionname );
+					$sessionName = 'ww_userlimit_admin_session';
+					session_name( $sessionName );
 					session_start();
-					$adminUser = $_SESSION[ 'adminUser' ];
-					$hash= $_SESSION[ 'hash' ];
-					$myhash = md5( $user . "bla" );
+					$adminUser = $_SESSION['adminUser'];
+					$hash = $_SESSION['hash'];
+					$myhash = md5( $user."bla" );
 					if( $user == $adminUser && $hash == $myhash ) {
 						$showStatus = true;
 					}
@@ -81,7 +80,7 @@ if( $hasLicense ) { // One or more licenses installed?
 			$wwTestResult = $lic->wwTest( $errorMessage, $help, $warn, $extended );
 		}
 		if( !$wwTestResult || $errMsg ) {
-			print '<h1>'  . BizResources::localize('ERR_LICENSE') . '</h1>';
+			print '<h1>'.BizResources::localize( 'ERR_LICENSE' ).'</h1>';
 		}
 		if( $errMsg ) {
 			print $errMsg;
@@ -104,8 +103,8 @@ if( $showStatus ) {
 $txt = ob_get_contents();
 ob_end_clean();
 
-require_once BASEDIR . '/server/secure.php';
-require_once BASEDIR . '/server/utils/htmlclasses/HtmlDocument.class.php';
+require_once BASEDIR.'/server/secure.php';
+require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 $txt = HtmlDocument::buildDocument( $txt, true, null, false, true );
 print $txt;

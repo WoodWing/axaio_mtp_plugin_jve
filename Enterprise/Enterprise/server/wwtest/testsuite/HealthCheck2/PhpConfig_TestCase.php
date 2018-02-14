@@ -233,7 +233,6 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 		$deprecatedFeatures = array( 
 			array( 'name' => 'ServerCreateImagePreview', 'help' => 'This option is no longer used. Please enable/disable the preview Server Plug-ins instead.' ),
 		);
-		require_once BASEDIR.'/server/bizclasses/BizSettings.class.php';
 		foreach( $deprecatedFeatures as $opt ) {
 			if( BizSettings::isFeatureEnabled( $opt['name'] ) ) {
 				$this->setResult( 'WARN', 'The server feature '.$opt['name'].' is obsoleted. '.$opt['help'].'', $help );
@@ -383,7 +382,6 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 			'CreatePagePDFOnProduce', 'CreatePagePreview', 'CreatePagePreviewOnProduce', 
 			'PagePreviewQuality', 'PagePreviewResolution' 
 		);
-		require_once BASEDIR.'/server/bizclasses/BizSettings.class.php';
 		foreach( $movedFeatures as $movedFeature ) {
 			if( BizSettings::isFeatureEnabled( $movedFeature ) ) {
 				$this->setResult( 'ERROR', 'The feature '.$movedFeature.' should be moved from the SERVERFEATURES setting to the CLIENTFEATURES setting.', $help );

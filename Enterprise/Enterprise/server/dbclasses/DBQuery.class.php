@@ -11,8 +11,7 @@ class DBQuery extends DBBase
 	private static $RegViews;
 
 	/**
-         * After the views have been used they must be dropped...
-         * @return nothing
+	 * After the views have been used they must be dropped...
 	 */
 	static public function dropRegisteredViews()
 	{
@@ -29,25 +28,6 @@ class DBQuery extends DBBase
 		DBBase::clearTempTables();
 	}
 
-	/**
-         * Registers a view with the purpose of dropping it when finished.
-         * @param string $viewname Name of the view to register.
-         * When empty no view is added, but it is still valid to get the array of views.
-         * @return array of registered views.
-	 */
-	static private function registerView($viewname = '')
-	{
-		if (!isset(self::$RegViews)) {
-			self::$RegViews = array();
-		}
-		if (!empty($viewname)) {
-			if (!in_array($viewname, self::$RegViews)) {
-				self::$RegViews[] = $viewname;
-			}
-		}
-		return self::$RegViews;
-	}
-
 	static public function getObjectRow($objectid, $sqlarray)
 	{
 		$dbdriver = DBDriverFactory::gen();
@@ -55,9 +35,9 @@ class DBQuery extends DBBase
 		$sql  = $sqlarray['select'];
 		$sql .= $sqlarray['from'];
 		$sql .= $sqlarray['joins'];
-		$sql .= " WHERE o.`id` = $objectid ";
+		$sql .= " WHERE o.`id` = ? ";
 
-		$sth  = $dbdriver->query($sql);
+		$sth  = $dbdriver->query($sql, array( intval( $objectid ) ));
 		$row  = $dbdriver->fetch($sth);
 		return $row;
 	}
@@ -99,15 +79,11 @@ class DBQuery extends DBBase
 	static public function getTopCount($sqlarray, $checkAccess)
 	{		
 		$dbdriver = DBDriverFactory::gen();
-		$tempaov = '';
-		if($checkAccess) {
-			$tempaov = self::getTempIds('aov');
-		}
-		
 		$sql  = "SELECT COUNT(DISTINCT o.`id`) AS c ";
 		$sql .= $sqlarray['from'];
 		$sql .= isset($sqlarray['joins4where']) ? $sqlarray['joins4where'] : $sqlarray['joins'];
 		if($checkAccess) {
+			$tempaov = self::getTempIds('aov');
 			$sql .= " INNER JOIN $tempaov aov ON (aov.`id` = o.`id`) ";
 		}
 		$sql .= $sqlarray['where'];
@@ -200,10 +176,6 @@ class DBQuery extends DBBase
 		$totalcount = self::getTopCount($sqlarray, $checkAccess);
 
 		$dbdriver = DBDriverFactory::gen();
-		$tempaov = '';
-		if($checkAccess) {
-			$tempaov = self::getTempIds('aov');
-		}
 		$temptvi = self::getTempIds('tvi');
 
 		// we need to use GROUP BY (not DISTINCT, see BZ#16880) here, because a named query can
@@ -217,6 +189,7 @@ class DBQuery extends DBBase
 		$sql .= $sqlarray['from'];
 		$sql .= isset($sqlarray['joins4where']) ? $sqlarray['joins4where'] : $sqlarray['joins'];
 		if($checkAccess) {
+			$tempaov = self::getTempIds('aov');
 			$sql .= " INNER JOIN $tempaov aov ON (aov.`id` = o.`id`) ";
 		}
 		$sql .= $sqlarray['where'];
@@ -317,7 +290,14 @@ class DBQuery extends DBBase
 			// When the query doesn't return any rows, the $sth parameter is actually set
 			// with an empty resultset. Therefore we can check this way.
 			// This solves BZ#28864 .
-			throw new BizException('ERR_SYSTEM_PROBLEM', 'server', $dbdriver->error());
+
+			// EN-88267:
+			// It used to be "ERR_SYSTEM_PROBLEM", but since it is database-related-error plus
+			// Enterprise should not expose all the database ( especially query syntax errors )
+			// when it is not in Debug mode. With this, the error key 'ERR_SYSTEM_PROBLEM' is
+			// changed to 'ERR_DATABASE' so that we have a better overview / control on suppressing
+			// these errors when Enterprise is not running on Debug mode.
+			throw new BizException( 'ERR_DATABASE', 'server', $dbdriver->error());
 		}
 		return self::fetchResults($sth, 'ID');
 	}
@@ -549,11 +529,11 @@ class DBQuery extends DBBase
 
 		$dbo = $deletedobjects ?  'smart_deletedobjects' : 'smart_objects';
 		$sql  =  self::getSQLRelatedChildsJoins( $dbo );
-		$sql .= "WHERE  parent.`id` = $parentId ";
+		$sql .= "WHERE  parent.`id` = ? ";
 		$sql .= "AND    child01.`child` <> parent.`id` ";
 
-		$sth = $dbdriver->query($sql);
-		$rows = self::fetchResults($sth);
+		$sth = $dbdriver->query($sql, array( intval( $parentId ) ) );
+		$rows = self::fetchResults( $sth );
 
 		$childsIds = array();
 		foreach ($rows as $row) {
@@ -617,9 +597,9 @@ class DBQuery extends DBBase
 		
 		$objectIdsConcat = implode(',', $flatObjectsIds);
 		
-		$sql = "select aov.`id` ";
-		$sql .= "from $tempaov aov ";
-		$sql .= "where aov.`id` in ($objectIdsConcat) ";
+		$sql = "SELECT aov.`id` ";
+		$sql .= "FROM $tempaov aov ";
+		$sql .= "WHERE aov.`id` IN ($objectIdsConcat) ";
 		
 		$sth = $dbdriver->query($sql);
 		$result = self::fetchResults($sth, 'id');	
@@ -840,9 +820,9 @@ class DBQuery extends DBBase
 	}
 
 	/**
-         * Gets the named query named $queryname from the database.
-         * @param string $queryname
-         * @return row containing the namedquery with $queryname
+	 * Gets the named query named $queryname from the database.
+	 * @param string $queryname
+	 * @return array row containing the namedquery with $queryname
 	 */
 	static public function getNamedQueryByName($queryname)
 	{
@@ -869,47 +849,54 @@ class DBQuery extends DBBase
  		$dbdriver = DBDriverFactory::gen();
 		$tempav = self::getTempIds('av');
 		$authorizationstable = $dbdriver->tablename('authorizations');
-		
+
 		// Publication admin rights
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		$authPublAdmin = DBUser::getListBrandsByPubAdmin($shortusername);
-		$handled = array();	// contains brands user has full authorization	
+		$fullAuthBrandIds = array();	// Contains brand Ids the user has full authorization for.
 		foreach ($authPublAdmin as $authPublAdminRow) {
+			$brandId = intval($authPublAdminRow['publication']);
+			$fullAuthBrandIds[$brandId] = $brandId; // Overwrite, to prevent duplicates.
+		}
+
+		if( $fullAuthBrandIds ) {
+			$where = self::addIntArrayToWhereClause('a.publication', $fullAuthBrandIds, false );
 			$brandAdmin = true;
-			$publication = intval($authPublAdminRow['publication']);
-			$sql =  "INSERT INTO $tempav ";
+			$sql  = "INSERT INTO $tempav ";
 			$sql .= "SELECT DISTINCT a.`publication`, a.`issue`, 0, 0 ";//BZ#35240 Brand admin user is also entitled to
-			$sql .= "FROM $authorizationstable a ";						//'overrule brand' issues.
-			$sql .= "WHERE a.`publication` = $publication ";
+			$sql .= "FROM {$authorizationstable} a ";                  //'overrule brand' issues.
+			$sql .= "WHERE {$where} ";
 			$dbdriver->query($sql);
-			$handled[$publication] = $publication;
 		}
-		
+
 		$skipPublications = '';
-		if (!empty($handled)) {
-			$skipPublications = implode(',', $handled);
+		if (!empty($fullAuthBrandIds)) {
+			$skipPublications = implode(',', $fullAuthBrandIds);
 		}
 		
-		$shortusername = $dbdriver->toDBString($shortusername);
 		$userstable = $dbdriver->tablename('users');
 		$usergrouptable = $dbdriver->tablename('usrgrp');
 		$profilefeaturestable = $dbdriver->tablename('profilefeatures');
 
 		// Workflow rights
+		$params = array();
 		$sql  = "INSERT INTO $tempav ";
 		$sql .= "SELECT DISTINCT `publication`, `issue`, `section`, `state` ";
-		$sql .= "FROM $userstable u, $usergrouptable ug, $authorizationstable a ";
-		$sql .= "LEFT JOIN $profilefeaturestable pf on pf.`profile` = a.`profile` ";
-		$sql .= "WHERE u.`user` = '$shortusername' ";
+		$sql .= "FROM {$userstable} u, {$usergrouptable} ug, {$authorizationstable} a ";
+		$sql .= "LEFT JOIN {$profilefeaturestable} pf on pf.`profile` = a.`profile` ";
+		$sql .= "WHERE u.`user` = ? ";
+		$params[] = strval( $shortusername );
 		if( $accessRight > 0 ) {
-			$sql .= "AND pf.`feature` = $accessRight ";
+			$sql .= "AND pf.`feature` = ? ";
+			$params[] = intval( $accessRight );
 		}
 
 		$sql .= "AND u.`id` = ug.`usrid` AND ug.`grpid` = a.`grpid` ";
 		if (!empty($skipPublications)) {
-			$sql .= "AND a.`publication` NOT IN ($skipPublications) ";
+			$sql .= "AND a.`publication` NOT IN ({$skipPublications}) ";
 		}
 		
-		$dbdriver->query($sql);
+		$dbdriver->query( $sql, $params );
 
 		return $tempav;
 	}
@@ -998,7 +985,7 @@ class DBQuery extends DBBase
 		
 		return $sql;
 	}
-	
+
 	/**
 	 * Creates a view named smart_authorizedobjects_view with all object-id's which the user is authorized for.
 	 * This includes the objects where the user is entitled to via the normal workflow and the objects of those
@@ -1011,27 +998,25 @@ class DBQuery extends DBBase
 	 * @param bool $hierarchical true if it's a hierarchical query otherwise false
 	 * @param string $objectsWhere extra where clause for preselecting objects without WHERE itself
 	 * @param int	$accessRight Access right to check (database id of the right or 0 when to skip).
-	 * @return nothing
 	 */
 	static public function createAuthorizedObjectsView($shortusername, $deletedobjects = false, $params = null,
-													   $withclosed = false, $hierarchical = false, $objectsWhere = '',
-													   $accessRight = 1/* View */)
+								 $withclosed = false,/** @noinspection PhpUnusedParameterInspection */ $hierarchical = false,
+								 $objectsWhere = '', $accessRight = 1/* View */)
 	{
 		$brandAdmin = false; // Has user brand admin rights
-		$tempav = self::createAuthorizationsView($shortusername, $accessRight, $brandAdmin);
+		$tempav = self::createAuthorizationsView( $shortusername, $accessRight, $brandAdmin );
 		$dbdriver = DBDriverFactory::gen();
 
 		$publications = array();
 		$issues = array();
-		$parentIds = array();
 		$objectIds = array();
 
-		if ($params) {
-			foreach ($params as $param) {
-				if( !empty($param->Value) ) {
-					$property = strtolower($param->Property);
-					if( is_numeric($param->Value) ) {
-						switch ($property) {
+		if( $params ) {
+			foreach( $params as $param ) {
+				if( !empty( $param->Value ) ) {
+					$property = strtolower( $param->Property );
+					if( is_numeric( $param->Value ) ) {
+						switch( $property ) {
 							case 'publicationid':
 								$publications[] = $param->Value;
 								break;
@@ -1039,22 +1024,22 @@ class DBQuery extends DBBase
 								$issues[] = $param->Value;
 								break;
 							case 'parentid': // Get children of a parent object, limit the query to parent object and its children (BZ#22116)
-								$objectIds[$param->Value] = intval( $param->Value );
+								$objectIds[ $param->Value ] = intval( $param->Value );
 								$children = self::getAllChildrenForParent( intval( $param->Value ), $deletedobjects );
 								$objectIds = array_merge( $objectIds, $children );
 								break;
 							case 'childid':
-								$objectIds[$param->Value] = intval( $param->Value );
+								$objectIds[ $param->Value ] = intval( $param->Value );
 								$parentIds = self::getAllParentsForChild( intval( $param->Value ), $deletedobjects );
 								$objectIds = array_merge( $parentIds, $objectIds );
 								break;
 						}
 					} else {
-						if ( $property == 'issue' ) {
+						if( $property == 'issue' ) {
 							require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
 							$issueRows = DBIssue::getIssuesByName( $param->Value );
-							if ( $issueRows ) foreach ( $issueRows as $issueRow ) {
-								$issues[] = $issueRow[ 'id' ];
+							if( $issueRows ) foreach( $issueRows as $issueRow ) {
+								$issues[] = $issueRow['id'];
 							}
 						}
 					}
@@ -1062,62 +1047,57 @@ class DBQuery extends DBBase
 			}
 		}
 
-		require_once BASEDIR . "/server/dbclasses/DBIssue.class.php";;
-		$overruleissues = DBIssue::listOverruleIssueIds($publications, $issues);
+		require_once BASEDIR."/server/dbclasses/DBIssue.class.php";;
+		$overruleissues = DBIssue::listOverruleIssueIds( $publications, $issues );
 
-		$tempaov = self::getTempIds('aov');
+		$tempaov = self::getTempIds( 'aov' );
 
-		$shortusernameDBStr = $dbdriver->toDBString($shortusername);
-		$objectstable = $deletedobjects ? $dbdriver->tablename('deletedobjects') : $dbdriver->tablename('objects');
-		
-		$isadmin = DBUser::isAdminUser($shortusername);
-		
+		$shortusernameDBStr = $dbdriver->toDBString( $shortusername );
+		$objectstable = $deletedobjects ? $dbdriver->tablename( 'deletedobjects' ) : $dbdriver->tablename( 'objects' );
+
+		$isadmin = DBuser::isAdminUser( $shortusername );
+
 		// BZ#11479 insert directly into temp_aov
-		$sql  = "INSERT INTO $tempaov ";
-		
+		$sql = "INSERT INTO $tempaov ";
+
 		$requiredPieces = array();
-		if (! empty($publications)) {
-			$requiredPieces[] = "o.`publication` IN (" . implode(',', $publications) . ")";
+		if( !empty( $publications ) ) {
+			$requiredPieces[] = "o.`publication` IN (".implode( ',', $publications ).")";
 		}
-		if (! $withclosed){
+		if( !$withclosed ) {
 			$requiredPieces[] = "( o.`closed` <> 'on' OR o.`closed` IS NULL)";
 		}
-		if ( $objectIds ) {
-			$requiredPieces[] = "o.`id` IN (" . implode(',', $objectIds) . ")";
+		if( $objectIds ) {
+			$requiredPieces[] = "o.`id` IN (".implode( ',', $objectIds ).")";
 		}
 		// extra clause for selecting objects		
-		if (! empty($objectsWhere)){
+		if( !empty( $objectsWhere ) ) {
 			$requiredPieces[] = $objectsWhere;
 		}
 		// $whereRequired must be filled
-		if (empty($requiredPieces)){
+		if( empty( $requiredPieces ) ) {
 			$requiredPieces[] = '1 = 1';
 		}
-		$whereRequired = implode(' AND ', $requiredPieces);
-		
+		$whereRequired = implode( ' AND ', $requiredPieces );
+
 		// get optimized section and state sql part
-		$sectionStateSQL = self::getAOVSectionStateSQLClause($tempav, $brandAdmin);
+		$sectionStateSQL = self::getAOVSectionStateSQLClause( $tempav, $brandAdmin );
 
-//		if (! empty($parentIds)){ BZ#20475 Content Station lists objects when no "Listed in Search Results" rights given.
-//			// for queries on parent id, user has right to see all children
-//			$sql .= self::getAOVParentSelect($parentIds, $overruleissues, $issues, $objectstable, $tempav, $sectionStateSQL, $shortusernameDBStr, $isadmin);
-//		} else {
-			// select object ids in brands
-			$sql .= "/*NoOverrule*/\n" . self::getAOVNoOverruleSelect($overruleissues, $issues, $objectstable, $tempav, $whereRequired, $sectionStateSQL);
-				// select object ids in overrule brand issues
-			if (! empty($overruleissues)) {
-				if ($dbdriver->supportMultipleReferencesTempTable()) {
-					$tempav2 = $tempav;
-				} else {
-					$tempav2 = DBBase::getTempIds('av2');
-				} //TODO we can skip this if we check given issues are present in overrule issues
-				$sql .= "\nUNION /*Overrule*/\n" . self::getAOVOverruleSelect($overruleissues, $issues, $objectstable, $tempav2, $whereRequired, $sectionStateSQL);
-			}
-			// select exceptions
-			$sql .= "\nUNION /*Exceptions*/\n" . self::getAOVExceptionsSelect($issues, $objectstable, $shortusernameDBStr, $isadmin, $whereRequired);
-//		}
+		// select object ids in brands
+		$sql .= "/*NoOverrule*/\n".self::getAOVNoOverruleSelect( $overruleissues, $issues, $objectstable, $tempav, $whereRequired, $sectionStateSQL );
+		// select object ids in overrule brand issues
+		if( !empty( $overruleissues ) ) {
+			if( $dbdriver->supportMultipleReferencesTempTable() ) {
+				$tempav2 = $tempav;
+			} else {
+				$tempav2 = DBBase::getTempIds( 'av2' );
+			} //TODO we can skip this if we check given issues are present in overrule issues
+			$sql .= "\nUNION /*Overrule*/\n".self::getAOVOverruleSelect( $overruleissues, $issues, $objectstable, $tempav2, $whereRequired, $sectionStateSQL );
+		}
+		// select exceptions
+		$sql .= "\nUNION /*Exceptions*/\n".self::getAOVExceptionsSelect( $issues, $objectstable, $shortusernameDBStr, $isadmin, $whereRequired );
 
-		$dbdriver->query($sql);
+		$dbdriver->query( $sql );
 	}
 	
 	/**
@@ -1165,9 +1145,8 @@ class DBQuery extends DBBase
 		if (!empty($overruleissues)){
 			// if tar isn't joined yet, do a left join (prevent error with objects which don't have any issues assgined)
 			if (empty($issues)) {
-				$issueClause[] = " 1 = 1 ";
 				// Also take children into account (via relational targets) BZ#33659.
-				$sql .= " LEFT JOIN (" . self::getIssueSubSelect($issueClause) . ') tar ON (o.`id` = tar.`objectid`) ';	
+				$sql .= " LEFT JOIN (" . self::getIssueSubSelect() . ') tar ON (o.`id` = tar.`objectid`) ';
 			}
 			$wheres[] = '( tar.`issueid` NOT IN (' . implode(',', $overruleissues) . ') OR tar.`issueid` IS NULL )';
 		}
@@ -1226,56 +1205,6 @@ class DBQuery extends DBBase
 	}
 	
 	/**
-	 * Return SQL statement to select child object ids. No check on access rights on
-	 * the child objects. 
-	 *
-	 * @param array $parentIds
-	 * @param array $overruleissues
-	 * @param array $issues
-	 * @param string $objectstable
-	 * @param string $tempav
-	 * @param string $sectionStateSQL
-	 * @param string $shortusernameDBStr
-	 * @param bool $isadmin
-	 * @return string
-	 * @throws BizException
-	 */
-	private static function getAOVParentSelect($parentIds, $overruleissues, $issues, $objectstable, $tempav, $sectionStateSQL, $shortusernameDBStr, $isadmin)
-	{
-		$dbdriver = DBDriverFactory::gen();
-		// check access on parent
-		$parentsWhereClause = 'o.`id` IN (' . implode(',', $parentIds) . ')';
-		$checkParentIdSQL = "/*CheckParentNoOverrule*/\n" . self::getAOVNoOverruleSelect($overruleissues, $issues, $objectstable, $tempav, $parentsWhereClause, $sectionStateSQL);
-		if (! empty($overruleissues)){
-			if ($dbdriver->supportMultipleReferencesTempTable()) {
-				$tempav2 = $tempav;
-			}
-			else {
-				$tempav2 = DBBase::getTempIds('av2');
-			}	
-			$checkParentIdSQL .= "\nUNION /*CheckParentOverrule*/\n" . self::getAOVOverruleSelect($overruleissues, $issues, $objectstable, $tempav2, $parentsWhereClause, $sectionStateSQL);
-		}
-		$checkParentIdSQL .= "\nUNION /*CheckParentExceptions*/\n" . self::getAOVExceptionsSelect($issues, $objectstable, $shortusernameDBStr, $isadmin, $parentsWhereClause);
-		$sth = $dbdriver->query($checkParentIdSQL);
-		$rows = self::fetchResults($sth);
-		if (! isset($rows[0]) || count($rows) != count($parentIds)){
-				throw new BizException('ERR_AUTHORIZATION', 'Client', 'Not allowed to query on parent ids: ' . implode(',', $parentIds));
-		}
-
-		// assume querying for ParentId hasn't additional query params because a user has access to all children
-		$sql = self::getAOVSelect($objectstable, array(), "", "")
-			. ' INNER JOIN ' . $dbdriver->tablename('objectrelations') . ' rel ON (o.`id` = rel.`child`)'
-			. " WHERE rel.`parent` IN (" . implode(',', $parentIds) . ")";
-		return $sql;
-	}
-
-	public static function escape4sql($instring)
-	{
-		$dbdriver = DBDriverFactory::gen();
-		return $dbdriver->toDBString($instring);
-	}
-	
-	/**
 	 * This method escapes sql wildcards used in search strings.
 	 * The used escape character itself has to be escaped if used in a like
 	 * statement as the % (any character, zero or more times), _ (any single
@@ -1310,19 +1239,19 @@ class DBQuery extends DBBase
 		$db = $dbdriver->tablename("namedqueries");
 		$query = $dbdriver->toDBString($query);
 
-		$sql = "SELECT * from $db";
+		$sql = "SELECT * FROM $db";
 		if ($query) {
-			$sql .= " where `query`='$query'";
+			$sql .= " WHERE `query`='$query'";
 			if (!$hidden) {
-				$sql .= " and `query` not like '.%'"; 
+				$sql .= " AND `query` NOT LIKE '.%'";
 			}
 		}
 		else {
 			if (!$hidden) {
-				$sql .= " where `query` not like '.%'"; 
+				$sql .= " WHERE `query` NOT LIKE '.%'";
 			}
 		}
-		$sql .= " order by `query`";
+		$sql .= " ORDER BY `query`";
 		$sth = $dbdriver->query($sql);
 		return $sth;
 	}
@@ -1449,48 +1378,65 @@ class DBQuery extends DBBase
 	 * with the given issue and objects that have been targetted for the given
 	 * issue or placed on layout with the issue, see BZ#15845
 	 *
+	 * For objects that are targeted for the given Issue, there will be no
+	 * object-relations (with other object's targeted Issue), hence, there
+	 * will be no deleted-relations (such as deletedContained, deletedPlaced).
+	 * Which means, these returned results are always from the Workflow area.
+	 *
+	 * However, for object (children objects) that have object-relations
+	 * (with other object's targeted Issue), these children objects will be
+	 * in a situation where they have deleted-relations (such as deletedContained,
+	 * deletedPlaced) when their parent object is moved to the TrashCan.
+	 * When this happens, these children objects should not be returned in the
+	 * results (since their relation to their parent is seen as -detached-).
+	 *
 	 * @param array $issueClauses
 	 * @return string SQL
 	 */
-	public static function getIssueSubSelect(array $issueClauses = array())
+	public static function getIssueSubSelect( array $issueClauses = array() )
 	{
 		$dbdriver = DBDriverFactory::gen();
-		$targetsTable = $dbdriver->tablename("targets");
-		$relationsTable = $dbdriver->tablename("objectrelations");
-		$issuesTable = $dbdriver->tablename("issues");
-		
-		$issueWhere = implode(' OR ', $issueClauses);
+		$targetsTable = $dbdriver->tablename( "targets" );
+		$relationsTable = $dbdriver->tablename( "objectrelations" );
+		$issuesTable = $dbdriver->tablename( "issues" );
+
+		$whereIssueClauses = '';
+		if( $issueClauses ) {
+			$whereIssueClauses = '('.implode( ') OR (', $issueClauses ).')';
+		}
+
+		// For Objects that have their own object-targets.
+		$whereObjectTargets = '';
+		if( $whereIssueClauses ) {
+			$whereObjectTargets = " WHERE {$whereIssueClauses} ";
+		}
+
+		// For Objects that have relations-targets
+		$whereParts = array();
+		if( $whereIssueClauses ) {
+			$whereParts[] = $whereIssueClauses;
+		}
+		// EN-88671: Children objects should not be returned when the parent objects
+		// have been deleted to the TrashCan (deleted from the Issue).
+		$whereParts[] = "(rel.`type` NOT LIKE 'Deleted%')"; // EN-88671
+		$whereSql = implode( ' AND ', $whereParts );
+		$whereObjectRelations = " WHERE {$whereSql} ";
+
 		$sql = "\nSELECT tar.`objectid` AS objectid, tar.`issueid` AS issueid"
-			. " FROM $targetsTable tar"
-			. " INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
-			. " WHERE $issueWhere"
-			. " AND tar.`objectrelationid` = 0"
-			. " UNION /*ChildrenInIssues*/"
-			. " SELECT rel.`child` AS objectid, tar.`issueid` AS issueid"
-			. " FROM $targetsTable tar"
-			. " INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
-			. " INNER JOIN $relationsTable rel ON ( rel.`id` = tar.`objectrelationid` )"
-			. " WHERE $issueWhere\n";
-		
+			." FROM $targetsTable tar"
+			." INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
+			.$whereObjectTargets
+			." AND tar.`objectrelationid` = 0"
+			." UNION /*ChildrenInIssues*/"
+			." SELECT rel.`child` AS objectid, tar.`issueid` AS issueid"
+			." FROM $targetsTable tar"
+			." INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
+			." INNER JOIN $relationsTable rel ON ( rel.`id` = tar.`objectrelationid` )"
+			.$whereObjectRelations;
+
 		return $sql;
 	}
 	
-	/**
-	 * Determine if the view is already created
-	 * 
-	 * @param string $viewid
-	 * @return boolean 
-	 */
-	private static function isViewCreated( $viewid )
-	{		
-		if ( !is_array( self::$RegViews) || !in_array( 'av_'.$viewid, self::$RegViews ) ) {
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-
 	/**
 	 * Returns an array with all object ids stored by a view (temporary table).
 	 * @param string $view The identifier of the view. 

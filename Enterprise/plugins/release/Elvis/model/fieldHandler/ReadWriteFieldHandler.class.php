@@ -14,6 +14,8 @@ class ReadWriteFieldHandler
 	protected $property;
 	/** @var bool $customProperty */
 	protected $customProperty = false;
+	/** @var int brand Id */
+	protected $brandId = 0;
 
 	/**
 	 * @param string $lvsFieldName Elvis metadata field name
@@ -21,7 +23,7 @@ class ReadWriteFieldHandler
 	 * @param string $dataType String representation of the Elvis field's data type.
 	 * @param string $entPropertyName Enterprise metadata property name.
 	 */
-	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName )
+	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName,  $brandId = 0 )
 	{
 		$this->lvsFieldName = $lvsFieldName;
 		$this->multiValue = $multiValue;
@@ -34,15 +36,21 @@ class ReadWriteFieldHandler
 			$entPropertyName = strtoupper( $entPropertyName );
 
 			// TODO: Jikes, this causes a lot of DB calls!
-			$propType = BizProperty::getCustomPropertyType( $entPropertyName );
-
+			$propType = BizProperty::getCustomPropertyType( $entPropertyName, $brandId );
+			
 			$this->property = new PropertyInfo( $entPropertyName, null, $this->entMetadataCategory, $propType );
 		} else {
 			$metadataPaths = BizProperty::getMetaDataPaths();
-			$metadataPath = $metadataPaths[ $entPropertyName ];
-			$this->entMetadataCategory = substr( $metadataPath, 0, strpos( $metadataPath, '->' ) );
-			$propertyInfos = BizProperty::getPropertyInfos();
-			$this->property = $propertyInfos[ $entPropertyName ];
+			if (array_key_exists($entPropertyName,$metadataPaths)) {
+				$metadataPath = $metadataPaths[ $entPropertyName ];
+				$this->entMetadataCategory = substr( $metadataPath, 0, strpos( $metadataPath, '->' ) );
+				$propertyInfos = BizProperty::getPropertyInfos();
+				$this->property = $propertyInfos[ $entPropertyName ];
+			} else {
+				if( LogHandler::debugMode() ) { // for developers/integrators only
+					LogHandler::Log( __METHOD__ , 'ERROR', "Property $entPropertyName not found in metadataPaths: ".print_r($metadataPaths,1));
+				}
+			}
 		}
 	}
 
@@ -55,7 +63,7 @@ class ReadWriteFieldHandler
 	public function read( $entMetadata, $elvisMetadata )
 	{
 		$propertyName = $this->property->Name;
-		$enterpriseValue = $this->getEnterpriseValue( $propertyName, $elvisMetadata );
+		$enterpriseValue = $this->getEnterpriseValue( $elvisMetadata );
 		if( $this->customProperty ) {
 			// Jay, we've got a custom property, let's do some complex stuff
 			if( is_null( $enterpriseValue ) ) {
@@ -116,7 +124,7 @@ class ReadWriteFieldHandler
 	 * Helper function to get the list of values from a metaDataValue.
 	 *
 	 * @param MetaDataValue $metaDataValue Metadata value structure of which the first value needs to be retrieved
-	 * @return string
+	 * @return mixed The metadata value
 	 */
 	private function getFirstMetaDataValue( $metaDataValue )
 	{
@@ -152,16 +160,17 @@ class ReadWriteFieldHandler
 				return (string)$enterpriseValue;
 			default:
 				$message = "Unable to cast to unknown Elvis data type ".$this->dataType." for field ".$this->property->Name;
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 		}
 	}
 
 	/**
-	 * @param string $enterpriseFieldName
-	 * @param mixed[] $elvisMetadata
+	 * Retrieve the desired value from Elvis to be populated at Enterprise side.
+	 *
+	 * @param array $elvisMetadata MetaData value retrieved from Elvis.
 	 * @return mixed
 	 */
-	protected function getEnterpriseValue( $enterpriseFieldName, $elvisMetadata )
+	protected function getEnterpriseValue( $elvisMetadata )
 	{
 		if( is_null( $this->lvsFieldName ) || !isset( $elvisMetadata[ $this->lvsFieldName ] ) ) {
 			$elvisValue = null;
@@ -192,10 +201,15 @@ class ReadWriteFieldHandler
 	}
 
 	/**
-	 * Converts the Elvis value to Enterprise value
+	 * Converts the Elvis value to Enterprise value.
 	 *
-	 * @param ElvisEntHit $elvisValue
-	 * @return mixed requested by Enterprise
+	 * In case when the Enterprise property is of type
+	 * 'list', 'multilist', 'multistring', 'multiline' or 'string',
+	 * extra checks are done on the value and illegals characters ( if found ) will be removed.
+	 * See UtfString::removeIllegalUnicodeCharacters().
+	 *
+	 * @param mixed $elvisValue
+	 * @return mixed Datatype requested by Enterprise
 	 * @throws BizException
 	 */
 	protected function getEnterpriseMetadataValue( $elvisValue )
@@ -205,7 +219,7 @@ class ReadWriteFieldHandler
 		}
 
 		//This code relies on Elvis values to be casted to the Enterprise type
-		//If the basic types between Elvis / Enterprise do not match 
+		//If the basic types between Elvis / Enterprise do not match
 		//create a special field handler for it
 		switch( $this->property->Type ) {
 			case 'date':
@@ -217,7 +231,8 @@ class ReadWriteFieldHandler
 			case 'multistring':
 			case 'multiline':
 			case 'string':
-				return (string)$elvisValue;
+				require_once BASEDIR.'/server/utils/UtfString.class.php';
+				return UtfString::removeIllegalUnicodeCharacters( strval( $elvisValue ) );
 			case 'bool':
 			case 'boolean':
 				return $this->toBoolean( $elvisValue );
@@ -234,10 +249,10 @@ class ReadWriteFieldHandler
 			case 'Section':
 			case 'ArrayOfEdition':
 				$message = "Casting to Enterprise data type ".$this->property->Type." for field ".$this->property->Name." is not supported by Elvis Content Source.";
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 			default:
 				$message = "Unable to cast to unknown Enterprise data type ".$this->property->Type." for field ".$this->property->Name;
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 		}
 	}
 
@@ -247,5 +262,17 @@ class ReadWriteFieldHandler
 			return strtolower( $value ) == "true" || $value == "1" || strtolower( $value ) == "yes";
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the Id of the brand for which the mapping is applicable.
+	 *
+	 * If the mapping is applicable for all brands the Id = 0.
+	 *
+	 * @return int Brand Id
+	 */
+	public function mappedToBrand(  )
+	{
+		return $this->brandId;
 	}
 }

@@ -4,7 +4,7 @@
 # @since        9.5
 # @copyright    WoodWing Software bv. All Rights Reserved.
 #
-# Build script for Enterprise Server 10.1 (or later). Designed to run on the Zetes build machine running CentOS7.
+# Build script for Enterprise Server 10.2 (or later). Designed to run on the Zetes build machine running CentOS7.
 # Initially, for 9.5 it was written for Perforce integration but since 10.1 it is redesigned for Git integration.
 #
 # It retrieves source code files from Git and updates version info in the core, plugins and 3rd party modules.
@@ -13,7 +13,16 @@
 
 SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
-iONCUBE_ENCODER="/usr/local/ioncube/9.0/ioncube_encoder54_9.0_64"
+iONCUBE_ENCODER="/usr/local/ioncube/10.0/ioncube_encoder71_10.0_64"
+PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
+PHPSTORM_LOGFILE=~/.PhpStorm2017.1/system/log/idea.log
+: ${PHP_EXE:=php} #Set default value to base php executable.
+
+# To maintain the es_php_encoder.php and php_define.php tools that are installed on Zetes, please use the Git repository
+# named "enterprise-server-build-tools" and run the Jenkins project named "Enterprise Server Build Tools" to upgrade.
+ES_PHP_ENCODER="/home/autobuild/workspace/Enterprise Server Build Tools/es_php_encoder.php"
+ES_PHP_DEFINE="/home/autobuild/workspace/Enterprise Server Build Tools/php_define.php"
+ES_REPLACE_RESOURCE_KEYS="/home/autobuild/workspace/Enterprise Server Build Tools/replace_resource_keys.php"
 
 #
 # Logs a given param name and value and exits with error when param value is empty.
@@ -172,8 +181,7 @@ function zipFolder {
 function determineZipPostfix {
 	# Start with the server version, but remove the patch digit for daily master builds.
 	SERVER_VERSION_ZIP="${SERVER_VERSION}"
-	if [[ "${SERVER_RELEASE_TYPE}" == "Daily" &&
-		( "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == work* ) ]]; then
+	if [[ "${SERVER_RELEASE_TYPE}" == "Daily" && ( "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == work* ) ]]; then
 		SERVER_VERSION_ZIP=`echo "${SERVER_VERSION_ZIP}" | sed -r "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/g"`
 	fi
 
@@ -201,116 +209,6 @@ function determineZipPostfix {
 
 	# Add "_Build<nr>.zip" postfix.
 	SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_Build${BUILD_NUMBER}.zip"
-}
-
-#
-# ionCube Encode a given PHP file.
-#
-# It reads from the ${SOURCE_BASE} folder and writes into the ${TARGET_BASE} folder.
-#
-# @param string ${1} ionCube Encoder project options file
-# @param string ${2} Relative path of file to be ionCube encoded
-#
-function ionCubeFile {
-	sourceFile="${SOURCE_BASE}${2}"
-	targetFile="${TARGET_BASE}${2}"
-	for i in `seq 1 10`;
-	do
-		"${iONCUBE_ENCODER}" --project-file "${1}" "${sourceFile}" -o "${targetFile}"
-		set +e
-		checkSum=`grep 'ionCube Loader' ${targetFile}`
-		set -e
-		if [ -n "${checkSum}"  ]; then
-			ionCubeEncodedFiles=$((ionCubeEncodedFiles+1))
-			break
-		else
-			# Sometimes ionCube Encoder silently fails. It turns out that we need
-			# to wait a bit and try again. The exact reason of failure is unknown (EN-87512).
-			echo "WARNING: ${targetFile} is not ionCube Encoded! (will retry)";
-			ionCubeBadAttempts=$((ionCubeBadAttempts+1))
-			sleep 3s
-		fi
-	done
-	if [ ! -n "${checkSum}"  ]; then
-		echo "ERROR: ${targetFile} is not ionCube Encoded! (gave up)";
-		head ${targetFile}
-		exit 1
-	fi
-}
-
-#
-# ionCube Encode all PHP files in a given folder recursively.
-#
-# It reads from the ${SOURCE_BASE} folder and writes into the ${TARGET_BASE} folder.
-#
-# @param string ${1} ionCube Encoder project options file
-# @param string ${2} Relative path of folder to be ionCube encoded recursively
-#
-function ionCubeFolder {
-	for icFile in $(find "${SOURCE_BASE}${2}" -name '*.php'); do
-		ionCubeFile "${1}" "${icFile#$SOURCE_BASE}"
-	done
-}
-
-#
-# ionCube encode specific files and folders in Enterprise Server release folder.
-#
-# Encoding is done for files that are related to the licensing of Enterprise to avoid
-# hackers working with our product without licenses. But also for some files that are
-# rather hard to develop which we do not want to give away for free and for files that
-# integrate with a 3rd party API that should not be exposed to the outside world.
-#
-function ionCubeEnterpriseFiles {
-	# Disable debugger; Else this function gives tons of noise. It validates encodings by itself.
-	set +x
-
-	echo "Encode specific Enterprise core folders."
-	thisYear=`date +%Y`
-	encodeOptionFile="${SOURCE_BASE}encodeoptions.txt"
-	echo "--replace-target --add-comment \"(c) Copyright 2000-${thisYear} WoodWing Software, www.woodwing.com\" --obfuscate locals --obfuscation-key \"de bocht van de ronde tocht\" --optimize max --no-doc-comments --property \"magic='the windmill keeps on turning'\" --message-if-no-loader \"'No Ioncube loader installed. Please run the Health Check page (e.g. http://localhost/Enterprise/server/wwtest/testsuite.php).'\"" > "${encodeOptionFile}"
-	icFolders="\
-		Enterprise/server/admin/license/ \
-		Enterprise/server/dbclasses/ \
-		Enterprise/server/dbdrivers/ \
-		Enterprise/server/services/ \
-		Enterprise/server/appservices/ \
-		Enterprise/server/wwtest/ngrams/ \
-		Enterprise/server/plugins/AdobeDps/ \
-	"
-	for icFolder in ${icFolders}; do
-		ionCubeFolder "${encodeOptionFile}" "${icFolder}"
-	done
-
-	echo "Encode specific Enterprise core files and Elvis plugin files."
-	icFiles="\
-		Enterprise/server/apps/webapplicense.inc.php \
-		Enterprise/server/regserver.inc.php \
-		Enterprise/server/bizclasses/BizServerJob.class.php \
-		Enterprise/server/bizclasses/BizPublishing.class.php \
-		Enterprise/server/utils/DigitalPublishingSuiteClient.class.php \
-		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
-		plugins/release/Elvis/Elvis_WflLogOn.class.php \
-		plugins/release/Elvis/Elvis_ContentSource.class.php \
-	"
-	for icFile in ${icFiles}; do
-		ionCubeFile "${encodeOptionFile}" "${icFile}"
-	done
-
-	echo "Encode the license folder of Enterprise core."
-	# Note that this step is separately done because it requires extra security options.
-	# These options block non-encoded PHP files from directly including one of our license files.
-	encodeOptionFile2="${SOURCE_BASE}encodeoptions2.txt"
-	cp "${encodeOptionFile}" "${encodeOptionFile2}"
-	echo "--include-if-property \"magic='the windmill keeps on turning'\"" >> "${encodeOptionFile2}"
-	icFolder="Enterprise/server/utils/license/"
-	ionCubeFolder "${encodeOptionFile2}" "${icFolder}"
-
-	# Restore the debugger; Now the encoding is done.
-	set -x
-
-	# Remove the temporary encoding options files.
-	rm -f "${encodeOptionFile}"
-	rm -f "${encodeOptionFile2}"
 }
 
 #
@@ -381,9 +279,12 @@ function step1_cleanGetWorkspace {
 	echo "step1i: Create folder for the internal files (not to ship)."
 	mkdir "${WORKSPACE}/internals"
 
+	echo "step1j: Create folder to temporary exclude files that do not need validation by phpStorm code analyser."
+	mkdir "${WORKSPACE}/code_analyser"
+
 	# The .default needs to be removed in order to successfully run the coding tests. The tests expect a healthy system,
 	# which includes an existing config_overrule file. When creating the artifact the filename will be restored.
-	echo "step1j: Install empty placeholder for Enterprise administrators to overrule config options."
+	echo "step1k: Install empty placeholder for Enterprise administrators to overrule config options."
 	cp "${WORKSPACE}/Enterprise/Build/config_overrule.php.default" "${WORKSPACE}/Enterprise/Enterprise/config/config_overrule.php"
 }
 
@@ -417,7 +318,7 @@ function updateResourceFiles {
 		cd -
 
 		echo "${step}5: Prefix the resource keys with ${product}."
-		php "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/${dir}${product}/resources" ${product}
+		${PHP_EXE} "${ES_REPLACE_RESOURCE_KEYS}" "${WORKSPACE}/Enterprise/${dir}${product}/resources" ${product}
 
 		echo "${step}6: Write timestamp of last update from TMS into the resource folder of ${product} plugin."
 		echo "${tmsLastUpdate}" > ${SOURCE_BASE}${dir}${product}/resources/_lastupdate.txt
@@ -589,20 +490,45 @@ function step3b_updateVersionInRepository {
 #
 function step4_validatePhpCode {
 	echo "step4a: Run the PHP Coding Test (testsuite)."
-	cd "${WORKSPACE}/Enterprise/Enterprise/server/wwtest/"
-	php testphpcodingcli.php "${WORKSPACE}/reports"
+	cd "${WORKSPACE}/Enterprise/Enterprise/server/wwtest/testsuite/"
+	${PHP_EXE} junitcliclient.php PhpCodingTest "${WORKSPACE}/reports"
 	cd -
 
-	echo "step4b: Run phpStorm's code inspection on the server folder."
+	echo "step4b: Temporary move 3rd party libraries aside (to exclude them from phpStorm's code inspection)."
+	mv "${WORKSPACE}/Enterprise/Enterprise/server/dgrid" "${WORKSPACE}/code_analyser"
+	mv "${WORKSPACE}/Enterprise/Enterprise/server/javachart" "${WORKSPACE}/code_analyser"
+	mv "${WORKSPACE}/Enterprise/Enterprise/server/jquery" "${WORKSPACE}/code_analyser"
+	mv "${WORKSPACE}/Enterprise/Enterprise/server/vendor" "${WORKSPACE}/code_analyser"
+	mv "${WORKSPACE}/Enterprise/Enterprise/server/ZendFramework" "${WORKSPACE}/code_analyser"
+
+	echo "step4c: Run phpStorm's code inspection on the server folder."
 	# mkdir ./reports/phpstorm_strict
 	# inspect.sh params: <project file path> <inspection profile path> <output path> -d <directory to be inspected>
 	# see more info: http://www.jetbrains.com/phpstorm/webhelp/running-inspections-offline.html
-	sh /opt/phpstorm/bin/inspect.sh "${WORKSPACE}/Enterprise" "${WORKSPACE}/Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml" "${WORKSPACE}/reports/phpstorm_strict" -d "${WORKSPACE}/Enterprise/Enterprise"
+	# Use "set +e" and "set -e" to temporary suppress exiting the script in case the code inspector exits.
+	set +e
+	sh ${PHPSTORM_INSPECTOR} "${WORKSPACE}/Enterprise" "${WORKSPACE}/Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml" "${WORKSPACE}/reports/phpstorm_strict" -d "${WORKSPACE}/Enterprise/Enterprise"
+	if [ $? -ne 0 ]; then
+		# The process could fail e.g. due to license expiration, so dump the log to see what is causing the failure.
+		echo "phpStorm code inspection has failed. Now dumping the phpStorm system log file..."
+		echo "----------------------8<----------------------8<----------------------"
+		cat "${PHPSTORM_LOGFILE}"
+		echo "----------------------8<----------------------8<----------------------"
+		exit 1
+	fi
+	set -e
+
+	echo "step4d: Move back the 3rd party libraries (that were temporary moved aside) to their original location."
+	mv "${WORKSPACE}/code_analyser/dgrid" "${WORKSPACE}/Enterprise/Enterprise/server"
+	mv "${WORKSPACE}/code_analyser/javachart" "${WORKSPACE}/Enterprise/Enterprise/server"
+	mv "${WORKSPACE}/code_analyser/jquery" "${WORKSPACE}/Enterprise/Enterprise/server"
+	mv "${WORKSPACE}/code_analyser/vendor" "${WORKSPACE}/Enterprise/Enterprise/server"
+	mv "${WORKSPACE}/code_analyser/ZendFramework" "${WORKSPACE}/Enterprise/Enterprise/server"
 
 	cd "${WORKSPACE}/Enterprise/Build/"
-	echo "step4c: Convert folder with XML files (output of phpStorm's code inspection) to one JUnit XML file to display in UI of Jenkins."
+	echo "step4e: Convert folder with XML files (output of phpStorm's code inspection) to one JUnit XML file to display in UI of Jenkins."
 	# phpstorm2junit params: <folder path with code inspector output> <output path for jUnit>
-	php phpstorm2junit.php "\"${WORKSPACE}/reports/phpstorm_strict\"" "\"${WORKSPACE}/reports/TEST-PhpStormCodeInspection.xml\""
+	${PHP_EXE} phpstorm2junit.php "\"${WORKSPACE}/reports/phpstorm_strict\"" "\"${WORKSPACE}/reports/TEST-PhpStormCodeInspection.xml\""
 	cd -
 }
 
@@ -623,17 +549,53 @@ function step5_ionCubeEncodePhpFiles {
 	rm -f -r ${TARGET_BASE}Enterprise/server/vendor/solarium/solarium/examples
 	rm -f -r ${TARGET_BASE}Enterprise/server/vendor/solarium/solarium/tests
 	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/development
-	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest/PhpCoding
+	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/PhpCoding
 	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest2
 	sync
 
-	echo 'step5c: Acquire license for ionCube Encoded to make sure it is still valid.'
+	echo 'step5c: Determine the last Enterprise Server version that introduced a new ionCube Encoder.'
+	esBaseVersion=`${PHP_EXE} "${ES_PHP_DEFINE}" --get --define=WW_ES_BASE_VERSION_FOR_IONCUBE --stripquotes < "${SOURCE_BASE}/Enterprise/server/serverinfo.php"`
+	if [ ! -n "${esBaseVersion}" ]; then
+		echo "ERROR: Failed reading the WW_ES_BASE_VERSION_FOR_IONCUBE option from serverinfo.php."
+		exit 1
+	fi
+	echo "Detected last Enterprise Server version that introduced a new ionCube Encoder: ${esBaseVersion}"
+
+	# TODO: Add the --acquire-license feature to the ES_PHP_ENCODER so that we can remove use of iONCUBE_ENCODER
+	echo 'step5d: Acquire license for ionCube Encoded to make sure it is still valid.'
 	sudo "${iONCUBE_ENCODER}" --acquire-license
 	"${iONCUBE_ENCODER}" -V
 	# "${iONCUBE_ENCODER}" --help | more
 
-	echo 'step5d: ionCube encode some files and folders in Enterprise Server release folder.'
-	ionCubeEnterpriseFiles
+	echo "step5e: Encode specific Enterprise core files and folders."
+	ioncubeEncodeParams="--sourcebase=${SOURCE_BASE} --targetbase=${TARGET_BASE} --esversion=${esBaseVersion} --deployment=integrated"
+	icFoldersOrFiles="\
+		Enterprise/server/admin/license/ \
+		Enterprise/server/dbclasses/ \
+		Enterprise/server/dbdrivers/ \
+		Enterprise/server/services/ \
+		Enterprise/server/appservices/ \
+		Enterprise/server/wwtest/ngrams/ \
+		Enterprise/server/regserver.inc.php \
+		Enterprise/server/bizclasses/BizServerJob.class.php \
+		Enterprise/server/bizclasses/BizPublishing.class.php \
+		Enterprise/server/bizclasses/BizSemaphore.class.php \
+		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
+		plugins/release/Elvis/Elvis_WflLogOn.class.php \
+		plugins/release/Elvis/Elvis_ContentSource.class.php \
+		plugins/release/Elvis/util/ElvisSessionUtil.php \
+	"
+	for icFoldersOrFile in ${icFoldersOrFiles}; do
+		${PHP_EXE} "${ES_PHP_ENCODER}" ${ioncubeEncodeParams} --encodelevel=1 --phppath="${icFoldersOrFile}"
+	done
+
+	echo "step5f: Encode specific Enterprise core files and folders (in 2nd level of security)."
+	icFoldersOrFiles="\
+		Enterprise/server/utils/license/ \
+	"
+	for icFoldersOrFile in ${icFoldersOrFiles}; do
+		${PHP_EXE} "${ES_PHP_ENCODER}" ${ioncubeEncodeParams} --encodelevel=2 --phppath="${icFoldersOrFile}"
+	done
 }
 
 #
@@ -683,13 +645,13 @@ function step7_zipExternalModules {
 	done
 
 	echo "step7c: Zipping demo plug-ins ..."
-	plugins="Celum Claro EZPublish FlickrPublish FlickrSearch Fotoware Guardian Imprezzeo NYTimes QRCode SMS Tripolis YouTubePublish AspellShellSpelling GoogleWebSpelling Tika"
+	plugins="Celum Claro EZPublish FlickrPublish FlickrSearch Fotoware Guardian NYTimes QRCode SMS Tripolis YouTubePublish AspellShellSpelling GoogleWebSpelling Tika"
 	for plugin in ${plugins}; do
 		zipFolder "${WORKSPACE}/Enterprise_release/plugins/demo" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
 
 	echo "step7d: Zipping examples plug-ins ..."
-	plugins="CopyrightValidationDemo SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample"
+	plugins="CopyrightValidationDemo CopyWithPlacements SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample"
 	for plugin in ${plugins}; do
 		zipFolder "${WORKSPACE}/Enterprise_release/plugins/examples" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
@@ -701,7 +663,7 @@ function step7_zipExternalModules {
 	done
 
 	echo "step7f: Copying the ionCube Loaders to the artifacts folder ..."
-	cp "${WORKSPACE}/Enterprise/Libraries/ionCube/loaders/v5.0.14_at_2015_07_29/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
+	cp "${WORKSPACE}/Enterprise/Libraries/ionCube/loaders/v10.0.2_at_2017_09_13/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
 	chmod +w "${WORKSPACE}/artifacts/ioncube_loaders_all_platforms.zip"
 }
 

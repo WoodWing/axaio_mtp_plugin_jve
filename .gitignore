@@ -16,12 +16,21 @@ Enterprise/Enterprise/config/plugins
 Enterprise/Enterprise/config/resources/_lastupdate.txt
 Enterprise/plugins/release/AdobeDps2/resources/_lastupdate.txt
 
+# Enterprise Server product version (project-wide multiple files)
+_productversion.txt
+Enterprise/Enterprise/server/_productversionextra.txt
+
 # phpStorm project settings (except shared coding standards)
 Enterprise/.idea/**
 !Enterprise/.idea/codeStyleSettings.xml
 !Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml
+!Enterprise/.idea/scopes/EnterpriseCodeInspection.xml
+!Enterprise/.idea/php.xml
 !Enterprise/.idea/modules.xml
 !Enterprise/.idea/Enterprise.iml
 
 # contentstation folder (Content Station HTML)
 Enterprise/Enterprise/contentstation
+
+# Docker folder
+Enterprise/Docker

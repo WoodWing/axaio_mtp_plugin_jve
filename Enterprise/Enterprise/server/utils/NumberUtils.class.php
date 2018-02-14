@@ -36,24 +36,22 @@ class NumberUtils
 	 * 
 	 * The input is sorted and cleaned from duplicates
 	 * 
-	 * @param array of numbers $pagenumbers
+	 * @param array of numbers $pageNumbers
 	 * @param integer $maxLen
 	 * @return string
 	 */
-	public static function createNumberRange( $pagenumbers, $maxLen=40 )
+	public static function createNumberRange( $pageNumbers, $maxLen=40 )
 	{
 		$pagerange = '';
-		// Remove duplicate page numbers and sort
-		$pagenumbers = array_unique( $pagenumbers );
-		sort( $pagenumbers );
-		$pageNumberCount = count( $pagenumbers );
+		$pageNumbers = self::sanitizePageNumbersForRangeCalc( $pageNumbers );
+		$pageNumberCount = count( $pageNumbers );
 		$lastPageNumber="";
 		if( $pageNumberCount >= 1 ) {
-			$pagerange = $pagenumbers[0];
+			$pagerange = $pageNumbers[0];
 			for( $pgn=1 ; $pgn < $pageNumberCount; ++$pgn ) {
-				if( $pagenumbers[$pgn] == $pagenumbers[$pgn-1]+1 ) {
+				if( $pageNumbers[$pgn] == $pageNumbers[$pgn-1]+1 ) {
 					// consecutive page number, remember last number, don't add to string yet
-					$lastPageNumber = $pagenumbers[$pgn];
+					$lastPageNumber = $pageNumbers[$pgn];
 				}
 				else {
 					// non-consecutive, see if we need to close previous range and add this number:
@@ -61,7 +59,7 @@ class NumberUtils
 						$pagerange .= "-".$lastPageNumber;
 						$lastPageNumber = "";
 					}
-					$pagerange .= ",".$pagenumbers[$pgn];
+					$pagerange .= ",".$pageNumbers[$pgn];
 				}
 			}
 			// See if we have a open range we need to close:
@@ -73,9 +71,28 @@ class NumberUtils
 		
 		// Too long, change to <start>~<end>
 		if( strlen($pagerange) > $maxLen ) {
-			$pagerange = $pagenumbers[0] . ' ~ ' . $pagenumbers[count($pagenumbers)-1];
+			$pagerange = $pageNumbers[0] . ' ~ ' . $pageNumbers[count($pageNumbers)-1];
 		}
 		return $pagerange;
+	}
+
+	/**
+	 * Sanitizes the page numbers before the page ranges are calculated.
+	 *
+	 * Empty page numbers are removed. E.g. in case of a placement on the pasteboard the page number is null or ''.
+	 * Duplicates are removed and the numbers are sorted.
+	 * Note: by sorting the numbers the index of the array is also 'repaired'. After the sorting the indexes are reset.
+	 *
+	 * @param array $pageNumbers
+	 * @return array sanitized page numbers.
+	 */
+	static private function sanitizePageNumbersForRangeCalc( array $pageNumbers )
+	{
+		$sanitizedPageNumbers = array_filter( $pageNumbers, function( $pageNumber) { return !empty( $pageNumber ); } );
+		$sanitizedPageNumbers = array_unique( $sanitizedPageNumbers );
+		sort( $sanitizedPageNumbers );
+
+		return $sanitizedPageNumbers;
 	}
 
 	/**
@@ -330,5 +347,20 @@ class NumberUtils
 	
 		// No matching anything above, so not supported.
 		return false;
+	}
+
+	/**
+	 * Returns the bit size of the architecture PHP is compiled for.
+	 *
+	 * Can be used e.g. to check if PHP is compiled for a 32-bit or 64-bit architecture.
+	 * Note that this does NOT imply the architecture of underlying OS where PHP is currently running on;
+	 * For example for Windows using WOW the PHP application pool could be 32 bit, while the OS could be 64 bit.
+	 *
+	 * @since 10.2.0
+	 * @return int Returns 32 for 32-bit PHP or 64 for 64-bit PHP, etc
+	 */
+	public static function getPhpArchitectureBitSize()
+	{
+		return PHP_INT_SIZE * 8; // PHP_INT_SIZE is 4 for 32 bit, 8 for 64 bit, etc
 	}
 }

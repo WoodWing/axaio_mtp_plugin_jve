@@ -40,6 +40,5 @@ abstract class AdsDeletePublication_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsDeletePublicationRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

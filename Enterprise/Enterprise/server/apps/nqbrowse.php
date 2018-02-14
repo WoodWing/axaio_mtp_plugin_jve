@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated 10.2.0 Code can be removed without further notice.
+ */
 require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR."/server/admin/global_inc.php";
 require_once BASEDIR."/server/secure.php";
@@ -109,7 +112,7 @@ class Props
 	public $Property;
 	public $Value;
 
-	function Props ($value1, $value2)
+	public function __construct($value1, $value2)
 	{
 		$this->Property = $value1;
 		$this->Value = $value2;

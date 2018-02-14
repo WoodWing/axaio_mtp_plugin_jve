@@ -33,24 +33,6 @@ class WflGetObjectsService extends EnterpriseService
 	/**
 	 * {@inheritdoc}
 	 */
-	protected function restructureResponse( $req, &$resp )
-	{
-		// Restructure messages from 8.0 (or newer) to 7.x (or older), to make old clients happy.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		$clientMajorVersion = intval( BizSession::getClientVersion( null, null, 1 ) );
-		if( $clientMajorVersion && $clientMajorVersion <= 7 ) { // 7.x (or older) => restructure!
-			if( $resp->Objects ) foreach( $resp->Objects as $object ) {
-				if( $object->MessageList ) {
-					$object->Messages = $object->MessageList->Messages;
-					$object->MessageList = null;
-				}
-			}
-		}
-	}
-	
-	/**
-	 * {@inheritdoc}
-	 */
 	public function runCallback( WflGetObjectsRequest $req )
 	{
 		// BZ#6021 Don't fail when more then one object is requested and one of them fails (not found for example)

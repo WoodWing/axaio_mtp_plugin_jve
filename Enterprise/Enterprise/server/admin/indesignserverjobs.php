@@ -2,7 +2,6 @@
 require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
 require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
@@ -146,6 +145,7 @@ if ( $jobRows ) foreach ( $jobRows as $jobIndex => $jobRow ) {
 		$app->composeObjInfoCell( $jobIndex, $jobRow ).
 		'<td>'.formvar($server).'</td>'.
 		'<td>'.formvar(DateTimeFunctions::iso2date( $jobRow['queuetime'] )).'</td>'.
+		'<td>'.formvar(DateTimeFunctions::iso2date( $jobRow['pickuptime'] )).'</td>'.
 		'<td>'.formvar(DateTimeFunctions::iso2date( $jobRow['starttime'] )).'</td>'.
 		'<td>'.formvar(DateTimeFunctions::iso2date( $jobRow['readytime'] )).'</td>'.
 		'<td>'.formvar($jobRow['attempts']).'</td>'.
@@ -492,7 +492,7 @@ class InDesignServerJobsApp
 		} else {
 			$value = $default;
 		}
-		setcookie( $key, $value, 0, INETROOT );
+		setcookie( $key, $value, 0, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
 		return $value;
 	}
 }

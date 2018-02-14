@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @package 	Enterprise
+ * @package 	/*PACKAGENAME*/
  * @subpackage 	ServerPlugins
  * @since 		v/*SERVERVERSION*/
  * @copyright	WoodWing Software bv. All Rights Reserved.
@@ -40,6 +40,5 @@ abstract class /*INTFSHORT*//*SERVICE*/_EnterpriseConnector extends ServiceConne
 	 */
 	public function onError( /*INTFSHORT*//*SERVICE*/Request $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

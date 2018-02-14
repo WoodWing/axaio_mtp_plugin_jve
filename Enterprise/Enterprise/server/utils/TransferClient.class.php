@@ -96,7 +96,7 @@ class WW_Utils_TransferClient
 				$result = true;
 				LogHandler::Log( __CLASS__, 'INFO',  "uploadFile successful: Upload over HTTP completed." );
 			} else {
-				LogHandler::Log( __CLASS__, 'ERROR', 'uploadFile failed:<br/>'.$response->getHeaders()->toString() );
+				LogHandler::Log( __CLASS__, 'ERROR', "uploadFile failed:\r\n".$response->getHeaders()->toString() );
 			}
 		} catch( Exception $e ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'uploadFile failed: '.$e->getMessage() );
@@ -146,7 +146,7 @@ class WW_Utils_TransferClient
 				LogHandler::Log( __CLASS__, 'INFO',  "downloadFile successful: Download over HTTP completed." );
 				$result = true;
 			} else {
-				LogHandler::Log( __CLASS__, 'ERROR', 'downloadFile failed:<br/>'.$response->getHeaders()->toString() );
+				LogHandler::Log( __CLASS__, 'ERROR', "downloadFile failed:\r\n".$response->getHeaders()->toString() );
 			}
 		} catch( Exception $e ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'downloadFile failed: '.$e->getMessage() );
@@ -179,7 +179,7 @@ class WW_Utils_TransferClient
 				LogHandler::Log( __CLASS__, 'INFO',  "cleanupFile successful: Cleanup over HTTP completed." );
 				$result = true;
 			} else {
-				LogHandler::Log( __CLASS__, 'ERROR', 'cleanupFile failed:<br/>'.$response->getHeaders()->toString() );
+				LogHandler::Log( __CLASS__, 'ERROR', "cleanupFile failed:\r\n".$response->getHeaders()->toString() );
 			}
 		} catch( Exception $e ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'cleanFile failed: '.$e->getMessage() );
@@ -238,7 +238,7 @@ class WW_Utils_TransferClient
 				$xmlStream = $response->getBody();
 				LogHandler::Log( __CLASS__, 'INFO',  "getTechniques successful: Handshake over HTTP completed." );
 			} else {
-				LogHandler::Log( __CLASS__, 'ERROR', 'getTechniques failed:<br/>'.$response->getHeaders()->toString() );
+				LogHandler::Log( __CLASS__, 'ERROR', "getTechniques failed:\r\n".$response->getHeaders()->toString() );
 			}
 		} catch( Exception $e ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'getTechniques failed: '.$e->getMessage() );

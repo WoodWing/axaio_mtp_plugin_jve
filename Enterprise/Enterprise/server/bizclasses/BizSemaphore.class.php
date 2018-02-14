@@ -34,9 +34,15 @@
  */
 class BizSemaphore
 {
-	private $attempts; // Attempts to create the semaphore. Each attempt represents waiting time in ms.
-	private $lifeTime; // Life time of the semaphore in seconds. After that, it automatically expires.
-	private static $sessionSemaphoreId;  // Entity ID for a session.
+	/** @var int[] $attempts Attempts to create the semaphore. Each attempt represents waiting time in ms. */
+	private $attempts;
+	/** @var int $lifeTime Life time of the semaphore in seconds. After that, it automatically expires. */
+	private $lifeTime;
+	/** @var int $sessionSemaphoreId Entity ID for a session. */
+	private static $sessionSemaphoreId;
+	/** @var  bool $logSql Whether or not the resulting SQL must be logged. For 10.1.3 only implemented for the create and
+	 *  release of the semaphore. */
+	private static $logSql;
 
 	public function __construct()
 	{
@@ -45,6 +51,9 @@ class BizSemaphore
 		
 		// Default 60 seconds life time of a semaphore.
 		$this->lifeTime = 60;
+
+		// Default logging is enabled.
+		self::$logSql = true;
 	}
 	
 	/**
@@ -89,14 +98,13 @@ class BizSemaphore
 	public function createSemaphore( $entityId, $logError=true )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBSemaphore.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$userShort = BizSession::getShortUserName();
 		if( !$userShort ) {
 			$userShort = '<unknown>';
 		}
 		$semaId = null;
 		foreach( $this->attempts as $waitTime ) {
-			$semaId = DBSemaphore::createSemaphore( $entityId, $this->lifeTime, $userShort );
+			$semaId = DBSemaphore::createSemaphore( $entityId, $this->lifeTime, $userShort, self::$logSql );
 			if( $semaId ) {
 				break; // we are in!
 			}
@@ -167,7 +175,7 @@ class BizSemaphore
 	static public function releaseSemaphore( $semaId )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBSemaphore.class.php';
-		$released = DBSemaphore::releaseSemaphore( $semaId );
+		$released = DBSemaphore::releaseSemaphore( $semaId, self::$logSql );
 		if( $released ) {
 			LogHandler::Log( 'Semaphore', 'DEBUG', 'Released semaphore (id='.$semaId.').' );
 		} else {
@@ -306,7 +314,6 @@ class BizSemaphore
 	 */
 	static public function refreshSession( $semaId )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
 
 		DBTicket::checkTicket(BizSession::getTicket());
@@ -344,5 +351,33 @@ class BizSemaphore
 		require_once BASEDIR.'/server/dbclasses/DBSemaphore.class.php';
 		$semaId = DBSemaphore::getSemaphoreId( $entityId );
 		return crypt( $semaId, $entityId );
+	}
+
+	/**
+	 * Disable the the logging of (some of) the SQL-statements.
+	 *
+	 * @since 10.1.3
+	 * @return bool State of the SQL logging before suppressing.
+	 */
+	public static function suppressSqlLogging()
+	{
+		$previousLogSqlState = self::$logSql;
+		self::$logSql = false;
+
+		return $previousLogSqlState;
+	}
+
+	/**
+	 * Restores the the logging of the SQL-statements.
+	 *
+	 * Must be called after the logging has been disabled by calling suppressSqlLogging().
+	 * The return value of the suppressSqlLogging() should be used as input parameter for this function.
+	 *
+	 * @param bool $restoreLogSqlState State to restore.
+	 * @since 10.1.3
+	 */
+	public static function restoreSqlLogging( $restoreLogSqlState )
+	{
+		self::$logSql = $restoreLogSqlState;
 	}
 }

@@ -428,7 +428,6 @@ class DBInDesignServer extends DBBase
 	 * @since 9.7.0
 	 * @param integer $serverId
 	 * @param string $lockToken
-	 * @return boolean Whether or not the IDS was unlocked successfully.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
 	static public function unlockServer( $serverId, $lockToken )
@@ -473,9 +472,9 @@ class DBInDesignServer extends DBBase
 				'WHERE s.`locktoken` != ? '.
 				'AND NOT EXISTS ('.
 					'SELECT 1 FROM '.$idsJobsTable.' j '.
-					'WHERE (s.`locktoken` = j.`locktoken`) '.
+					"WHERE (s.`locktoken` = j.`locktoken`) AND  j.`locktoken` != ? ".
 				') ';
-		$params = array( '' );
+		$params = array( '', '' );
 		$sth = $dbDriver->query( $sql, $params );
 
 		if( self::hasError() || !$sth ) {

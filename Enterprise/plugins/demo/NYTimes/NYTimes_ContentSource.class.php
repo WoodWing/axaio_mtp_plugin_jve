@@ -67,10 +67,8 @@ class NYTimes_ContentSource extends ContentSource_EnterpriseConnector
 	
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		// keep code analyzer happy for unused params:
 		// maxEntries is ignored because the API just returns 10 or 20 entries per call
-		$query=$query; $maxEntries=$maxEntries; $order=$order;
-		
+
 		LogHandler::Log('NYTimes', 'DEBUG', 'doNamedQuery called for search: '.$query );
 
 		if( $query == NYT_QUERY_ARTICLESEARCH_NAME ) {	
@@ -98,7 +96,6 @@ class NYTimes_ContentSource extends ContentSource_EnterpriseConnector
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
 		PerformanceProfiler::startProfile( 'NYTimes - getAlienObject', 3 );
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
 		LogHandler::Log('NYTimes', 'DEBUG', "getAlienObject called for $alienID - $rendition" );
 
 		$files = array();
@@ -350,7 +347,6 @@ class NYTimes_ContentSource extends ContentSource_EnterpriseConnector
 	private function getEnterpriseContext( &$publication, &$category, &$status )
 	{
 		// Get list of publications from Enterpise. If available we use WW News
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		$username = BizSession::getShortUserName();
 

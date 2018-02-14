@@ -40,6 +40,5 @@ abstract class WflDeleteObjectTargets_EnterpriseConnector extends ServiceConnect
 	 */
 	public function onError( WflDeleteObjectTargetsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

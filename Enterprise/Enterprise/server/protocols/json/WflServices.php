@@ -3,7 +3,6 @@
 /**
  * @package Enterprise
  * @subpackage Services
- * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  * 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -49,6 +48,42 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		$req = $this->arraysToObjects( $req );
 		$req = $this->restructureObjects( $req );
 		$service = new WflLogOffService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function GetUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetUserSettingsService.class.php';
+		$req['__classname__'] = 'WflGetUserSettingsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new WflGetUserSettingsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function SaveUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflSaveUserSettingsService.class.php';
+		$req['__classname__'] = 'WflSaveUserSettingsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new WflSaveUserSettingsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function DeleteUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflDeleteUserSettingsService.class.php';
+		$req['__classname__'] = 'WflDeleteUserSettingsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new WflDeleteUserSettingsService();
 		$resp = $service->execute( $req );
 		$resp = $this->restructureObjects( $resp );
 		return $resp;

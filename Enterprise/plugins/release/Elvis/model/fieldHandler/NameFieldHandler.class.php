@@ -41,26 +41,23 @@ class NameFieldHandler extends ReadWriteFieldHandler
 	}
 
 	/**
-	 * Extracts the filename from the hit
-	 * Removes extension and applies a maximum length
+	 * Extracts the file name from the meta data returned by Elvis.
 	 *
-	 * @param mixed[] $elvisMetadata
-	 * @return string Filename extracted from hit
+	 * Returned file name is the original file name without the extension.
+	 * Illegal characters found in the file name will be removed.
+	 *
+	 * @param array $elvisMetadata Elvis metadata.
+	 * @return string Filename (without extension).
 	 */
 	private function getFilename( $elvisMetadata )
 	{
-		$fileName = $elvisMetadata['filename'];
-		$endIdx = strrpos( $fileName, '.' );
+		$fileName = $this->getEnterpriseValue( $elvisMetadata ); // Value of Elvis MetaData 'filename' will be used.
+		$endIdx = mb_strrpos( $fileName, '.', 'UTF8' );
 		if( !$endIdx ) {
 			LogHandler::Log( 'ContentSource', 'WARN', 'NameFieldHandler::getFilename; filename has no extension: '.$fileName );
 			return $fileName;
 		}
-
-		$fileName = substr( $fileName, 0, $endIdx );
-		if( strlen( $fileName ) > 63 ) {
-			$fileName = substr( $fileName, 0, 63 );
-		}
-
+		$fileName = mb_substr( $fileName, 0, $endIdx, 'UTF8' );
 		return $fileName;
 	}
 

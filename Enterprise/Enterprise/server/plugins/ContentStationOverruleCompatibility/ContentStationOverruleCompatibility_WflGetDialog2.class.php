@@ -105,7 +105,7 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 			if( count($resp->Targets) == 1 && isset($resp->Targets[0]->Issue->Id) ) {
 				if( $resp->Targets[0]->Issue->OverrulePublication ) {
 					$respPubId = $resp->Dialog->MetaData['Publication']->PropertyValues[0]->Value;
-					$this->overrulePub = OverruleCompatibility::createPubId( $respPubId, $resp->Targets[0]->Issue->Id );
+					$this->overrulePub = OverruleCompatibility::composePubId( $respPubId, $resp->Targets[0]->Issue->Id );
 					//$req->MetaData['Publication']->PropertyValues[0]->Value = $respPubId; // Is this needed?
 				}
 			}
@@ -139,7 +139,7 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 							foreach( $relatedTarget->Targets as $target ) {
 								if( $target->Issue->Id == $iss and $target->Issue->OverrulePublication ) {
 									$respPubId = $relatedTarget->BasicMetaData->Publication->Id;
-									$this->overrulePub = OverruleCompatibility::createPubId( $respPubId, $target->Issue->Id );
+									$this->overrulePub = OverruleCompatibility::composePubId( $respPubId, $target->Issue->Id );
 									//$req->MetaData['Publication']->PropertyValues[0]->Value = $respPubId; // Is this needed?
 									break 2;
 								}
@@ -153,7 +153,7 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 		if ( $resp->RelatedTargets) foreach ( $resp->RelatedTargets as $relatedTarget ) {
 			if ( $relatedTarget->Targets ) foreach ( $relatedTarget->Targets as $target ) {
 				if ( $target->Issue->OverrulePublication === true ) {
-					$relatedTarget->BasicMetaData->Publication->Id = OverruleCompatibility::createPubId(
+					$relatedTarget->BasicMetaData->Publication->Id = OverruleCompatibility::composePubId(
 						$relatedTarget->BasicMetaData->Publication->Id, $target->Issue->Id );
 					$relatedTarget->BasicMetaData->Publication->Name = $target->Issue->Name;
 				}
@@ -163,7 +163,6 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 
 		// Populate the overrule issue(s) into dialog-widget['Publication']
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-		require_once( BASEDIR . '/server/bizclasses/BizSession.class.php' );
 		$user = BizSession::getShortUserName();
 		if( $resp->Dialog->Tabs )foreach( $resp->Dialog->Tabs as $tab ){
 			if( $tab->Widgets ) foreach( $tab->Widgets as $dialogWidget ){
@@ -174,7 +173,7 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 						if($issues) foreach( $issues as $issue ){
 							if($issue->OverrulePublication) { // just to be sure.
 								$propValueForOverrule = new PropertyValue();
-								$propValueForOverrule->Value = OverruleCompatibility::createPubId( $propValue->Value, $issue->Id );
+								$propValueForOverrule->Value = OverruleCompatibility::composePubId( $propValue->Value, $issue->Id );
 								$propValueForOverrule->Display = $propValue->Display . ' ' . $issue->Name;
 								$dialogWidget->PropertyInfo->PropertyValues[] = $propValueForOverrule;
 							}
@@ -194,7 +193,7 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 					if( $respIssId ) {
 						require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 						if( DBIssue::isOverruleIssue( $respIssId ) ) {
-							$this->overrulePub = OverruleCompatibility::createPubId( $respPubId, $respIssId );
+							$this->overrulePub = OverruleCompatibility::composePubId( $respPubId, $respIssId );
 						}
 					}
 				}
@@ -252,8 +251,8 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 			// Fix pub name and id:
 			$respPubId	 = $resp->Dialog->MetaData['Publication']->PropertyValues[0]->Value;
 			$respPubName = $resp->Dialog->MetaData['Publication']->PropertyValues[0]->Display;
-			$overrulePubId	=	OverruleCompatibility::createPubId( $respPubId, $ourIssue->Id );
-			$overrulePubName =  OverruleCompatibility::createPubName( $respPubName, $ourIssue->Name );
+			$overrulePubId	=	OverruleCompatibility::composePubId( $respPubId, $ourIssue->Id );
+			$overrulePubName =  OverruleCompatibility::composePubName( $respPubName, $ourIssue->Name );
 
 			// Set the Overrule Publication Id and Name back to MetaData['Publication']
 			$resp->Dialog->MetaData['Publication']->PropertyValues[0]->Value = $overrulePubId;
@@ -263,7 +262,7 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 			foreach( $resp->Dialog->Tabs as $tab ) {
 				foreach( $tab->Widgets as $dialogWidget ) {
 					if( $dialogWidget->PropertyInfo->Name == 'Category' ){
-						$dialogWidget->PropertyInfo->PropertyValues = OverruleCompatibility::createPropertyValues( $ourIssue->Sections );
+						$dialogWidget->PropertyInfo->PropertyValues = OverruleCompatibility::composePropertyValues( $ourIssue->Sections );
 					}
 				}
 			}

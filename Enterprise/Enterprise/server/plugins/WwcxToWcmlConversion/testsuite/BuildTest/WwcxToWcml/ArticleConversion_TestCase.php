@@ -287,7 +287,7 @@ class WW_TestSuite_BuildTest_WwcxToWcml_ArticleConversion_TestCase extends TestC
 	 * @param string $content Article content
 	 * @param string $format Article format
 	 * @param int $nthStory Nth story with first story starts from index 0.
-	 * @return object Element of $nthStory story (with Content in embedded XML format).
+	 * @return string the $nthStory story (with Content in embedded XML format).
 	 */
 	private function getStorySnippet( $content, $format, $nthStory = null)
 	{

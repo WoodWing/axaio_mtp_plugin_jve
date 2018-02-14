@@ -557,7 +557,7 @@ class MadeToPrintDispatcher
 	 * Get the configured MadeToPrint configuration for the given layout trigger status
 	 *
 	 * @param int $layStatusId  Status id of the layout
-	 * @return string Job name
+	 * @return array
 	 */
 	private static function getMtpConfig( $layStatusId )
 	{

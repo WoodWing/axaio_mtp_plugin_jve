@@ -22,9 +22,9 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Extracts elvis asset id from alien id provided by enterprise
+	 * Extracts Elvis asset id from alien id provided by enterprise
 	 * @param $alienId - id of enterprise object, including _<ContentSourceId>_ prefix
-	 * @return string elvis asset id
+	 * @return string Elvis asset id
 	 */
 	public static function getElvisId($alienId)
 	{
@@ -35,25 +35,28 @@ class ElvisUtils {
 		 * How it should be: _ELVIS_<ASSETID>
 		 * /_HACK__HACK__ 
 		 */
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return str_replace(ELVIS_CONTENTSOURCEPREFIX, "", $alienId);
 	}
 	
 	public static function isElvisId($alienId)
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return strpos($alienId, ELVIS_CONTENTSOURCEPREFIX) !== false;
 	}
 	
 	public static function getAlienId($elvisId)
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return ELVIS_CONTENTSOURCEPREFIX . $elvisId;
 	}
 
 	/**
-	 * Returns hit from server, base on provided elvis id
+	 * Returns hit from server, base on provided Elvis id
 	 * @param $elvisId - for hit to be returned
 	 * @param $lock - true if we have lock on Elvis server
 	 * @return ElvisEntHit - hit from Elvis server
-	 * @throws BizException - thrown if more then on hit found for specified elvis ID
+	 * @throws BizException - thrown if more then on hit found for specified Elvis ID
 	 */
 	public static function getHit($elvisId, $lock = false)
 	{
@@ -88,39 +91,58 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Extract corresponding URL to elvis asset, based on provided rendition.
+	 * Extract corresponding URL to Elvis asset, based on provided rendition.
 	 *
 	 * If version specified, it will be taken into account
 	 * Extracted url, if could be resolved then used to copy file to Enterprise Transfer server.
 	 *
-	 * @param ElvisEntHit $hit - hit which is used for url extraction
-	 * @param string $rendition - to be extracted
-	 * @param bool $returnFileUrls When true, only file links to the content source are returned, otherwise the complete file content
-	 * @return Attachment|null
+	 * While copying, the Elvis session id is sent through cookies to authorize the download URL.
+	 * This is done through input stream options.
+	 *
+	 * @param ElvisEntHit $hit Elvis search result (where the URL can be extracted from).
+	 * @param string $rendition File rendition to download.
+	 * @param bool $returnFileUrls TRUE to return a direct link (URL) to the content source, or FALSE to download the file to the transfer server folder and return the URL.
+	 * @return Attachment|null The file attachment, or null when not found.
 	 * @throws BizException
 	 */
 	public static function getAttachment( $hit, $rendition, $returnFileUrls )
 	{
 		$attachment = null;
-		$url = ElvisUtils::getUrlFromRendition( $hit, $rendition );
+		$url = self::getUrlFromRendition( $hit, $rendition );
 		if( $url ) {
 			$type = self::getMimeType( $hit, $url, $rendition );
 			if( $type ) {
-				$url = self::appendSessionId( $url );
 				if( !$returnFileUrls ) {
 					require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 					$transferServer = new BizTransferServer();
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
-					if( !$transferServer->copyToFileTransferServer( $url, $attachment ) ) {
+					$attempt = 0;
+					do {
+						$attempt += 1;
+						$httpStatus = $transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ); // $httpStatus can be a boolean when running with Server <= 10.1.3
+						$retry = self::retryCopyToFileTransferServer( $attempt, $httpStatus );
+						if( $retry ) {
+							require_once __DIR__.'/../logic/ElvisAMFClient.php';
+							ElvisAMFClient::login();
+						}
+					} while( $retry );
+					if( intval($httpStatus) >= 500 ) {
+						ElvisAMFClient::throwExceptionForElvisCommunicationFailure(
+							'Failed to copy '.$rendition.' file from Elvis server to Transfer Server folder.' );
+					}
+					if( intval($httpStatus) >= 400 || $httpStatus === false ) { // false: simulate ES < 10.1.4 behaviour
 						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
 					}
 				} else {
+					// EN-88634: We no longer add our jsessionid to the ContentSourceFileLink URL; This URL is requested by
+					// SC which passes on the URL to the Elvis InDesign plugin. This plugin has its own session with Elvis
+					// and so it has its own authorization.
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
-					$attachment->ContentSourceFileLink = $url;
+					$attachment->ContentSourceFileLink = self::replaceUrlForClientsAccess( $url );
 				}
 			}
 		}
@@ -128,13 +150,80 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Restore elvis version from enterprise version
+	 * Whether or not the copy file to File TransferServer should be re-attempted.
+	 *
+	 * When the copy of a file to File TransferServer has failed, this function will
+	 * determine if a re-attempt of the copy is logical.
+	 *
+	 * Re-attempt is logical when ...
+	 * - the retry is for the first time
+	 *
+	 * AND when the status status code / boolean is one of the following
+	 *
+	 * - the copy fails due to network problem or Elvis node became unhealthy ( status code >= 500 ).
+	 * - user was not logged in / session expired ( status code 401 ).
+	 * - Elvis returns status code 409 due to several reasons:
+	 *      L> request thumb or preview when asset previewState is set to 'failed'
+	 *      L> processing has failed half-way due to unhealthy node
+	 *      L> file is corrupt or could not be processed for some reason
+	 *      L> caching for NFS share is enabled (should be disabled)
+	 *      L> https://jira.woodwing.net/browse/LVS-9614
+	 * - status code of 408, 421 and 429 were never really tested but they retry of the copy() does make sense for these statuses.
+	 * - false: copy() failed and a boolean is returned in the case of Enterprise 10.1.3 and below is used.
+	 *
+	 * @param int $attempt The number of attempts that have been done so far, this will also determine if the reattempt should be done.
+	 * @param bool|int $httpStatus HTTP status code that was returned from the copy()
+	 * @return bool True when a retry is needed, False otherwise.
+	 */
+	private static function retryCopyToFileTransferServer( $attempt, $httpStatus )
+	{
+		$retry = $attempt <= 1 && (      // retry once only; the login() does the configured reattempts already
+				intval($httpStatus) >= 500 || // fatal network problem or Elvis node unhealthy (e.g. LB returns 504)
+				intval($httpStatus) == 401 || // user not logged in or session expired
+				intval($httpStatus) == 408 || // request didn't finish on time, a re-try is possible. https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+				intval($httpStatus) == 409 || // for Elvis, this can happen for several reasons, refer to function header.
+				intval($httpStatus) == 421 || // misdirected request https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+				intval($httpStatus) == 429 || // too many requests in a given amount of time.
+				$httpStatus === false); // in case Elvis plugin uses ES < 10.1.4 that returns true/false on any HTTP error
+
+		return $retry;
+	}
+
+	/**
+	 * Composes input stream options from Elvis session cookie.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return array|null
+	 */
+	private static function composeSessionOptions()
+	{
+		$options = null;
+		require_once __DIR__.'/ElvisSessionUtil.php';
+		$cookies = ElvisSessionUtil::getSessionCookies();
+		if( $cookies ) {
+			$cookiesHeader = array();
+			foreach( $cookies as $name => $value ) {
+				$encodedValue = urlencode( $value );
+				$cookiesHeader[] = "{$name}={$encodedValue}";
+			}
+			if( $cookiesHeader ) {
+				$options = array( 'http' => array(
+					'header' => "Cookie: ".implode('; ',$cookiesHeader ),
+				) );
+			}
+		}
+		return $options;
+	}
+
+	/**
+	 * Restore Elvis version from enterprise version
 	 *
 	 * @param string $version - enterprise version
 	 * @return string - Elvis version
 	 */
 	public static function getElvisVersionNumber($version)
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return substr($version, strlen(ELVIS_ENTERPRISE_VERSIONPREFIX));
 	}
 
@@ -146,11 +235,12 @@ class ElvisUtils {
 	 */
 	public static function getEnterpriseVersionNumber($version)
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return ELVIS_ENTERPRISE_VERSIONPREFIX.$version;
 	}
 	
 	/**
-	 * Removes the shadow object for the given elvis id
+	 * Removes the shadow object for the given Elvis id
 	 * 
 	 * @param string $elvisId
 	 */
@@ -190,6 +280,7 @@ class ElvisUtils {
 		$userDetails = $service->getUserDetails($user->Name);
 		
 		if ($userDetails) {
+			require_once __DIR__.'/../config.php'; // ELVIS_INTERNAL_USER_POSTFIX
 			$user->FullName = $userDetails->fullName;
 			$user->EmailAddress = $userDetails->email;
 			if (!$userDetails->ldapUser) {
@@ -231,26 +322,36 @@ class ElvisUtils {
 		}
 		return $result;
 	}
-	
+
 	/**
-	 * Appends ;jssesionid=[sessionId] to the given url
+	 * Replace the passed in $url ( that contains ELVIS_URL ) with ELVIS_CLIENT_URL.
 	 *
+	 * When a url is returned to the clients, the url that is pointing to Elvis has
+	 * to be ELVIS_CLIENT_URL ( instead of ELVIS_URL ).
+	 *
+	 * From EN-88079:
+	 * 1. When Enterprise Server sends in the request to Elvis, it uses ELVIS_URL to
+	 * connect to Elvis.
+	 * 2. When Elvis receives the request, it uses this very same url to compose the
+	 * download URL for the Elvis object.
+	 * 3. Download URL is returned to Enterprise Server.
+	 * 4. Enterprise Server returns this download URL to the clients, but not all clients can
+	 * access Elvis using this download URL. This is because ELVIS_URL that is used is
+	 * meant for communication between Enterprise Server and Elvis ( which are often located
+	 * in the same local network ).
+	 *
+	 * Therefore, the download URL ( $url ) needs to be replaced with ELVIS_CLIENT_URL
+	 * in order for the clients to be able to access Elvis.
+	 *
+	 * @since 10.1.6
 	 * @param string $url
-	 * @return string url
+	 * @return string
 	 */
-	private static function appendSessionId($url)
+	private static function replaceUrlForClientsAccess( $url )
 	{
-		require_once dirname(__FILE__) . '/ElvisSessionUtil.php';
-		$jsessionId = ';jsessionid=' . ElvisSessionUtil::getSessionId();
-		
-		// Put ;jsessionid BEFORE querystring, otherwise it doesn't work
-		$idx = strpos($url, '?');
-		if ($idx === false) {
-			$url .= $jsessionId;
-		} else {					
-			$url = substr($url, 0, $idx) . $jsessionId . substr($url, $idx);
-		}
-		return $url;
+		$count = 0;
+		$replacedUrl = str_replace( ELVIS_URL, ELVIS_CLIENT_URL, $url, $count );
+		return ( $count == 1 ) ? $replacedUrl : $url;
 	}
 
 	/**
@@ -292,7 +393,7 @@ class ElvisUtils {
 	 */
 	static public function isContentStation()
 	{
-		return ElvisUtils::isClient('content station');
+		return self::isClient('content station');
 	}
 	
 	/**
@@ -302,7 +403,7 @@ class ElvisUtils {
 	 */
 	static public function isSmartConnection()
 	{
-		return ElvisUtils::isClient('InDesign') || ElvisUtils::isClient('InCopy');
+		return self::isClient('InDesign') || self::isClient('InCopy');
 	}
 	
 	/**
@@ -312,7 +413,7 @@ class ElvisUtils {
 	 */
 	static public function isInDesignServer()
 	{
-		return ElvisUtils::isClient('InDesign Server');
+		return self::isClient('InDesign Server');
 	}
 	
 	/**
@@ -323,18 +424,8 @@ class ElvisUtils {
 	 */
 	static private function isClient($clientName)
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$activeClient = BizSession::getClientName();
 		LogHandler::Log('ELVIS', 'DEBUG', 'client for ticket '. BizSession::getTicket() . ": ". $activeClient);
 		return (bool)stristr($activeClient, $clientName);
-	}
-
-	/**
-	 * @param $serviceName
-	 * @return string
-	 */
-	public static function getServiceUrl($serviceName)
-	{
-		return self::appendSessionId(ELVIS_URL . "/services/" . $serviceName);
 	}
 }

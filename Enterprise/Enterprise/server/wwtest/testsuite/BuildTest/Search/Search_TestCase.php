@@ -6,19 +6,20 @@ class WW_TestSuite_BuildTest_Search_Search_TestCase extends WW_TestSuite_BuildTe
 {
 	public function getDisplayName()
 	{
-		return 'Search in Solr';
+		return 'Search by using Solr Search.';
 	}
 
 	public function getTestGoals()
 	{
-		return 'Checks if able to find objects in Solr';
+		return 'Checks if object(s) can be found by using by Solr Search.';
 	}
 
 	public function getTestMethods() { return
 		'Call QueryObjectsService and validate responses.
 		<ol>
-			<li>Search on Object name (QueryObjects)</li>
-			<li>Search on Object content (QueryObjects)</li>
+			<li>Search Object on "Name" property (QueryObjects)</li>
+			<li>Search Object on "Content" property (QueryObjects)</li>
+			<li>Search Object on "Placed on" property. (QueryObjects)</li>
 		 </ol>';
 	}
 
@@ -62,6 +63,13 @@ class WW_TestSuite_BuildTest_Search_Search_TestCase extends WW_TestSuite_BuildTe
 			return false;
 		}
 
+		// Test searching on name and placed on in Solr.
+		$queryParam = array( new QueryParam( 'PlacedOn', '=', '' ) );
+		if( !$this->testSearch( $articleID, $articleName, 'Searching for article, not placed.', true, $queryParam ) ) {
+			return false;
+		}
+
 		return true;
 	}
+
 }

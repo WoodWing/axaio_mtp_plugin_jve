@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated 10.2.0 Code can be removed without further notice.
+ */
 require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR."/server/secure.php";
 require_once BASEDIR."/server/apps/functions.php";

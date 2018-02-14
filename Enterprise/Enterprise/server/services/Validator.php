@@ -74,7 +74,7 @@ class WW_Services_Validator
 		}
 		if( $raiseException ) { // raise a fault?
 			$context = $this->isRequest ? 'Client' : 'Server'; // Bad request = client's fault. Bad reponse = server's fault.
-			throw new BizException( 'ERR_INVALID_PROPERTY', $context, $errorMsg, null, null, 'ERROR' );
+			throw new BizException( 'ERR_ARGUMENT', $context, $errorMsg, null, null, 'ERROR' );
 		} else { // Suppress the a fault and so we just log only
 			LogHandler::Log( 'ServicesValidator', 'ERROR', $errorMsg );
 		}
@@ -148,7 +148,7 @@ class WW_Services_Validator
 	 * Checks if a property has the correct type.
 	 * It also has hard-coded enumeration checking for SCE's workflow interface.
 	 *
-	 * @param string $propValue   Actual property value
+	 * @param mixed $propValue   Actual property value
 	 * @param string $propType    The WSDL data type. Will be mapped onto PHP types.
 	 * @throws BizException when property has bad type. See {@link raiseFault} for more details.
 	 */
@@ -187,6 +187,7 @@ class WW_Services_Validator
 
 					// WSDL types and hard-coded simpleTypes...
 					case 'unsignedInt': // WSDL type
+					case 'Id': // WSDL type
 						$formatOk = is_numeric($propValue) && $propValue >= 0;
 						$emptyAllowed = ($formatOk && $propValue == 0); // to let 'empty' function work (below)
 						break;
@@ -212,7 +213,8 @@ class WW_Services_Validator
 			case 'integer': 
 			case 'float': 
 			case 'double': 
-				$typeOk = ($propType == 'integer' || $propType == 'float' || $propType == 'string' || $propType == 'unsignedInt');
+				$typeOk = ($propType == 'integer' || $propType == 'float' || $propType == 'string' ||
+					$propType == 'unsignedInt' || $propType == 'Id'); // simpleType
 				$formatOk = ($propType == 'unsignedInt') ? ($propValue >= 0) : true;
 				$emptyAllowed = ($typeOk && $formatOk && ( $propValue === 0 || $propValue === 0.0 ) ); // to let 'empty' function work (below)
 				break;

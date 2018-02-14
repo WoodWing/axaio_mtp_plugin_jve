@@ -40,6 +40,5 @@ abstract class PubAbortOperation_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PubAbortOperationRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

@@ -20,12 +20,6 @@
  * differs and it therefore pushed onto the stack.
  */
 
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
-require_once BASEDIR.'/server/bizclasses/BizLDAP.class.php';
-require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
-
 class BizSession
 {
 	private static $userRow;
@@ -191,6 +185,7 @@ class BizSession
 		$user->UserID = self::$userRow['user'];
 		$user->FullName = self::$userRow['fullname'];
 		$user->TrackChangesColor = $trackChangesColor;
+		$user->EmailAddress = self::$userRow['email'];
 		return $user;
 	}
 
@@ -207,6 +202,7 @@ class BizSession
 	public static function validateUser( $user, $password )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizLDAP.class.php';
 
 		// Decode the user typed password
 		// Although server has given public encryption key to client application, this does *not* imply
@@ -290,6 +286,69 @@ class BizSession
 	}
 
 	/**
+	 * Get the client identifier from the request.
+	 *
+	 * The client identifier is used to select the correct ticket cookie in the request.
+	 * Clients can send this identifier in a customer HTTP header ("X-WoodWing-Application") or
+	 * in the URL parameters ("ww-app").
+	 *
+	 * @since 10.2.0
+	 * @return null|string
+	 */
+	private static function getClientIdentifierFromRequest()
+	{
+		$clientIdentifier = null;
+		do{
+			if( isset( $_SERVER['HTTP_X_WOODWING_APPLICATION']) && !empty($_SERVER['HTTP_X_WOODWING_APPLICATION']) ) {
+				$clientIdentifier = $_SERVER['HTTP_X_WOODWING_APPLICATION'];
+				LogHandler::Log( 'BizSession', 'DEBUG', 'Detected a client identifier in headers: ' . $clientIdentifier );
+				break;
+			}
+			require_once BASEDIR.'/server/utils/HttpRequest.class.php';
+			$requestParams = WW_Utils_HttpRequest::getHttpParams( 'GP' ); // GET and POST only
+			if(  isset($requestParams['ww-app']) && !empty($requestParams['ww-app']) ) {
+				$clientIdentifier = urldecode($requestParams['ww-app']);
+				LogHandler::Log( 'BizSession', 'DEBUG', 'Detected a client identifier in URL parameters: ' . $clientIdentifier );
+				break;
+			}
+			LogHandler::Log( 'BizSession', 'DEBUG', 'No client identifier detected.' );
+		} while(false);
+
+		return $clientIdentifier;
+	}
+
+	/**
+	 * Sets or updates the ticket cookie for the webservices.
+	 *
+	 * @since 10.2.0
+	 * @param string $ticket
+	 */
+	public static function setTicketCookieForClientIdentifier( $ticket )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+		require_once BASEDIR.'/server/secure.php';
+		$clientIdentifier = DBTicket::DBappticket( $ticket );
+		setLogCookie( 'tickets['.urlencode( $clientIdentifier ).']', $ticket );
+	}
+
+	/**
+	 * Returns the ticket for the client identifier that is given in the request.
+	 *
+	 * The tickets cookies are returned as an array in PHP. To select the correct
+	 * ticket the client identifier can be added to the request by the client.
+	 *
+	 * @since 10.2.0
+	 * @return null|string
+	 */
+	public static function getTicketForClientIdentifier()
+	{
+		$clientIdentifier = self::getClientIdentifierFromRequest();
+		require_once BASEDIR.'/server/secure.php';
+		$tickets = getOptionalCookie( 'tickets' );
+		return $clientIdentifier && isset( $tickets[ $clientIdentifier ] ) ? $tickets[ $clientIdentifier ] : null;
+	}
+
+	/**
 	 * Logon the given user (short user id) to the given application.
 	 * Be sure to call 'validateUser' first!
 	 * Generate an exception in case the user can not logon
@@ -317,6 +376,9 @@ class BizSession
 		/** @noinspection PhpUnusedParameterInspection */ $domain,
 		$appname, $appversion, $appserial, $appproductcode, $requestInfo, $masterTicket, $password )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+
 		if( is_null($requestInfo) ) { // null means all
 			$requestInfo = array(
 				'Publications', 'NamedQueries', 'ServerInfo', 'Settings',
@@ -329,6 +391,14 @@ class BizSession
 		$sLanguage_code = BizUser::getLanguage($shortUser);
 		BizResources::getResourceTable(true);
 
+		try {
+			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+			$bizTicket = new BizTicket();
+			$bizTicket->deleteExpiredTicketsAndAffiliatedStructures();
+		} catch ( BizException $e ) {
+			// Do nothing, error is already added to the log, no need to stop the log on.
+		}
+
 		// Make up new ticket		
 		$errorMessage = '';
 		$userLimit = false;
@@ -336,14 +406,6 @@ class BizSession
 			$appversion, $appserial, $appproductcode, $userLimit,
 			$errorMessage, $masterTicket );
 
-		// Purge the session workspaces for the purged tickets
-		$purgedTickets = DBTicket::getPurgedTickets();
-		self::purgeSessionWorkspaces( $purgedTickets );
-
-		// Remove orphan queues in RabbitMQ.
-		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
-		BizMessageQueue::removeOrphanQueuesByTickets( $purgedTickets );
-		
 		if ( !$ticketid )  {
 			throw new BizException( $userLimit ? 'WARN_USER_LIMIT' : 'ERR_LICENSE', 'Client', $errorMessage );
 		}
@@ -356,7 +418,13 @@ class BizSession
 		if( !isset(self::$userName) ) {
 			self::$userName = $shortUser;
 		}
-		$userid = self::getUserInfo('id');
+		$userId = self::getUserInfo('id');
+
+		// Support cookie enabled sessions for JSON clients that run multiple web applications which need to share the
+		// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
+		if( $ticketid ) {
+			BizSession::setTicketCookieForClientIdentifier($ticketid);
+		}
 
 		// Return LogOnResponse to client application
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflLogOnResponse.class.php';
@@ -383,13 +451,14 @@ class BizSession
 		if( in_array( 'ServerInfo', $requestInfo ) ) {
 			$ret->ServerInfo    = self::getServerInfo( $ticket );
 		}
-		if( in_array( 'Settings', $requestInfo ) ) {
-			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-			$ret->Settings      = BizUser::getSettings( $shortUser, $appname );
+		if( in_array( 'Settings', $requestInfo ) && !in_array( 'PreferNoSettings', $requestInfo ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+			$bizUserSettings = new WW_BizClasses_UserSetting();
+			$ret->Settings = $bizUserSettings->getSettings( BizSession::getShortUserName(), BizSession::getClientName(), null );
 		}
 		if( in_array( 'Users', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-			$ret->Users         = BizUser::getUsersWithCommonAuthorization( $userid );
+			$ret->Users         = BizUser::getUsersWithCommonAuthorization( $userId );
 		}
 		if( in_array( 'UserGroups', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
@@ -397,7 +466,7 @@ class BizSession
 		}
 		if( in_array( 'Membership', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-			$ret->Membership    = BizUser::getMemberships( $userid );
+			$ret->Membership    = BizUser::getMemberships( $userId );
 		}
 		if( in_array( 'ObjectTypeProperties', $requestInfo ) ) {
 			require_once BASEDIR.'/server/dbclasses/DBMetaData.class.php';
@@ -420,7 +489,7 @@ class BizSession
 		}
 		if( in_array( 'MessageList', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizMessage.class.php';
-			$ret->MessageList          = BizMessage::getMessagesForUser( $shortUser ); // Messages that are pending for this user
+			$ret->MessageList          = BizMessage::getMessagesForUser( $userId, $shortUser ); // Messages that are pending for this user
 		}
 		if( in_array( 'CurrentUser', $requestInfo ) ) {
 			$user = self::getUser();
@@ -429,7 +498,7 @@ class BizSession
 		}
 		if( in_array( 'MessageQueueConnections', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
-			BizMessageQueue::setupMessageQueueConnectionsForLogOn( $ret, $userid, $password );
+			BizMessageQueue::setupMessageQueueConnectionsForLogOn( $ret, $userId, $password );
 		}
 
 		// fire event
@@ -451,20 +520,21 @@ class BizSession
 		// Let user overrule the company language to tell client apps what language this user is speaking
 		require_once BASEDIR.'/server/bizclasses/BizServerInfo.class.php';
 		$serverInfo = BizServerInfo::getServerInfo();
-		$featureSet = &$serverInfo->FeatureSet;
 		$compLangFeature = null;
-		foreach( $featureSet as &$feature ) { // Search through featureset for company language setting
+		foreach( $serverInfo->FeatureSet as $feature ) { // Search through featureset for company language setting
 			if( $feature->Key == 'CompanyLanguage' ) {
-				$compLangFeature = &$feature;
+				$compLangFeature = $feature;
+				break;
 			}
 		}
+
 		if( $compLangFeature ) {
 			if( trim($compLangFeature->Value) == '' ) {
 				$compLangFeature->Value = 'enUS'; // Empty (bad) comp lang configured; take English as default
 			}
 		} else { // No comp lang configured at all; take English as default
 			$compLangFeature = new Feature( 'CompanyLanguage', 'enUS' );
-			$serverInfo->FeatureSet[] = &$compLangFeature;
+			$serverInfo->FeatureSet[] = $compLangFeature;
 		}
 		if( self::getUserInfo('language') != '') {
 			$compLangFeature->Value = self::getUserInfo('language'); // Let user overrule
@@ -473,7 +543,7 @@ class BizSession
 		// Add the server feature FileUploadUrl (if proper define is set).
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();
-		$transferServer->addFeatures($serverInfo);
+		$transferServer->addFeatures( $serverInfo );
 
 		// Determine whether or not the user works from remote location.
 		require_once BASEDIR.'/server/utils/IpAddressRange.class.php';
@@ -488,27 +558,27 @@ class BizSession
 			'adding IsRemoteUser='.$isRemote.' option to ServerInfo->FeatureSet in LogOnResponse. ' );
 
 		// Add the Labels feature to the FeatureSet.
-		self::addFeatureLabels( $serverInfo->FeatureSet );
+		self::addFeatureLabels( $serverInfo );
 
 		// Add the Client features (CLIENTFEATURES) to the FeatureSet.
-		self::addFeaturesForClient( $serverInfo->FeatureSet, $isRemote == 'true', $ticket );
+		self::addFeaturesForClient( $serverInfo, $isRemote == 'true', $ticket );
 
 		// Add the AutomatedPrintWorkflow feature to the FeatureSet.
-		self::addFeatureForAutomatedPrintWorkflow( $serverInfo->FeatureSet );
+		self::addFeatureForAutomatedPrintWorkflow( $serverInfo );
 
 		// Add the ContentSourceFileLinks feature to the FeatureSet.
-		self::addFeatureForContentSourceFileLinks( $serverInfo->FeatureSet );
+		self::addFeatureForContentSourceFileLinks( $serverInfo );
 
 		// Add Output Devices to the FeatureSet.
 		require_once BASEDIR.'/server/bizclasses/BizAdmOutputDevice.class.php';
 		$bizDevice = new BizAdmOutputDevice();
-		$bizDevice->addFeatureOutputDevices( $serverInfo->FeatureSet );
+		$bizDevice->addFeatureOutputDevices( $serverInfo );
 
-		// add ExtensionMap feature. 
+		// add ExtensionMap feature.
 		// NOTE: Might change in the future, added in v6.1 for Content Station
-		self::addFeatureExtensionMap( $serverInfo->FeatureSet );
+		self::addFeatureExtensionMap( $serverInfo );
 
-		foreach( $featureSet as &$feature ) {
+		foreach( $serverInfo->FeatureSet as $feature ) {
 			if ( !is_null($feature->Value) && !is_string($feature->Value) ) {
 				if ( is_bool($feature->Value) ) {
 					// Only bool values can't are currently convert as:
@@ -528,8 +598,10 @@ class BizSession
 
 	public static function logOff( $ticket, $savesettings=null, $settings=null, $messageList=null )
 	{
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+
 		// check ticket (and get user)
-		$user = self::checkTicket( $ticket, 'LogOff' );
+		$shortUserName = self::checkTicket( $ticket, 'LogOff' );
 
 		// Handle messages read/deleted by user.
 		if( $messageList ) {
@@ -539,48 +611,30 @@ class BizSession
 					'Make sure you pass in a MessageList data object at the 4th parameter. ' );
 			}
 			require_once BASEDIR.'/server/bizclasses/BizMessage.class.php';
-			BizMessage::sendMessagesForUser( $user, $messageList );
+			BizMessage::sendMessagesForUser( $shortUserName, $messageList );
 		}
 
 		// Fire event (n-cast the logoff operation to notify client apps).
 		require_once BASEDIR.'/server/smartevent.php';
-		new smartevent_logoff( $ticket, $user );  // fire event now, while ticket is still valid
+		new smartevent_logoff( $ticket, $shortUserName );  // fire event now, while ticket is still valid
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-		DBlog::logService( $user, 'LogOff' );
+		DBlog::logService( $shortUserName, 'LogOff' );
 
-		//get the appname before deleting the ticket...
-		$appname = DBTicket::DBappticket($ticket);
-
-		// delete ticket
-		$dbDriver = DBDriverFactory::gen();
-		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		$sth = DBTicket::DBendticket( $ticket );
-		if( !$sth ) {
-			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
+		// store user settings (before deleting the ticket)
+		if( $savesettings && is_array( $settings ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+			$bizUserSettings = new WW_BizClasses_UserSetting();
+			$bizUserSettings->replaceSettings( $shortUserName , DBTicket::DBappticket($ticket), $settings );
 		}
 
-		// Purge the session workspace
-		self::purgeSessionWorkspaces( array( $ticket ) );
-
-		// Remove the ticket based queue in RabbitMQ.
-		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
-		BizMessageQueue::removeOrphanQueuesByTickets( array( $ticket ) );
-
-		// settings
-		if( $savesettings ) {
-			require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-			$sth = DBUserSetting::purgeSettings( $user , $appname );
-			if( !$sth ) {
-				throw new BizException( 'ERR_DATABASE', 'Server',  $dbDriver->error() );
-			}
-
-			if( $settings ) foreach( $settings as $setting ) {
-				$sth = DBUserSetting::addSetting( $user, $setting->Setting, $setting->Value, $appname );
-				if( !$sth ) {
-					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-				}
-			}
+		try {
+			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+			$bizTicket = new BizTicket();
+			$bizTicket->deleteTicketAndAffiliatedStructures( $ticket );
+		} catch( BizException $e ) {
+			// Do nothing, error is already added to the log, no need to stop the log off.
 		}
+
 	}
 
 	/**
@@ -593,8 +647,9 @@ class BizSession
 	 */
 	public static function getUserLanguage()
 	{
-		global $sLanguage_code;
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 
+		global $sLanguage_code;
 		$sLanguage_code = self::getUserInfo('language');
 
 		// Check user language, if unknown, assign the default company language (or English when not configured)
@@ -609,10 +664,12 @@ class BizSession
 	 *
 	 * @param string $ticket Ticket to validate
 	 * @param string $service Service to validate the ticket for, default ''.
-	 * @return string The active user of the session.
+	 * @param bool $extend Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
+	 *                     Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
+	 * @return string Short user name of the active user of the session.
 	 * @throws BizException When ticket not valid.
 	 */
-	public static function checkTicket( $ticket, $service='' )
+	public static function checkTicket( $ticket, $service='', $extend = true )
 	{
 		// All web applications validate their ticket before they start operating,
 		// but most of them do not start a session. Here we do a lazy start to avoid
@@ -623,9 +680,9 @@ class BizSession
 
 		// Throw error when ticket is not (or no longer) valid.
 		require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-		self::$userName = DBTicket::checkTicket( $ticket, $service );
+		self::$userName = DBTicket::checkTicket( $ticket, $service, $extend );
 		if( !self::$userName ) {
-			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
+			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 		}
 
 		// Language was not correctly loaded when called from soap-client, so making sure 
@@ -654,8 +711,14 @@ class BizSession
 			// That forces clients to (re)login and obtain a seat for both Enterprise and
 			// the remote system again.
 			if( !$connectorTicketsValid ) {
-				DBTicket::DBendticket( $ticket );
-				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
+				try {
+					require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+					$bizTicket = new BizTicket();
+					$bizTicket->deleteTicketAndAffiliatedStructures( $ticket );
+				} catch( BizException $e ) {
+					// Do nothing, error is already added to the log, no need to stop.
+				}
+				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 			}
 		}
 
@@ -671,6 +734,8 @@ class BizSession
 	 */
 	public static function loadUserLanguage( $userName )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+
 		global $sLanguage_code;
 		$sLanguage_code = BizUser::getLanguage( $userName );
 		return $sLanguage_code;
@@ -703,7 +768,7 @@ class BizSession
 			self::$ticket != $ticket ) {
 			$message = 'Multiple session with different tickets are not supported. ';
 			$message .= 'Self ticket [' . self::$ticket . '] New ticket [' . $ticket . ']';
-			throw new BizException( 'ERR_TICKET', 'Server', $message );
+			throw new BizException( 'ERR_TICKET', 'Server', $message, null, null, 'ERROR' );
 		}
 	}
 
@@ -826,15 +891,15 @@ class BizSession
 	 * Adds the "Labels" feature to the given feature set. "Labels" is the
 	 * content of componentDefs.xml
 	 *
-	 * @param Feature[] $features Feature set to add the "Labels" feature.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to add the "Labels" feature.
 	 */
-	private static function addFeatureLabels( array &$features )
+	private static function addFeatureLabels( ServerInfo $serverInfo )
 	{
 		$filePath = BASEDIR . '/config/componentDefs.xml';
 		if (is_file($filePath)) {
 			$contents = file_get_contents($filePath);
 			if ($contents !== FALSE){
-				$features[] = new Feature('Labels', $contents);
+				$serverInfo->FeatureSet[] = new Feature('Labels', $contents);
 			}
 		}
 	}
@@ -851,9 +916,9 @@ class BizSession
 	 *
 	 * The values are read form EXTENSIONMAP defined in configserver.php
 	 *
-	 * @param Feature[] $features Feature set to add the "ExtensionMap" feature.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to add the "ExtensionMap" feature.
 	 */
-	private static function addFeatureExtensionMap( array &$features )
+	private static function addFeatureExtensionMap( ServerInfo $serverInfo )
 	{
 		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 		// Create <extensions> XML element and iterate thru EXTENSIONMAP to add
@@ -877,7 +942,7 @@ class BizSession
 			}
 		}
 
-		$features[] = new Feature('ExtensionMap', $xmlTree->asXML());
+		$serverInfo->FeatureSet[] = new Feature('ExtensionMap', $xmlTree->asXML());
 	}
 
 	/**
@@ -887,11 +952,11 @@ class BizSession
 	 * subcollection of features (configured in CLIENTFEATURES) to add.
 	 *
 	 * @since 9.7.0
-	 * @param Feature[] $features Feature set to add the client features.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to add the client features.
 	 * @param boolean $isRemote
 	 * @param string $ticket The requested ticket
 	 */
-	private static function addFeaturesForClient( array &$features, $isRemote, $ticket )
+	private static function addFeaturesForClient( ServerInfo $serverInfo, $isRemote, $ticket )
 	{
 		$clientName = BizSession::getClientName();
 		if( $clientName == 'InDesign Server' ) {
@@ -903,7 +968,7 @@ class BizSession
 		}
 		$options = unserialize( CLIENTFEATURES );
 		if( isset( $options[$clientName][$subEntry] ) && $options[$clientName][$subEntry] ) {
-			$features = array_merge( $features, $options[$clientName][$subEntry] );
+			$serverInfo->FeatureSet = array_merge( $serverInfo->FeatureSet, $options[$clientName][$subEntry] );
 		}
 	}
 
@@ -912,13 +977,13 @@ class BizSession
 	 * has the AutomatedPrintWorkflow business connector interface implemented.
 	 *
 	 * @since 9.8.0
-	 * @param Feature[] $features Feature set to update.
+	 * @param ServerInfo $serverInfo Holds the FeatureSet to update.
 	 */
-	private static function addFeatureForAutomatedPrintWorkflow( array &$features )
+	private static function addFeatureForAutomatedPrintWorkflow( ServerInfo $serverInfo )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		if( BizServerPlugin::hasActivePlugins( 'AutomatedPrintWorkflow' ) ) {
-			$features[] = new Feature( 'ContentStationAutomatedPrintWorkflow' );
+			$serverInfo->FeatureSet[] = new Feature( 'ContentStationAutomatedPrintWorkflow' );
 		}
 	}
 
@@ -927,9 +992,9 @@ class BizSession
 	 * has enabled this feature.
 	 *
 	 * @since 9.7.0
-	 * @param Feature[] $features Feature set to update.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to update.
 	 */
-	private static function addFeatureForContentSourceFileLinks( array &$features )
+	private static function addFeatureForContentSourceFileLinks( ServerInfo $serverInfo )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		BizServerPlugin::runDefaultConnectors(
@@ -942,7 +1007,7 @@ class BizSession
 			}
 		}
 		if( count($contentSources) > 0 ) {
-			$features[] = new Feature( 'ContentSourceFileLinks', implode($contentSources, ',') );
+			$serverInfo->FeatureSet[] = new Feature( 'ContentSourceFileLinks', implode($contentSources, ',') );
 		}
 	}
 
@@ -1109,6 +1174,7 @@ class BizSession
 			if( self::$runMode == self::RUNMODE_BACKGROUND ) { // server job calling?
 				$retVal = '';
 			} else { // web service client calling?
+				require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 				$clientVersion = DBTicket::getClientAppVersion( $ticket );
 				if( $clientVersion ) {
 					$retVal = self::formatClientVersion( $clientVersion, $digits );

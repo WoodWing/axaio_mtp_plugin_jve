@@ -3,7 +3,6 @@
 /**
  * @package Enterprise
  * @subpackage Services
- * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  * 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -42,7 +41,7 @@ class WflPubChannelTypeValidator
 {
 	static public function validate( $validator, $enumVal )
 	{
-		static $enums = array( 'print', 'web', 'sms', 'dps', 'dps2', 'other' );
+		static $enums = array( 'print', 'web', 'sms', 'dps2', 'other' );
 		$validator->checkEnum( $enums, $enumVal );
 	}
 }
@@ -949,6 +948,18 @@ class WflInDesignArticleValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'SplineIDs' ) ) {
+			$validator->enterPath( 'SplineIDs' );
+			if( !is_null( $datObj->SplineIDs ) ) {
+				$validator->checkType( $datObj->SplineIDs, 'array' );
+				if( !empty($datObj->SplineIDs) ) foreach( $datObj->SplineIDs as $listItem ) {
+					$validator->enterPath( 'string' );
+					$validator->checkType( $listItem, 'string' );
+					$validator->leavePath();
+				}
+			}
+			$validator->leavePath();
+		}
 	}
 }
 
@@ -1377,6 +1388,13 @@ class WflUserValidator
 			$validator->checkNull( $datObj->TrackChangesColor );
 			if( !is_null( $datObj->TrackChangesColor ) ) {
 				$validator->checkType( $datObj->TrackChangesColor, 'Color' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'EmailAddress' ) ) {
+			$validator->enterPath( 'EmailAddress' );
+			if( !is_null( $datObj->EmailAddress ) ) {
+				$validator->checkType( $datObj->EmailAddress, 'string' );
 			}
 			$validator->leavePath();
 		}
@@ -4376,6 +4394,20 @@ class WflLayoutObjectValidator
 			$validator->checkNull( $datObj->LockedBy );
 			if( !is_null( $datObj->LockedBy ) ) {
 				$validator->checkType( $datObj->LockedBy, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Flag' ) ) {
+			$validator->enterPath( 'Flag' );
+			if( !is_null( $datObj->Flag ) ) {
+				$validator->checkType( $datObj->Flag, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'FlagMsg' ) ) {
+			$validator->enterPath( 'FlagMsg' );
+			if( !is_null( $datObj->FlagMsg ) ) {
+				$validator->checkType( $datObj->FlagMsg, 'string' );
 			}
 			$validator->leavePath();
 		}

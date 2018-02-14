@@ -5,17 +5,14 @@ class AutoTargetingTest_NameValidation extends NameValidation_EnterpriseConnecto
 {
 	public function validatePassword( $password )
 	{
-		$password = $password; // keep code analyzer happy
 	}
 
 	public function validateMetaDataAndTargets( $user, MetaData &$meta, &$targets )
 	{
-		$user = $user; $meta = $meta; $targets = $targets; // keep code analyzer happy
 	}
 	
 	public function validateMetaDataInMultiMode( $user, MetaData $invokedMetaData, array &$changedMetaDataValues )
 	{
-		$user = $user; $invokedMetaData = $invokedMetaData; $changedMetaDataValues = $changedMetaDataValues; // keep code analyzer happy
 	}
 	
 	/**
@@ -31,8 +28,6 @@ class AutoTargetingTest_NameValidation extends NameValidation_EnterpriseConnecto
 	 */
 	public function applyAutoTargetingRule( $user, Relation $relation, $parentType, $childType, &$extraTargets )
 	{
-		$user = $user; $parentType = $parentType; $childType = $childType; // make code analyser happy
-
 		// Get all the possible targets
 		require_once BASEDIR . '/server/bizclasses/BizTarget.class.php';
 		$parentObjectTargets = BizTarget::getTargets($user, $relation->Parent);

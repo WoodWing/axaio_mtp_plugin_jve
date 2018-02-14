@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LocalizationMap language="plPL">
+  <Term key="Elvis.ERR_CONNECT">Podczas pobierania pliku z Elvis wystąpił błąd związany z utratą połączenia. (S1144)#EOL##EOL#Skontaktuj się z administratorem systemu.#EOL##EOL#WAŻNE: Stanowczo zalecamy, aby przerwać pracę z JAKIMKOLWIEK plikiem w systemie do czasu odzyskania połączenia oraz nie podejmować żadnych działań, takich jak sprawdzanie, przerywanie sprawdzania, zapisywanie wersji, otwieranie plików lub dossier itp.#EOL##EOL#Kontynuowanie jakiejkolwiek pracy z plikami może doprowadzić do utraty danych lub uszkodzenia plików.</Term>
   <Term key="Elvis.PRODUCTION_ZONE">Strefa produkcyjna</Term>
 </LocalizationMap>

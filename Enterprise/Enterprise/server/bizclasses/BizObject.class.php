@@ -222,7 +222,7 @@ class BizObject
 		$status = BizAdmStatus::getStatusWithId( $object->MetaData->WorkflowMetaData->State->Id );
 
 		// Check authorization
-		$rights = 'W'; // check 'Write' access (W)
+		$rights = 'RW'; // check 'Read/Write' access (R and W): Read is added for EN-88613
 		if( $arr['type'] == 'Dossier' || $arr['type'] == 'DossierTemplate' ) {
 			$rights .= 'd'; // check the 'Create Dossier' access (d) (BZ#17051)
 		} else if( $arr['type'] == 'Task' ) {
@@ -316,10 +316,6 @@ class BizObject
 			if (!$id) {
 				throw new BizException( 'ERR_DATABASE', 'Server', 'No ID' );
 			}
-			// now we know id: generate storage name and store it
-			$storename = StorageFactory::storename($id, $arr);
-			// $modifier and $modified are null for this function call, they are already set a few lines ago
-			/*$sth = */DBObject::updateObject( $id, null, array(), null, $storename );
 		}
 		$object->MetaData->BasicMetaData->ID = $id;
 
@@ -428,8 +424,9 @@ class BizObject
 
 		// ==== So far it was DB only, now involve files:
 		// Save object's files:
+		$storename = StorageFactory::storename( $id, $arr );
+		/*$sth = */ DBObject::updateObject( $id, null, array(), null, $storename );
 		self::saveFiles( $storename, $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
-
 		// When an image is created, the thumb and preview need to be removed from the TransferServer.
 		if ('Image' == $arr['type'] ){
 			LogHandler::Log('BizObject', 'DEBUG', 'Removing temporary image files from TransferServer.');
@@ -465,7 +462,7 @@ class BizObject
 			$requestInfo = self::getDefaultRequestInfos();
 		}
 		$object = self::getObject( $object->MetaData->BasicMetaData->ID, $user, false,
-			$rendition,	$requestInfo );
+			$rendition,	$requestInfo, null, true, null,null, false );
 
 		if( defined( 'HTMLLINKFILES' ) && HTMLLINKFILES == true ) {
 			// Update object's 'link' files (htm) in <FileStore>/_BRANDS_ folder
@@ -624,56 +621,59 @@ class BizObject
 		$dbDriver = DBDriverFactory::gen();
 
 		// Next, check if we have an alien object (from content source, not in our database)
-		require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( BizContentSource::isAlienObject( $id ) ) {
 			// Check if all users in the metadata are known within the system. If not, create them and import remaining
 			// information when such a user logs in through LDAP when enabled.
-			self::getOrCreateResolvedUsers($id, $object->MetaData);
+			self::getOrCreateResolvedUsers( $id, $object->MetaData );
 			// Check if we already have a shadow object for this alien. If so, change the id
 			// to the shadow id
-			$shadowID = BizContentSource::getShadowObjectID($id);
+			$shadowID = BizContentSource::getShadowObjectID( $id );
 			if( $shadowID ) {
 				$id = $shadowID;
 			} else {
-				LogHandler::Log('bizobject','DEBUG','No shadow found for alien object '.$id);
+				LogHandler::Log( 'bizobject', 'DEBUG', 'No shadow found for alien object '.$id );
 				throw new BizException( 'ERR_NOTFOUND', 'Client', $id );
 			}
 		}
 
 		// get current record in db
 		$sth = DBObject::getObject( $id );
-		if (!$sth) {
+		if( !$sth ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 		}
-		$currRow = $dbDriver->fetch($sth);
-		if (!$currRow) {
+		$currRow = $dbDriver->fetch( $sth );
+		if( !$currRow ) {
 			throw new BizException( 'ERR_NOTFOUND', 'Client', $id );
 		}
 
 		// BZ#8475: Oracle specific fix - on Oracle ID as well as id is set...
 		// this leads further code to believe it is a list of properties, not a databaserow...
-		if (isset($currRow['id']) && isset($currRow['ID'])) {
-			unset($currRow['ID']);
+		if( isset( $currRow['id'] ) && isset( $currRow['ID'] ) ) {
+			unset( $currRow['ID'] );
 		}
 
-		$curPub   = $currRow['publication'];
-		$curSect  = $currRow['section'];
+		$curPub = $currRow['publication'];
+		$curSect = $currRow['section'];
 		$curState = $currRow['state'];
 
-		// Publication, Category are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
+		// Publication, Category, Content Source are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
 		if( !$object->MetaData->BasicMetaData->Publication || !$object->MetaData->BasicMetaData->Publication->Id ) {
 			$object->MetaData->BasicMetaData->Publication = new Publication( $curPub );
 		}
 		if( !$object->MetaData->BasicMetaData->Category || !$object->MetaData->BasicMetaData->Category->Id ) {
 			$object->MetaData->BasicMetaData->Category = new Category( $curSect );
 		}
+		if( !empty( $currRow['contentsource'] && empty( $object->MetaData->BasicMetaData->ContentSource ) ) ) {
+			$object->MetaData->BasicMetaData->ContentSource = $currRow['contentsource'];
+		}
 
 		// Determine the current- and new targets and issue.
 		require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 		$curTargets = DBTarget::getTargetsByObjectId( $id );
-		$newTargets = is_null($object->Targets) ? $curTargets : $object->Targets;
-		$curIssueId = $curTargets && count($curTargets) ? $curTargets[0]->Issue->Id : 0;
-		$newIssueId = $newTargets && count($newTargets) ? $newTargets[0]->Issue->Id : 0;
+		$newTargets = is_null( $object->Targets ) ? $curTargets : $object->Targets;
+		$curIssueId = $curTargets && count( $curTargets ) ? $curTargets[0]->Issue->Id : 0;
+		$newIssueId = $newTargets && count( $newTargets ) ? $newTargets[0]->Issue->Id : 0;
 
 		// Validate targets count, layouts can be assigned to one issue only
 		BizWorkflow::validateMultipleTargets( $object->MetaData, $object->Targets );
@@ -688,11 +688,11 @@ class BizObject
 
 		// Does the user has a lock for this file?
 		$lockedby = DBObjectLock::checkLock( $id );
-		if( !$lockedby ){
+		if( !$lockedby ) {
 			// object not locked at all:
-			$sErrorMessage = BizResources::localize("ERR_NOTLOCKED").' '.BizResources::localize("SAVE_LOCAL");
+			$sErrorMessage = BizResources::localize( "ERR_NOTLOCKED" ).' '.BizResources::localize( "SAVE_LOCAL" );
 			throw new BizException( null, 'Client', $id, $sErrorMessage );
-		} else if( strtolower($lockedby) != strtolower($user) ) {
+		} else if( strtolower( $lockedby ) != strtolower( $user ) ) {
 			//locked by someone else
 			throw new BizException( 'ERR_NOTLOCKED', 'Client', $id );
 		}
@@ -725,7 +725,7 @@ class BizObject
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 
-		if ( BizPublishForm::isPublishForm( $object )) {
+		if( BizPublishForm::isPublishForm( $object ) ) {
 			BizRelation::validateFormContainedByDossier( $object->MetaData->BasicMetaData->ID, $object->Targets, $object->Relations );
 		}
 		if( $object->MetaData->BasicMetaData->Type == 'Dossier' ) {
@@ -738,7 +738,20 @@ class BizObject
 		// Create version if needed, even if $createVersion is false a version might be generated
 		BizVersion::createVersionIfNeeded( $id, $currRow, $newRow, $object->MetaData->WorkflowMetaData, $createVersion );
 
-		$now = date('Y-m-d\TH:i:s');
+		// Delete object's 'link' files (htm) in <FileStore>/_BRANDS_ folder
+		$oldtargets = BizTarget::getTargets( $user, $id );
+		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
+		$pubName = DBPublication::getPublicationName( $curPub );
+		if( defined( 'HTMLLINKFILES' ) && HTMLLINKFILES == true ) {
+			require_once BASEDIR.'/server/bizclasses/BizLinkFiles.class.php';
+			BizLinkFiles::deleteLinkFiles( $curPub, $pubName, $id, $currRow['name'], $oldtargets );
+		}
+
+		$now = date( 'Y-m-d\TH:i:s' );
+		$userfull = BizUser::resolveFullUserName( $user );
+		// Set Modifier for return
+		$object->MetaData->WorkflowMetaData->Modified = $now;
+		$object->MetaData->WorkflowMetaData->Modifier = $userfull;
 
 		// Clear indexed flag, so object will be re-indexed when search engine used:
 		// At Create it's initialized empty, SetProps does not modify this to prevent overkill
@@ -746,109 +759,20 @@ class BizObject
 		// change after creation.
 		$newRow['indexed'] = '';
 
-		// Save to DB:
-		$sth = DBObject::updateObject($id, $user, $newRow, $now);
-		if (!$sth)	{
-			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-		}
-		// v4.2.4 patch for #5700, Save current time be able to send this later as modified time
-		$now = date('Y-m-d\TH:i:s');
-
-		$userfull = BizUser::resolveFullUserName($user);
-
-		// Set Modifier for return
-		$object->MetaData->WorkflowMetaData->Modified = $now;
-		$object->MetaData->WorkflowMetaData->Modifier = $userfull;
-
-		// Delete object's 'link' files (htm) in <FileStore>/_BRANDS_ folder
-		$oldtargets = BizTarget::getTargets($user, $id);
-		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		$pubName = DBPublication::getPublicationName($curPub);
-		if( defined( 'HTMLLINKFILES' ) && HTMLLINKFILES == true ) {
-			require_once BASEDIR . '/server/bizclasses/BizLinkFiles.class.php';
-			BizLinkFiles::deleteLinkFiles( $curPub, $pubName, $id, $currRow['name'], $oldtargets );
-		}
-
-		// Validate targets and store them at DB for this object
-		// BZ#9827 Only save targets if not null
-		if ($object->Targets !== null) {
+		// Validate targets and store them at DB for this object. BZ#9827 Only save targets if not null
+		if( $object->Targets !== null ) {
 			BizTarget::saveTargets( $user, $id, $object->Targets, $object->MetaData );
-
 			// Validate meta data and targets (including validation done by Server Plug-ins)
-			self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, null, FALSE );
+			self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, null, false );
 		}
-
-		// Object record is now changed, now save other stuff elements, relations, messages, etc.
+		// Save other stuff elements, relations, messages, etc.
 		self::saveExtended( $id, $object, $user, false );
+		BizDeadlines::handleDeadlineForSaveObject( $object, $newRow, $currRow['deadline'] );
 
-		// ===== Handle deadline.
-		// Collect object-/relational-target issues from object
-		$issueIdsDL = self::getTargetIssuesForDeadline( $object );
-		// If deadline is set and object has issues check if the set deadline is not beyond earliest possible deadline
-		if( $issueIdsDL && isset($newRow['deadline']) && $newRow['deadline'] ) {
-			BizDeadlines::checkDeadline($issueIdsDL, $newRow['section'], $newRow['deadline']);
-		}
-		// If no deadline set, calculate deadline, else just store the deadline
-		$deadlinehard = '';
-		$oldDeadline = DBObject::getObjectDeadline( $id );
-		if( isset($newRow['deadline']) && $newRow['deadline'] ) {
-			$deadlinehard = $newRow['deadline'];
-			if ( $oldDeadline !== $deadlinehard ) {
-				DBObject::setObjectDeadline( $id, $deadlinehard );
-				if ( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
-					// Set the deadlines of children without own object-target issue.
-					BizDeadlines::setDeadlinesIssuelessChilds( $id, $deadlinehard );
-				}
-			}
-		} else { // No deadline set, calculate (when "Activate Relative Deadlines" is enabled in brand admin page.).
-			// Determine if it is normal brand or overruleIssue.
-			$overruleIssueId = 0;
-			if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object, it's definitely not an overruleIssue, so don't need to check.
-				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-				$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
-			}
-
-			require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-			if( BizPublication::isCalculateDeadlinesEnabled( $newRow['publication'], $overruleIssueId ) ) {
-				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
-                $deadlinehard = $deadlines['Deadline'];
-				if ( $oldDeadline !== $deadlinehard ) {
-					if ( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
-						// Recalculate the deadlines of children without own object-target issue.
-						// This recalculation is limited to an issue change of the parent.
-						// New issue of the parent results in new relational-target issue and so
-						// a new deadline. If the category of the parent changes this has no effect
-						// as the children do not inherit this change.
-						BizDeadlines::recalcDeadlinesIssuelessChilds( $id );
-					}
-				}
-			}
-		}
-
-		// Broadcast (soft) deadline (Broadcast only when deadlinehard is given by user or re-calculated.
-		if ( $oldDeadline !== $deadlinehard ) {
-			require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
-			$deadlinesoft = DateTimeFunctions::calcTime( $deadlinehard, -DEADLINE_WARNTIME );
-			require_once BASEDIR . '/server/smartevent.php';
-			new smartevent_deadlinechanged( null, $id, $deadlinehard, $deadlinesoft );
-		}
-		// ==== So far it was DB only, now involve files:
-
-		// For shadow objects we now pass control to Content Source which may influence what to do with file storing
-		// as it can modify $object
-		if( trim($currRow['contentsource']) ) {
-			require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
-			BizContentSource::saveShadowObject( trim($currRow['contentsource']), trim($currRow['documentid']), $object );
-		}
-
-		// Save object's files:
-		self::saveFiles( $currRow['storename'], $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
-
-		// Clear the files array, the files are moved to the files store so they aren't available anymore
-		$object->Files = array();
-
-		// Save pages (both files and DB records)
-		BizPage::savePages( $currRow['storename'], $id, 'Production', $object->Pages, TRUE, $currRow['version'], $object->MetaData->WorkflowMetaData->Version );
+		// Update object, both in the database as the Filestore.
+		$object = self::updateDatabaseAndFilestore( $object, $user, $newRow, $now, $currRow );
+		// Save pages, both in the database as the Filestore.
+		BizPage::savePages( $currRow['storename'], $id, 'Production', $object->Pages, true, $currRow['version'], $object->MetaData->WorkflowMetaData->Version );
 
 		// Create server job to generate preview/thumb async
 		//require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
@@ -904,11 +828,12 @@ class BizObject
 
 
 		// Do notifications
+		$latestRouteTo = isset( $newRow['routeto'] ) ? $newRow['routeto'] : $currRow['routeto']; // when not provided by caller, take original value
 		$issueIds = $issueNames = $editionIds = $editionNames = '';
 		self::listIssuesEditions( $object->Targets, $issueIds, $issueNames, $editionIds, $editionNames );
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logService( $user, 'SaveObjects', $id, $newRow['publication'], null, $newRow['section'], $newRow['state'],
-			'', '', '', $newRow['type'], $newRow['routeto'], $editionNames, $newRow['version'] );
+			'', '', '', $newRow['type'], $latestRouteTo, $editionNames, $newRow['version'] );
 		if( MTP_SERVER_DEF_ID != '' ) {
 			require_once BASEDIR.'/server/MadeToPrintDispatcher.class.php';
 			MadeToPrintDispatcher::doPrint( $id, BizSession::getTicket() );
@@ -921,7 +846,7 @@ class BizObject
 		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
 		BizEnterpriseEvent::createObjectEvent( $object->MetaData->BasicMetaData->ID, 'update' );
 
-		BizEmail::sendNotification( 'save object' , $object, $newRow['types'], $currRow['routeto']);
+		BizEmail::sendNotification( 'save object', $object, $newRow['types'], $currRow['routeto'] );
 
 		// Optionally send geo update for placed articles of a saved layout, but only if we are not using XMLGeo
 		// XMLGeo would require a geo update file per article which we don't have
@@ -1193,7 +1118,7 @@ class BizObject
 			// v9.7 Return InDesign Articles
 			if( in_array('InDesignArticles', $requestInfo) ) {
 				require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-				$indesignArticles = DBInDesignArticle::getInDesignArticles( $id );
+				$indesignArticles = DBInDesignArticle::getInDesignArticles( $id, true );
 			} else {
 				$indesignArticles = null;
 			}
@@ -1238,6 +1163,9 @@ class BizObject
 					BizContentSource::getShadowObject( trim($objectProps['ContentSource']),
 						trim($objectProps['DocumentID']), $object, $objectProps, $lock,
 						$rendition, $requestInfo, $supportedContentSources, $haveVersion );
+
+					// Ugly hack!! A temporary hack until we have a proper solution. See DBObject::trucateNamePropertyValue().
+					$object->MetaData->BasicMetaData->Name = DBObject::trucateNamePropertyValue( $object->MetaData->BasicMetaData->Name );
 				} catch( BizException $e ) {
 					// Let's be robust here; When the Content Source connector has been unplugged, an exception is thrown.
 					// Nevertheless, when not asked for a rendition, we already have the metadata, so there is no reason
@@ -1260,7 +1188,7 @@ class BizObject
 				// BZ#13297 don't get files for native and placement renditions when haveversion is same as object version
 				if ($rendition && $rendition != 'none'
 					&& ! ( ($rendition == 'native' || $rendition == 'placement')
-						&& $haveVersion === $object->MetaData->WorkflowMetaData->Version ) ) {
+						&& $haveVersion === $objectProps['Version'] ) ) {
 					require_once BASEDIR.'/server/bizclasses/BizStorage.php';
 					if( $editionId ) { // edition/device specific rendition
 						require_once BASEDIR.'/server/dbclasses/DBObjectRenditions.class.php';
@@ -1601,7 +1529,7 @@ class BizObject
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
 		}
 
-			// Next, check if we have access to destination.
+		// Next, check if we have access to destination.
 		BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
 			$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $newRow['state'],
 			$currRow['id'], $currRow['contentsource'], $currRow['documentid'], $currRow['routeto'] );
@@ -1698,7 +1626,7 @@ class BizObject
 		// ==== Handle deadline
 		$newDeadline = isset( $newRow['deadline'] ) ? $newRow['deadline'] : null;
 		$pubId = $newRow['publication'];
-		self::handleDeadline( $id, $pubId, $targets, $curType, $curState, $curSection, $state, $categoryId, $newDeadline );
+		BizDeadlines::handleDeadlineForSetProperties( $id, $pubId, $targets, $curType, $curState, $curSection, $state, $categoryId, $newDeadline );
 
 		//self::saveMetaDataExtended( $id, $newRow, ($curState != $state || $curSection != $meta->BasicMetaData->Category->Id ), $issueIdsDL );
 
@@ -1768,92 +1696,6 @@ class BizObject
 	}
 
 	/**
-	 * Handles the deadline of an object.
-	 *
-	 * Function either takes the deadline entered by the user or
-	 * recalculate the deadline (relative deadline) when user changes the category or status.
-	 *
-	 * When user changes the category / status, and at the same time also entered a deadline in the dialog,
-	 * the function will recalculate the deadline (relative deadline) and ignores the deadline entered by the
-	 * user.
-	 *
-	 * When user only entered the deadline, function checks if the deadline entered is later than the one set
-	 * at the Issue level, function throws error when the the date set is later than the one set in Issue level.
-	 *
-	 * @param int $id Id of the object where the deadline will be calculated and handled.
-	 * @param int $pubId Publication id.
-	 * @param array $targets The targets of the object of which the issue will be retrieved to get its deadline setting.
-	 * @param string $objectType Object's type.
-	 * @param string $oriState Original object's status.  This is to check if the user has changed the status.
-	 * @param string $oriSection Original category. This is to check if the user has changed the category.
-	 * @param string $state The current status of the object.
-	 * @param int $categoryId The current category of the object.
-	 * @param null|string $newDeadline User typed deadline taken from workflow dialog. Null when deadline not shown at dialog.
-	 */
-	public static function handleDeadline( $id, $pubId, $targets, $objectType, $oriState, $oriSection, $state, $categoryId, $newDeadline )
-	{
-		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-
-		// First look for object-target issues
-		$issueIdsDL = BizTarget::getIssueIds( $targets ); // Object-target issues
-		// Image/Article without object-target issue can inherit issues from relational-targets. BZ#21218
-		if (!$issueIdsDL && ( $objectType == 'Article' || $objectType == 'Image' || $objectType == 'Spreadsheet' )) {
-			$issueIdsDL = BizTarget::getRelationalTargetIssuesForChildObject( $id );
-		}
-
-		// If state or category are changed the deadline is recalculated.
-		$reCalcDeadline = ( $oriState != $state || $oriSection != $categoryId );
-		$deadlineHard = '';
-
-		// A deadline for an object that is not assigned to any issue has no meaning, so we ignore.
-		// If deadline is set and object has issues, check if the set deadline is not beyond earliest possible deadline.
-		if( !$reCalcDeadline && $issueIdsDL && $newDeadline ) {
-			$deadlineHard = $newDeadline;
-			BizDeadlines::checkDeadline( $issueIdsDL, $categoryId, $newDeadline );
-		}
-
-		// In case state/category are changed a deadline set by hand is ignored
-		// (always recalculate).
-		// This behavior is different from the saveObject() where a deadline set
-		// by hand always has primacy on status/category changes.
-		if ( $reCalcDeadline || empty( $deadlineHard ) ) {
-			// Determine if it is normal brand or overruleIssue.
-			$overruleIssueId = 0;
-			if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object, it's definitely not an overruleIssue, so don't need to check.
-				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-				$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
-			}
-
-			$deadlines = null;
-			if( BizPublication::isCalculateDeadlinesEnabled( $pubId, $overruleIssueId ) ) {
-				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $categoryId, $state );
-				if ( BizDeadlines::canPassDeadlineToChild( $objectType ) ) {
-					// Recalculate the deadlines of children without own object-target issue.
-					// This recalculation is limited to an issue change of the parent.
-					// New issue of the parent results in new relational-target issue and so
-					// a new deadline. If the category of the parent changes this has no effect
-					// as the children do not inherit this change.
-					BizDeadlines::recalcDeadlinesIssuelessChilds($id);
-				}
-			}
-		} else {
-			$deadlines = DBObject::setObjectDeadline( $id, $deadlineHard );
-			if ( BizDeadlines::canPassDeadlineToChild( $objectType ) ) {
-				// Set the deadlines of children without own object-target issue.
-				BizDeadlines::setDeadlinesIssuelessChilds( $id, $deadlineHard );
-			}
-		}
-
-		if( $deadlines ) {
-			require_once BASEDIR.'/server/smartevent.php';
-			new smartevent_deadlinechanged( null, $id, $deadlines['Deadline'], $deadlines['DeadlineSoft'] );
-		}
-	}
-
-	/**
 	 * Retrieves the essential object properties to serve the MultisetProperties feature.
 	 * This is the minimum set of props that is required for the web service (and plugins)
 	 * to recognize the objects and apply biz logics before it comes to the real operation
@@ -1876,7 +1718,7 @@ class BizObject
 	 * Checks if all the Objects have the same publication id and type.
 	 *
 	 * @since 9.2.0
-	 * @param array $objectIds An array of object ids.
+	 * @param integer[] $objectIds An array of object ids.
 	 * @return bool Whether or not all objects have the same publication id and type.
 	 */
 	public static function isSameObjectTypeAndPublication( $objectIds )
@@ -1908,7 +1750,6 @@ class BizObject
 	{
 		require_once BASEDIR.'/server/bizclasses/BizEmail.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 
@@ -2013,7 +1854,12 @@ class BizObject
 
 			// Retrieve the statuses that are defined for this publication / overrule issue.
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-			$statuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType );
+			$statuses = array();
+			$gotStatuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType );
+			// $gotStatuses has index [0...N-1] but we need $statuses with status ids as index.
+			if( $gotStatuses ) foreach( $gotStatuses as $status ) {
+				$statuses[$status->Id] = $status;
+			}
 
 			// Initialize variables to hold the allowed Statuses and Categories for MultiSetObjectProperties.
 			$categories = array();
@@ -2099,7 +1945,7 @@ class BizObject
 					if ( $sendToNext ) {
 						// First determine the new State for the Object, if next, determine next.
 						$state = $statuses[$invokedObject->WorkflowMetaData->State->Id];
-						$newStateId = ( $state->NextStatusId ) ? $state->NextStatusId : null;
+						$newStateId = isset( $state->NextStatus->Id ) ? $state->NextStatus->Id : null;
 
 						if ( is_null( $newStateId ) ) {
 							// If there is no state change, then we do not need to include this Object in the set properties so
@@ -2120,21 +1966,12 @@ class BizObject
 					}
 
 					// Set new properties and group the remaining invoked Objects.
-					if( !is_null($routeToMetaDataValueIndex) ) {
-						// If RouteTo exists in MetaDataValue, then add  new / old RouteTo value on the fly.
-						$invokedObject->NewRouteTo = isset($objectProperties['standard']['RouteTo'])
-							? $objectProperties['standard']['RouteTo']
-							: $invokedObject->WorkflowMetaData->RouteTo;
-					} else {
-						// If RouteTo not exists in MetaDataValue, then get new RouteTo value[from the configured Auto Routing],
-						// else take the old RouteTo value.
-						if( !is_null($stateIdMetaDataValueIndex) ) {
-							$invokedObject->NewRouteTo = !empty( $routes[$newStateId][$categoryId]) // When empty, no auto routing configured
-								? $routes[$newStateId][$categoryId]
-								: $invokedObject->WorkflowMetaData->RouteTo;
-						} else {
-							$invokedObject->NewRouteTo = $invokedObject->WorkflowMetaData->RouteTo;
-						}
+					if( !is_null($routeToMetaDataValueIndex) && isset($objectProperties['standard']['RouteTo']) ) { // Did the user choose a new RouteTo?
+						$invokedObject->NewRouteTo = $objectProperties['standard']['RouteTo'];
+					} else if( !is_null($stateIdMetaDataValueIndex) && !empty( $routes[$newStateId][$categoryId]) ) { // Status changes, any auto routing?
+						$invokedObject->NewRouteTo = $routes[$newStateId][$categoryId];
+					} else { // No changes on RouteTo nor Status
+						$invokedObject->NewRouteTo = null;  // No changes, using back the original RouteTo value.
 					}
 
 					// On a Send To next, we overrule whatever else was sent along for the route and take the RouteTo
@@ -2219,7 +2056,9 @@ class BizObject
 				if ( $sendToNext || ( !$sendToNext && isset( $objectProperties['standard']['StateId'] ) ) ) {
 					$objectProperties['standard']['StateId'] = $stateIdForGroup;
 				}
-				$objectProperties['standard']['RouteTo'] = $routeToForGroup;
+				if( !is_null( $routeToForGroup ) ) { // Only update when there's changes in the RouteTo.
+					$objectProperties['standard']['RouteTo'] = $routeToForGroup;
+				}
 
 				// If a RouteTo change was not requested, add it to the MetaDataValues as it may have been changed.
 				if ( $sendToNext && is_null( $routeToMetaDataValueIndex ) ) {
@@ -2313,6 +2152,7 @@ class BizObject
 				DBlog::logMultiService( $user, 'MultiSetObjectProperties', $objectIds, $objectType, $publicationId, $sections, $states, $versions, $routeTos );
 
 				require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
+				require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
 				foreach ( $objectIds as $id ) {
 					$originalStateId = $invokedObjects[$id]->WorkflowMetaData->State->Id;
 					$originalCategoryId = $invokedObjects[$id]->BasicMetaData->Category->Id;
@@ -2322,8 +2162,8 @@ class BizObject
 					$latestStateIdForDeadline = $newStateId ? $newStateId : $originalStateId;
 					$latestCatIdForDeadline = $newCategoryId ? $newCategoryId : $originalCategoryId;
 					$deadline = ( isset( $objectProperties['standard']['Deadline'] ) ) ?
-						$objectProperties['standard']['Deadline'] : null;
-					self::handleDeadline( $id, $publicationId, $targets[$id], $objectType, $originalStateId,
+					$objectProperties['standard']['Deadline'] : null;
+					BizDeadlines::handleDeadlineForSetProperties( $id, $publicationId, $targets[ $id ], $objectType, $originalStateId,
 						$originalCategoryId, $latestStateIdForDeadline, $latestCatIdForDeadline, $deadline );
 
 					// Copy task objects to dossier ( For more info, refer to BZ#10308 ).
@@ -2491,7 +2331,8 @@ class BizObject
 					// the next status. This can be skipped if Personal state is involved.
 					if ( $newStateId != -1 && $currentState != -1  ) {
 						$currentStateObject = $statuses[$currentState];
-						if (  $newStateId == $currentStateObject->NextStatusId) {
+						if ( isset($currentStateObject->NextStatus->Id)
+							&& $newStateId == $currentStateObject->NextStatus->Id ) {
 							if ( !$changeStatusForward && !$changeStatus ) {
 								try {
 									throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
@@ -2630,7 +2471,6 @@ class BizObject
 	public static function getMultipleObjectsPropertiesByObjectIds( $user, $objIds, $requestProps )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 		// Treat special cases; When prop is configured, we actually want the id instead.
 		// ID,PublicationId,IssueId,SectionId,PubChannelIds,EditionIds are not applicable for multi-set properties.
@@ -2658,19 +2498,15 @@ class BizObject
 		$accessRight = 2; // Read right
 		$minProps = array( 'ID', 'Type', 'Name' );
 		$requestProps = array_unique( array_merge( $minProps, $requestProps ) );
-		$queryObjResp = BizQuery::queryObjects(
-			$ticket,
-			$user,
-			$params,
-			null,
-			null,
-			null,
-			false,
-			null,
-			null,
-			$requestProps,
-			array( 'Workflow' ),
-			$accessRight );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->Params = $params;
+		$request->Hierarchical = false;
+		$request->RequestProps = $requestProps;
+		$request->Areas = array( 'Workflow' );
+		require_once BASEDIR . '/server/bizclasses/BizQuery.class.php';
+		$queryObjResp = BizQuery::queryObjects2( $request, $user, $accessRight );
 
 		// Determine column indexes to work with
 		$indexes = array_combine( array_values( $requestProps ), array_fill( 1, count( $requestProps ), -1 ) );
@@ -3238,14 +3074,18 @@ class BizObject
 
 		// Copy the InDesign Articles (and their placements) set for layout objects.
 		require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-		$idArticles = DBInDesignArticle::getInDesignArticles( $srcid );
+		$idArticles = DBInDesignArticle::getInDesignArticles( $srcid, true );
 		if( $idArticles ) {
 			DBInDesignArticle::createInDesignArticles( $id, $idArticles );
 		}
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		$placements = DBPlacements::getPlacements( $srcid, 0, 'Placed' );
-		foreach( $placements as $placement ) {
-			DBPlacements::insertPlacement( $id, 0, 'Placed', $placement );
+		if( $placements ) {
+			DBPlacements::insertInDesignArticlePlacementsFromScratch( $id, $placements );
+		}
+		if( $idArticles ) {
+			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+			DBInDesignArticlePlacement::saveSortingForInDesignArticlePlacements( $id, $idArticles );
 		}
 
 		// Delete the Object Operations set for layout objects.
@@ -3329,6 +3169,7 @@ class BizObject
 		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
 
 		$id = $meta->BasicMetaData->ID;
+		$name = $meta->BasicMetaData->Name;
 
 		if ( $id && is_null($targets) ) {
 			// Get the targets when they aren't available (see BZ#35774)
@@ -3389,14 +3230,15 @@ class BizObject
 			}
 		}
 		if( !$foundState ) {
-			$errMsg = 'Found an invalid State ' . $meta->WorkflowMetaData->State->Name . ' for ';
+			$errMsg = "Found an invalid Status (id={$stateId}) for ";
 			if( $numOverruleIssues == 1 ) {
-				$errMsg .= 'Overrule Issue ' . $targets[0]->Issue->Name;
+				$errMsg .= "Overrule Issue (id=" . $targets[0]->Issue->Id.") ";
 			} else {
-				$errMsg .= 'Brand ' . $meta->BasicMetaData->Publication->Name;
+				$errMsg .= "Brand (id={$pubId}) ";
 			}
+			$errMsg .= "when validating Object (id={$id}, name={$name})";
 			throw new BizException( 'ERR_INVALIDSTATE', 'Client',
-				$errMsg . PHP_EOL . 'id=' . $id, null, array( $meta->WorkflowMetaData->State->Name ) );
+				$errMsg, null, array( $meta->WorkflowMetaData->State->Name ) );
 		}
 
 		foreach( $categories as $section ) {
@@ -3406,14 +3248,15 @@ class BizObject
 			}
 		}
 		if( !$foundCategory ) {
-			$errMsg = 'Found an invalid Category ' . $meta->BasicMetaData->Category->Name . ' for ';
+			$errMsg = "Found an invalid Category (id={$catId}) for ";
 			if( $numOverruleIssues == 1 ) {
-				$errMsg .= 'Overrule Issue ' . $targets[0]->Issue->Name;
+				$errMsg .= "Overrule Issue (id={$targets[0]->Issue->Id}) ";
 			} else {
-				$errMsg .= 'Brand ' . $meta->BasicMetaData->Publication->Name;
+				$errMsg .= "Brand (id={$pubId}) ";
 			}
+			$errMsg .= "when validating Object (id={$id}, name={$name})";
 			throw new BizException( 'ERR_INVALIDCATEGORY', 'Client',
-				$errMsg . PHP_EOL . 'id=' . $id, null, array( $meta->BasicMetaData->Category->Name ) );
+				$errMsg, null, array( $meta->BasicMetaData->Category->Name ) );
 		}
 	}
 
@@ -3803,7 +3646,9 @@ class BizObject
 		// Shadow objects do not have a native, so we need them to tell us their orientation.
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( !BizContentSource::isShadowObject( $object ) ) {
-			$object->MetaData->ContentMetaData->Orientation = null;
+			if ( isset( $object->MetaData->ContentMetaData->Orientation ) ) {
+				$object->MetaData->ContentMetaData->Orientation = null;
+			}
 		}
 
 		// Enrich object MetaData with any embedded metadata from file
@@ -3830,6 +3675,15 @@ class BizObject
 			}
 		}
 
+		// When client provides PlainContent without Slugline, derive the Slugline from the PlainContent.
+		// This happens for the Digital Editor (CSDE). [EN-88921]
+		if( !isset($object->MetaData->ContentMetaData->Slugline) &&
+			isset($object->MetaData->ContentMetaData->PlainContent)) {
+			require_once BASEDIR.'/server/utils/UtfString.class.php';
+			$object->MetaData->ContentMetaData->Slugline = UtfString::truncateMultiByteValue(
+				$object->MetaData->ContentMetaData->PlainContent, 250 );
+		}
+
 		// Validate meta data and targets
 		self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, $object->Relations, false );
 
@@ -3841,10 +3695,38 @@ class BizObject
 		self::validateFiles( $object );
 
 		// Serialize the types of renditions that this object has.
-		// This is added to flattened meta data only, it's not a property of class Object, but goes with object's db recored
+		// This is added to flattened meta data only, it's not a property of class Object, but goes with object's db record
 		$arr['types'] = self::serializeFileTypes( $object->Files );
 
 		return $arr;
+	}
+
+	/**
+	 * Adds the first level of data structure to a given MetaData tree.
+	 *
+	 * @since 10.2.0
+	 * @param MetaData $metadata
+	 */
+	public static function completeMetaDataStructure( MetaData $metadata )
+	{
+		if( !isset($metadata->BasicMetaData) ) {
+			$metadata->BasicMetaData = new BasicMetaData();
+		}
+		if( !isset($metadata->RightsMetaData) ) {
+			$metadata->RightsMetaData = new RightsMetaData();
+		}
+		if( !isset($metadata->SourceMetaData) ) {
+			$metadata->SourceMetaData = new SourceMetaData();
+		}
+		if( !isset($metadata->ContentMetaData) ) {
+			$metadata->ContentMetaData = new ContentMetaData();
+		}
+		if( !isset($metadata->WorkflowMetaData) ) {
+			$metadata->WorkflowMetaData = new WorkflowMetaData();
+		}
+		if( !isset($metadata->ExtraMetaData) ) {
+			$metadata->ExtraMetaData = array();
+		}
 	}
 
 	/**
@@ -3864,7 +3746,6 @@ class BizObject
 	 *
 	 * @param Object $object
 	 * @throws BizException in case of error
-	 * @return null
 	 */
 	private static function validateFiles( /** @noinspection PhpLanguageLevelInspection */
 		Object $object )
@@ -3905,12 +3786,8 @@ class BizObject
 
 	private static function validName( $name )
 	{
-		// Max length is 63 to prevent file name issues with 4-byte Unicode strings
-		$nameLen = mb_strlen($name, "UTF8");
-		if( $nameLen > 63) return false;
-
 		$sDangerousCharacters = "`~!@#$%^*\\|;:'<>/?";
-		$sDangerousCharacters .= '"'; // add double quote to dangerous charaters
+		$sDangerousCharacters .= '"'; // Add double quote to dangerous characters.
 
 		$sSubstringStartingWithInvalidCharacter = strpbrk($sDangerousCharacters, $name);
 		return empty($sSubstringStartingWithInvalidCharacter); // true if no invalid character
@@ -4011,9 +3888,14 @@ class BizObject
 
 		// Save the Indesign Article Placements for the layout object (v9.7).
 		if( !is_null($object->Placements) ) {
-			foreach( $object->Placements as $placement ) {
-				DBPlacements::insertPlacement( $id, 0, 'Placed', $placement );
-			}
+			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+			DBPlacements::insertInDesignArticlePlacementsFromScratch( $id, $object->Placements );
+		}
+
+		// Sort the placements per InDesign Article as shown in the Articles palette for the layout (v10.2).
+		if( !is_null($object->InDesignArticles) ) {
+			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+			DBInDesignArticlePlacement::saveSortingForInDesignArticlePlacements( $id, $object->InDesignArticles );
 		}
 
 		// Save the Object Operations for the layout object (9.7).
@@ -4160,8 +4042,8 @@ class BizObject
 			} else {
 				LogHandler::Log( 'bizobject', 'ERROR', 'Tried to save unsupported file rendition "'.$file->Rendition.'".' );
 			}
+			clearstatcache(); // Make sure unlink calls above are reflected!
 		}
-		clearstatcache(); // Make sure unlink calls above are reflected!
 	}
 
 	/**
@@ -4417,7 +4299,6 @@ class BizObject
 	 * @param string $user short user name
 	 * @param string $objId Unique object ID
 	 * @param bool $checkAccess check user access right
-	 * @return bool User has lock.
 	 * @throws BizException when locked by someone else or lock fails
 	 */
 	public static function restoreLock( $user, $objId, $checkAccess = true)
@@ -4756,7 +4637,7 @@ class BizObject
 	 * @param Object $object
 	 * @return array with the unique issues of the object to calculate the deadline.
 	 */
-	static private function getTargetIssuesForDeadline(/** @noinspection PhpLanguageLevelInspection */
+	static public function getTargetIssuesForDeadline(/** @noinspection PhpLanguageLevelInspection */
 		Object $object )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
@@ -4784,12 +4665,11 @@ class BizObject
 	 * 	3) Do a broadcast after the above updates.
 	 *
 	 * @param ServerJob $job
-	 * @return ServerJobStatus  $jobStatusId
+	 * @return integer job status id
 	 */
 	public static function updateParentObject( $job )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBDeletedObject.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
@@ -4942,7 +4822,6 @@ class BizObject
 	private static function updateParentModifierAndModified( $parentId=null, $childId=null, $relation=null, $modifier, $modified )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$isChildRel = isset($relation) && ($relation->Type == 'Contained' || $relation->Type == 'DeletedContained')  && $childId == $relation->Child;
 		if( $parentId || $isChildRel ) {
@@ -5531,7 +5410,6 @@ class BizObject
 
 					// Update the search index, and surpress errors if any.
 					require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
-					require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 					try {
 						$objectsToIndex = array();
 						$user = BizSession::getShortUserName();
@@ -5664,6 +5542,7 @@ class BizObject
 			}
 		}
 
+		$newSlugLine = UtfString::removeIllegalUnicodeCharacters( $newSlugLine );
 		$newSlugLine = UtfString::truncateMultiByteValue( $newSlugLine, 250 );
 		return $newSlugLine;
 	}
@@ -5735,7 +5614,6 @@ class BizObject
 		if ( !is_null( $object ) && $object->MetaData->BasicMetaData->Type == 'Dossier' ) {
 			require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 			// Update contained PublishForms.
 			$objectsToIndex = array();
@@ -5958,9 +5836,8 @@ class BizObject
 	 * @param integer[] $objectIds
 	 * @param string[] $areas Either 'Workflow' or 'Trash'
 	 * @param string[] $propertiesToIndex Properties returned by the search engine(s) needed to build the index.
-	 * @param array $metaDatas
-	 * @param array $targets
-	 * @return MetaData[] List of MetaData, with object ids as keys plus a list of Targets, with object ids as key.
+	 * @param MetaData[] $metaDatas List of MetaData, with object ids
+	 * @param Target[] $targets list of Targets, with object ids as key
 	 */
 	private static function getMetaDatasAndTargetsToIndexForObjectIds(
 		array $objectIds, array $areas, array $propertiesToIndex, array &$metaDatas, array &$targets )
@@ -6216,18 +6093,18 @@ class BizObject
 	}
 
 	/**
-	 * Get an unique object, when restoring an object or when applyautonaming is true.
+	 * Get an unique object, when restoring an object or when 'apply auto-naming' is true.
 	 *
-	 * Different logic or algorithm will be apply differently for both actions, restoring object or applyautonaming is true.
-	 * When restoring an object, if the object name already exists in DB, autonaming numbering will be append at the end of object name,
+	 * Different logic or algorithm will be apply differently for both actions, restoring object or 'apply auto-naming' is true.
+	 * When restoring an object, if the object name already exists in DB, 'auto naming' numbering will be append at the end of object name,
 	 * For example:
 	 * Original name                Unique name
 	 * =============                ===========
 	 * abc                          abc_0001
 	 * abc_0001                     abc_0001_0001
 	 *
-	 * When applyautonaming is true, if the object name already exist in DB, autonaming numbering will be append at the end of object name,
-	 * when the object contains the autonaming format[abc_0001], incremental autonaming numbering from the last number[abc_0002].
+	 * When 'apply auto-naming' is true, if the object name already exist in DB, auto-naming numbering will be append at the end of object name,
+	 * when the object contains the auto-naming format[abc_0001], incremental auto-naming numbering from the last number[abc_0002].
 	 * For example:
 	 * Original name                Unique name
 	 * =============                ===========
@@ -6243,27 +6120,73 @@ class BizObject
 	 */
 	private static function getUniqueObjectName( $id, $proposedName, $issueIds, $type, $restore )
 	{
-		$existingNames[ $proposedName ] = true;
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$existingNames[$proposedName] = true;
 		/** @noinspection PhpUnusedLocalVariableInspection */
 		// Initialization of a flag before entering the do-while loop to avoid undefined variable
 		// in the case of the code execution didn't go as expected.
 		$nameFound = false;
 		$iterations = 0;
+		$maxSuffix = intval( str_repeat( '9', AUTONAMING_NUMDIGITS ) );
 		do {
 			if( !$restore ) {
 				if( preg_match('/^(.*?)_(\d+)$/', $proposedName, $matches ) > 0 ) {
 					if(strlen($matches[2]) == AUTONAMING_NUMDIGITS ) {
-						$existingNames[ $proposedName ] = true;
+						$existingNames[$proposedName] = true;
 						$proposedName = $matches[1];
 					}
 				}
 			}
 			$proposedName = DBObject::makeNameUnique( $existingNames, $proposedName );
-			$existingNames[ $proposedName ] = true;
+			$existingNames[$proposedName] = true;
 			$nameFound = self::objectNameExists( $issueIds, $proposedName, $type, $id );
 			$iterations += 1;
-		} while ( $nameFound && $iterations < 1000 );
+		} while ( $nameFound && $iterations < $maxSuffix );
 
 		return $proposedName;
+	}
+
+
+	/**
+	 * Updates the object in the database and next the files in the Filestore.
+	 *
+	 * The update of the object in the database and the update of the files in the Filestore is seen as one action.
+	 * The version information must in line for both the object as the files. If there is a difference (version in the
+	 * database doesn't match the version of the files) the object cannot be opened anymore without content loss.
+	 *
+	 * $object->Files in the to-be-returned Object will be reset ( setting it to an empty array() ) by this function. This is
+	 * to indicate that the files have been handled and moved to the Filestore and so no further action is needed.
+	 *
+	 * @param Object $object
+	 * @param string $user
+	 * @param array $newFlattenedMetadata
+	 * @param string $now
+	 * @param array $currentFlattenedMetaData
+	 * @return Object
+	 * @throws BizException
+	 */
+	private static function updateDatabaseAndFilestore( $object, $user, $newFlattenedMetadata, $now, $currentFlattenedMetaData )
+	{
+		/* $sth  = */ DBObject::updateObject( $object->MetaData->BasicMetaData->ID, $user, $newFlattenedMetadata, $now );
+
+		// For shadow objects we now pass control to Content Source which may influence what to do with file storing
+		// as it can modify $object
+		if( trim( $currentFlattenedMetaData['contentsource'] ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+			BizContentSource::saveShadowObject(
+				trim( $currentFlattenedMetaData['contentsource'] ),
+				trim( $currentFlattenedMetaData['documentid'] ),
+				$object );
+		}
+
+		self::saveFiles(
+			$currentFlattenedMetaData['storename'],
+			$object->MetaData->BasicMetaData->ID,
+			$object->Files,
+			$object->MetaData->WorkflowMetaData->Version );
+
+		$object->Files = array(); // The files are moved to the Filestore so they aren't needed anymore.
+
+		return $object;
 	}
 }

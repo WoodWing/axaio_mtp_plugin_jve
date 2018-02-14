@@ -296,10 +296,6 @@ class WW_TestSuite_HealthCheck_PhpConfig_TestCase extends TestCase
 
     public function session_error_handler($errno, $errstr,  $errfile, $errline, $errcontext)
     {
-    	// keep analyzer happy
-    	$errfile = $errfile;
-    	$errline = $errline;
-    	$errcontext = $errcontext;
     	throw new Exception($errstr, $errno);
     }
 }

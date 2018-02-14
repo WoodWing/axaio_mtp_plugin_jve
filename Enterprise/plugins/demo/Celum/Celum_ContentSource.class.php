@@ -49,10 +49,8 @@ class Celum_ContentSource extends ContentSource_EnterpriseConnector
 	
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		// keep code analyzer happy for unused params:
 		// maxEntries is ignored because the API just returns 10 or 20 entries per call
-		$maxEntries=$maxEntries; $order=$order;
-		
+
 		LogHandler::Log('Celum', 'DEBUG', 'doNamedQuery called for search: '.$query );
 		PerformanceProfiler::startProfile( 'Celum - Search', 3 );
 
@@ -74,7 +72,6 @@ class Celum_ContentSource extends ContentSource_EnterpriseConnector
 		LogHandler::Log('Celum', 'DEBUG', "getAlienObject called for $alienID - $rendition" );
 		PerformanceProfiler::startProfile( 'Celum - getAlienObject', 3 );
 		$alienID = substr( $alienID, strlen(CELUM_CONTENTSOURCEPREFIX) ); // Remove prefix from alienID
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
 
 		$meta = new MetaData();
 
@@ -278,7 +275,6 @@ class Celum_ContentSource extends ContentSource_EnterpriseConnector
 	private function getEnterpriseContext( &$publication, &$category, &$status )
 	{
 		// Get list of publications from Enterpise. If available we use WW News
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		$username = BizSession::getShortUserName();
 
@@ -458,7 +454,6 @@ class Celum_ContentSource extends ContentSource_EnterpriseConnector
 	 */
     private function calledByContentStation( )
     {
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		
 		$app = DBTicket::DBappticket( BizSession::getTicket() );

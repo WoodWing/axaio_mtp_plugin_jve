@@ -118,9 +118,6 @@ class SolrSearchEngine extends BizQuery
 		$this->searchParams = $searchParams;
 		if( $searchOneType ) {
 			switch( $objectType ) {
-				case 'Dossier':
-					$this->facetFields = unserialize(SOLR_DOSSIER_FACETS);
-					break;
 				case 'Image':
 					$this->facetFields = unserialize(SOLR_IMAGE_FACETS);
 					break;
@@ -244,49 +241,6 @@ class SolrSearchEngine extends BizQuery
 	}
 
 	/**
-	 * Searches for facets only.
-	 *
-	 * After the query is executed by Solr only the Facets are retrieved from the
-	 * Solr response. No rows are build and returned.
-	 * Because no rows are returned the area (Workflow/Trash) does not matter.
-	 *
-	 * This search is used for the feature "FacetsInDossier".
-	 */
-	public function facetOnlySearch()
-	{
-		if( is_null($this->index) ) {
-			return; // quit when bad config / no access / Solr server down
-		}
-
-		PerformanceProfiler::startProfile( 'Solr facet only search', 3 );
-
-		// Create a new Query object
-		$query = $this->index->createSelect( array(
-			'start'         => 0,
-			'rows'          => 0, // Facets only, don't care about documents search result
-			'fields'        => array('ID'),  // Fields returned by Solr.
-		));
-		if( !is_null($query) ) {
-			// Add facet fields/queries to query object
-			$this->addFacetsFieldsSearchParams( $query );
-
-			// Add query parameters (search query term & filter queries)
-			$this->addQueryParamsToQuery( $query );
-
-			// Add authorizations of user as a filter query
-			$this->addAuthorizationToQuery( $query );
-
-			// Execute query and parse the results
-			$resultSet = $this->index->executeSelect( $query );
-			if( !is_null($resultSet) ) {
-				$this->parseQueryResult( $resultSet, array('Workflow'), true /* facetsOnly */ );
-			}
-		}
-
-		PerformanceProfiler::stopProfile( 'Solr facet only search', 3 );
-	}
-
-	/**
 	 * Parses the result from Solarium.
 	 *
 	 * @param Solarium/QueryType/Select/Result/Result $searchResult result set returned by Solarium
@@ -350,18 +304,20 @@ class SolrSearchEngine extends BizQuery
 	 */
 	public function indexObjects( $objects, $areas = array('Workflow'), $directCommit=false )
 	{
+		$this->handledObjectIds = array();
+		$objIds = array();
 		if( is_null($this->index) ) {
 			return; // quit when bad config / no access / Solr server down
 		}
 		foreach( $objects as $object ) {
-			$this->handledObjectIds[] = $object->MetaData->BasicMetaData->ID; // Passed back to the searcher.
+			$objIds[] = $object->MetaData->BasicMetaData->ID;
 		}
 
 		PerformanceProfiler::startProfile( 'Solr index', 3 );
 		try {
 			// Gather the documents to be indexed.
 			$documents = array();
-			$specialDataByObjId = BizProperty::updateIndexFieldWithSpecialProperties( $this->handledObjectIds, $this->fieldsToIndex );
+			$specialDataByObjId = BizProperty::updateIndexFieldWithSpecialProperties( $objIds, $this->fieldsToIndex );
 			foreach( $objects as $object ) {
 				$objId = $object->MetaData->BasicMetaData->ID;
 				$specialData = array_key_exists($objId, $specialDataByObjId) ? $specialDataByObjId[ $objId ] : array(); 
@@ -371,22 +327,25 @@ class SolrSearchEngine extends BizQuery
 			}
 
 			// Index the documents.
-			$this->commitToIndex( $documents, $directCommit );
-		} catch( Exception $e ) {
+			$resultStatus = $this->commitToIndex( $documents, $directCommit );
+			if( $resultStatus ) {
+				$this->handledObjectIds = $objIds; // For the caller to access this data.
+			}
+		} catch( BizException $e ) {
 			PerformanceProfiler::stopProfile( 'Solr index', 3 );
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($e->getMessage()), 'ERROR' );
+			throw $e;
 		}
 		PerformanceProfiler::stopProfile( 'Solr index', 3 );
 	}
 
-	/*
+	/**
 	 * Remove given Enterprise objects from index.
+	 *
 	 * The objects are assumed to be deleted first (=> so they reside at smart_deletedobjects table).
 	 *
-	 * @param array of string	$ids	Enterprise object ids to unindex
+	 * @param int[] $ids List of object ids to be unindexed.
 	 * @throws BizException
-	*/
-
+	 */
 	public function unindexObjects( $ids )
 	{
 		if( is_null($this->index) ) {
@@ -399,9 +358,9 @@ class SolrSearchEngine extends BizQuery
 			if (count($ids) > 0 ) {
 				$this->handledObjectIds +=  $ids ;
 			}
-		} catch( Exception $e ) {
+		} catch( BizException $e ) {
 			PerformanceProfiler::stopProfile( 'Solr unindex', 3 );
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($e->getMessage()), 'ERROR' );
+			throw $e;
 		}
 		PerformanceProfiler::stopProfile( 'Solr unindex', 3 );
 	}
@@ -414,6 +373,8 @@ class SolrSearchEngine extends BizQuery
 	 * Running optimize took 9.9 seconds after which the same search operation took 0.02 sec.
 	 * Adding another document to the index, the optimize took again 9 sec.
 	 * Optimize on 5000 docs (that were never optimized) took 50 sec.
+	 *
+	 * @throws BizException
 	 */
 	public function optimize( )
 	{
@@ -424,9 +385,9 @@ class SolrSearchEngine extends BizQuery
 		PerformanceProfiler::startProfile( 'Solr optimize', 3 );
 		try {
 			$this->index->optimize();
-		} catch ( Exception $e ) {
+		} catch ( BizException $e ) {
 			PerformanceProfiler::stopProfile( 'Solr optimize', 3 );
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($e->getMessage()), 'ERROR' );
+			throw $e;
 		}
 		PerformanceProfiler::stopProfile( 'Solr optimize', 3 );
 	}
@@ -477,15 +438,10 @@ class SolrSearchEngine extends BizQuery
 			if( !empty( $indexValues ) ) {
 				// Update fields of indexed documents.
 				$result = $this->index->updateObjectsFields( $objectIDs, $indexValues, $directCommit );
-				if( !is_null($result) ) {
-					if ( $result->getResponse()->getStatusCode() != "200" ) {
-						throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($result->getResponse()->getStatusMessage()), 'ERROR' );
-					}
-				}
 			}
-		} catch( Exception $e ) {
+		} catch( BizException $e ) {
 			PerformanceProfiler::stopProfile( 'Solr index', 3 );
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($e->getMessage()), 'ERROR' );
+			throw $e;
 		}
 		PerformanceProfiler::stopProfile( 'Solr update fields', 3 );
 	}
@@ -682,27 +638,30 @@ class SolrSearchEngine extends BizQuery
 	 * may be useful in the case a race condition might occur, but should be used with caution, as overuse
 	 * of this option might affect performance negatively.
 	 *
-	 * @throws Exception
 	 * @param array $documents A list of documents to be indexed.
 	 * @param bool $directCommit Whether to forego the autocommit functionality or not.
-	 * @return void
+	 * @throws BizException
+	 * @return bool True when the indexing is successful, false otherwise.
 	 */
 	private function commitToIndex($documents, $directCommit=false)
 	{
 		LogHandler::Log( 'Solr', 'DEBUG', 'Commit to index with directCommit set to: ' . var_export($directCommit, true) );
 		try {
+			$resultStatus = false;
 			$commit = $directCommit;
 			if (!defined( 'SOLR_AUTOCOMMIT' ) || !SOLR_AUTOCOMMIT || $directCommit ) {
 				$commit = true;
 			}
 
 			PerformanceProfiler::startProfile( 'Solr Add Documents', 3 );
-			$this->index->indexObjects( $documents, $commit );
+			$resultStatus = $this->index->indexObjects( $documents, $commit );
 			PerformanceProfiler::stopProfile( 'Solr Add Documents', 3 );
-		} catch ( Exception $e ) {
-			LogHandler::Log( 'Solr', 'ERROR', 'Index error:'.$e->getMessage() );
+		} catch ( BizException $e ) {
+			PerformanceProfiler::stopProfile( 'Solr Add Documents', 3 );
 			throw $e;
 		}
+
+		return $resultStatus;
 	}
 
 	/**
@@ -717,7 +676,6 @@ class SolrSearchEngine extends BizQuery
 	{
 		require_once BASEDIR . '/server/bizclasses/BizUser.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$shortUserName = BizSession::getShortUserName();
 		$userRow = DBUser::getUser($shortUserName);
@@ -1165,49 +1123,49 @@ class SolrSearchEngine extends BizQuery
 	 */
 	private function buildFacetItemsForIssueIds( $facet )
 	{
-		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
-		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
 		$resultFacetItems = array();
 		$issueIds = array();
 		$user = BizSession::getShortUserName();
 		$isAdmin = DBUser::isAdminUser( $user );
 
-		foreach ($facet as $facetItemName => $facetItemNumber) {
-			$issueId = intval($facetItemName);
-			if ($issueId > 0){
+		foreach( $facet as $facetItemName => $facetItemNumber ) {
+			$issueId = intval( $facetItemName );
+			if( $issueId > 0 ) {
 				$issueIds[] = $issueId;
 			}
 		}
 
 		// Get names of issue ids (do we want such a function in DBIssue?).
-		if ( !empty( $issueIds ) ) {
-			$where = 'id IN (' . implode(',', $issueIds) . ') ';
+		if( !empty( $issueIds ) ) {
+			$where = 'id IN ('.implode( ',', $issueIds ).') ';
 			$params = array();
 			if( !$isAdmin ) {
-				// BZ#1856:Hide objects from query results that are assigned to inactive issues
+				// BZ#41856:Hide objects from query results that are assigned to inactive issues
 				$where .= 'AND `active` = ? ';
 				$params[] = 'on';
 			}
 			$select = array( 'id', 'name' );
-			$issueRows = DBBase::listRows('issues', 'id', '', $where, $select, $params );
+			$issueRows = DBBase::listRows( 'issues', 'id', '', $where, $select, $params );
 		}
 
 		foreach( $facet as $facetItemName => $facetItemNumber ) {
-			if ( $facetItemName == '_empty_' ) {
+			$facetItemDisplayName = '';
+			if( $facetItemName == '_empty_' || empty( $facetItemName ) ) {
 				$facetItemName = '';
-				$issueId = -1;
+				$facetItemDisplayName = '<'.BizResources::localize( 'OBJ_UNASSIGNED' ).'>';
 			} else {
-				$issueId = intval($facetItemName);
+				$issueId = intval( $facetItemName );
+				if( isset( $issueRows[ $issueId ]['name'] ) ) {
+					$facetItemDisplayName = $issueRows[ $issueId ]['name'];
+				}
 			}
-			if( isset($issueRows[$issueId]['name'])){
-				$facetItemDisplayName = $issueRows[$issueId]['name'];
-			} else {
-				$facetItemDisplayName = '<'.BizResources::localize('OBJ_UNASSIGNED').'>';
+			if( $facetItemDisplayName ) {
+				$resultFacetItem = new FacetItem( $facetItemName, $facetItemDisplayName, $facetItemNumber );
+				$resultFacetItems[] = $resultFacetItem;
 			}
-			$resultFacetItem = new FacetItem($facetItemName, $facetItemDisplayName, $facetItemNumber);
-			$resultFacetItems[] = $resultFacetItem;
 		}
 
 		return $resultFacetItems;
@@ -1385,7 +1343,7 @@ class SolrSearchEngine extends BizQuery
 	 * Returns the beginning of a period in 'Y-m-d\TH:i:sZ' format
 	 *
 	 * @param string $period E.g. '1 day', '1 month'
-	 * @return begin of period in'Y-m-d\TH:i:sZ' format
+	 * @return string begin of period in'Y-m-d\TH:i:sZ' format
 	 */
 	private function getPeriodBorder($period)
 	{
@@ -1484,7 +1442,11 @@ class SolrSearchEngine extends BizQuery
 			if( !in_array('Trash', $areas) && BizProperty::isCustomPropertyName( $fieldToIndex ) ) { // Index custom properties
 				// The rows from the database won't contain custom properties when in the Trash.
 				$customData = $this->findMetaDataByField( $fieldToIndex, $object->MetaData->ExtraMetaData);
-				$fieldDefinition[$fieldToIndex] = $this->createCustomValue( $customData );
+				// The $customData can be null if the custom property is defined for a specific brand and the current object
+				// resides in a different brand.
+				if ( !is_null( $customData ) ) {
+					$fieldDefinition[ $fieldToIndex ] = $this->createCustomValue( $customData );
+				}
 			}
 			else // Standard properties
 			{
@@ -1577,7 +1539,7 @@ class SolrSearchEngine extends BizQuery
 	 *
 	 * @param string $fieldToIndex Name of the field (property).
 	 * @param string $indexValue value to be indexed.
-	 * @return converted value.
+	 * @return string|null converted value.
 	 */
 	private function convertToIndexFormat($fieldToIndex, $indexValue)
 	{
@@ -1978,12 +1940,12 @@ class SolrSearchEngine extends BizQuery
 	/**
 	 * Helper function to get the list of values from a metaDataValue.
 	 *
-	 * @param object $metaDataValue Metadata value structure of which the first value needs to be retrieved
-	 * @return The metadata value
+	 * @param MetaDataValue $metaDataValue Metadata value structure of which the first value needs to be retrieved
+	 * @return string The metadata value
 	 */
 	private function getFirstMetaDataValue($metaDataValue)
 	{
-		if( !is_null($metaDataValue->Values) ) {
+		if( isset($metaDataValue->Values) ) {
 			return $metaDataValue->Values[0];
 		} else {
 			return $metaDataValue->PropertyValues[0]->Value;
@@ -1994,8 +1956,8 @@ class SolrSearchEngine extends BizQuery
 	 * Finds metadata for a given field.
 	 *
 	 * @param string $fieldToIndex Name of the field
-	 * @param array $metaData contains the extra meta data of the object
-	 * @return metaData found metaData if any. Null if not found.
+	 * @param MetaDataValue[]|ExtraMetaData[] $metaData contains the extra meta data of the object
+	 * @return MetaDataValue|null found metaData if any. Null if not found.
 	 */
 	private function findMetaDataByField( $fieldToIndex, $metaData )
 	{
@@ -2010,8 +1972,8 @@ class SolrSearchEngine extends BizQuery
 	/**
 	 * Handles the indexing of custom fields.
 	 *
-	 * @param object $customData contains the metaData value
-	 * @return array field value ready to be indexed.
+	 * @param MetaDataValue $customData contains the metaData value
+	 * @return string|null field value ready to be indexed.
 	 */
 	private function createCustomValue($customData)
 	{
@@ -2071,7 +2033,7 @@ class SolrSearchEngine extends BizQuery
 	 * Instead we should use the "mb_" variants.
 	 *
 	 * @param $searchString String containing the search terms
-	 * @return array Search terms
+	 * @return string Search terms
 	 */
 	private function handleSearchTerms($searchString)
 	{

@@ -109,13 +109,24 @@ class TransferEntry
 		}
 		
 		// Check the mandatory ticket param.		
-		$ticket = $requestParams['ticket'];
+		if( isset($requestParams['ticket']) ) {
+			$ticket = $requestParams['ticket'];
+		} else {
+			// Support cookie enabled sessions. When the client has no ticket provided in the URL params, try to grab the ticket
+			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
+			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
+			require_once BASEDIR.'/server/secure.php';
+			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+			$ticket = BizSession::getTicketForClientIdentifier();
+		}
 		if( !$ticket ) {
 			$message = 'Please specify "ticket" param at URL';
 			header('HTTP/1.1 400 Bad Request');
 			header('Status: 400 Bad Request - '.$message );
 			LogHandler::Log( 'TransferServer', 'ERROR', $message );
 			exit( $message );
+		} else {
+			BizSession::setTicketCookieForClientIdentifier($ticket);
 		}
 		
 		// The ticket validation takes around 50ms because of the db UPDATE statement.
@@ -134,10 +145,10 @@ class TransferEntry
 			}
 		}
 
-		// The OPTIONS call is send by a web browser as a preflight for a CORS request.
+		// The OPTIONS call is send by a web browser as a pre-flight for a CORS request.
 		// This request doesn't send or receive any information. There is no need to validate the ticket,
 		// and when the OPTIONS calls returns an error the error can't be validated within an application.
-		// This is a restiction by web browsers.
+		// This is a restriction by web browsers.
 		if ( $httpMethod == 'OPTIONS' ) {
 			$validateTicket = false;
 		}
@@ -205,11 +216,9 @@ class TransferEntry
 			}
 		}
 		
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::setServiceName( 'FileTransfer' );
 		PerformanceProfiler::startProfile( 'Entry point', 1 );
-		$msg = 'Incoming HTTP '.$httpMethod.' request.<br/>'.
-				'Ticket=[' . $ticket . '] File GUID=[' . $fileguid .'] ';
+		$msg = "Incoming HTTP {$httpMethod} request\r\nTicket=[{$ticket}] File GUID=[{$fileguid}]";
 		if( $format ) {
 			$msg .= 'Format=['.$format.'] ';
 		}

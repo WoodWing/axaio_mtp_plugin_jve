@@ -216,7 +216,7 @@ class DBObjectLabels extends DBBase
 	 *
 	 * @param integer $objectId Id of dossier for which the labels are configured.
 	 * @param string $labelName
-	 * @return integer The resolved label id.
+	 * @return ObjectLabel
 	 */
 	public static function getLabelByName( $objectId, $labelName )
 	{
@@ -251,10 +251,19 @@ class DBObjectLabels extends DBBase
 	 */
 	private static function objToRow( $objectId, ObjectLabel $obj )
 	{
-		require_once BASEDIR.'/server/utils/UtfString.class.php';
+
 		$row = array();
-		if( !is_null($obj->Id) )   $row['id']   = $obj->Id   ? intval($obj->Id)   : 0;	
-		if( !is_null($obj->Name) ) $row['name'] = $obj->Name ? UtfString::truncateMultiByteValue(strval($obj->Name), 250) : '';
+		if( !is_null($obj->Id) ) {
+			$row['id']   = $obj->Id   ? intval($obj->Id)   : 0;
+		}
+		if( !is_null($obj->Name) ) {
+			$row['name'] = '';
+			if( $obj->Name ) {
+				require_once BASEDIR.'/server/utils/UtfString.class.php';
+				$row['name'] = UtfString::removeIllegalUnicodeCharacters( strval( $obj->Name ) );
+				$row['name'] = UtfString::truncateMultiByteValue( $row['name'], 250 );
+			}
+		}
 		$row['objid'] = intval($objectId);	
 		return $row;
 	}

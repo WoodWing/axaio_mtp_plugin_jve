@@ -23,6 +23,8 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 	private $issue = null;
 	private $channel2 = null;
 	private $issue2 = null;
+
+	/** @var AdmStatus $state */
 	private $state = null;
 	private $category = null;
 
@@ -141,7 +143,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 			$this->state->DefaultRouteTo = 'print';
 
 			// Create a category
-			$this->category = $this->createCategory( $this->publication->Id, 'Create Category' );
+			$this->category = $this->createCategory();
 
 			// Create a Dossier.
 			$stepInfo = 'Create the Dossier object.';
@@ -245,6 +247,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 
 		// Delete the dossier.
 		if( $this->dossier->MetaData->BasicMetaData->ID ){
+			$errorReport = null;
 			if( !$this->utils->deleteObject( $this, $this->ticket, $this->dossier->MetaData->BasicMetaData->ID,
 				'Delete dossier object', $errorReport ) ) {
 				$this->setResult( 'ERROR',
@@ -255,28 +258,28 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 		// Delete the first issue.
 		if( $this->issue->Id ){
 			if( !$this->utils->removeIssue( $this, $this->ticket, $this->publication->Id, $this->issue->Id) ) {
-				$this->setResult( 'ERROR',  'Could not tear down issue with id ' . $this->issue->Id . '.' . $errorReport );
+				$this->setResult( 'ERROR',  'Could not tear down issue with id ' . $this->issue->Id . '.' );
 			}
 		}
 
 		// Delete the second issue.
 		if( $this->issue2->Id ){
 			if( !$this->utils->removeIssue( $this, $this->ticket, $this->publication->Id, $this->issue2->Id) ) {
-				$this->setResult( 'ERROR',  'Could not tear down issue with id ' . $this->issue2->Id . '.' . $errorReport );
+				$this->setResult( 'ERROR',  'Could not tear down issue with id ' . $this->issue2->Id . '.' );
 			}
 		}
 
 		// Delete the Facebook channel.
 		if( $this->channel->Id ){
 			if( !$this->utils->removePubChannel( $this, $this->ticket, $this->publication->Id, $this->channel->Id) ) {
-				$this->setResult( 'ERROR',  'Could not tear down channel with id ' . $this->channel->Id . '.' . $errorReport );
+				$this->setResult( 'ERROR',  'Could not tear down channel with id ' . $this->channel->Id . '.' );
 			}
 		}
 
 		// Delete the Print channel.
 		if( $this->channel2->Id ){
 			if( !$this->utils->removePubChannel( $this, $this->ticket, $this->publication->Id, $this->channel2->Id) ) {
-				$this->setResult( 'ERROR',  'Could not tear down channel with id ' . $this->channel2->Id . '.' . $errorReport );
+				$this->setResult( 'ERROR',  'Could not tear down channel with id ' . $this->channel2->Id . '.'  );
 			}
 		}
 
@@ -509,6 +512,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 	 * Creates a new category.
 	 *
 	 * @return Category|null Null on error.
+	 * @throws BizException
 	 */
 	public function createCategory()
 	{
@@ -546,7 +550,8 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 	/**
 	 * Deletes a category.
 	 *
-	 * @return Category|null Null on error.
+	 * @return AdmDeleteSectionsResponse
+	 * @throws BizException
 	 */
 	public function deleteCategory()
 	{
@@ -639,7 +644,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 		$request->Objects[0]->MetaData->WorkflowMetaData->Creator = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Created = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Comment = '';
-		$request->Objects[0]->MetaData->WorkflowMetaData->State = $this->state;
+		$request->Objects[0]->MetaData->WorkflowMetaData->State = new State( $this->state->Id, $this->state->Name );
 		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = '';
 		$request->Objects[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Version = null;

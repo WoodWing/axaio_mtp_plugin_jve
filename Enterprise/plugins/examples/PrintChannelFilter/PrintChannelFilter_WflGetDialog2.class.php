@@ -71,11 +71,9 @@ class PrintChannelFilter_WflGetDialog2 extends WflGetDialog2_EnterpriseConnector
 	
 	final public function runBefore( WflGetDialog2Request &$req )
 	{
-		$req = $req; // make code analyzer happy
-	} 
+	}
 	
 	final public function runOverruled( WflGetDialog2Request $req )
 	{
-		$req = $req; // make code analyzer happy
-	} 
+	}
 }

@@ -143,7 +143,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 		$defines = array( 'SOLR_INSTALLED', // now checking server plug-in instead
 			'SOLR_SERVER', 'SOLR_PORT', 'SOLR_PATH',  // use SOLR_SERVER_URL instead
 			'SOLR_SYNCHRONOUS_INDEX', 'SOLR_USER', 'SOLR_PASSWORD', 'SOLR_INDEX_MAXDOCS', // synchron only!
-			'SOLR_MLT_GENERAL_FIELDS', 'SOLR_HL_GENERAL_FIELDS' ); // No longer supported
+			'SOLR_MLT_GENERAL_FIELDS', 'SOLR_HL_GENERAL_FIELDS', 'SOLR_DOSSIER_FACETS' ); // No longer supported
 		foreach( $defines as $define ) {
 			if( defined($define) ) {
 				$this->setResult( 'WARN', 'The '.$define.' option is no longer supported.',
@@ -153,10 +153,13 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 		}
 
 		// Check obsolete options at SERVERFEATURES
-		if( BizSettings::isFeatureEnabled( 'HotInbox' ) ) {
-			$this->setResult( 'WARN', 'The "HotInbox" option at SERVERFEATURES setting is no longer supported.',
-				'Remove the option from your configserver.php file.' );
+		$obsoletedServerFeatures = array( 'HotInbox', 'FacetsInDossier' );
+		if( $obsoletedServerFeatures ) foreach( $obsoletedServerFeatures as $obsoletedServerFeature ) {
+			if( BizSettings::isFeatureEnabled( $obsoletedServerFeature ) ) {
+				$this->setResult( 'WARN', 'The "'. $obsoletedServerFeature.'" option at SERVERFEATURES setting is no longer supported.',
+					'Remove the option from your configserver.php or config_overrule.php file.' );
 				// continue
+			}
 		}
 
 		// Check if the obsoleted Inbox or Name Search queries are still in DB
@@ -424,11 +427,12 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 			return false;
 		}
 
-		// Check the Lucene version, should match 6.2.1.
+		// Check the Lucene version.
 		$luceneVersion = (string)$xmlDoc->getElementsByTagName('luceneMatchVersion')->item(0)->nodeValue;
 
-		if( version_compare($luceneVersion, '6.2.1', '<') ) {
+		if( !$this->isVersionSupported( $luceneVersion ) ) {
 			$this->setResult( 'ERROR', $solrConfigName . ' version is incorrect.',
+				'The version should be '.$this->getSupportedVersionInfo().'. '.
 				'This typically happens when you have manually edited the file and accidentally made a typo. '.
 				'Check if the "luceneMatchVersion" is well formed by opening it in a Web browser (or in an XML editor). '.
 				'Fix the typos in a plain text editor. Alternatively, or if you upgraded Solr, install the original solrconfig.xml '.
@@ -685,9 +689,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	/**
 	 * Checks the version of the currently used Solr instance.
 	 *
-	 * Solr versions prior to version 6.2.1 are not supported, and thus if one of those versions is detected
-	 * then an error message should be displayed accordingly.
-	 *
 	 * @param bool $ignoreFailRetrieve Does not set an error message if it failed to retrieve the version
 	 * @return bool Whether or not the version is supported.
 	 */
@@ -700,14 +701,13 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 				return true;
 			}
 			$this->setResult( 'ERROR', 'Could not retrieve Solr version number',
-				"Verify your Solr connection and verify Solr is at least version 6.2.1.");
+				'Verify your Solr connection and verify the Solr version is '.$this->getSupportedVersionInfo().'.' );
 			return false;
 		}
 		else {
-			// Solr versions pre 6.2.1 are not supported.
-			if (version_compare($versionNumber, '6.2.1', '<')){
-				$this->setResult( 'ERROR', 'The currently configured Solr version ( ' . $versionNumber . ' ) is not supported, version 6.2.1 or higher is required.',
-					"Upgrade Solr to at least version 6.2.1.");
+			if ( !$this->isVersionSupported( $versionNumber ) ){
+				$this->setResult( 'ERROR', 'The currently configured Solr version ( ' . $versionNumber . ' ) is not supported, version '.$this->getSupportedVersionInfo().' is required.',
+					'Please use Solr version '.$this->getSupportedVersionInfo().'.' );
 				return false;
 			}
 		}
@@ -783,8 +783,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	/**
 	 * Check the version of the schema.xml file.
 	 *
-	 * The schema should adhere to the Solr 6.2.1 version.
-	 *
 	 * @param array $schemaInfo
 	 * @return bool Whether or not the test was passed.
 	 */
@@ -827,5 +825,31 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 			return false;
 		}
 		return $xmlDoc;
+	}
+
+	/**
+	 * Checks if the provided version is supported.
+	 *
+	 * @param string $version
+	 * @return bool
+	 */
+	private function isVersionSupported( $version )
+	{
+		$supported = false;
+		if( version_compare( $version, '6.2.1', '>=' ) && version_compare( $version, '6.3.0', '<' ) ) {
+			$supported = true;
+		}
+
+		return $supported;
+	}
+
+	/**
+	 * Returns a string with info about the supported versions.
+	 *
+	 * @return string supported version(s) info.
+	 */
+	private function getSupportedVersionInfo()
+	{
+		return '6.2.1 - 6.2.x';
 	}
 }

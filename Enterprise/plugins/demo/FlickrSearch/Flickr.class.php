@@ -280,7 +280,6 @@ class Flickr
 	 */
     static final public function calledByContentStation( )
     {
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		
 		$app = DBTicket::DBappticket( BizSession::getTicket() );

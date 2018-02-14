@@ -116,6 +116,10 @@ class BizException extends Exception
 		// Log the exception (in case of ERROR/WARN; log includes stack dump)
 		LogHandler::Log( 'BizException', $this->LogSeverity, $logMessage );
 
+		// EN-88267 Security precaution: Don't want to expose database related details unnecessarily.
+		if( $messageKey == 'ERR_DATABASE' && !LogHandler::debugMode() ) {
+			$detail = '';
+		}
 		// Take over given param
 		$this->Type = $type;
 		$this->Detail = $detail;
@@ -259,7 +263,6 @@ class BizException extends Exception
  *  public function Foo()
  *  {
  *		$map = new BizExceptionSeverityMap( array( 'S5000' => 'INFO' ) );
- *		$map = $map; // keep code analyzer happy
  *		try {
  *			... // call function that might throw BizException
  *		} catch( BizException $e ) {

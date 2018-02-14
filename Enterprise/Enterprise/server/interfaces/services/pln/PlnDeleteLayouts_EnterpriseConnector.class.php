@@ -40,6 +40,5 @@ abstract class PlnDeleteLayouts_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PlnDeleteLayoutsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

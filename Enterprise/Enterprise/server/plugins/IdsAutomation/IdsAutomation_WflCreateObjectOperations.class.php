@@ -71,7 +71,10 @@ class IdsAutomation_WflCreateObjectOperations extends WflCreateObjectOperations_
 		// Create the IDS job when layout has made status change that should trigger IDS.
 		if( $this->hookedLayoutId ) {
 			require_once dirname(__FILE__).'/IdsAutomationUtils.class.php';
-			IdsAutomationUtils::createIDSJob( $this->hookedLayoutId, $this->hookedLayoutId, $this->hookedLayoutType, true );
+
+			// EN-89035 - The server doesn't pickup the newly generated InDesign server job for 20 seconds. Users can override this.
+			$waitTime = defined('IDSA_WAIT_TIMEOUT_AFTER_OBJECT_OPERATION') ? IDSA_WAIT_TIMEOUT_AFTER_OBJECT_OPERATION : 20;
+			IdsAutomationUtils::createIDSJob( $this->hookedLayoutId, $this->hookedLayoutId, $this->hookedLayoutType, true, $waitTime );
 		}
 		
 		// Clear service context data.
@@ -81,17 +84,10 @@ class IdsAutomation_WflCreateObjectOperations extends WflCreateObjectOperations_
 	// No called.
 	final public function runOverruled( WflCreateObjectOperationsRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 
 	final public function onError( WflCreateObjectOperationsRequest $req, BizException $e )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$e = $e; // keep analyzer happy
-		
 		// Clear service context data.
 		$this->cleanupResources();
 	} 

@@ -5,7 +5,7 @@ require_once dirname(__FILE__) . '/WW_Facebook.class.php';
 /**
  * Wrapper class for handling Facebook publishing.
  *
- * Note: some methods for unpublishing are missing, this is because not all the unpublish steps are supported by the
+ * Note: some methods for un-publishing are missing, this is because not all the un-publish steps are supported by the
  * Facebook Graph API at the time of this writing.
  *
  * @package	 Enterprise
@@ -22,6 +22,7 @@ class FacebookPublisher
 	private $appSecret = null;
 	public $appId = null;
 	public $pageId = null;
+	const LOG_IDENTIFIER = 'FacebookPublisher';
 
 	/**
 	 * The construct function of Facebook publisher
@@ -43,7 +44,6 @@ class FacebookPublisher
 			$config = array(
 				'appId' => $this->appId,
 				'secret' => $this->appSecret,
-				'cookie' => false,
 			);
 
 			$this->facebook = new WW_Facebook( $config );
@@ -94,7 +94,6 @@ class FacebookPublisher
 		$config = array(
 			'appId' => $this->appId,
 			'secret' => $this->appSecret,
-			'cookie' => false,
 		);
 
 		$this->facebook = new WW_Facebook( $config );
@@ -140,13 +139,22 @@ class FacebookPublisher
 		$config = array(
 			'appId' => $this->appId,
 			'secret' => $this->appSecret,
-			'cookie' => false,
 		);
 
 		$this->facebook = new WW_Facebook( $config );
 		$accessToken = $this->facebook->getAccessTokenFromFbCode( $code );
 		$this->saveAccessToken( $accessToken, $channelId );
 
+		if( !$accessToken ) {
+			LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR', 'Failed retrieving access token.' . PHP_EOL .
+				'Code:' . $code . PHP_EOL .
+				'ChannelId:' . $channelId );
+		}
+
+		// Access token is already retrieved above, so code and state are no longer needed.
+		// Remove them to avoid "CSRF state token does not match one provided." error.
+		unset( $_REQUEST['code'] );
+		unset( $_REQUEST['state'] );
 		$logOutUri = $this->facebook->getLogoutUrl( array(
 			'access_token' => $accessToken,
 			'next' => SERVERURL_ROOT.INETROOT.'/server/admin/webappindex.php?webappid=ImportDefinitions&plugintype=config&pluginname=Facebook' ) );
@@ -284,19 +292,59 @@ class FacebookPublisher
 		}
 
 		$connectString = 'https://graph.facebook.com/me/accounts?access_token='.$userAccessToken;
-		$accounts = json_decode( file_get_contents( $connectString ) );
+		$response = file_get_contents( $connectString );
 
-		if( empty( $accounts ) ) {
-			throw new Exception( 'Could not retrieve the account information.' );
+		$httpStatusCode = 0;
+		$errorMessage = 'Failed retrieving access token for Facebook page.';
+		if( isset($http_response_header ) &&
+			preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#i", $http_response_header[0], $httpStatus ) > 0 ) {
+			$httpStatusCode = intval( $httpStatus[1] );
+		} else {
+			LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR',
+				$errorMessage . PHP_EOL . ": No response returned from Facebook: {$connectString}." );
+			throw new Exception( $errorMessage ); //
 		}
 
-		foreach( $accounts->data as $account ) {
+		$accounts = $this->validateAndRetrieveAccountsFromResponse( $httpStatusCode, $response, $errorMessage );
+		if( $accounts ) foreach( $accounts->data as $account ) {
 			if( $account->id == $pageId ) {
 				$this->pageAccessToken = $account->access_token;
 			}
 		}
 
 		return $this->pageAccessToken;
+	}
+
+	/**
+	 * Validates the response from the page-access-token request and retrieves the accounts.
+	 *
+	 * @param int $httpStatusCode The HTTP status code returned from calling the retrieval of page-access-token.
+	 * @param string $response Response returned from calling the retrieval of page-access-token.
+	 * @param string $errorMessage Error message to be shown to the end-user.
+	 * @throws Exception Throws Exception when validation of the response fails or accounts cannot be retrieved.
+	 * @return string[]|null List of accounts or Null when no accounts found.
+	 */
+	private function validateAndRetrieveAccountsFromResponse( $httpStatusCode, $response, $errorMessage )
+	{
+		$accounts = null;
+		if( $httpStatusCode == 200 ) {
+			$accounts = json_decode( $response );
+			if( $accounts === null ) {
+				LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR',
+					$errorMessage . PHP_EOL . ": Could not parse the response returned from Facebook {$response}." );
+				throw new Exception( $errorMessage );
+			}
+		} else {
+			LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR',
+				$errorMessage . PHP_EOL . ": Communication error with Facebook (HTTP code: $httpStatusCode)." );
+			throw new Exception( $errorMessage );
+		}
+		if( empty( $accounts ) ) {
+			LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR',
+				$errorMessage . PHP_EOL . ": Could not retrieve the account information." );
+			throw new Exception( $errorMessage );
+		}
+		return $accounts;
 	}
 
 	/**
@@ -462,8 +510,8 @@ class FacebookPublisher
 	 *
 	 * @param $pageId String The ID of the page for which to delete a post.
 	 * @param $message_id String The ID of the message to be deleted.
-	 * @return mixed
-	 * @throws Exception Throws an exception if the deletion cannot be completed succesfully.
+     * @return mixed
+	 * @throws Exception Throws an exception if the deletion cannot be completed successfully.
 	 */
 	public function deleteMessageFromFeed( $pageId, $message_id )
 	{

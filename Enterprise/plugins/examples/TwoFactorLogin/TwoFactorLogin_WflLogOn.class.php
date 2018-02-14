@@ -25,7 +25,6 @@ class TwoFactorLogin_WflLogOn extends WflLogOn_EnterpriseConnector
 	final public function runBefore( WflLogOnRequest &$req )
 	{
 		LogHandler::Log( 'TwoFactorLogin', 'INFO', 'TwoFactorLogin LogOn runBefore' );
-		$req = $req; // keep code analyser happy
 		$user = $req->User;
 		if ($user == 'woodwing') {
 			return;
@@ -85,13 +84,11 @@ class TwoFactorLogin_WflLogOn extends WflLogOn_EnterpriseConnector
 	
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp ) 
 	{
-		$resp = $resp; $req = $req; // keep code analyzer happy
-	} 
+	}
 	
 	final public function runOverruled( WflLogOnRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 	
 	private static function generatePassword( $length=6, $strength=0 )
 	{

@@ -9,7 +9,6 @@
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
 require_once BASEDIR.'/server/admin/global_inc.php'; // formvar, inputvar
 
 class HtmlDocument
@@ -80,6 +79,7 @@ class HtmlDocument
 			$wr = array();
 			if( BizSession::isStarted() ) {
 				try {
+					require_once BASEDIR.'/server/secure.php'; // getauthorizations()
 					$dbDriver = DBDriverFactory::gen();
 					$sth = getauthorizations( $dbDriver, $globUser );
 					while( ($row = $dbDriver->fetch($sth) ) ) {
@@ -117,43 +117,6 @@ class HtmlDocument
 				$imagedir = '../' . $imagedir;	
 				$appsdir = '../' . $appsdir;
 				$admindir = '../' . $admindir;
-			}
-			
-			// Check if we are in error... then signal user (happens only in debug mode)
-			$suppressDlg = isset($_COOKIE["suppressdebugdialog"]) && $_COOKIE["suppressdebugdialog"] == '1';
-			if( !$suppressDlg && LogHandler::getDebugErrorLogFile() ) {
-				$errServer = '
-					<table id="servererror" border="3" cellpadding="10" bgcolor="red"><tr>
-					<td align="center" bgcolor="red">
-						<font color="white" size="3"><b>SERVER ERROR</b></font>&nbsp;&nbsp;&nbsp;
-						<img src="'.$imagedir.'remov_16.gif" onclick="document.getElementById(\'errordiv\').style.visibility=\'hidden\';"/>
-					</td></tr>
-					<tr><td bgcolor="white" td align="left">
-						<a href="#" onclick="javascript:window.open(\''.$admindir.'showlog.php?act=errorsonly\')"><img src="'.$imagedir.'srch_16.gif"/>&nbsp;Show Server Errors</a><br/>
-						<a href="#" onclick="javascript:window.open(\''.$admindir.'showlog.php?act=delerrors\'); document.getElementById(\'errordiv\').style.visibility=\'hidden\';"><img src="'.$imagedir.'trash_16.gif"/>&nbsp;Delete Server Errors</a><br/>
-						<a href="#" onclick="CookieManager.prototype.setCookie(\'suppressdebugdialog\', \'1\'); document.getElementById(\'errordiv\').style.visibility=\'hidden\';"><img src="'.$imagedir.'cancl_16.gif"/>&nbsp;Do Not Show Again</a><br/>
-					</td></tr></table>';
-			} else {
-				$errServer = '';
-			}
-			if( !$suppressDlg && LogHandler::getPhpLogFile() ) {
-				$errPHP = '
-					<table id="phperror" border="3" cellpadding="10" bgcolor="orange"><tr>
-					<td align="center" bgcolor="orange">
-						<font color="white" size="3"><b>PHP ERROR</b></font>&nbsp;&nbsp;&nbsp;
-						<img src="'.$imagedir.'remov_16.gif" onclick="document.getElementById(\'errordiv\').style.visibility=\'hidden\'"/>
-					</td></tr>
-					<tr><td bgcolor="white" td align="left">
-						<a href="#" onclick="javascript:window.open(\''.$admindir.'showlog.php?act=phplog\')"><img src="'.$imagedir.'srch_16.gif"/>&nbsp;Show PHP Log</a><br/>
-						<a href="#" onclick="javascript:window.open(\''.$admindir.'showlog.php?act=delphplog\'); document.getElementById(\'errordiv\').style.visibility=\'hidden\';"><img src="'.$imagedir.'trash_16.gif"/>&nbsp;Delete PHP Log</a><br/>
-						<a href="#" onclick="CookieManager.prototype.setCookie(\'suppressdebugdialog\', \'1\'); document.getElementById(\'errordiv\').style.visibility=\'hidden\';"><img src="'.$imagedir.'cancl_16.gif"/>&nbsp;Do Not Show Again</a><br/>
-					</td></tr></table>';
-			} else {
-				$errPHP = '';
-			}
-			if( $errServer || $errPHP ) {
-				$errSignal = '<table><tr><td>'.$errServer.'</td><td>'.$errPHP.'</td></tr></table>';
-				$txt = str_replace( '<!--DEBUG_ERROR_SIGNAL-->', $errSignal, $txt );
 			}
 	
 			// build Applications menu
@@ -225,10 +188,6 @@ class HtmlDocument
 				//if( $isadmin ) { // to do: access profile
 				//	$menu .= '<a id="bullet" class="menu" href="'.$admindir.'searchindexing.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('ACT_SEARCH_SERVER').'</a><br/>';
 				//	$adminIcons[] = '<a href="'.$admindir.'searchindexing.php"><img src="'.$imagedir.'searchsvr_32.gif" border="0" width="32" height="32"/><br/>'.BizResources::localize('ACT_SEARCH_SERVER').'</a>';
-				//}
-				//if( $isadmin ) { // to do: access profile
-				//	$menu .= '<a id="bullet" class="menu" href="'.$admindir.'adobedpsissues.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('DPS_ISSUES').'</a><br/>';
-				//	$adminIcons[] = '<a href="'.$admindir.'adobedpsissues.php"><img src="'.$imagedir.'adobedps_32.gif" border="0" width="32" height="32"/><br/>'.BizResources::localize('DPS_ISSUES').'</a>';
 				//}
 				//if( $isadmin ) { // to do: access profile
 				//	$menu .= '<a id="bullet" class="menu" href="'.$admindir.'log.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('MNU_LOG').'</a><br/>';
@@ -340,7 +299,6 @@ class HtmlDocument
 		$user = '';
 		try {
 			if( BizSession::isStarted() ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getUserInfo( 'fullname' );
 			}
 		} catch( BizException $e ) { // ignore errors; could be no DB installed!

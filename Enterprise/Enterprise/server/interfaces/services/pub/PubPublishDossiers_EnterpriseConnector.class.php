@@ -40,6 +40,5 @@ abstract class PubPublishDossiers_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PubPublishDossiersRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

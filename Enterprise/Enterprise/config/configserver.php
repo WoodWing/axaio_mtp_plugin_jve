@@ -16,7 +16,6 @@ require_once BASEDIR.'/server/serverinfo.php';
 //    The type of database used:
 //       'mysql'   MySQL. Default option.
 //       'mssql'   MS SQL Server.
-//       'oracle'  Oracle.
 //    Value must be in lower case.
 //
 if( !defined('DBTYPE') ) {
@@ -26,10 +25,7 @@ if( !defined('DBTYPE') ) {
 //    The database server address. By default the same machine as the
 //    application server of which this configserver.php file is part.
 //    Default value: '127.0.0.1'. (MySQL)
-//    For MSSQL and ORACLE the database machine must be listed. For MySQL use the IP address.
-//    Oracle:
-//       Use Enterprise Manager to configure the so-called "sid" that specifies the host+port+service
-//          define ('DBSERVER', 'MySID' );
+//    For MS SQL the database machine must be listed. For MySQL use the IP address.
 //    MS SQL:
 //       If your machine is called 'MyPC'.
 //          define ('DBSERVER', 'MyPC' );
@@ -157,6 +153,7 @@ if( !defined('EXTENSIONMAP') ) {
 		'.wwea' => array( 'text/wwea', 'Article'),
 		'.wweat' => array( 'text/wwea', 'ArticleTemplate'), // BZ# 19176: To ensure the article template has the correct icon.
 		'.digital' => array( 'application/ww-digital+json', 'Article'), // added since 10.2.0 to support Content Station Digital Editor articles
+		'.digitmpl' => array( 'application/ww-digitmpl+json', 'ArticleTemplate'), // added since 10.2.0 to support Content Station Digital Editor articles
 		'.incd' => array( 'application/incopy', 'Article'),
 		'.incx' => array( 'application/incopy', 'Article'),
 		'.indd' => array( 'application/indesign', 'Layout'),
@@ -260,7 +257,6 @@ if( !defined('EXTENSIONMAP') ) {
 		'.dmg' => array( 'application/x-apple-diskimage', 'Other' ),
 		'.htmlwidget' => array( 'application/ww-htmlwidget', 'Other'),
 		'.ofip' => array( 'application/x-ofip+zip', 'Other'), // Obsoleted, files can still be downloaded from the system
-	    '.folio' => array( 'application/vnd.adobe.folio+zip', 'Other'), // For DPS
 	)));
 }
 
@@ -859,16 +855,22 @@ if( !defined('SERVERFEATURES') ) {
 //          It is not allowed to have both CreatePagePDFOnProduce and CreatePageEPSOnProduce options enabled.
 //          This option has no effect when the CreatePageEPS option is enabled.
 //       CreatePagePDF
-//          (SC for InDesign feature.) When a Layout is saved in the Filestore, for each page
-//          a PDF file is generated and uploaded along with the document. When a page varies per Edition,
-//          for each Edition a PDF file is generated.
-//          It is not allowed to have both CreatePagePDF and CreatePageEPS options enabled.
+//          (SC for InDesign feature.) When a layout is saved in the Filestore, a PDF file is generated for each page
+//          and uploaded along with the document. When a page varies per Edition, a PDF file is generated for each Edition.
+//          A value can be specified for this option which should match one of the Adobe PDF Presets.
+//          Example: '[Smallest File Size]'.
+//          When this option is defined without a PDF preset value, the '[Press Quality]' will be used as the default
+//          preset.
+//          It is not allowed to have both CreatePagePDF and CreatePageEPS options enabled.
 //       CreatePagePDFOnProduce (default)
-//          (SC for InDesign feature.) Same as CreatePagePDF, but only when the Layout is saved in a Status
-//          for which the Output option is selected in the Workflow Status options.
-//          A value should be specified for this option which should match one of the Adobe PFD Presets,
-//          for example '[High Quality Print]'. Default value: '[Press Quality]'.
-//          This option supersedes the CreatePagePDF option for Statuses with the Output option selected.
+//          (SC for InDesign feature.) Same as CreatePagePDF, but only when the layout is saved in a status for which
+//          the Output option is selected in the Workflow Status options.
+//          A value can be specified for this option which should match one of the Adobe PDF Presets.
+//          Example: '[High Quality Print]'.
+//          Default value: '[Press Quality]'.
+//          This option can be left empty if the Workflow Status name is the same as the PDF preset name and when the
+//          'Output' option is selected for that Workflow Status.
+//          This option supersedes the CreatePagePDF option for Statuses that have the Output option selected.
 //       CreatePagePreview (default)
 //          (SC for InDesign feature.) When a Layout is saved in the Filestore, for each page
 //          a preview (JPEG) file is generated and uploaded along with the document. When a page varies per Edition,
@@ -1221,6 +1223,22 @@ if( !defined('ENTERPRISE_CA_BUNDLE') ) {
 	define( 'ENTERPRISE_CA_BUNDLE', WOODWINGSYSTEMDIRECTORY.'/Certificates/ca-bundle.crt' );
 }
 
+// -------------------------------------------------------------------------------------------------
+// Cookies
+// -------------------------------------------------------------------------------------------------
+
+// COOKIES_OVER_SECURE_CONNECTIONS_ONLY:
+//    If the Enterprise Server instance is only accessible over secure (HTTPS) connections,
+//    this setting can be set to 'true' for extra security. Clients that support
+//    cookie based authentication are forced to send cookies only over a secure connection.
+//    When direct access from InDesign Server or direct access to the Admin pages over a regular (HTTP)
+//    connection is needed, this setting can't be set to true.
+//    True to enable. Default value: false.
+//
+if( !defined('COOKIES_OVER_SECURE_CONNECTIONS_ONLY') ) {
+	define( 'COOKIES_OVER_SECURE_CONNECTIONS_ONLY', false );
+}
+
 /*
 // -------------------------------------------------------------------------------------------------
 // List of LDAP servers. See '/server/dataclasses/LDAPServer.class.php' for more info.
@@ -1419,7 +1437,7 @@ if( !defined('EXIFTOOL_APP_PATH') ) {
 //        'http://example.com' => array(
 //            'Access-Control-Allow-Credentials' => 'true',
 //            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE, PUT, HEAD',
-//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept'
+//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept, X-WoodWing-Application'
 //        ),
 //
 //    - The set of headers to return is determined by the Origin header that is send by the client.
@@ -1432,7 +1450,7 @@ if( !defined('EXIFTOOL_APP_PATH') ) {
 //        'http://example.com' => array(
 //            'Access-Control-Allow-Credentials' => 'true',
 //            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE, PUT, HEAD',
-//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept'
+//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept, X-WoodWing-Application'
 //        ),
 //    )));
 //}
@@ -1497,8 +1515,8 @@ if( !defined('OUTPUTDIRECTORY') ) {
 }
 
 // PROFILELEVEL:
-//    Used for profiling PHP code. Default value: 1. Requires DEBUGLEVELS to be set to 'INFO' or 'DEBUG'  
-//    in order to work, else the value of profile level is ignored. Possible settings are: 0 to 5:
+//    Used for profiling PHP code. Default value: 0. Requires OUTPUTDIRECTORY to be set in order to
+//    work, else the value of profile level is ignored. Possible settings are: 0 to 5:
 //       0: No profiling
 //       1: Web Service => Handling one service call of client application (excl network traffic)
 //       2: PHP Service => Handling one service call without SOAP/AMF/JSON wrapping/unwrapping.
@@ -1507,7 +1525,7 @@ if( !defined('OUTPUTDIRECTORY') ) {
 //       5: PHP Script  => Potential expensive PHP operations, such as loops, regular expressions, etc
 //
 if( !defined('PROFILELEVEL') ) {
-	define( 'PROFILELEVEL', 1 );
+	define( 'PROFILELEVEL', 0 );
 }
 
 // LOGSQL:
@@ -1537,11 +1555,11 @@ if( !defined('LOG_INTERNAL_SERVICES') ) {
 }
 
 // LOG_DPS_SERVICES:
-//    Used for logging DPS Web services in the service log folder. When enabled, DPS requests  
-//    fired by Enterprise Server to Adobe DPS Server and the corresponding responses are logged. 
-//    Adobe DPS is a so called REST server. The REST services are logged in the service folder 
-//    (in OUTPUTDIRECTORY/soap) and have an AdobeDPS_ prefix and a .txt file extension. 
-//    By default, this log feature is disabled. It can be temporary enabled to troubleshoot DPS traffic.
+//    Used for logging Adobe AEM Web services in the service log folder. When enabled, requests
+//    fired by Enterprise Server to Adobe AEM Server and the corresponding responses are logged.
+//    Adobe AEM is a so called REST server. The REST services are logged in the service folder
+//    (in OUTPUTDIRECTORY/soap) and have an AdobeDps2_ prefix and a .txt file extension.
+//    By default, this log feature is disabled. It can be temporary enabled to troubleshoot Adobe AEM traffic.
 //    
 if( !defined('LOG_DPS_SERVICES') ) {
 	define( 'LOG_DPS_SERVICES', false );
@@ -1751,6 +1769,11 @@ if( defined('OUTPUTDIRECTORY') && OUTPUTDIRECTORY != '' ) {
 	ini_set('error_log', OUTPUTDIRECTORY.'php.log'); // Log PHP Errors, Warnings and Noticed to file
 }
 
+// Override cookie settings for the PHPSESSION cookie for extra security. The session id is the same as the Enterprise ticket. 
+ini_set('session.cookie_path', INETROOT);
+ini_set('session.cookie_secure', COOKIES_OVER_SECURE_CONNECTIONS_ONLY);
+ini_set('session.cookie_httponly', true);
+
 if( !defined('DBPREFIX') ) {
 	define( 'DBPREFIX', 'smart_' ); // Prefix used for all database table names. This must not be changed.
 }
@@ -1768,10 +1791,6 @@ if( !defined('DEFAULT_USER_COLOR') ) {
 ini_set('include_path', BASEDIR.'/server/ZendFramework/library'.PATH_SEPARATOR.ini_get('include_path'));
 
 // Init autoloader for Zend Framework 2:
-if( !defined('ZF2_PATH') ) {
-	define( 'ZF2_PATH', BASEDIR.'/server/vendor/zendframework/zendframework/library' );
-}
-require_once ZF2_PATH . '/Zend/Loader/StandardAutoloader.php';
 $loader = new Zend\Loader\StandardAutoloader(array(
     'autoregister_zf' => true,
 ));
@@ -1780,6 +1799,7 @@ $loader->register();
 require_once BASEDIR.'/server/utils/LogHandler.class.php';
 LogHandler::init();
 
+require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizErrorReport.class.php';
 require_once BASEDIR.'/server/utils/PerformanceProfiler.class.php';

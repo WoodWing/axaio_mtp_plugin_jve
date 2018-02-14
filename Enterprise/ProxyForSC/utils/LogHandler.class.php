@@ -582,8 +582,6 @@ class LogHandler
 	 */
 	public static function phpErrorHandler( $errno, $errmsg, $file, $line, $debug )
 	{
-		$debug = $debug; // keep analyzer happy
-
 		// When the error handler catches the error, the @ puts silently error_reporting level to 0,
 		// so you can detect errors comming from 'arobased' instructions.
 		if( error_reporting() == 0 ) {
@@ -766,8 +764,13 @@ class LogHandler
 		return $log;
 	}
 
+
 	/**
 	 * Check on LogOn request, to replace password value with asterisk *
+	 *
+	 * Even in case of empty passwords the password needs to be replaced by asterisk. When the logon is done by using
+	 * a ticket instead of a user/password combination the password is also set to asterisk. So the replacement should
+	 * never fail.
 	 *
 	 * @param string $methodName
 	 * @param string|object $transData Could be string or object
@@ -777,24 +780,40 @@ class LogHandler
 	public static function replacePasswordWithAsterisk( $methodName, $transData, $protocol )
 	{
 		$logonMethods = array( 'LogOn', 'WflLogOn', 'LogOnRequest', 'AdmLogOn', 'PlnLogOn' );
+		$expression = '';
+		$replacement = '';
 		if( in_array($methodName, $logonMethods) ) {
 			if( $protocol == 'SOAP' ) {
 				// e.g. <Password>xxx</Password> => <Password>***</Password>
-				$transData = preg_replace('/<Password>(.*)<\/Password>/is', '<Password>***</Password>', $transData, 1 );
+				$expression = '/<Password>(.*)<\/Password>/is';
+				$replacement = '<Password>***</Password>';
 			} elseif( $protocol == 'Service' ) {
 				// e.g. [Password] => xxx => [Password] => ***
-				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
+				$expression = '/Password => (.*)\n(.*)/i';
+				$replacement = "Password => ***\n$2";
 			} elseif( $protocol == 'AMF' ) {
 				// e.g. [Password] => xxx => [Password] => ***
-				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
+				$expression = '/\[Password\] => (.*)\n(.*)/i';
+				$replacement = "[Password] => ***\n$2";
 			} elseif( $protocol == 'JSON' ) {
 				// e.g. "Password":"xxx" => "Password":"***"
-				$transData = preg_replace('/\"Password\":\"(.*)\"/i', "\"Password\":\"***\"", $transData, 1 );
+				$expression = '/\"Password\":\s*\"(.*)\"/i';
+				$replacement = "\"Password\": \"***\"";
+			}
+		}
+		if( $methodName == 'RabbitMQ_createOrUpdateUser' && $protocol == 'REST' ) {
+			$expression = '/\"password\":\"(.*)\"/i';
+			$replacement = "\"password\":\"***\"";
+		}
+
+		if( $expression ) {
+			$count = 0;
+			$transData = preg_replace( $expression, $replacement, $transData, 1, $count );
+			if( $count == 0 ) {
+				self::Log( 'Security', 'ERROR', $methodName.': Logged password is not obfuscated. This is a potential security risk when the log folder is accessed by unauthorized people.' );
 			}
 		}
 
-		return $transData;
-	}
 
 	/**
 	 * Retrieve a member of the $_SERVER superglobal

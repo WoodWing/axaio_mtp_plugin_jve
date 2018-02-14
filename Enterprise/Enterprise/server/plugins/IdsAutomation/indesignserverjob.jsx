@@ -40,7 +40,13 @@ if( app.entSession.activeTicket ) {
 }
 
 wwlog( CONSOLE, 'Login to [' + pServer + '] server with ticket [' + pTicket + ']' );
-app.entSession.forkLogin( '', pTicket, pServer );
+var requestInfo = [ "ServerInfo",
+    "Publications->PubChannels",
+    "Publications->FeatureAccessList",
+    "Publications->States",
+    "Publications->Categories",
+    "FeatureProfiles" ];
+app.entSession.forkLogin( '', pTicket, pServer, false, requestInfo );
 wwlog( CONSOLE , 'after login: activeServer = [' + app.entSession.activeServer  + '] activeUser = [' + app.entSession.activeUser + ']' );
 
 var myDoc;

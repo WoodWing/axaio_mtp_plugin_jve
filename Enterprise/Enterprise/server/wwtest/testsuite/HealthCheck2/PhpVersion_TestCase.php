@@ -22,25 +22,32 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 	final public function runTest()
 	{
 		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
-    	$help = 'Supported PHP versions: v'.implode(', v', NumberUtils::getSupportedPhpVersions() ).'<br/>';
-    	$unsupportedPhpVersions = NumberUtils::getUnsupportedPhpVersions();
-    	if( $unsupportedPhpVersions ) {
-	    	$help .= 'Unsupported PHP versions: v'.implode(', v', $unsupportedPhpVersions ).'<br/>';
-	    }
-   		$help .= 'Please make sure you have installed a supported version.';
+		$help = 'Supported PHP versions: v'.implode( ', v', NumberUtils::getSupportedPhpVersions() ).'<br/>';
+		$unsupportedPhpVersions = NumberUtils::getUnsupportedPhpVersions();
+		if( $unsupportedPhpVersions ) {
+			$help .= 'Unsupported PHP versions: v'.implode( ', v', $unsupportedPhpVersions ).'<br/>';
+		}
+		$help .= 'Please make sure you have installed a supported version.';
 
 		$phpVersion = NumberUtils::getPhpVersionNumber();
 		if( !NumberUtils::isPhpVersionSupported( $phpVersion ) ) { // unsupported version
-            $this->setResult( 'ERROR', 'Unsupported version of PHP installed: v'.$phpVersion, $help );
+			$this->setResult( 'ERROR', 'Unsupported version of PHP installed: v'.$phpVersion, $help );
 		} else {
-			$customPhpVersions = defined('SCENT_CUSTOM_PHPVERSIONS') ? unserialize(SCENT_CUSTOM_PHPVERSIONS) : array();
-			if( in_array($phpVersion, $customPhpVersions) ) {
+			$customPhpVersions = defined( 'SCENT_CUSTOM_PHPVERSIONS' ) ? unserialize( SCENT_CUSTOM_PHPVERSIONS ) : array();
+			if( in_array( $phpVersion, $customPhpVersions ) ) {
 				// Give a warning on custom php versions
 				$this->setResult( 'WARN', 'Unsupported version of PHP installed: v'.$phpVersion, $help );
 			}
 		}
+		LogHandler::Log( 'wwtest', 'INFO', "Checked PHP version: v{$phpVersion}." );
 
-		LogHandler::Log('wwtest', 'INFO', 'PHP version (v'.$phpVersion.').');
+		// Since 10.2.0: make sure PHP is compiled for 64 bit architecture.
+		$bitSize = NumberUtils::getPhpArchitectureBitSize();
+		if( $bitSize <= 32 ) {
+			$help = 'Please make sure you have installed a 64 bit version.';
+			$this->setResult( 'ERROR', "Unsupported version of PHP installed: {$bitSize} bit.", $help );
+		}
+		LogHandler::Log( 'wwtest', 'INFO', "Checked PHP architecture: {$bitSize} bit." );
 
 		// check if the crypt() function is working for an allowed version. In PHP 5.3.0 this function is bugged for < 4 characters
 		$this->runCryptTest();
@@ -92,7 +99,7 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 		$data = str_pad( '', 1024 );
 		if (($fh = fopen( $filePath, 'wb' ))) {
 			$filesize = 0;
-			for ($i = 0; $i < 4096; $i ++) {
+			for ($i = 0; $i < 16384; $i ++) {
 				$result = fputs( $fh, $data );
 				if ($result === FALSE){
 					break;
@@ -103,7 +110,7 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 			// on some Windows installation, you cannot get the filesize with the function filesize if you
 			// don't have the permission "List Folder / Read Data"
 			LogHandler::Log( 'wwtest', 'INFO', "Created " . $filePath . " with filesize = " . number_format( $filesize ) );
-			if ( $filesize == (1024*4096) ) {
+			if ( $filesize == (1024*16384) ) {
 				$peakStart = memory_get_peak_usage();
 				LogHandler::Log( 'wwtest', 'INFO', "Memory usage at start: " . number_format( memory_get_usage() ) . "; peak: " . number_format( $peakStart ) );
 				
@@ -114,14 +121,12 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 				
 				$peakEnd = memory_get_peak_usage();
 				LogHandler::Log( 'wwtest', 'INFO', "Memory usage at afterward: " . number_format( memory_get_usage() ) . "; peak: " . number_format(	$peakEnd ) );
-				// do nothing with y
-				$y = $y;
 				LogHandler::Log( 'wwtest', 'INFO', "Memory used: " . number_format( $peakEnd - $peakStart ) . "; 1.2 x filesize: " . number_format(	1.2 * $filesize ) );
 				if (($peakEnd - $peakStart) >= (1.2 * $filesize)) {
 					$this->setResult( 'ERROR', 'The memory usage of the function fileread is at least 1.2 times the filesize of the file to be read. Please install an other PHP version.' );
 				}
 			} else {
-				$this->setResult( 'ERROR', 'Could not create test file "' . $filePath . '" with ' . number_format(1024*4096) . ' but with ' . number_format(	$filesize ) . ' bytes' );
+				$this->setResult( 'ERROR', 'Could not create test file "' . $filePath . '" with ' . number_format(1024*16384) . ' but with ' . number_format(	$filesize ) . ' bytes' );
 			}
 			unlink( $filePath );
 		} else {

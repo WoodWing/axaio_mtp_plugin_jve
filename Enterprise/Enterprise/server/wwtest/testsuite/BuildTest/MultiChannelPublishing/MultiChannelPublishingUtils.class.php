@@ -88,28 +88,32 @@ class MultiChannelPublishingUtils
 	 */
 	public static function createState( $objectType, $name, $publicationId )
 	{
+		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmStatus
+
+		$issueId = 0; // It is not an overrule issue publication, so we leave this 0
+
 		// Compose an object.
-		$object = new stdClass();
+		$object = new AdmStatus();
 		$object->Id = 0;
 		$object->PublicationId	= $publicationId;
 		$object->Type = $objectType;
 		$object->Name = $name;
 		$object->Produce = false;
-		$object->Color = '#FFFF99';
-		$object->NextStatusId = 0;
+		$object->Color = 'FFFF99';
+		$object->NextStatus = null;
 		$object->SortOrder = 0;
 		$object->IssueId = 0;
-		$object->SectionId = 0;
-		$object->DeadlineStatusId = 0;
 		$object->DeadlineRelative = 0;
 		$object->CreatePermanentVersion = false;
 		$object->RemoveIntermediateVersions = false;
 		$object->AutomaticallySendToNext = false;
+		$object->SkipIdsa = false;
 
 		// Insert the State.
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-			$status = BizAdmStatus::createStatus( $object );
+			$statusIds = BizAdmStatus::createStatuses( $publicationId, $issueId, array($object) );
+			$status = BizAdmStatus::getStatusWithId( $statusIds[0] );
 		} catch( BizException $e ) {
 			self::setResult( 'ERROR', 'Creating states failed: ' . $e->getMessage());
 			$status = null;
@@ -169,7 +173,6 @@ class MultiChannelPublishingUtils
 	public function createArticle( $stepInfo, $articleName=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_MultiChannelPublishing']['ticket'] );
 
 		// The WSDL expects a Publication object, a PublicationInfo object is given, so transform
@@ -308,7 +311,6 @@ class MultiChannelPublishingUtils
 		$issue = $this->vars['BuildTest_MultiChannelPublishing']['webIssue'];
 
 		// Retrieve the State.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_MultiChannelPublishing']['ticket'] );
 
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
@@ -372,11 +374,11 @@ class MultiChannelPublishingUtils
 	 * @param string $stepInfo Extra logging info.
 	 * @param string|null $layoutName To give the article a name. Pass NULL to auto-name it: 'BuildTestLayout'+<datetime>
 	 * @param bool $lock Whether to lock the Layout during creation.
+	 * @param string $publicationChannel
 	 * @return Object|null The created layout; Null otherwise.
 	 */
 	public function createLayout( $stepInfo, $layoutName=null, $lock=false, $publicationChannel='print' )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 
@@ -392,6 +394,8 @@ class MultiChannelPublishingUtils
 		$state = BizObjectComposer::getFirstState( $user, $publication->Id, null, null, 'Layout' );
 		$transferServer = new BizTransferServer();
 
+		$pubChannelInfo = null;
+		$issueInfo = null;
 		if( $publicationChannel == 'web' ) {
 			// Take from 'web' channel
 			$pubChannelInfo = $this->vars['BuildTest_MultiChannelPublishing']['webPubChannel'];
@@ -571,13 +575,13 @@ class MultiChannelPublishingUtils
 	 * @param Object $template The template to base an Object Relation on.
 	 * @param Object $dossier The Dossier to create the Object Relation for
 	 * @param string $stepInfo Extra logging info.
-	 * @param $relationOption how to set up the relations for this object.
+	 * @param string $relationOption how to set up the relations for this object.
 	 * @param MetaData $metaData Optional MetaData object to be set for the object.
 	 * @param array|null $formRelationTargets The form relational targets. When null is sent, the first dossier target is used.
 	 * @return null|Object The created object or null if unsucessful.
 	 */
-	public function createPublishFormObject( Object $template, $dossier, $stepInfo,
-		$relationOption=self::RELATION_NORMAL, $metaData=null, $formRelationTargets=null )
+	public function createPublishFormObject( /** @noinspection PhpLanguageLevelInspection */ Object $template,
+		$dossier, $stepInfo, $relationOption=self::RELATION_NORMAL, $metaData=null, $formRelationTargets=null )
 	{
 		$object = new Object();
 		$object->MetaData 	= null;
@@ -601,8 +605,8 @@ class MultiChannelPublishingUtils
 	 * @param Object $template
 	 * @param Object $dossier
 	 * @param array|null $formRelationTargets The form relational targets. When null is sent, the first dossier target is used.
-	 * @param string $stepInfo Extra logging info.
 	 * @param string|null $case self::RELATION_NORMAL, self::RELATION_MISSING_ERROR or self::RELATION_TARGET_ERROR
+	 * @return Relation[]
 	 */
 	private static function createRelationsForFormObject( $template, $dossier, $formRelationTargets, $case )
 	{
@@ -759,7 +763,6 @@ class MultiChannelPublishingUtils
 		$publication = $this->vars['BuildTest_MultiChannelPublishing']['publication'];
 
 		// Retrieve the State.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_MultiChannelPublishing']['ticket'] );
 
 		$category = BizObjectComposer::getFirstCategory( $user, $publication->Id );
@@ -879,7 +882,6 @@ class MultiChannelPublishingUtils
 		$issue = $this->vars['BuildTest_MultiChannelPublishing']['webIssue'];
 
 		// Retrieve the State.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_MultiChannelPublishing']['ticket'] );
 
 		// Flush the states cache to ensure we retrieve the latest from the Database.
@@ -941,6 +943,7 @@ class MultiChannelPublishingUtils
 	 * @param string &$errorReport To fill in the error message if there's any during the delete operation.
 	 * @param bool $permanent Whether or not to delete the object permanently.
 	 * @param array $areas The areas to test against.
+	 * @return bool
 	 */
 	public function deleteObject( $objId, $stepInfo, &$errorReport, $permanent=true, $areas=array('Workflow'))
 	{
@@ -1020,7 +1023,6 @@ class MultiChannelPublishingUtils
 	 */
 	public static function setResult( $status, $message, $configTip='' )
 	{
-		$configTip = $configTip;
 		$level = $status == 'NOTINSTALLED' ? 'WARN' : $status;
 		$level = $status == 'FATAL' ? 'ERROR' : $status;
 		LogHandler::Log( 'wwtest', $level, $message );
@@ -1049,7 +1051,7 @@ class MultiChannelPublishingUtils
 	 * @param string $childId
 	 * @param string $relationType
 	 * @param Target[] $targets
-	 * @param WflCreateObjectRelationsResponse|null
+	 * @return WflCreateObjectRelationsResponse|null
 	 */
 	public function createRelationObject( $stepInfo, $parentId, $childId, $relationType, $targets=null )
 	{
@@ -1084,7 +1086,7 @@ class MultiChannelPublishingUtils
 	 * @param int $pubId
 	 * @param int $pubChannelId
 	 * @param array $newIssues
-	 * @return AdmCreateIssuesResponse The Issue(s) created.
+	 * @return AdmCreateIssuesResponse|bool The Issue(s) created, or false on error.
 	 */
 	public function createIssues( $stepInfo, $pubId, $pubChannelId, $newIssues )
 	{
@@ -1142,7 +1144,6 @@ class MultiChannelPublishingUtils
 	 */
 	public function clearAutocompleteTermEntitiesAndTerms( $provider )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTerm.class.php';
 		require_once BASEDIR.'/server/services/adm/AdmDeleteAutocompleteTermEntitiesService.class.php';

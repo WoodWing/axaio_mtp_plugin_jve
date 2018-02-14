@@ -80,10 +80,8 @@ class TwitterSearch_ContentSource extends ContentSource_EnterpriseConnector
 	
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		// keep code analyzer happy for unused params:
 		// maxEntries is ignored because the API just returns 10 or 20 entries per call
-		$query=$query; $maxEntries=$maxEntries; $order=$order;
-		
+
 		LogHandler::Log('TwitterSearch', 'DEBUG', 'doNamedQuery called for search: '.$query );
 
 		if( $query == TWS_QUERY_SEARCH ) {	
@@ -107,7 +105,6 @@ class TwitterSearch_ContentSource extends ContentSource_EnterpriseConnector
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
 		PerformanceProfiler::startProfile( 'Twitter Search - getAlienObject', 5 );
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
 		LogHandler::Log('Twitter Search', 'DEBUG', "getAlienObject called for $alienID - $rendition" );
 
 		$files = array();
@@ -298,7 +295,6 @@ class TwitterSearch_ContentSource extends ContentSource_EnterpriseConnector
 	private function getEnterpriseContext( &$publication, &$category, &$status )
 	{
 		// Get list of publications from Enterpise. If available we use WW News
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		$username = BizSession::getShortUserName();
 

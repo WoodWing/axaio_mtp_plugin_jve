@@ -119,11 +119,11 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 	/**
 	 * Change stdClass type status returned from database to State object.
 	 *
-	 * @param stdClass $status Status information received from the database as stdClass.
+	 * @param AdmStatus $status Status information received from the database as stdClass.
 	 *
 	 * @return State new State object to work with in this test.
 	 */
-	private function composeStatusFromResult( stdClass $status )
+	private function composeStatusFromResult( AdmStatus $status )
 	{
 		$tmpStatus = new State();
 		$tmpStatus->Id = $status->Id;
@@ -166,26 +166,26 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 	private function setupTestStatuses()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
+		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmStatus
 
-		$status = new stdClass();
-		$status->Id = null;
-		$status->PublicationId = $this->vars['BuildTest_Admin']['publication']->Id;
-		$status->Type = $this->vars['BuildTest_Admin']['articleStatus']->Type;
-		$status->Phase = '';
-		$status->Name = '';
-		$status->Produce = false;
-		$status->Color = '#A0A0A0';
-		$status->NextStatusId = '';
-		$status->SortOrder = '';
-		$status->IssueId = 0; // It is not an overrule issue publication, so we leave this 0
-		$status->SectionId = '';
-		$status->DeadlineStatusId = '';
-		$status->DeadlineRelative = '';
-		$status->CreatePermanentVersion = false;
-		$status->RemoveIntermediateVersions = false;
-		$status->AutomaticallySendToNext = false;
-		$status->ReadyForPublishing = false;
-		$status->SkipIdsa = false;
+		$status = new AdmStatus();
+		$status->Id							= null;
+		$status->Name						= '';
+		$status->SortOrder					= '';
+		$status->Type						= $this->vars['BuildTest_Admin']['articleStatus']->Type;
+		$status->Produce					= false;
+		$status->Color						= 'A0A0A0';
+		$status->DeadlineRelative			= '';
+		$status->NextStatus					= null;
+		$status->CreatePermanentVersion 	= false;
+		$status->RemoveIntermediateVersions	= false;
+		$status->AutomaticallySendToNext	= false;
+		$status->ReadyForPublishing      = false;
+		$status->SkipIdsa                = false;
+		$status->Phase						= '';
+
+		$publicationId = $this->vars['BuildTest_Admin']['publication']->Id;
+		$issueId = 0; // It is not an overrule issue publication, so we leave this 0
 
 		$microTime = explode( ' ', microtime() );
 		$milliSec = sprintf( '%03d', round($microTime[0]*1000) );
@@ -197,7 +197,8 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 			$draftStatus = $status;
 			$draftStatus->Name = 'Status Phase Draft '.$postfix;
 			$draftStatus->Phase = 'Selection';
-			$status = BizAdmStatus::createStatus( $draftStatus );
+			$statusIds = BizAdmStatus::createStatuses( $publicationId, $issueId, array($draftStatus) );
+			$status = BizAdmStatus::getStatusWithId( $statusIds[0] );
 			$this->statuses['Status Phase Draft'] = $this->composeStatusFromResult($status);
 			$this->statusIds['Status Phase Draft'] = $status->Id;
 
@@ -205,7 +206,8 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 			$progressStatus = $status;
 			$progressStatus->Name = 'Status Phase Progress '.$postfix;
 			$progressStatus->Phase = 'Production';
-			$status = BizAdmStatus::createStatus( $progressStatus );
+			$statusIds = BizAdmStatus::createStatuses( $publicationId, $issueId, array($progressStatus) );
+			$status = BizAdmStatus::getStatusWithId( $statusIds[0] );
 			$this->statuses['Status Phase Progress'] = $this->composeStatusFromResult($status);
 			$this->statusIds['Status Phase Progress'] = $status->Id;
 
@@ -213,7 +215,8 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 			$finishedStatus = $status;
 			$finishedStatus->Name = 'Status Phase Finished '.$postfix;
 			$finishedStatus->Phase = 'Completed';
-			$status = BizAdmStatus::createStatus( $finishedStatus );
+			$statusIds = BizAdmStatus::createStatuses( $publicationId, $issueId, array($finishedStatus) );
+			$status = BizAdmStatus::getStatusWithId( $statusIds[0] );
 			$this->statuses['Status Phase Finished'] = $this->composeStatusFromResult($status);
 			$this->statusIds['Status Phase Finished'] = $status->Id;
 		}

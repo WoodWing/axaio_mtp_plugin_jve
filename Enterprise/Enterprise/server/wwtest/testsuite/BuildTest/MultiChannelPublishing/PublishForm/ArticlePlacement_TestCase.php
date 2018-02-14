@@ -62,7 +62,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 		$this->issue      = $this->vars['BuildTest_MultiChannelPublishing']['webIssue'];
 		
 		// Start the session for the BuildTest to get the definitions.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::checkTicket( $this->ticket );
 
 		// Remember which templates are already in DB, before the script creates more templates.
@@ -405,6 +404,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 	
 			// Determine column indexes to work with
 			$colNames = array( 'ID', 'Name' );
+			$indexes = array();
 			foreach( $colNames as $colName ) {
 				foreach( $response->Columns as $index => $column ) {
 					if( $column->Name == $colName ) {
@@ -453,6 +453,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmActionProperty.class.php';
 		$retVal = true;
+		$templateName = null;
 
 		foreach( $this->templates as $templateName => $templates ) {
 			foreach( $templates as $pubChannelId => $template ) {
@@ -1081,6 +1082,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 
 		$this->form = BizObject::getObject( $this->form->MetaData->BasicMetaData->ID, $user, false, 'none' );
 		$latestFormVersion = $this->form->MetaData->WorkflowMetaData->Version;
+		$latestArticleVersion = null;
 
 		if( !is_null( $areasWhereArticleResides )) {
 			$this->article = BizObject::getObject( $this->article->MetaData->BasicMetaData->ID, $user, false, 'none',
@@ -1184,6 +1186,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 	 * Delete the placement object(article) on the PublishForm.
 	 *
 	 * @param bool $permanent Whether to delete the article permanently.
+	 * @param array $areas
 	 * @return bool
 	 */
 	private function deletePlacementObject( $permanent, $areas )

@@ -40,6 +40,5 @@ abstract class AdmCreateAutocompleteTermEntities_EnterpriseConnector extends Ser
 	 */
 	public function onError( AdmCreateAutocompleteTermEntitiesRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

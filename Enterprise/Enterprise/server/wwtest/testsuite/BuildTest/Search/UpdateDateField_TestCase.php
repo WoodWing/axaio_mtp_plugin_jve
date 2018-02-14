@@ -6,18 +6,19 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 {
 	public function getDisplayName()
 	{
-		return 'Update DateField in Solr';
+		return 'Update "Modified" date field in Solr Search';
 	}
 
 	public function getTestGoals()
 	{
-		return 'Update Object properties and verify the updated values are searchable in Solr. ';
+		return 'Update Object properties and verify if the updated values are searchable by Solr Search. ';
 	}
 
 	public function getTestMethods()
 	{
 		return 'Updates the properties of the object using SetObjectProperties and searches on the updated values ' .
-			   'using QueryObjects. Name and content properties are changed and being searched on.';
+			   'using QueryObjects. "Modified" property is changed and is being searched on. Search on the "Name" '.
+				'property should give the same result as before.';
 	}
 
 	public function getPrio()
@@ -50,7 +51,7 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 	 *
 	 * @param Object[] $objects Objects properties to update. On success, they get updated with latest info from DB.
 	 * @param string $stepInfo Extra logging info.
-	 * @param string|null $expectedError S-code when error expected. NULL when no error expected.
+	 * @param array|null $expectedErrors S-codes when error expected. NULL when no error expected.
 	 * @param MetaDataValue[] $updateProps List of metadata properties to update.
 	 * @param string[] $changedPropPaths List of changed metadata properties, expected to be different.
 	 * @return bool success or failure depending on response
@@ -75,7 +76,6 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 			}
 		}
 		$severityMapHandle = new BizExceptionSeverityMap( $serverityMap );
-		$severityMapHandle = $severityMapHandle; // keep code analyzer happy
 
 		// Call the SetObjectProperties service.
 		require_once BASEDIR . '/server/services/wfl/WflMultiSetObjectPropertiesService.class.php';
@@ -140,6 +140,7 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 		foreach( $response->Objects as $respObject ) {
 
 			// Lookup the original/cached object for the object returned through web service response.
+			$orgObject = null;
 			foreach( $objects as $orgObject ) {
 				if( $orgObject->MetaData->BasicMetaData->ID == $respObject->MetaData->BasicMetaData->ID ) {
 					break; // found
@@ -194,7 +195,7 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 		$expectedErrors = array();
 		$expectedErrors[$articleID] = null; // no error
 
-		$stepInfo = 'Change modified field by calling MultiSetObjectProperties service.';
+		$stepInfo = 'Change "Modified" date field by calling MultiSetObjectProperties service.';
 
 		$updateProps = array();
 		$mdValue = new MetaDataValue();
@@ -213,7 +214,7 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 		}
 
 		$queryParam = new QueryParam( 'Modified', '=', '>_This_Year' );
-		if( !$this->testSearch( $articleID, $articleName, 'Searching for article on modified value (older than a year)', true, array($queryParam) ) ) {
+		if( !$this->testSearch( $articleID, $articleName, 'Searching for article on "Modified" value (older than a year)', true, array($queryParam) ) ) {
 			return false;
 		}
 
@@ -239,7 +240,7 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 		// Test modified field is cleared in Solr...
 		// Note: a null modified field does not show up in any of the date range facets
 		$queryParam = new QueryParam( 'Modified', '=', '>_This_Year' );
-		if( !$this->testSearch( $articleID, $articleName, 'Searching for article on old modified datefield value', false, array($queryParam) ) ) {
+		if( !$this->testSearch( $articleID, $articleName, 'Searching for article on old "Modified" date field value', false, array($queryParam) ) ) {
 			return false;
 		}
 

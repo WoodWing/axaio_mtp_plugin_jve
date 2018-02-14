@@ -20,7 +20,9 @@ public class Status  implements java.io.Serializable {
 
     private java.lang.String color;
 
-    private com.woodwing.enterprise.interfaces.services.adm.IdName defaultRouteTo;
+    private java.lang.Integer deadlineRelative;
+
+    private com.woodwing.enterprise.interfaces.services.adm.IdName nextStatus;
 
     private java.lang.Boolean createPermanentVersion;
 
@@ -44,7 +46,8 @@ public class Status  implements java.io.Serializable {
            com.woodwing.enterprise.interfaces.services.adm.ObjectType type,
            java.lang.Boolean produce,
            java.lang.String color,
-           com.woodwing.enterprise.interfaces.services.adm.IdName defaultRouteTo,
+           java.lang.Integer deadlineRelative,
+           com.woodwing.enterprise.interfaces.services.adm.IdName nextStatus,
            java.lang.Boolean createPermanentVersion,
            java.lang.Boolean removeIntermediateVersions,
            java.lang.Boolean automaticallySendToNext,
@@ -57,7 +60,8 @@ public class Status  implements java.io.Serializable {
            this.type = type;
            this.produce = produce;
            this.color = color;
-           this.defaultRouteTo = defaultRouteTo;
+           this.deadlineRelative = deadlineRelative;
+           this.nextStatus = nextStatus;
            this.createPermanentVersion = createPermanentVersion;
            this.removeIntermediateVersions = removeIntermediateVersions;
            this.automaticallySendToNext = automaticallySendToNext;
@@ -188,22 +192,42 @@ public class Status  implements java.io.Serializable {
 
 
     /**
-     * Gets the defaultRouteTo value for this Status.
+     * Gets the deadlineRelative value for this Status.
      * 
-     * @return defaultRouteTo
+     * @return deadlineRelative
      */
-    public com.woodwing.enterprise.interfaces.services.adm.IdName getDefaultRouteTo() {
-        return defaultRouteTo;
+    public java.lang.Integer getDeadlineRelative() {
+        return deadlineRelative;
     }
 
 
     /**
-     * Sets the defaultRouteTo value for this Status.
+     * Sets the deadlineRelative value for this Status.
      * 
-     * @param defaultRouteTo
+     * @param deadlineRelative
      */
-    public void setDefaultRouteTo(com.woodwing.enterprise.interfaces.services.adm.IdName defaultRouteTo) {
-        this.defaultRouteTo = defaultRouteTo;
+    public void setDeadlineRelative(java.lang.Integer deadlineRelative) {
+        this.deadlineRelative = deadlineRelative;
+    }
+
+
+    /**
+     * Gets the nextStatus value for this Status.
+     * 
+     * @return nextStatus
+     */
+    public com.woodwing.enterprise.interfaces.services.adm.IdName getNextStatus() {
+        return nextStatus;
+    }
+
+
+    /**
+     * Sets the nextStatus value for this Status.
+     * 
+     * @param nextStatus
+     */
+    public void setNextStatus(com.woodwing.enterprise.interfaces.services.adm.IdName nextStatus) {
+        this.nextStatus = nextStatus;
     }
 
 
@@ -356,9 +380,12 @@ public class Status  implements java.io.Serializable {
             ((this.color==null && other.getColor()==null) || 
              (this.color!=null &&
               this.color.equals(other.getColor()))) &&
-            ((this.defaultRouteTo==null && other.getDefaultRouteTo()==null) || 
-             (this.defaultRouteTo!=null &&
-              this.defaultRouteTo.equals(other.getDefaultRouteTo()))) &&
+            ((this.deadlineRelative==null && other.getDeadlineRelative()==null) || 
+             (this.deadlineRelative!=null &&
+              this.deadlineRelative.equals(other.getDeadlineRelative()))) &&
+            ((this.nextStatus==null && other.getNextStatus()==null) || 
+             (this.nextStatus!=null &&
+              this.nextStatus.equals(other.getNextStatus()))) &&
             ((this.createPermanentVersion==null && other.getCreatePermanentVersion()==null) || 
              (this.createPermanentVersion!=null &&
               this.createPermanentVersion.equals(other.getCreatePermanentVersion()))) &&
@@ -406,8 +433,11 @@ public class Status  implements java.io.Serializable {
         if (getColor() != null) {
             _hashCode += getColor().hashCode();
         }
-        if (getDefaultRouteTo() != null) {
-            _hashCode += getDefaultRouteTo().hashCode();
+        if (getDeadlineRelative() != null) {
+            _hashCode += getDeadlineRelative().hashCode();
+        }
+        if (getNextStatus() != null) {
+            _hashCode += getNextStatus().hashCode();
         }
         if (getCreatePermanentVersion() != null) {
             _hashCode += getCreatePermanentVersion().hashCode();
@@ -474,8 +504,14 @@ public class Status  implements java.io.Serializable {
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("defaultRouteTo");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "DefaultRouteTo"));
+        elemField.setFieldName("deadlineRelative");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "DeadlineRelative"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("nextStatus");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "NextStatus"));
         elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "IdName"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);

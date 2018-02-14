@@ -2,14 +2,14 @@
 /**
  * /*INTFFULL*/ SOAP server.
  *
- * @package Enterprise
+ * @package /*PACKAGENAME*/
  * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
- *
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
- * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
+
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 require_once BASEDIR . '/server/protocols/soap/Server.php';
 

@@ -38,6 +38,7 @@ class WW_TestSuite_BuildTest_Admin_Setup_TestCase extends TestCase
 
 		$articleStatus = null;
 		$dossierStatus = null;
+		$printTarget = null;
 
 		if( !is_null($response) ) {
 			$ticket = $response->Ticket;

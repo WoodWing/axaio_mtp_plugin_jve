@@ -27,7 +27,6 @@ class BizPublishForm
 	 */
 	static public function getFormFields( $publishForm, $pattern = null )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 
 		$fieldProperties = array();
@@ -122,7 +121,7 @@ class BizPublishForm
 	 */
 	static public function cleanupPlacedFilesCreatedByConversion( $publishForm )
 	{
-		if( $publishForm->Relations ) foreach( $publishForm->Relations as $relation ) {
+		if( isset( $publishForm->Relations ) ) foreach( $publishForm->Relations as $relation ) {
 			if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
 				if( isset($placement->ConvertedImageToPublish->Attachment->FilePath ) ) {
 					unlink( $placement->ConvertedImageToPublish->Attachment->FilePath );
@@ -157,7 +156,6 @@ class BizPublishForm
 		}
 
 		// If not found in the ExtraMetaData, find it in the placed relations.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 
 		if (is_array($publishForm->Relations)) foreach ($publishForm->Relations as $relation ) {
@@ -309,7 +307,6 @@ class BizPublishForm
 	 */
 	static public function extractLayoutObjectAttachments( $layoutObject, $rendition='native' )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
@@ -607,7 +604,6 @@ class BizPublishForm
 		$attachments = array();
 		if (!isset($object->Files) || !is_array($object->Files) || count($object->Files) == 0) {
 			// Retrieve the object with files to ensure we have the attachments.
-			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 			$rendition = 'native';
 			$requestInfo = array('Pages', 'Targets', 'Relations', 'Elements');
@@ -641,13 +637,6 @@ class BizPublishForm
 		$attachments = self::getAttachments( $articleObject );
 		$content = $transferServer->getContent( $attachments[0] );
 
-		// Cleanup the temp images from the transfer folder.
-		if( $attachments ) {
-			$transferServer = new BizTransferServer();
-			foreach( $attachments as $attachment ) {
-				$transferServer->deleteFile( $attachment->FilePath );
-			}
-		}
 		return $content;
 	}
 
@@ -697,7 +686,6 @@ class BizPublishForm
 
 	static public function getDocumentId( $publishForm )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 
 		// Attempt to determine the InstanceOf relational Parent.

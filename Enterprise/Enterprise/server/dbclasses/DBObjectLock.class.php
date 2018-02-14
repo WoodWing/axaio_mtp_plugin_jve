@@ -126,12 +126,11 @@ class DBObjectLock extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
-		$usr = $dbDriver->toDBString($usr);
 		$sql = "DELETE FROM $db WHERE `object` = ?";
-		$params = array($object);
+		$params = array( intval( $object ));
 		if ($usr) {
 			$sql .= " AND `usr`= ?";
-			$params[] = $usr;
+			$params[] = strval( $usr );
 		}
 		
 		$sth = $dbDriver->query($sql, $params);
@@ -160,9 +159,8 @@ class DBObjectLock extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
-		$usr = $dbDriver->toDBString($usr);
 		$sql = 'SELECT * FROM '.$db.' WHERE `usr`= ? AND `object`= ?';
-		$params = array($usr, $object);
+		$params = array( strval( $usr ), intval( $object ));
 		$sth = $dbDriver->query($sql, $params);
 		$res = $dbDriver->fetch($sth);
 		if( empty($res) ) {

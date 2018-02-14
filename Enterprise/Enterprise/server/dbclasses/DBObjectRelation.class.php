@@ -26,7 +26,7 @@ class DBObjectRelation extends DBBase
 	 * @static
 	 * @param array $newValues Column/value pairs of the columns to be inserted.
 	 * @param bool $autoIncrement Apply auto increment for primary key (true/false).
-	 * @return integer|bool ID of the inserted record or false on failure.
+	 * @return bool|int
 	 */
 	public static function insert( array $newValues, $autoIncrement )
 	{
@@ -52,8 +52,7 @@ class DBObjectRelation extends DBBase
     	$dbDriver = DBDriverFactory::gen();
 		require_once BASEDIR.'/server/utils/UtfString.class.php';
 		$pageRange = UtfString::truncateMultiByteValue( $pageRange, 50 );
-		$pageRange = $dbDriver->toDBString( $pageRange );
-		
+
 		// Zerofy rating when no or bad value is given.
 		if( !is_numeric($rating) ) {
 			$rating = 0;
@@ -65,7 +64,7 @@ class DBObjectRelation extends DBBase
 				'child'     => $child,
 				'type'      => $relType,
 				'subid'     => $childType,
-				'pagerange' => $pageRange,
+				'pagerange' => strval( $pageRange ),
 				'rating'    => $rating,
 				'parenttype' => $parentType);
 		$result = self::insert( $newValues, true );
@@ -83,7 +82,9 @@ class DBObjectRelation extends DBBase
 	 */
 	public static function update(array $whereParams, array $newValues)
 	{
-		return parent::doUpdate($whereParams, self::TABLENAME, self::KEYCOLUMN, self::DBINT_CLASS, $newValues);
+		$params = array();
+		$where = self::makeWhereForSubstitutes($whereParams, $params);
+		return self::updateRow(self::TABLENAME, $newValues, $where, $params);
 	}	
 	
 	/**
@@ -154,7 +155,7 @@ class DBObjectRelation extends DBBase
 	 * @throws BizException Throws BizException when no record found.
 	 * @return Relation
 	 */
-	static public function getOBjectRelationByRelId( $relId )
+	static public function getObjectRelationByRelId( $relId )
 	{
 		$where = 'id = ?';
 		$params = array( $relId );
@@ -196,7 +197,7 @@ class DBObjectRelation extends DBBase
 		$db = $dbDriver->tablename($table);
 
 		$where = $isParent ? '`parent`= ?' : '`child`= ?';
-		$params = array( $objectId );
+		$params = array( intval( $objectId ) );
 
 		// Restoring type from 'deleted' to original relation type?
 		if( $restore ) {
@@ -206,10 +207,10 @@ class DBObjectRelation extends DBBase
 			$ids = array();
 			if( $isParent ) {
 				// Looking for a certain parent: check whether child is present in the objects table.
-				$sql = "SELECT `id`, `child` FROM $db where $where";
+				$sql = "SELECT `id`, `child` FROM $db WHERE $where";
 			} else {
 				// Looking for a certain child: check whether parent is present in the objects table.
-				$sql = "SELECT `id`, `parent` FROM $db where $where";
+				$sql = "SELECT `id`, `parent` FROM $db WHERE $where";
 			}
 			$sth = $dbDriver->query( $sql, $params );
 			if( !$sth ) {
@@ -328,17 +329,19 @@ class DBObjectRelation extends DBBase
 		$db = $dbDriver->tablename(self::TABLENAME);
 
 		if ($childs) {
-			$sql = "SELECT `id`, `child`, `type`, `subid`, `pagerange`, `rating` FROM $db WHERE `parent` = $id";
+			$sql = "SELECT `id`, `child`, `type`, `subid`, `pagerange`, `rating` FROM $db WHERE `parent` = ? ";
 		} else {
-			$sql = "SELECT `id`, `parent`, `type`, `subid`, `pagerange`, `rating` FROM $db WHERE `child` = $id";
+			$sql = "SELECT `id`, `parent`, `type`, `subid`, `pagerange`, `rating` FROM $db WHERE `child` = ? ";
 		}
+		$params = array( intval( $id ) );
 		// Never return relations that are marked as 'deleted'.
 		if ($type) {
-			$sql .= " AND `type` = '$type'";
+			$sql .= " AND `type` = ? ";
+			$params[] = strval( $type );
 		} elseif ( !$alsoDeletedOnes ) {
 			$sql .= " AND `type` NOT LIKE 'Deleted%'";
 		}
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
@@ -385,8 +388,6 @@ class DBObjectRelation extends DBBase
 				}
 				$where .= $typeWhere;
 				$params = array_merge( $paramsIds, $paramsType);
-				/** @noinspection PhpSillyAssignmentInspection */
-				$params = $params; // keep analyzer happy
 				break;
 			case 'childs':
 				if( $multiIds ) {
@@ -435,8 +436,37 @@ class DBObjectRelation extends DBBase
 		$fields = array('id' => 'id');
 		$result = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return is_null($result) ? null : $result['id'];
-	}	
-	
+	}
+
+	/**
+	 * Returns the DB id and page range of a workflow object relations.
+	 *
+	 * @param Relation[] $relations
+	 * @return null|array For each parent/child combinations an infoObj containing the Id and the PageRange.
+	 */
+	static public function getObjectRelationInfoOfRelations( $relations )
+	{
+		$params = array();
+		$wheres = array();
+		foreach( $relations as $relation ) {
+			$wheres[] = '( `parent`= ? AND `child`= ? AND `type` = ? ) ';
+			$params[] = $relation->Parent;
+			$params[] = $relation->Child;
+			$params[] = $relation->Type;
+		}
+		$where = '('.implode( ' OR ', $wheres ).') ';
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where, array( 'id', 'parent', 'child', 'pagerange' ), $params );
+		$result = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$infoObj = new stdClass();
+			$infoObj->Id = $row['id'];
+			$infoObj->PageRange = $row['pagerange'];
+			$result[$row['parent']][$row['child']] = $infoObj;
+		}
+
+		return $result;
+	}
+
 	/**
 	 * Returns unplaced adverts for a certain layout within the specified publication/
 	 * issue/section.
@@ -444,7 +474,7 @@ class DBObjectRelation extends DBBase
 	 * @param integer $lay_id
 	 * @param integer $publication id
 	 * @param integer $issue id
-	 * @param $section section id
+	 * @param integer $section section id
 	 * @return array|boolean Array with ids of unplaced adverts, false in case of an error.
 	 */
 	static public function unplacedAdverts( $lay_id, $publication, $issue, $section )
@@ -453,8 +483,9 @@ class DBObjectRelation extends DBBase
 		$db1 = $dbDriver->tablename("objects");
 		$db2 = $dbDriver->tablename(self::TABLENAME);
 
-		$sql = "SELECT `id` FROM $db1 WHERE `type` = 'Advert' AND `publication` = $publication AND `issue` = $issue AND (`section` = $section or `section` = 0)";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT `id` FROM $db1 WHERE `type` = ? AND `publication` = ? AND `issue` = ? AND (`section` = ? or `section` = ? )";
+		$params = array( 'Advert', intval( $publication), intval( $issue ), intval( $section ), 0 );
+		$sth = $dbDriver->query( $sql, $params );
 		if (!$sth) return false;
 
 		$arr = array();
@@ -464,11 +495,11 @@ class DBObjectRelation extends DBBase
 			$adv_id = $row["id"];
 			$sql = "SELECT 1 FROM $db2 WHERE ";
 			// (`type` = 'Placed' and `child` = $adv_id) or `parent` = $lay_id or (`child` = $adv_id and `parent` != $lay_id) ";
-			$sql .= "(`type` = 'Placed' AND `child` = $adv_id) OR ";
-			$sql .= "(`parent` = $lay_id AND `type` NOT LIKE 'Deleted%') OR ";
-			$sql .= "(`child` = $adv_id AND `parent` != $lay_id AND `type` NOT LIKE 'Deleted%' ) ";
-
-			$sth2 = $dbDriver->query($sql);
+			$sql .= "(`type` = 'Placed' AND `child` = ? ) OR ";
+			$sql .= "(`parent` = ? AND `type` NOT LIKE 'Deleted%') OR ";
+			$sql .= "(`child` = ? AND `parent` != ? AND `type` NOT LIKE 'Deleted%' ) ";
+			$params = array( intval( $adv_id ), intval( $lay_id ), intval( $adv_id ), intval( $lay_id ) );
+			$sth2 = $dbDriver->query($sql, $params );
 			if (!$sth2) return false;
 			$row2 = $dbDriver->fetch($sth2);
 			if (!$row2)
@@ -600,17 +631,51 @@ class DBObjectRelation extends DBBase
 		
 		$sql  = "SELECT `child` ";
 		$sql .= "FROM $objrel ";
-		$sql .= "WHERE `child` = $childId ";
+		$sql .= "WHERE `child` = ? ";
 		$sql .= "AND `type` <> 'Related' ";
 		$sql .= "GROUP BY `child` ";
 		$sql .= "HAVING COUNT(1) > $manifold ";
+		$params = array( intval( $childId ) );
 		
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch($sth); 
 		
 		return $row ? true : false;
 		
-	}	
+	}
+	/**
+	 * Checks if an object, used as child, has more than $manifold relations.
+	 *
+	 * It is not about 'related' relations but especially  'placed' and 'contained'
+	 * relations.
+	 *
+	 * @param array $childIds 	Array of child ids.
+	 * @param int $manifold Threshold value for manifold placed objects.
+	 * @return array with the ids of manifold used child objects.
+	 */
+	public static function childrenPlacedManifold( array $childIds, $manifold )
+	{
+		$manifoldUsed = array();
+		if ( $childIds ) {
+			$where = self::addIntArrayToWhereClause( 'child', $childIds, false );
+			$where .= "AND `type` <> ? ";
+			$params = array( 'Related' );
+			$rows = self::listRows(
+						self::TABLENAME,
+						'child',
+						'',
+						$where,
+						array( 'child' ),
+						$params,
+						null,
+						null,
+						array( 'child' ),
+						"COUNT(1) > $manifold" );
+			$manifoldUsed = array_keys( $rows );
+		}
+
+		return $manifoldUsed;
+	}
 	/**************************** Other *******************************************/	
 
 	/**

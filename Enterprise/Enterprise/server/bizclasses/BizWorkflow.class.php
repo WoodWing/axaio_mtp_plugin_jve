@@ -1758,7 +1758,6 @@ class BizWorkflow
 
 			// Only check if there's auto-routing configured when any of the edge cases above happen.
 			if( $categoryStateRouteToMixed || $categoryRouteToMixed || $stateRouteToMixed ) {
-				require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getShortUserName();
 				foreach( $objectsProps as /*$objId => */$objProps ) {
 					$pub = new Publication();
@@ -1896,7 +1895,6 @@ class BizWorkflow
 			// structure( $flatMD ).
 			// Those properties where the objects don't share the same value, it will be
 			// 'scrapped off'(by setting the properties to null) later on.
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			$user = BizSession::getShortUserName();
 			reset( $objectsProps ); // Just get one of the objects.
 			$obj = self::getObjectOrAlien( $user, key($objectsProps), array('Workflow') );
@@ -2145,7 +2143,6 @@ class BizWorkflow
 	 */
 	protected static function isDossierPropertyDisabled( $objTargets )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$clientVersion = BizSession::getClientVersion( null, null, 3 );
 		$appName = BizSession::getClientName();
 
@@ -2624,8 +2621,15 @@ class BizWorkflow
 			//$queryParams[] = new QueryParam('SectionId', '=', $section); // commented out; this gives too few results!
 			$queryParams[] = new QueryParam('Type', '=', 'Dossier');
 			// BZ#22871 - Shouldn't set the result limit, set maxEntries = '' to return all dossiers
-			$result = BizQuery::queryObjects(
-				'', $shortUserName, $queryParams, null, '', null, false, array( new QueryOrder( 'Name', true ) ), null, array( 'ID', 'Name', 'Type' ) );
+			require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+			$request = new WflQueryObjectsRequest();
+			$request->Ticket = '';
+			$request->Params = $queryParams;
+			$request->MaxEntries = '';
+			$request->Hierarchical = false;
+			$request->Order = array( new QueryOrder( 'Name', true ) );
+			$request->RequestProps = array( 'ID', 'Name', 'Type' );
+			$result = BizQuery::queryObjects2( $request, $shortUserName );
 			if (is_array($result->Rows)){
 				foreach ($result->Rows as $row) {
 					if( $row[0] == $defaultDossier ){ // BZ#24829: version#9, scenario 2 & 4:

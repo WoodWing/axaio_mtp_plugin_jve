@@ -61,8 +61,8 @@ class HtmlLog
 		// IMPORTANT: Commented out below; we can NOT access DB from here or else we end up in MAJOR troubles: BZ#8483
 		
 		// db population
-		/*require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
+		/*require_once BASEDIR.'/server/dbmodel/Definition.class.php';
+		$dbStruct = new WW_DbModel_Definition();
 		$tables = $dbStruct->listTables();
 		$header. = '<h2>Database Population</h2><table><tr><th>Table</th><th>Records</th><th>Table</th><th>Records</th></tr>';
 		$dbh = DBDriverFactory::gen();

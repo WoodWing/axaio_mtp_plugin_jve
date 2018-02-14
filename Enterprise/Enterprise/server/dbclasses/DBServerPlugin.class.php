@@ -24,9 +24,9 @@ class DBServerPlugin extends DBBase
 		self::clearError();
 		$fields = array( '`id`' );
 		if( $plugin->Id ) {
-			$row = self::getRow( self::TABLENAME, "`id` = '$plugin->Id' ", $fields );
+			$row = self::getRow( self::TABLENAME, "`id` = ?", $fields, array( intval( $plugin->Id ) ) );
 		} else if( $plugin->UniqueName ) {
-			$row = self::getRow( self::TABLENAME, "`uniquename` = '$plugin->UniqueName' ", $fields );
+			$row = self::getRow( self::TABLENAME, "`uniquename` = ?", $fields, array( strval( $plugin->UniqueName ) ) );
 		} else {
 			$row = null;
 		}
@@ -37,18 +37,18 @@ class DBServerPlugin extends DBBase
 	 *  Retrieves one server plugin object from DB
 	 *
 	 * @param PluginInfoData $plugin Plugin object (PluginInfoData) to be retrieved from DB
-	 * @return object of PluginInfoData if succeeded, null if no record returned
+	 * @return PluginInfoData|null The plugin data, or null if not found
 	 */
 	static public function getPlugin( PluginInfoData $plugin )
 	{
 		self::clearError();
 		if( $plugin->Id ) {
-			$row = self::getRow( self::TABLENAME, "`id` = '$plugin->Id' " );
+			$row = self::getRow( self::TABLENAME, "`id` = ?", '*', array( intval( $plugin->Id ) ) );
 			if( !$row ) {
 				self::setError( BizResources::localize( 'ERR_NOTFOUND' ) );
 			}
 		} else if( $plugin->UniqueName ) {
-			$row = self::getRow( self::TABLENAME, "`uniquename` = '$plugin->UniqueName' " );
+			$row = self::getRow( self::TABLENAME, "`uniquename` = ?", '*', array( strval( $plugin->UniqueName ) ) );
 			if( !$row ) {
 				self::setError( BizResources::localize( 'ERR_NOTFOUND' ) );
 			}
@@ -95,10 +95,10 @@ class DBServerPlugin extends DBBase
 		$sql  = "SELECT `uniquename`, `displayname` ";
 		$sql .= "FROM $pluginTable plug ";
 		$sql .= "INNER JOIN $connectorTable con ON (plug.`id` = con.`pluginid`) ";
-		$sql .= "WHERE con.`interface` = '$interface' ";
+		$sql .= "WHERE con.`interface` = ? ";
 		$sql .= "ORDER BY `displayname` ";
-		
-		$sth = $dbDriver->query($sql);
+
+		$sth = $dbDriver->query($sql, array( strval( $interface ) ) );
 		if( is_null($sth) ) {
 			$err = trim( $dbDriver->error() );
 			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
@@ -145,8 +145,8 @@ class DBServerPlugin extends DBBase
 	{
 		self::clearError();
 		$row = self::objToRow( $plugin );
-		unset( $row['id'] );
-		if( self::updateRow( self::TABLENAME, $row, " `id` = '$plugin->Id'" ) ) { // does set error
+		unset($row['id']);
+		if( self::updateRow( self::TABLENAME, $row, " `id` = ?", array( intval( $plugin->Id ) ) ) ) { // does set error
 			return self::getPlugin( $plugin );
 		}
 		return null; // failed
@@ -164,12 +164,15 @@ class DBServerPlugin extends DBBase
 		self::clearError();
 		$where = '';
 		$deletedObjs = array();
+		$params = array();
 		foreach( $pluginInfos as $plugin ) {
 			if( $where ) $where.= ' AND ';
 			if( $plugin->Id ) {
-				$where .= "NOT (`id` = '$plugin->Id') ";
+				$where .= "NOT (`id` = ?) ";
+				$params[] = intval( $plugin->Id );
 			} else if( $plugin->UniqueName ) {
-				$where .= "NOT (`id` = '$plugin->UniqueName') ";
+				$where .= "NOT (`uniquename` = ?) ";
+				$params[] = strval( $plugin->UniqueName );
 			} else {
 				self::setError( BizResources::localize('ERR_ARGUMENT') );
 				$where = '';
@@ -177,7 +180,7 @@ class DBServerPlugin extends DBBase
 			}
 		}
 		if( $where ) {
-			$rows = self::listRows( self::TABLENAME, 'id', 'uniquename', $where, '*' );
+			$rows = self::listRows( self::TABLENAME, 'id', 'uniquename', $where, '*', $params );
 			if( $rows ) {
 				foreach( $rows as $row ) {
 					$deletedObjs[] = self::rowToObj( $row );
@@ -185,7 +188,7 @@ class DBServerPlugin extends DBBase
 				if( self::hasError() ) {
 					$deletedObjs = array(); // clear
 				} else {
-					self::deleteRows( self::TABLENAME, $where );
+					self::deleteRows( self::TABLENAME, $where, $params );
 				}
 			}
 		}

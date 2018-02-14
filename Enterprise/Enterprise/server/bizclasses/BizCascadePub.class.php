@@ -19,7 +19,7 @@ class BizCascadePub
 	 * @param string  $copyPubName  New name to apply to copied publication.
 	 * @param boolean $copyIssues   Whether or not to copy issues too.
 	 * @param string  $namePrefix   Debug feature; name prefix to apply to all copied items inside publication. Just to ease recognizion.
-	 * @return string Id of the copied publication
+	 * @return int Id of the copied publication
 	 * @throws BizException when source pub not found or new name is invalid or already exists
 	 */
 	static public function copyPublication( $srcPubId, $copyPubName, $copyIssues, $namePrefix )

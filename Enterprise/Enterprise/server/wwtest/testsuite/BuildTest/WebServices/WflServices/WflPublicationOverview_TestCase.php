@@ -10,6 +10,7 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_TestCase extends TestCase
 {
+	private $wflServicesUtils = null;
 	private $ticket = null; // Session ticket
 	private $transferServer = null; // BizTransferServer
 	private $suiteOpts = null; //  TestSuite value
@@ -20,8 +21,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 	private $pubChannelObj = null;
 	private $category = null;
 	private $objectIds = null; // array( 'Layouts' => ids, 'Articles' => ids, 'Images' => ids )
+	private $objectNames = null; // array( 'Layouts' => LayoutNames )
+	private $flaggedObjects = null; // Objects that are flagged with its flag and message
 	private $testService017_saveResp = null;  // testService017 saveObject response
-	
+	private $routeTo1 = null;
+	private $routeToGroup1 = null;
+
 	// Step#01: Fill in the TestGoals, TestMethods and Prio...
 	public function getDisplayName() { return 'Publication Overview'; }
 	public function getTestGoals()   { return 'Checks if the Publication Overview service works correctly.'; }
@@ -45,12 +50,14 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		<li>016: SC: Place Article#3 on page 2 of Layout#3 (WflCreateObjectRelations)</li>
 		<li>017: SC: Save Layout#3 (WflSaveObjects)</li>
 		<li>018: SC: Unlock Layout#3 (WflUnlockObjects)</li>
-		<li>019: CS: Publication Overview on First Edition (WflGetPagesInfo)</li>
-		<li>020: CS: Get Page Thumbnail (WflGetPages)</li>
-		<li>021: CS: Publication Overview on First Edition (WflGetPagesInfo)</li>
-		<li>022: CS: Get Page Thumbnail (WflGetPages)</li>
-		<li>023: CS: Delete objects created in this test (WflDeleteObjects)</li>
-		<li>024: CS: Delete the issue in this test (AdmDeleteIssues)</li>
+		<li>019: JD: Adding object flag. A direct DB call is made (DB call) </li>
+		<li>020: CS: Publication Overview on First Edition (WflGetPagesInfo)</li>
+		<li>021: CS: Get Page Thumbnail (WflGetPages)</li>
+		<li>022: SC: Removing the object flag when SaveObjects is called. A direct DB call is made. (DB call)</li>
+		<li>023: CS: Publication Overview on Second Edition (WflGetPagesInfo)</li>
+		<li>024: CS: Get Page Thumbnail (WflGetPages)</li>
+		<li>025: CS: Delete objects created in this test (WflDeleteObjects)</li>
+		<li>026: CS: Delete the issue in this test (AdmDeleteIssues)</li>
 		</ol>'; }
 	public function getPrio()        { return 150; }
 	
@@ -80,7 +87,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 			$this->setupTestData();
 
 			// First Layout
-			$this->testService001(); // WflCreateObjects
+			$this->testService001();  // WflCreateObjects
 			$this->testService002();  // WflCreateObjects
 			$this->testService003();  // WflCreateObjectRelations
 			$this->testService004();  // WflSaveObjects
@@ -102,12 +109,16 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 			$this->testService016();  // WflCreateObjectRelations
 			$this->testService017();  // WflSaveObjects
 			$this->testService018();  // WflUnlockObjects
+
+			// Flag the first layout
+			$this->testService019();  // Direct call to DB ( Insert Object Flag )
 	
 			// Publication Overview Test
-			$this->testService019();  // WflGetPagesInfo
-			$this->testService020();  // WflGetPages
-			$this->testService021();  // WflGetPagesInfo
-			$this->testService022();  // WflGetPages
+			$this->testService020();  // WflGetPagesInfo
+			$this->testService021();  // WflGetPages
+			$this->testService022();  // Direct call to DB ( Remove Object Flag )
+			$this->testService023();  // WflGetPagesInfo
+			$this->testService024();  // WflGetPages
 		}
 		catch( BizException $e ) {
 		}
@@ -127,6 +138,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 	
 		$curResp = $this->wflServicesUtils->callService( $req, 'testService#001');
 		$this->objectIds['Layouts'][] = $curResp->Objects[0]->MetaData->BasicMetaData->ID;
+		$this->objectNames['Layouts'][] = $curResp->Objects[0]->MetaData->BasicMetaData->Name;
 	}
 
 	private function getRecordedRequest001()
@@ -644,7 +656,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->Produce = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->Color = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = '';
+		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = $this->routeTo1;
 		$request->Objects[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Version = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -885,6 +897,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$req = $this->getRecordedRequest006();
 		$curResp = $this->wflServicesUtils->callService( $req, 'testService#006');
 		$this->objectIds['Layouts'][] = $curResp->Objects[0]->MetaData->BasicMetaData->ID;
+		$this->objectNames['Layouts'][] = $curResp->Objects[0]->MetaData->BasicMetaData->Name;
 	}
 
 	private function getRecordedRequest006()
@@ -1506,7 +1519,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->Produce = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->Color = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = '';
+		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = $this->routeToGroup1;
 		$request->Objects[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Version = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -1728,6 +1741,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$req = $this->getRecordedRequest013();
 		$curResp = $this->wflServicesUtils->callService( $req, 'testService#013');
 		$this->objectIds['Layouts'][] = $curResp->Objects[0]->MetaData->BasicMetaData->ID;
+		$this->objectNames['Layouts'][] = $curResp->Objects[0]->MetaData->BasicMetaData->Name;
 		return !$this->hasError();
 	}
 
@@ -2457,18 +2471,31 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 
 	private function testService019()
 	{
+		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizPlnObject.class.php';
+
+		// Layout 1
+		$layoutId = $this->objectIds['Layouts'][0];
+		$sMsg = BizResources::localize( 'PLAN_MESS_LAYOUT_MODIFIED', true, array( $this->objectNames['Layouts'][0] ) );
+		$this->flaggedObjects[] = array( 'id' => $layoutId, 'flag' => FLAG_OBJECT_UPDATED, 'flagMsg' => $sMsg ); // Remember this for the recorded responses later.
+		DBObjectFlag::setObjectFlag( $layoutId, 'Plan System', $this->flaggedObjects[0]['flag'],
+												1, $this->flaggedObjects[0]['flagMsg'] );
+	}
+
+	private function testService020()
+	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflGetPagesInfoService.class.php';
-		$req = $this->getRecordedRequest019();
-		$recResp = $this->getRecordedResponse019();
-		$curResp = $this->wflServicesUtils->callService( $req, 'testService#019');
+		$req = $this->getRecordedRequest020();
+		$recResp = $this->getRecordedResponse020();
+		$curResp = $this->wflServicesUtils->callService( $req, 'testService#020');
 
 		require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 		$phpCompare = new WW_Utils_PhpCompare();
 		$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
 		if( !$phpCompare->compareTwoProps( $recResp, $curResp ) ) {
-			$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '019' );
-			$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '019' );
+			$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '020' );
+			$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '020' );
 			$errorMsg = implode( PHP_EOL, $phpCompare->getErrors() );
 			$errorMsg .= 'Recorded response: '.$recRespFile.'<br/>';
 			$errorMsg .= 'Current response: '.$curRespFile.'<br/>';
@@ -2477,7 +2504,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return !$this->hasError();
 	}
 
-	private function getRecordedRequest019()
+	private function getRecordedRequest020()
 	{
 		$request = new WflGetPagesInfoRequest();
 		$request->Ticket = $this->ticket;
@@ -2492,7 +2519,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return $request;
 	}
 	
-	private function getRecordedResponse019()
+	private function getRecordedResponse020()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizPageInfo.class.php';
 		$response = new WflGetPagesInfoResponse();
@@ -2609,6 +2636,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->LayoutObjects[0]->State->DefaultRouteTo = null;
 		$response->LayoutObjects[0]->Version = '0.2';
 		$response->LayoutObjects[0]->LockedBy = '';
+		$response->LayoutObjects[0]->Flag = 0;
+		$response->LayoutObjects[0]->FlagMsg = '';
 		$response->LayoutObjects[0]->Modified = '2013-12-04T15:15:44';
 		$response->LayoutObjects[1] = new LayoutObject();
 		$response->LayoutObjects[1]->Id = $this->objectIds['Layouts'][0];
@@ -2625,6 +2654,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->LayoutObjects[1]->State->DefaultRouteTo = null;
 		$response->LayoutObjects[1]->Version = '0.2';
 		$response->LayoutObjects[1]->LockedBy = '';
+		$response->LayoutObjects[1]->Flag = $this->flaggedObjects[0]['flag'];
+		$response->LayoutObjects[1]->FlagMsg = $this->flaggedObjects[0]['flagMsg'];
 		$response->LayoutObjects[1]->Modified = '2013-12-04T15:14:53';
 		$response->PlacedObjects = array();
 		$response->PlacedObjects[0] = new PlacedObject();
@@ -2672,13 +2703,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return $response;
 	}
 	
-	private function testService020()
+	private function testService021()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflGetPagesService.class.php';
-		$req = $this->getRecordedRequest020();
-		$recResp = $this->getRecordedResponse020();
-		$curResp = $this->wflServicesUtils->callService( $req, 'testService#020');
+		$req = $this->getRecordedRequest021();
+		$recResp = $this->getRecordedResponse021();
+		$curResp = $this->wflServicesUtils->callService( $req, 'testService#021');
 
 		require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 		$phpCompare = new WW_Utils_PhpCompare();
@@ -2689,8 +2720,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		);
 		$phpCompare->initCompare( $ignorePaths, $this->getCommonPropDiff() ); // all properties should be checked
 		if( !$phpCompare->compareTwoProps( $recResp, $curResp ) ) {
-			$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '020' );
-			$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '020' );
+			$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '021' );
+			$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '021' );
 			$errorMsg = implode( PHP_EOL, $phpCompare->getErrors() );
 			$errorMsg .= 'Recorded response: '.$recRespFile.'<br/>';
 			$errorMsg .= 'Current response: '.$curRespFile.'<br/>';
@@ -2699,7 +2730,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return !$this->hasError();
 	}
 
-	private function getRecordedRequest020()
+	private function getRecordedRequest021()
 	{
 		$request = new WflGetPagesRequest();
 		$request->Ticket = $this->ticket;
@@ -2720,7 +2751,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return $request;
 	}
 	
-	private function getRecordedResponse020()
+	private function getRecordedResponse021()
 	{
 		$response = new WflGetPagesResponse();
 		$response->ObjectPageInfos = array();
@@ -2758,7 +2789,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Produce = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Color = $this->statuses['Layout']->Color;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->RouteTo = '';
+		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->RouteTo = $this->routeTo1;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Version = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -2780,7 +2811,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->Pages[0]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[0]->Pages[0]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[0]->Pages[0]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#020_att#000_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#021_att#000_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[0]->Pages[0]->Files[0] );
 		$response->ObjectPageInfos[0]->Pages[0]->Edition = null;
 		$response->ObjectPageInfos[0]->Pages[0]->Master = 'Master';
@@ -2803,7 +2834,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->Pages[1]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[0]->Pages[1]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[0]->Pages[1]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#020_att#001_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#021_att#001_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[0]->Pages[1]->Files[0] );
 		$response->ObjectPageInfos[0]->Pages[1]->Edition = null;
 		$response->ObjectPageInfos[0]->Pages[1]->Master = 'Master';
@@ -2849,7 +2880,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Produce = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Color = $this->statuses['Layout']->Color;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->RouteTo = '';
+		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->RouteTo = $this->routeToGroup1;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->LockedBy = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Version = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -2871,7 +2902,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->Pages[0]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[1]->Pages[0]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[1]->Pages[0]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#020_att#002_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#021_att#002_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[1]->Pages[0]->Files[0] );
 		$response->ObjectPageInfos[1]->Pages[0]->Edition = null;
 		$response->ObjectPageInfos[1]->Pages[0]->Master = 'Master';
@@ -2894,7 +2925,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->Pages[1]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[1]->Pages[1]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[1]->Pages[1]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#020_att#003_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#021_att#003_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[1]->Pages[1]->Files[0] );
 		$response->ObjectPageInfos[1]->Pages[1]->Edition = null;
 		$response->ObjectPageInfos[1]->Pages[1]->Master = 'Master';
@@ -2962,7 +2993,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->Pages[0]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[2]->Pages[0]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[2]->Pages[0]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#020_att#004_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#021_att#004_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[2]->Pages[0]->Files[0] );
 		$response->ObjectPageInfos[2]->Pages[0]->Edition = null;
 		$response->ObjectPageInfos[2]->Pages[0]->Master = 'Master';
@@ -2985,7 +3016,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->Pages[1]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[2]->Pages[1]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[2]->Pages[1]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#020_att#005_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#021_att#005_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[2]->Pages[1]->Files[0] );
 		$response->ObjectPageInfos[2]->Pages[1]->Edition = null;
 		$response->ObjectPageInfos[2]->Pages[1]->Master = 'Master';
@@ -2999,21 +3030,28 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->MessageList = $this->testService017_saveResp->Objects[0]->MessageList;
 		return $response;
 	}
-	
-	private function testService021()
+
+	private function testService022()
+	{
+		// Delete object flags
+		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
+		DBObjectFlag::deleteObjectFlagsByObjId( $this->flaggedObjects[0]['id'] );
+	}
+
+	private function testService023()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflGetPagesInfoService.class.php';
-		$req = $this->getRecordedRequest021();
-		$recResp = $this->getRecordedResponse021();
-		$curResp = $this->wflServicesUtils->callService( $req, 'testService#021');
+		$req = $this->getRecordedRequest023();
+		$recResp = $this->getRecordedResponse023();
+		$curResp = $this->wflServicesUtils->callService( $req, 'testService#023');
 
 		require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 		$phpCompare = new WW_Utils_PhpCompare();
 		$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
 		if( !$phpCompare->compareTwoProps( $recResp, $curResp ) ) {
-			$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '021' );
-			$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '021' );
+			$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '023' );
+			$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '023' );
 			$errorMsg = implode( PHP_EOL, $phpCompare->getErrors() );
 			$errorMsg .= 'Recorded response: '.$recRespFile.'<br/>';
 			$errorMsg .= 'Current response: '.$curRespFile.'<br/>';
@@ -3022,7 +3060,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return !$this->hasError();
 	}
 
-	private function getRecordedRequest021()
+	private function getRecordedRequest023()
 	{
 		$request = new WflGetPagesInfoRequest();
 		$request->Ticket = $this->ticket;
@@ -3037,7 +3075,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return $request;
 	}
 	
-	private function getRecordedResponse021()
+	private function getRecordedResponse023()
 	{
 		$response = new WflGetPagesInfoResponse();
 		$response->ReversedReadingOrder = false;
@@ -3159,6 +3197,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->LayoutObjects[0]->State->DefaultRouteTo = null;
 		$response->LayoutObjects[0]->Version = '0.2';
 		$response->LayoutObjects[0]->LockedBy = '';
+		$response->LayoutObjects[0]->Flag = 0;
+		$response->LayoutObjects[0]->FlagMsg = '';
 		$response->LayoutObjects[0]->Modified = '2013-12-04T15:16:30';
 		$response->LayoutObjects[1] = new LayoutObject();
 		$response->LayoutObjects[1]->Id = $this->objectIds['Layouts'][0];
@@ -3175,6 +3215,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->LayoutObjects[1]->State->DefaultRouteTo = null;
 		$response->LayoutObjects[1]->Version = '0.2';
 		$response->LayoutObjects[1]->LockedBy = '';
+		$response->LayoutObjects[1]->Flag = 0;
+		$response->LayoutObjects[1]->FlagMsg = '';
 		$response->LayoutObjects[1]->Modified = '2013-12-04T15:15:44';
 		$response->PlacedObjects = array();
 		$response->PlacedObjects[0] = new PlacedObject();
@@ -3208,13 +3250,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return $response;
 	}
 	
-	private function testService022()
+	private function testService024()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflGetPagesService.class.php';
-		$req = $this->getRecordedRequest022();
-		$recResp = $this->getRecordedResponse022();
-		$curResp = $this->wflServicesUtils->callService( $req, 'testService#022');
+		$req = $this->getRecordedRequest024();
+		$recResp = $this->getRecordedResponse024();
+		$curResp = $this->wflServicesUtils->callService( $req, 'testService#024');
 
 		require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 		$phpCompare = new WW_Utils_PhpCompare();
@@ -3225,8 +3267,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		);
 		$phpCompare->initCompare( $ignorePaths, $this->getCommonPropDiff() ); // all properties should be checked
 		if( !$phpCompare->compareTwoProps( $recResp, $curResp ) ) {
-			$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '022' );
-			$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '022' );
+			$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '024' );
+			$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '024' );
 			$errorMsg = implode( PHP_EOL, $phpCompare->getErrors() );
 			$errorMsg .= 'Recorded response: '.$recRespFile.'<br/>';
 			$errorMsg .= 'Current response: '.$curRespFile.'<br/>';
@@ -3235,7 +3277,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return !$this->hasError();
 	}
 
-	private function getRecordedRequest022()
+	private function getRecordedRequest024()
 	{
 		$request = new WflGetPagesRequest();
 		$request->Ticket = $this->ticket;
@@ -3257,7 +3299,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return $request;
 	}
 	
-	private function getRecordedResponse022()
+	private function getRecordedResponse024()
 	{
 		$response = new WflGetPagesResponse();
 		$response->ObjectPageInfos = array();
@@ -3295,7 +3337,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Produce = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Color = $this->statuses['Layout']->Color;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->RouteTo = '';
+		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->RouteTo = $this->routeTo1;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Version = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -3317,7 +3359,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->Pages[0]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[0]->Pages[0]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[0]->Pages[0]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#022_att#000_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#024_att#000_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[0]->Pages[0]->Files[0] );
 		$response->ObjectPageInfos[0]->Pages[0]->Edition = null;
 		$response->ObjectPageInfos[0]->Pages[0]->Master = 'Master';
@@ -3340,7 +3382,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->Pages[1]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[0]->Pages[1]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[0]->Pages[1]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#022_att#001_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#024_att#001_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[0]->Pages[1]->Files[0] );
 		$response->ObjectPageInfos[0]->Pages[1]->Edition = null;
 		$response->ObjectPageInfos[0]->Pages[1]->Master = 'Master';
@@ -3386,7 +3428,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Produce = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Color = $this->statuses['Layout']->Color;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->RouteTo = '';
+		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->RouteTo = $this->routeToGroup1;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->LockedBy = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Version = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -3408,7 +3450,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->Pages[0]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[1]->Pages[0]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[1]->Pages[0]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#022_att#002_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#024_att#002_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[1]->Pages[0]->Files[0] );
 		$response->ObjectPageInfos[1]->Pages[0]->Edition = null;
 		$response->ObjectPageInfos[1]->Pages[0]->Master = 'Master';
@@ -3431,7 +3473,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->Pages[1]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[1]->Pages[1]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[1]->Pages[1]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#022_att#003_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#024_att#003_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[1]->Pages[1]->Files[0] );
 		$response->ObjectPageInfos[1]->Pages[1]->Edition = null;
 		$response->ObjectPageInfos[1]->Pages[1]->Master = 'Master';
@@ -3499,7 +3541,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->Pages[0]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[2]->Pages[0]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[2]->Pages[0]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#022_att#004_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#024_att#004_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[2]->Pages[0]->Files[0] );
 		$response->ObjectPageInfos[2]->Pages[0]->Edition = null;
 		$response->ObjectPageInfos[2]->Pages[0]->Master = 'Master';
@@ -3522,7 +3564,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->Pages[1]->Files[0]->FilePath = '';
 		$response->ObjectPageInfos[2]->Pages[1]->Files[0]->FileUrl = null;
 		$response->ObjectPageInfos[2]->Pages[1]->Files[0]->EditionId = null;
-		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#022_att#005_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/WflPublicationOverview_TestData/rec#024_att#005_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->ObjectPageInfos[2]->Pages[1]->Files[0] );
 		$response->ObjectPageInfos[2]->Pages[1]->Edition = null;
 		$response->ObjectPageInfos[2]->Pages[1]->Master = 'Master';
@@ -3537,14 +3579,14 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return $response;
 	}
 
-	private function getRecordedRequest023()
+	private function getRecordedRequest025()
 	{
 		// Collect all used object ids.
 		$objectIds = array();
 		foreach( $this->objectIds as $objTypeIds ) {
 			$objectIds = array_merge( $objectIds, $objTypeIds );
 		}
-		
+
 		// Compose request.
 		$request = new WflDeleteObjectsRequest();
 		$request->Ticket = $this->ticket;
@@ -3557,7 +3599,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		return $request;
 	}
 	
-	private function getRecordedResponse023()
+	private function getRecordedResponse025()
 	{
 		// Collect all used object ids.
 		$objectIds = array();
@@ -3618,6 +3660,17 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$stepInfo = 'Creating issue "'.$issueName.'" under the print channel of the TESTSUITE brand.';
 		$this->issueObj = $this->wflServicesUtils->createIssue( $stepInfo, 
 									$this->pubObj->Id, $this->pubChannelObj->Id, $issueName );
+
+		// EN-89563
+		// Getting RouteTo user.
+		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
+		$this->routeTo1 = Bizsession::getUserInfo( 'fullname' );
+
+		// Getting RouteTo group.
+		$stepInfo = "Retrieving user groups to be assigned to Layout's routeTo.";
+		$userGroups = $this->wflServicesUtils->getUserGroups( $stepInfo, Bizsession::getUserInfo( 'id' ) );
+		$this->routeToGroup1 = !empty( $userGroups ) ? $userGroups[0]->Name : '';
+
 		return true;
 	}
 
@@ -3632,16 +3685,16 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		if( $this->objectIds ) {
 			require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 			require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
-			$req = $this->getRecordedRequest023();
-			$recResp = $this->getRecordedResponse023();
-			$curResp = $this->wflServicesUtils->callService( $req, 'testService#023');
+			$req = $this->getRecordedRequest025();
+			$recResp = $this->getRecordedResponse025();
+			$curResp = $this->wflServicesUtils->callService( $req, 'testService#025');
 	
 			require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 			$phpCompare = new WW_Utils_PhpCompare();
 			$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
 			if( !$phpCompare->compareTwoProps( $recResp, $curResp ) ) {
-				$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '023' );
-				$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '023' );
+				$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', '025' );
+				$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', '025' );
 				$errorMsg = implode( PHP_EOL, $phpCompare->getErrors() );
 				$errorMsg .= 'Recorded response: '.$recRespFile.'<br/>';
 				$errorMsg .= 'Current response: '.$curRespFile.'<br/>';

@@ -66,9 +66,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		// Possible enhancement: add paging to this example
 		
-		// keep code analyzer happy for unused params:
-		$query=$query; $firstEntry=$firstEntry; $maxEntries=$maxEntries; $order=$order;
-
 		LogHandler::Log('SimpleFileSystem', 'DEBUG', 'SimpleFileSystem::queryObjects called for selected folder: '.$params[0]->Value );
 
 		// Create array with column definitions
@@ -97,7 +94,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
 		PerformanceProfiler::startProfile( 'SimpleFileSystem - getAlienObject', 3 );
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
 		LogHandler::Log('SimpleFileSystem', 'DEBUG', "SimpleFileSystem::getAlienObject called for $alienID - $rendition" );
 
 		$fullfile  = $this->getFullFilePathFromAlienID( $alienID );
@@ -179,7 +175,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log('SimpleFileSystem', 'DEBUG', "SimpleFileSystem::createShadowObject called for $alienID" );
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/utils/ImageUtils.class.php'; // ResizeJPEG
 		
 		$fullfile  = $this->getFullFilePathFromAlienID( $alienID );
@@ -250,8 +245,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function setShadowObjectProperties( $alienId, &$object )
 	{
-		// keep code analyzer happy:
-		$alienId=$alienId; $object=$object;
 		LogHandler::Log( 'SimpleFileSystem', 'INFO', 'Multi-set::Calling setShadowObjectProperties' );
 	}
 
@@ -267,7 +260,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function multiSetShadowObjectProperties( $shadowObjectIds, $metaDataValues )
 	{
-		$shadowObjectIds = $shadowObjectIds; $metaDataValues = $metaDataValues; // keep code analyzer happy:
 		LogHandler::Log( 'SimpleFileSystem', 'INFO', 'Multi-set::Calling multiSetShadowObjectProperties' );
 	}
 
@@ -287,7 +279,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public function getShadowObject( $alienId, &$object, $objprops, $lock, $rendition )
 	{
-		$objprops = $objprops; $lock = $lock; // Make code analyzer happy.
 		// For the native rendition, we return the latest version from the filestory
 		if ( $rendition == 'native' ) {
 			require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
@@ -459,7 +450,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	private function getEnterpriseContext( &$publication, &$category, &$status, $article )
 	{
 		// Get list of publications from Enterpise. If available we use WW News
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		$username = BizSession::getShortUserName();
 
@@ -594,10 +584,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 		$brandId, $overruleIssueId, $categoryId, $objectType, $statusId, 
 		$alienId, $contentSource, $documentId )
 	{
-		// keep analyzer happy:
-		$user=$user; $right=$right; $alienId=$alienId; $contentSource=$contentSource; $documentId=$documentId; 
-		$brandId=$brandId; $overruleIssueId=$overruleIssueId; $categoryId=$categoryId; $objectType=$objectType; $statusId=$statusId;
-
 		return SFS_ALLOW_ACCESS;
 	}
 
@@ -608,10 +594,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 		$brandId, $overruleIssueId, $categoryId, $objectType, $statusId, 
 		$shadowId, $contentSource, $documentId )
 	{
-		// keep analyzer happy:
-		$user=$user; $right=$right; $shadowId=$shadowId; $contentSource=$contentSource; $documentId=$documentId; 
-		$brandId=$brandId; $overruleIssueId=$overruleIssueId; $categoryId=$categoryId; $objectType=$objectType; $statusId=$statusId;
-
 		return SFS_ALLOW_ACCESS;
 	}
 

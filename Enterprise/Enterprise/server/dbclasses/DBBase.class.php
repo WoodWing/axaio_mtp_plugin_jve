@@ -449,10 +449,13 @@ class DBBase
 	 * 		  retrieve rows 6-15. The offset of the initial row is 0 (not 1).
 	 * @param array|null $groupBy List of fields on which the result set is grouped.
 	 * @param string|null $having Indicates the condition or conditions that the grouped by rows must satisfy to be selected.
+	 * @param bool $logSQL [Since 10.1.6/10.3.0] Whether or not the resulting SQL must be logged.
 	 * @return array of rows (see function description) or null on failure (use getError() for details)
+	 * @throws BizException In case of database connection error.
 	 */
 	static public function listRows(
-		$tableNames, $keycol, $namecol, $where, $fieldnames = '*', $params = array(), $orderBy = null, $limit = null, $groupBy = null, $having = null )
+		$tableNames, $keycol, $namecol, $where, $fieldnames = '*', $params = array(), $orderBy = null, $limit = null,
+		$groupBy = null, $having = null, $logSQL = true )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
@@ -529,7 +532,7 @@ class DBBase
 			$sql = self::addLimitByClause( $dbDriver, $sql, $limit );
 		}
 
-		$sth = $dbDriver->query( $sql, $params );
+		$sth = $dbDriver->query( $sql, $params, null, $logSQL );
 		if( is_null( $sth ) ) {
 			$err = trim( $dbDriver->error() );
 			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
@@ -583,27 +586,64 @@ class DBBase
 	}
 
 	/**
-	 *	Deletes one or more rows from table with $tablename where = $where
-	 *	@param $tablename string Name of the table to delete records from
-	 *  @param $where string What records to delete. Can contain placeholders (?).
-	 *  @param $params array containing parameters to be substituted for the placeholders
+	 * Deletes one or more rows from table with $tablename where = $where
+	 *
+	 * @param string $tablename string Name of the table to delete records from
+	 * @param string $where What records to delete. Can contain placeholders (?).
+	 * @param array $params containing parameters to be substituted for the placeholders
 	 *         of the where clause.
+	 * @param bool $logSQL Whether or not the resulting SQL must be logged.
 	 * @return boolean|null NULL in case of error, TRUE in case of success
+	 * @throws BizException In case of database connection error.
 	 */
-	static public function deleteRows( $tablename, $where, $params = array() )
+	static public function deleteRows( $tablename, $where, $params = array(), $logSQL = true )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
-		$tablename = $dbDriver->tablename($tablename);
-		
+		$tablename = $dbDriver->tablename( $tablename );
+
 		$sql = " DELETE FROM $tablename WHERE $where ";
-		$queryresult = $dbDriver->query($sql, $params);
+		$queryresult = $dbDriver->query( $sql, $params, null, $logSQL );
 		if( is_null( $queryresult ) ) {
 			$err = trim( $dbDriver->error() );
-			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
+			self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
 			return null;
 		}
 		return true;
+	}
+
+	/**
+	 * Makes 'raw' copy of a table row.
+	 * This is without understanding the exact meaning of individual fields.
+	 *
+	 * @since 10.2.0 moved from DBCascadePub to here.
+	 * @param string $tableName  Name of table without prefix or quotes
+	 * @param array  $sourceRow    Row to be copied. Keys are column names, values are field data.
+	 * @param array  $overruleFields Some fields to be filled in during copy
+	 * @param bool   $autoincrement
+	 * @return integer The id of the created row (the copy), or null if copy failed.
+	 */
+	static public function copyRow( $tableName, $sourceRow, $overruleFields = null, $autoincrement = true )
+	{
+		// Copy record in memory (except the id, as handled in insertRow below)
+		$copyRow = $sourceRow;
+
+		// Take care that both $copyRow and $overruleFields have lowercase keys,
+		// as this may not be guaranteed?!?
+		$copyRow = array_change_key_case( $copyRow );
+
+		// Apply overruled data
+		if( $overruleFields ) {
+			$overruleFields = array_change_key_case( $overruleFields );
+			foreach( $overruleFields as $overruleName => $overruleValue ) {
+				if( isset( $copyRow[ $overruleName ] ) ) {
+					$copyRow[ $overruleName ] = $overruleValue;
+				}
+			}
+		}
+
+		// Insert the copy into DB
+		return self::insertRow( $tableName, $copyRow, $autoincrement );
 	}
 
 	/**
@@ -616,6 +656,39 @@ class DBBase
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
 		$dbDriver->resetAutoIncreament( $tableName, $autoIncrementValue );
+	}
+
+	/**
+	 * Performs a given SQL query at the DB.
+	 *
+	 * @since 10.2.0
+	 * @param string $sql   The SQL statement.
+	 * @param array $params Parameters for replacement
+	 * @param mixed $blob   Chunck of data to store at DB. It will be converted to a DB string here.
+	 * 				   One blob can be passed or multiple. If muliple are passed $blob is an array.
+	 * @param boolean $writeLog In case of license related queries, this option can be used to not write in the log file.
+	 * @param boolean $logExistsErr Suppress 'already exists' errors. Used for specific insert operations for which this error is fine.
+	 * @return resource|bool DB handle that can be used to fetch results. False when record already exists, in case $logExistsErr is set false.
+	 * @throws BizException on syntax error in SQL.
+	 */
+	static public function query( $sql, $params=array(), $blob=null, $writeLog=true, $logExistsErr=true )
+	{
+		self::clearError();
+		$dbDriver = DBDriverFactory::gen();
+		return $dbDriver->query( $sql, $params, $blob, $writeLog, $logExistsErr );
+	}
+
+	/**
+	 * Fetch a result row as an associative array.
+	 *
+	 * @since 10.2.0
+	 * @param resource $sth The result resource that is being evaluated. This result comes from a call to {@link: query()}.
+	 * @return array Associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
+	 */
+	static public function fetch( $sth )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		return $dbDriver->fetch( $sth );
 	}
 
 	/**
@@ -761,28 +834,29 @@ class DBBase
     		$versionProp = $major.'.'.$minor;
     	}
     }
-	
+
 	/**
 	 * Inserts records with the new params for passed columns.
+	 *
 	 * @param string $table table name
 	 * @param string $dbIntClass DB Integrity class name
 	 * @param array $newValues column/value pairs of the columns to be inserted.
 	 * @param boolean $autoIncrement Apply auto increment for primary key (true/false).
 	 * @param $logExistsErr boolean Log 'already exists' errors. If set to false no error is logged for an insert operations for which this error is fine.
-	 * @return new id or else false.
+	 * @return int|bool id or else false.
 	 */
-	protected static function doInsert( $table, $dbIntClass, array $newValues, $autoIncrement, $logExistsErr=true )
+	protected static function doInsert( $table, $dbIntClass, array $newValues, $autoIncrement, $logExistsErr = true )
 	{
 		self::clearError();
-		
+
 		$intDB = new $dbIntClass;
-        $intDB->beforeInsert( $newValues );
-        
+		$intDB->beforeInsert( $newValues );
+
 		$result = self::insertRow( $table, $newValues, $autoIncrement, null, $logExistsErr );
 
-        $intDB->afterInsert( $result, $newValues );
+		$intDB->afterInsert( $result, $newValues );
 
-        return $result;
+		return $result;
 	}	    
     
 	/**
@@ -792,7 +866,7 @@ class DBBase
 	 * @param string $table Table from which records are deleted.
 	 * @param string $keyColumn  Used as keys at the result array. Leave empty to use [0...N-1] array keys.
 	 * @param string $dbIntClass Class name to instantiate the integrity object from.
-	 * @return number of records updated or null in case of error.
+	 * @return integer|null number of records updated or null in case of error.
 	 */	
 	protected static function doDelete(array $whereParams, $table, $keyColumn, $dbIntClass)
 	{
@@ -880,49 +954,50 @@ class DBBase
 	}
 
 	/**
-	 * This method converts an array with integer params to a where clause.
-	 * If the array contains one element the '=' operator is used else the 'in'
-	 * operator will be used. If the number of passed array elements exceeds 1000
-	 * then more than one IN-clause is generated.This is because of Oracle limitations.
-	 * This is a very exceptional case.
+	 * Convert a list of integers into a search filter (SQL expression) that can be added to a WHERE clause.
 	 *
-	 * @param string $fieldname database column name
- 	 * @param array (integer) $arrayValues params to filter on
+	 * If the array contains one element the '=' operator is used else the 'IN' operator will be used.
+	 * If the number of passed array elements exceeds 1000 then more than one IN-clause is generated.
+	 * This is because of Oracle limitations. This is a very exceptional case.
+	 *
+	 * @param string $fieldName database column name
+ 	 * @param integer[] $intValues params to filter on
  	 * @param bool $not to negate the params
-	 * @return string which can be added to where clause
+	 * @return string SQL expression that can be added to the WHERE clause. Empty when no list of integer provided.
 	 */
-	static public function addIntArrayToWhereClause( $fieldname, $arrayValues, $not )
+	static public function addIntArrayToWhereClause( $fieldName, $intValues, $not = false )
 	{
 		$where = '';
 
-		if( is_array($arrayValues) && !empty($arrayValues) ) {
-			$count = count( $arrayValues );
-			$alias = explode('.', $fieldname);
-			if (count( $alias ) === 2) { // alias is used e.g. o.id
-				$fieldname = $alias[0].'.'."`$alias[1]`";  
+		if( is_array( $intValues ) && !empty( $intValues ) ) {
+			$intValues = array_map( 'intval', $intValues ); // block sql injection
+			$count = count( $intValues );
+			$alias = explode( '.', $fieldName, 2 );
+			if( count( $alias ) === 2 ) { // alias is used e.g. o.id
+				$fieldName = $alias[0].'.'."`$alias[1]`";
 			} else {
-				$fieldname = "`$fieldname`";  
-			}			
+				$fieldName = "`$fieldName`";
+			}
 			if( $count === 1 ) {
-				$notOperator = $not ? '!' : ''; 
-				$where = "$fieldname $notOperator= " . array_shift($arrayValues) . ' ' ;
-			} elseif ($count < 1000 ) { // Oracle only supports upto 1000 literals in the IN clause (see BZ#27945).
-				$notOperator = $not ? 'NOT' : ''; 
-				$where = "$fieldname $notOperator IN (" . implode(',', $arrayValues) . ') ';
+				$notOperator = $not ? '!' : '';
+				$where = "$fieldName $notOperator= ".reset( $intValues ).' ';
+			} elseif( $count < 1000 ) { // Oracle only supports up to 1000 literals in the IN clause (see BZ#27945).
+				$notOperator = $not ? 'NOT' : '';
+				$where = "$fieldName $notOperator IN (".implode( ',', $intValues ).') ';
 			} else { // More than 1000 literals
-				$notOperator = $not ? 'NOT' : ''; 
+				$notOperator = $not ? 'NOT' : '';
 				$or = '';
-				for ( $offset = 0; $offset < $count; $offset += 1000 ) {
-					$subArray = array_slice($arrayValues, $offset, 1000);
+				for( $offset = 0; $offset < $count; $offset += 1000 ) {
+					$subArray = array_slice( $intValues, $offset, 1000 );
 					$where .= $or;
-					$where .= "$fieldname $notOperator IN (" . implode( ',', $subArray ) . ') ';
+					$where .= "$fieldName $notOperator IN (".implode( ',', $subArray ).') ';
 					$or = 'OR ';
 				}
 			}
 		}
-		
+
 		return $where;
-	}	
+	}
 
 	/**
 	 * Views contain only the ids of objects. This method returns the ids of $rhs view with are not in the $lhs view.

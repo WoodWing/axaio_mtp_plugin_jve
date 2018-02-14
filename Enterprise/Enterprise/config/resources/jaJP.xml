@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">Enterpriseデータベーステーブルに保管されたデータは正常に移行されました。</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">データベース - インストール/アップグレード</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Enterpriseデータベースモデルの情報:</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Enterpriseデータベースモデルの情報:</Term>
   <Term key="DBINSTALLER_DBSELECT">データベース名</Term>
   <Term key="DBINSTALLER_DBSERVER">データベースサーバー</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1.データベース接続を定義するオプションをチェック:\n・configserver.phpファイル：DBSERVERとDBTYPE\n・config.phpファイル：DBSELECT、DBUSERおよびDBPASS\n2.データベースの起動と接続のために定義された '%1' でアクセス可能かどうかを確認します。\n3.'%2' を実行するユーザはデータベースへのアクセス権を持っていることを確認してください。\n4.新規インストールの場合は、空のデータベース（テーブルスペース）が '%3' で手動で事前に作成されているか確認してください。\n5.一度設定を修正した場合は、'%4' をクリックしてください。</Term>
@@ -1113,7 +1114,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">ジョブ %1に有効な設定がありません。優先度が %3のInDesignサーバ %2を設定してください。 (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign Serverからの応答がありません (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">以下の優先度が登録されているジョブは処理されません： %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
+  <Term key="IDS_PICKUP_FROM">ピックアップタイム</Term>
   <Term key="IDS_PORTNUMBER">ポート番号:</Term>
   <Term key="IDS_PRIO">ジョブの優先度</Term>
   <Term key="IDS_PRIO_1">高い</Term>
@@ -1448,6 +1449,7 @@
   <Term key="MNU_REPORTING">レポート</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">ジョブコンフィグレーション</Term>
   <Term key="MNU_SERVER_JOBS">ジョブクエリ</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">アップロード</Term>
   <Term key="MNU_USER">ユーザ</Term>
   <Term key="MNU_USER_QUERY">ユーザクエリ</Term>

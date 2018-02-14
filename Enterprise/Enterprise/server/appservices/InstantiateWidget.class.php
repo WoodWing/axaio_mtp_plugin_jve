@@ -14,8 +14,6 @@ class InstantiateWidget
 {
 	public static function execute( $ticket, $dossierId, $widgetId, $layoutId, $editionId, $artboard, $location, $manifest, $pageSequence )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		
 		// Start business session, create DB instance etc.
 		BizSession::startSession( $ticket );
 		BizSession::startTransaction();

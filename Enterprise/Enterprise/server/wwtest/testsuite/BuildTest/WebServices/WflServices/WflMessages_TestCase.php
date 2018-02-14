@@ -146,7 +146,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		// Make sure the save operations are directly reflected at Solr indexes,
 		// or else we risk race-conditions, whereby saved data is not queryable the next
 		// split second, and so tests would fail randomly.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::setDirectCommit( true );
 		
 		// Save the retrieved ticket into session data.
@@ -416,7 +415,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	 *
 	 * @param string $user
 	 * @param string $password
-	 * @return WflogOnResponse on succes. NULL on error.
+	 * @return WflLogOnResponse on success. NULL on error.
 	 */
 	private function logOn( $user, $password )
 	{
@@ -2679,7 +2678,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		// errors and warnings in the server log.
 		if( $expectedError ) {
 			$map = new BizExceptionSeverityMap( array( $expectedError => 'INFO' ) );
-			$map = $map; // keep analyzer happy
 		}
 		
 		// Run the SaveObjects service.
@@ -3356,15 +3354,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 			require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 			$phpCompare = new WW_Utils_PhpCompare();
 			$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
-			if( $this->isV8Client ) {
-				$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
-				$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
-				$clientVr = 'v8';
-			} else {
-				$recRespMessages = $recResp->Objects[0]->Messages;
-				$curRespMessages = $curResp->Objects[0]->Messages;
-				$clientVr = 'v7';
-			}
+			$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
+			$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
+			$clientVr = 'v8';
 			if( !$phpCompare->compareTwoProps( $recRespMessages, $curRespMessages ) ) {
 				$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', 'callGetObjects001-' . $clientVr );
 				$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', 'callGetObjects001-' . $clientVr );
@@ -3523,13 +3515,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$messages[3]->Id = '899300503';
 		$messages[3]->IsRead = false;
 		
-		if( $this->isV8Client ) {
-			$response->Objects[0]->MessageList = new MessageList();
-			$response->Objects[0]->MessageList->Messages = $messages;
-		} else {
-			$response->Objects[0]->MessageList = null;
-			$response->Objects[0]->Messages = $messages;
-		}		
+		$response->Objects[0]->MessageList = new MessageList();
+		$response->Objects[0]->MessageList->Messages = $messages;
 		return $response;
 	}
 
@@ -3552,15 +3539,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 			require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 			$phpCompare = new WW_Utils_PhpCompare();
 			$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
-			if( $this->isV8Client ) {
-				$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
-				$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
-				$clientVr = 'v8';
-			} else {
-				$recRespMessages = $recResp->Objects[0]->Messages;
-				$curRespMessages = $curResp->Objects[0]->Messages;
-				$clientVr = 'v7';
-			}
+			$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
+			$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
+			$clientVr = 'v8';
 			if( !$phpCompare->compareTwoProps( $recRespMessages, $curRespMessages ) ) {
 				$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', 'callGetObjects002-' . $clientVr );
 				$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', 'callGetObjects002-' . $clientVr );
@@ -3718,13 +3699,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$messages[3]->Id = '899300901';
 		$messages[3]->IsRead = false;
 		
-		if( $this->isV8Client ) {
-			$response->Objects[0]->MessageList = new MessageList();
-			$response->Objects[0]->MessageList->Messages = $messages;
-		} else {
-			$response->Objects[0]->MessageList = null;
-			$response->Objects[0]->Messages = $messages;
-		}		
+		$response->Objects[0]->MessageList = new MessageList();
+		$response->Objects[0]->MessageList->Messages = $messages;
 		return $response;
 	}
 
@@ -3747,16 +3723,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 			require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 			$phpCompare = new WW_Utils_PhpCompare();
 			$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
-			if( $this->isV8Client ) {
-				$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
-				$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
-				$clientVr = 'v8';
-			} else {
-				$recRespMessages = $recResp->Objects[0]->Messages;
-				$curRespMessages = $curResp->Objects[0]->Messages;
-				$clientVr = 'v7';
-			}
-			
+			$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
+			$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
+			$clientVr = 'v8';
+
 			if( !$phpCompare->compareTwoProps( $recRespMessages, $curRespMessages ) ) {
 				$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', 'callGetObjectsForPubOverview-' . $clientVr );
 				$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', 'callGetObjectsForPubOverview-' . $clientVr );
@@ -3919,13 +3889,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$messages[3]->Id = '899500324';
 		$messages[3]->IsRead = false;
 		
-		if( $this->isV8Client ) {
-			$response->Objects[0]->MessageList = new MessageList();
-			$response->Objects[0]->MessageList->Messages = $messages;
-		} else {
-			$response->Objects[0]->MessageList = null;
-			$response->Objects[0]->Messages = $messages;
-		}	
+		$response->Objects[0]->MessageList = new MessageList();
+		$response->Objects[0]->MessageList->Messages = $messages;
 		return $response;
 	}
 	
@@ -4191,10 +4156,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$messages[$indexCounter]->Id = '899500322';
 		$messages[$indexCounter]->IsRead = false;
 		
-		if( $this->isV8Client ) {
-			$response->Objects[0]->MessageList = new MessageList();
-			$response->Objects[0]->MessageList->Messages = $messages;
-		}
+		$response->Objects[0]->MessageList = new MessageList();
+		$response->Objects[0]->MessageList->Messages = $messages;
 		return $response;
 	}
 
@@ -4250,7 +4213,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 
 	/**
 	 * Construct WflQueryObjectsRequest object.
-	 * @return WflGetObjectsRequest
+	 * @return WflQueryObjectsRequest
 	 */	
 	private function getQueryObjectsRequestToGetUnreadMessages()
 	{
@@ -4522,7 +4485,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 
 	/**
 	 * Construct WflSendMessagesRequest object.
-	 * @return WflGetObjectsRequest
+	 * @return WflSendMessagesRequest
 	 */
 	private function getSendMessagesToReplyStickyRequest()
 	{
@@ -4680,20 +4643,18 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$this->pubChannelObj = $setup->getPubChannelInfo();
 		
 		$this->category = count( $this->pubObj->Categories ) > 0  ? $this->pubObj->Categories[0] : null;
-		require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
-		$editions = DBEdition::listChannelEditionsObj( $this->pubChannelObj->Id );
+		require_once BASEDIR . '/server/dbclasses/DBAdmEdition.class.php';
+		$editions = DBAdmEdition::listChannelEditionsObj( $this->pubChannelObj->Id );
 		$this->editionObj = ( count($editions) > 0 ) ? $editions[0] : null;
 	}
 
 	/**
-	 * Get trackchangescolor of the given user.
+	 * Retrieve the track changes color of the session user.
 	 *
-	 * @param string $user User shortname to retrieve trackchangescolor of the user.
-	 * @return string Trackchangescolor retrieved from the DB.
+	 * @return string The track changes color, retrieved from the DB.
 	 */
 	private function getUserColor()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$trackchangescolor = BizSession::getUserInfo( 'trackchangescolor' );
 		$trackchangescolor = substr( $trackchangescolor, 1 );
 		return $trackchangescolor;
@@ -4702,8 +4663,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	/**
 	 * Calls a web service. Uses either a SoapClient or calls server directly.
 	 *
-	 * @param $request
-	 * @return response data object
+	 * @param mixed $request request data object
+	 * @return mixed response data object
 	 */
 	private function runService( $request )
 	{
@@ -4716,10 +4677,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	}
 
 	/**
-	 * Property that needs to be ignored in
-	 * WW_Utils_PhpCompare::compareTwoProps() 
-	 * should be declared here.
+	 * Compose list of properties that needs to be ignored in WW_Utils_PhpCompare::compareTwoProps().
 	 *
+	 * @return array List of property names.
 	 */
 	private function getCommonPropDiff()
 	{

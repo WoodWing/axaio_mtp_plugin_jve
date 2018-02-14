@@ -163,7 +163,8 @@ define( 'PROXY_PHPVERSIONS', serialize( array(
 	// '1.2.3+' >>> php version 1.2.3...1.2.x is supported (so 1.2.x with patch >= 3)
 	// '-1.2.3' >>> php version 1.2.3 NOT supported
 	'5.4.32+', 
-	'5.5.16+'
+	'5.5.16+',
+	'5.6.14+'
 )));
 
 // Zend framework requires the library folder to be in php path:

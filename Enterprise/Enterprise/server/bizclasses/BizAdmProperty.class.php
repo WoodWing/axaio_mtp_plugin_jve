@@ -952,7 +952,7 @@ class BizAdmProperty
 			new PropertyInfo( 'Name', BizResources::localize( 'OBJ_NAME' ), null, 'string', '', null, null, null, 255 ),
 			new PropertyUsage( 'Name', true, true, false, false ) ); // mandatory
 		$widgets['EmailNotify'] = new DialogWidget(
-			new PropertyInfo( 'EmailNotify', BizResources::localize( 'WFL_EMAIL_NOTIFICATIONS' ), null, 'bool', true ),
+			new PropertyInfo( 'EmailNotify', BizResources::localize( 'WFL_EMAIL_NOTIFICATIONS' ), null, 'bool', false ),
 			new PropertyUsage( 'EmailNotify', true, false, false, false ) );
 		$widgets['Description'] = new DialogWidget(
 			new PropertyInfo( 'Description', BizResources::localize( 'OBJ_DESCRIPTION' ), null, 'multiline', '' ),
@@ -1146,16 +1146,15 @@ class BizAdmProperty
 		$channelObj = $context->getPubChannel();
 		$issueObj = $context->getIssue();
 		$isPrintChannel    = strtolower($channelObj->Type) == 'print';
-		$isDpsChannel      = strtolower($channelObj->Type) == 'dps';
 		$isApChannel       = strtolower($channelObj->Type) == 'dps2';
 		$showWidgets = $builtinWidgets;
-		if( !$isPrintChannel && !$isDpsChannel && !$isApChannel ) {
+		if( !$isPrintChannel && !$isApChannel ) {
 			unset( $showWidgets['PublicationDate'] );
 			unset( $showWidgets['Deadline'] );
 			unset( $showWidgets['ExpectedPages'] );
 			unset( $showWidgets['OverrulePublication'] );
 		}
-		if( !(($isPrintChannel || $isDpsChannel || $isApChannel) && $issueObj->OverrulePublication) ) {
+		if( !(($isPrintChannel || $isApChannel) && $issueObj->OverrulePublication) ) {
 			unset( $showWidgets['ReversedRead'] );
 		}
 		if( !$issueObj->OverrulePublication ) {

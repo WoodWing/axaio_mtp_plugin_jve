@@ -335,7 +335,6 @@ class BizPubIssue
 		
 		// N-cast the new dossier order (to clients listening).
 		require_once BASEDIR.'/server/smartevent.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$base64DossierIds = $this->getBase64DossierIds( $pubChannelObj->Type, $newOrder );
 		new smartevent_issuereorder( 
 			BizSession::getTicket(), $pubChannelObj->Type, $issueId, $base64DossierIds );
@@ -351,13 +350,20 @@ class BizPubIssue
 	private function queryIssueDossierOrder( $issueId )
 	{
 		// Query DB for all dossiers that are assigned to the given issue.
-		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
 		$minProps = array( 'ID', 'Type', 'Name' );
 		$params = array( 
 			new QueryParam( 'IssueId', '=', $issueId ),
 			new QueryParam( 'Type', '=', 'Dossier' ) );
-		$response = BizQuery::queryObjects(
-			BizSession::getTicket(), BizSession::getShortUserName(), $params, 1, 0, null, false, null, $minProps, null, null, 0 );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = BizSession::getTicket();
+		$request->Params = $params;
+		$request->FirstEntry = 1;
+		$request->MaxEntries = 0;
+		$request->Hierarchical = false;
+		$request->MinimalProps = $minProps;
+		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
+		$response = BizQuery::queryObjects2( $request, BizSession::getShortUserName(), 0 );
 
 		// Determine column indexes to work with.
 		$indexes = array_combine( array_values($minProps), array_fill(1,count($minProps), -1) );
@@ -438,7 +444,7 @@ class BizPubIssue
 	/**
 	 * Release the semaphore lock obtained by createSemaLock().
 	 *
-	 * @param integer Semaphore id.
+	 * @param integer $semaphoreId Semaphore id.
 	 */
 	private function releaseSemaLock( $semaphoreId )
 	{
@@ -447,22 +453,17 @@ class BizPubIssue
 	}
 
 	/**
-	 * Construct the DossierIds into base64 format
+	 * EN-89567 Adobe DPS support has been dropped which makes this method unneccessary.
+	 * Considering that this method is very deep in the Enterprise logics, we've chosen not to
+	 * cut everything out completely right now and instead clean everything up once we stop
+	 * supporting publish forms.
 	 *
-	 * @param string $channelType Publication channel type
-	 * @param array $dossierIdsOrder Array of dossierIds order
-	 * @return unknown
+	 * @param string $channelType
+	 * @param array $dossierIdsOrder
+	 * @return string
 	 */
 	public function getBase64DossierIds( $channelType, $dossierIdsOrder )
 	{
-		$uint32 = '';
-		if( $channelType == 'dps' ) {
-			foreach( $dossierIdsOrder as $dossierId ) {
-				$uint32 .= pack( "V", $dossierId );
-			}
-		}
-		$base64 = base64_encode( $uint32 );
-
-		return $base64;
+		return '';
 	}
 }

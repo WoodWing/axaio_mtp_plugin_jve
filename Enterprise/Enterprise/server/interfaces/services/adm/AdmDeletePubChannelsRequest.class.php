@@ -17,7 +17,7 @@ class AdmDeletePubChannelsRequest
 	/**
 	 * @param string               $Ticket                    
 	 * @param integer              $PublicationId             
-	 * @param Id[]                 $PubChannelIds             
+	 * @param integer[]            $PubChannelIds             
 	 */
 	public function __construct( $Ticket=null, $PublicationId=null, $PubChannelIds=null )
 	{
@@ -56,8 +56,8 @@ class AdmDeletePubChannelsRequest
 			if( !is_null( $datObj->PubChannelIds ) ) {
 				$validator->checkType( $datObj->PubChannelIds, 'array' );
 				if( !empty($datObj->PubChannelIds) ) foreach( $datObj->PubChannelIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

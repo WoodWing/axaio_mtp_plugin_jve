@@ -155,12 +155,6 @@ class IdsAutomation_WflMultiSetObjectProperties  extends WflMultiSetObjectProper
 
 	final public function onError( WflMultiSetObjectPropertiesRequest $req, BizException $e )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$e = $e; // keep analyzer happy
-		
-		
 		// Clear service context data.
 		$this->cleanupResources();
 	} 
@@ -168,8 +162,6 @@ class IdsAutomation_WflMultiSetObjectProperties  extends WflMultiSetObjectProper
 	// Not called.
 	final public function runOverruled( WflMultiSetObjectPropertiesRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 
 	/**

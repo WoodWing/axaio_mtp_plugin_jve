@@ -40,6 +40,5 @@ abstract class WflSendToNext_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflSendToNextRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

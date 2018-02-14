@@ -216,7 +216,7 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	 * Default implementation does nothing, leaving it all up to Enterprise
 	 *
 	 * @param string $alienId Alien object id
-	 * @param string $object Shadow object from Enterprise
+	 * @param Object $object Shadow object from Enterprise
 	 * @param array $objprops Array of all properties, both the public (also in Object) as well as internals
 	 * @param boolean $lock Whether object should be locked
 	 * @param string $rendition Rendition to get
@@ -238,7 +238,7 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	 * Performance could vastly improve by not retrieving files for every request.
 	 *
 	 * @param string $alienId Alien object id
-	 * @param string $object Shadow object from Enterprise
+	 * @param Object $object Shadow object from Enterprise
 	 * @param array $objprops Array of all properties, both the public (also in Object) as well as internals
 	 * @param boolean $lock Whether object should be locked
 	 * @param string $rendition Rendition to get
@@ -313,7 +313,7 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	 *
 	 * @since v9.2.0
 	 * @param array[] $shadowObjectIds List of array where key is the content source id and value its list of shadow ids.
-	 * @param MetaDataValues[] $metaDataValues The modified values that needs to be updated at the content source side.
+	 * @param MetaDataValue[] $metaDataValues The modified values that needs to be updated at the content source side.
 	 */
 	public function multiSetShadowObjectProperties( $shadowObjectIds, $metaDataValues )
 	{
@@ -537,6 +537,47 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	public function isContentSourceFileLinksRequested()
 	{
 		return $this->isFileLinksRequested;
+	}
+
+	/**
+	 * To determine if a copy of an image should always be created at the external content source.
+	 *
+	 * As the function name implies, this function is only called in the case when object type Image
+	 * is handled.
+	 *
+	 * When the image from the external content source is brought to Enterprise, the content source
+	 * implementation can determine if a copy is made or not-made at the content source.
+	 * A) When a copy is made, this new copy at the content source will be linked to Enterprise.
+	 * B) When no copy is made, the original image at the content source will be linked to Enterprise.
+	 *
+	 * When setup A) is chosen, a copy will be made once or always depending on this function.
+	 * - When willAlwaysCreateACopyForImage() returns true, a copy is -always- made.
+	 * - When willAlwaysCreateACopyForImage() returns false (default), a copy is done once (for the
+	 * first time) only.
+	 *
+	 * When setup B) is chosen, this function should always return false, otherwise a copy will be
+	 * created which is unwanted.
+	 *
+	 * It is the responsibility of the ContentSource plugin to ensure that this function has the
+	 * correct combination with setup A or setup B.
+	 *
+	 * @since 10.1.3
+	 * @return bool Returns true to always create copy, false(default) to create the copy only one time.
+	 */
+	public function willAlwaysCreateACopyForImage()
+	{
+		return false;
+	}
+
+	/**
+	 * Returns an array with all the rendition types stored by the content source.
+	 *
+	 * @since 10.1.4
+	 * @return array Stored renditions.
+	 */
+	public function storedRenditionTypes()
+	{
+		return array();
 	}
 
 	// ===================================================================================

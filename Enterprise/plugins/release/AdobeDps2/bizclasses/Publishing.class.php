@@ -209,8 +209,6 @@ class AdobeDps2_BizClasses_Publishing
 				self::$uploadProgress['uploaded_total_filesize'] += self::$uploadProgress['upload_filesize_per_edition'][$editionId];
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // first we need to clear the transfer folder, then we'll throw errors (see below)
 		}
 		
 		// Delete the folio files from the transfer server folder.
@@ -292,14 +290,21 @@ class AdobeDps2_BizClasses_Publishing
 			require_once dirname(__FILE__).'/../dataclasses/EntityArticle.class.php';
 			$dpsArticle = new AdobeDps2_DataClasses_EntityArticle();
 			$dpsArticle->entityName = self::composeArticleId( $layoutId, $editionId );
-			self::$httpClient->safeCreateOrUpdateEntity( $projectId, $dpsArticle,
+			/**
+			 * The '$article' param isn't used in the callback as the $dpsArticle param
+			 * is already global. Since these parameters can't have the same name since PHP 7.1
+			 * a different name is chosen, but the inspector sees this parameter as unused.
+			 * @noinspection PhpUnusedParameterInspection
+			 */
+			self::$httpClient->safeCreateOrUpdateEntity(
+				$projectId, $dpsArticle,
 		
 				// This function is called back between the getMetadata and the
 				// createOrUpdateEntity requests. It allows us to set/overwrite
 				// those few properties that we need to set on the latest version
 				// of the article. It may be called multiple times in case of
 				// re-attempts after version conflicts.
-				function( $dpsArticle, $exists ) use ( $layout, $dpsArticle, $pubChannel, $edition ) {
+				function( $article, $exists ) use ( $layout, $dpsArticle, $pubChannel, $edition ) {
 				
 					// Once an article is created, never update its properties, or else 
 					// we might overwrite props that were manually updated in the AP portal.
@@ -707,7 +712,6 @@ class AdobeDps2_BizClasses_Publishing
 	 */
 	private static function composeArticleId( $layoutId, $editionId )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$entSystemId = BizSession::getEnterpriseSystemId();
 		return $entSystemId.'_'.$layoutId.'_'.$editionId;
 	}
@@ -723,7 +727,6 @@ class AdobeDps2_BizClasses_Publishing
 	 */
 	private static function composeCollectionId( $issueId, $editionId )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$entSystemId = BizSession::getEnterpriseSystemId();
 		return $entSystemId.'_'.$issueId.'_'.$editionId;
 	}
@@ -812,7 +815,7 @@ class AdobeDps2_BizClasses_Publishing
 	 * @param string $projectRef
 	 * @throws BizException
 	 */
-	private static function addToPublishHistory( Object $layout, $editionId, 
+	private static function addToPublishHistory( /** @noinspection PhpLanguageLevelInspection */ Object $layout, $editionId,
 		AdobeDps2_DataClasses_EntityArticle $dpsArticle, $projectId, $projectRef )
 	{
 		require_once BASEDIR . '/server/interfaces/services/pub/DataClasses.php'; // PubField, PubPublishedDossier
@@ -1007,12 +1010,6 @@ class AdobeDps2_BizClasses_Publishing
 	 */
 	public static function curlProgressCallback5( $curl, $downloadSize, $downloaded, $uploadSize, $uploaded )
 	{
-		// keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */ $curl = $curl;
-		/** @noinspection PhpSillyAssignmentInspection */ $downloadSize = $downloadSize;
-		/** @noinspection PhpSillyAssignmentInspection */ $downloaded = $downloaded;
-		/** @noinspection PhpSillyAssignmentInspection */ $uploadSize = $uploadSize;
-
 		// The semaphore expires after 5 minutes (300 seconds) without updates. The ticket
 		// expired after one hour. The semaphore and ticket are updated in the database at 
 		// BizSemaphore::refreshSession(). Updating the database every few miliseconds will 

@@ -27,11 +27,10 @@ class DBTicket extends DBBase
 	const TABLENAME = 'tickets';
 	
 	/**
-	 * Array that holds the purged ticket ids
-	 * 
-	 * @var array
+	 * @var array $ticketCache Cache session data (per ticket) that is frequently asked.
+	 * @since 10.2.0
 	 */
-	private static $purgedTickets = array();
+	private static $ticketCache = array();
 	
 	/**
 	 * The first part of ticket is based on the hashed value of the logon parameters.
@@ -124,6 +123,7 @@ class DBTicket extends DBBase
 	 * @param string $errorMessage: in case false is returned, the errorMessage is set.
 	 * @param string $masterTicket [9.7] In case the same application does logon twice (e.g. IDS for DPS) this refers to the ticket of the first logon.
 	 * @return string ticketid or false
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function genTicket( $orguser, $shortuser, $server, $clientname, 
 		$appname, $appversion, $appserial, $appproductcode, &$usageLimitReached, 
@@ -132,9 +132,6 @@ class DBTicket extends DBBase
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		$clientip = WW_Utils_UrlUtils::getClientIP();
 		$ticketid = '';
-
-		// purge old tickets
-		self::DBpurgetickets();
 
 		// create new ticket
 		while( true ) {
@@ -191,13 +188,15 @@ class DBTicket extends DBBase
 	 *
 	 * @param string $ticket 
 	 * @return boolean unique (true=not found)
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function checkUniqueTicket($ticket)
 	{
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
-		$sql = 'SELECT * FROM '.$db.' WHERE `ticketid`=\''.$ticket.'\'';
-		$sth = $dbdriver->query($sql);
+		$sql = 'SELECT * FROM '.$db.' WHERE `ticketid` = ? ';
+		$params = array(strval( $ticket ) );
+		$sth = $dbdriver->query($sql, $params );
 		$result = $dbdriver->fetch($sth);
 		if( $result ) {
 			return false;
@@ -224,6 +223,7 @@ class DBTicket extends DBBase
 	 * @return boolean True on success else false.
 	 * 	- userLimit: in case false is returned, 'userLimit' is true in case the max number of concurrent users has been reached.
 	 *  - errorMessage: in case false is returned, the errorMessage is set.
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function DBnewticket( $ticketid, $usr, $database, $clientname, $clientip, 
 		$appname, $appversion, $appserial, $appproductcode, &$usageLimitReached, 
@@ -250,19 +250,17 @@ class DBTicket extends DBBase
 		$now = date('Y-m-d\TH:i:s', $dbtime );
 
 		$db_tickets = $dbdriver->tablename(self::TABLENAME);
-		$installTicketID = $lic->getInstallTicketID(); 
+		$installTicketID = $lic->getInstallTicketID();
 
-		//Always allow the _install_ user to leave a footprint in the tickets table; do not check the license for that.
-		//To distinguish our _install_ user from a real user named _install_, also check the appserial
-		if ( ($usr != $installTicketID) ||( crc32( $ticketid ) != $appserial ))
-		{
+		if ( self::licenseCheckIsNeeded( $usr, $installTicketID, $ticketid, $appserial, $appname ) ) {
 			$errorMessage = '';
 			$info = Array();
 
 			//Check the license and number of concurrent users for this application
 			//On success, use '$now' as last valid logon time
 			//Be sure to use this $now also to insert a ticket in the database below!
-			$licenseStatus = $lic->getLicenseStatus( $appproductcode, $appserial, $info, $errorMessage, $now, $usr, $appname );
+			$licenseStatus = $lic->getLicenseStatus( $appproductcode, $appserial, $info, $errorMessage, $now,
+				$usr, $appname, $appversion );
 			if ( !$lic->canLogonStatus( $licenseStatus ) )
 			{
 				$usageLimitReached = 
@@ -276,7 +274,8 @@ class DBTicket extends DBBase
 			$tmpErrorMessage = $errorMessage;
 			//On success, use '$now' as last valid logon time
 			//Be sure to use this $now also to insert a ticket in the database below!
-			$licenseStatus = $lic->getLicenseStatus( PRODUCTKEY, $appserialSCE, $info, $errorMessage, $now, $usr, $appname );
+			$licenseStatus = $lic->getLicenseStatus( PRODUCTKEY, $appserialSCE, $info, $errorMessage, $now,
+				$usr, $appname, $appversion );
 			if ( !$lic->canLogonStatus( $licenseStatus ) )
 			{
 				$usageLimitReached = 
@@ -313,8 +312,8 @@ class DBTicket extends DBBase
 		}
 
 		$db_users = $dbdriver->tablename("users");
-		$sql = "UPDATE $db_users SET `lastlogondate`='$now' WHERE `user`='$usr'";
-		$sth = $dbdriver->query($sql);
+		$sql = "UPDATE $db_users SET `lastlogondate`='$now' WHERE `user`= ? ";
+		$sth = $dbdriver->query($sql, array( strval( $usr ) ) );
 		if ( !$sth )
 		{
 			$errorMessage = $dbdriver->error();
@@ -323,7 +322,38 @@ class DBTicket extends DBBase
 
 		return true;
 	}
-	
+
+	/**
+	 * Checks if the license status must be checked before a ticket is issued.
+	 *
+	 * In case of InDesign Server the license is checked randomly. Checking the license status for each newly created
+	 * ticket to serve InDesign Server jobs has a too serious performance drawback.
+	 * Secondly always allow the _install_ user to leave a footprint in the tickets table; do not check the license for that.
+	 * To distinguish our _install_ user from a real user named _install_, also check the application serial.
+	 *
+	 * @param string $user
+	 * @param string $installTicketID
+	 * @param string $ticketId
+	 * @param string $appSerial
+	 * @param string $appName
+	 * @return bool License status must be checked.
+	 */
+	static private function licenseCheckIsNeeded( $user, $installTicketID, $ticketId, $appSerial, $appName )
+	{
+		$check = false;
+
+		if( $appName == 'InDesign Server' ) {
+			$random = mt_rand( 0, 1600 );
+			if( $random % 40 == 0 ) {
+				$check = true;
+			}
+		} elseif( ($user != $installTicketID) || ( crc32( $ticketId ) != $appSerial ) ) {
+			$check = true;
+		}
+
+		return $check;
+	}
+
 	/**
 	 * Search for user's ticket in the database. <br>
 	 * Required: user id (short name) and client application name. <br>
@@ -336,29 +366,39 @@ class DBTicket extends DBBase
 	 * @param string $appversion Client application version number
 	 * @param string $appserial  Client application serial number
 	 * @return string            ticket; gives user access to the system with given client application
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function DBfindticket( $usr, $database, $clientname, $clientip, $appname, $appversion, $appserial )
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
 		LogHandler::Log('dbticket', 'DEBUG', $usr.' '.$database.' '.$clientname.' '.$clientip.' '.$appname.' '.$appversion.' '.$appserial);
 
-		$usr = $dbdriver->toDBString($usr);
-		$database =	$dbdriver->toDBString($database);
-		$clientname = $dbdriver->toDBString($clientname);
-		$clientip =	$dbdriver->toDBString($clientip);
-		$appname =	$dbdriver->toDBString($appname);
-		$appversion = $dbdriver->toDBString($appversion);
-		$appserial = $dbdriver->toDBString($appserial);
+		$wheres = array( '`usr` = ?', '`appname` = ?' );
+		$params = array( strval( $usr ), strval( $appname ) );
+		if( $database ) {
+			$wheres[] = '`db` = ?';
+			$params[] = strval( $database );
+		}
+		if( $clientname ) {
+			$wheres[] = '`clientname` = ?';
+			$params[] = strval( $clientname );
+		}
+		if( $clientip ) {
+			$wheres[] = '`clientip` = ?';
+			$params[] = strval( $clientip );
+		}
+		if( $appversion ) {
+			$wheres[] = '`appversion` = ?';
+			$params[] = strval( $appversion );
+		}
+		if( $appserial ) {
+			$wheres[] = '`appserial` = ?';
+			$params[] = strval( $appserial );
+		}
 
-		$sql  = "SELECT * FROM $db WHERE `usr`='$usr' ";
-		$sql .= "AND `appname`= '$appname' ";
-		$sql .= $database ? "AND `db`= '$database' " : '';
-		$sql .= $clientname ? "AND `clientname`= '$clientname' " : '';
-		$sql .= $clientip ? "AND `clientip`= '$clientip' " : '';
-	 	$sql .= $appversion ? " AND `appversion`= '$appversion' " : '';
-		$sql .= $appserial ? "AND `appserial`= '$appserial' " : '';
-		$sth = $dbdriver->query($sql);
+		$dbdriver = DBDriverFactory::gen();
+		$db = $dbdriver->tablename(self::TABLENAME);
+		$sql = "SELECT `ticketid` FROM $db WHERE ".implode( ' AND ', $wheres );
+		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) return false;
 		$row = $dbdriver->fetch($sth);
 		if (!$row) return false;
@@ -373,6 +413,9 @@ class DBTicket extends DBBase
 	 */
 	public static function getMasterTicket( $ticket )
 	{
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'masterticketid' ];
+		}
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
 		$fields = array( 'masterticketid' );
@@ -383,51 +426,59 @@ class DBTicket extends DBBase
 	/**
 	 * Delete all expired tickets from the database. <br>
 	 * Works indepently of current user or client application. <br>
-	 *
-	 * @return resource       Database connection or FALSE on error
+	 * @deprecated Since 10.2.1. Use \BizTicket::deleteExpiredTicketsAndAffiliatedStructures instead.
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function DBpurgetickets()
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
-		$expire = date('Y-m-d\TH:i:s');
+		require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+		$bizTicket = new BizTicket();
+		$bizTicket->deleteExpiredTicketsAndAffiliatedStructures();
+	}
 
-		include_once( BASEDIR . '/server/utils/license/license.class.php' );
+	/**
+	 * Returns the tickets that are expired.
+	 *
+	 * @return array Array with tickets.'id' as key and tickets.'ticketid' as value.
+	 * @throws  BizException In case of database connection error.
+	 */
+	static public function getExpiredTicketsIndexedById(): array
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$dbTickets = $dbDriver->tablename( self::TABLENAME );
+		$expire = date( 'Y-m-d\TH:i:s' );
+		include_once( BASEDIR.'/server/utils/license/license.class.php' );
 		$lic = new License();
-		$installTicketID = $lic->getInstallTicketID(); 
-
-		// Get all the tickets that need to be purged
-		$sql = "SELECT `id`, `ticketid` FROM $db WHERE `expire` < '$expire' OR `appname`='$installTicketID'";
-		$sth = $dbdriver->query($sql, array(), null, false); //Don't write in log
-		
-		$tickets = array();
-		while( ( $row = $dbdriver->fetch( $sth ) ) ) {
-			$tickets[$row['id']] = $row['ticketid'];
-		}
-		
-		// Remember the tickets for later reference in this session
-		self::$purgedTickets = array_values($tickets);
-		
-		// Delete the expired tickets from the database
-		if( $tickets ) {
-			$purgeRowIds = implode(',', array_keys($tickets));
-			$sql = "DELETE FROM $db WHERE `id` IN ($purgeRowIds)";
-			$sth = $dbdriver->query($sql, array(), null, false); //Don't write in log
+		$installTicketID = $lic->getInstallTicketID();
+		$sql = "SELECT `id`, `ticketid` FROM {$dbTickets} WHERE `expire` < ? OR `appname`= ? ";
+		$params = array( strval( $expire ), strval( $installTicketID ) );
+		$sth = $dbDriver->query( $sql, $params, null, false ); //Don't write in log
+		$rows = array();
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$rows[ $row['id'] ] = $row['ticketid'];
 		}
 
-		return $sth;
+		return $rows;
+	}
+
+	/**
+	 * Removes all ticket records with the specified 'id'.
+	 *
+	 * @param array $ticketRowIds
+	 * @throws BizException In case of database connection error.
+	 */
+	static public function deleteTicketsById( array $ticketRowIds ): void
+	{
+		if( $ticketRowIds ) {
+			$dbDriver = DBDriverFactory::gen();
+			$tickets = $dbDriver->tablename( self::TABLENAME );
+			$where = self::addIntArrayToWhereClause( 'id', $ticketRowIds );
+			if( $where ) {
+				/* $success = */ self::deleteRows( self::TABLENAME, $where, array(), false );
+			}
+		}
 	}
 	
-	/**
-	 * Returns the tickets that are purged
-	 *
-	 * @return array
-	 */
-	public static function getPurgedTickets()
-	{
-		return self::$purgedTickets;
-	}
-
 	/**
 	 * Retrieves the whole ticket DB record (row) for a given ticket.
 	 * Ticket is not validated.
@@ -453,11 +504,60 @@ class DBTicket extends DBBase
 	 */
 	public static function DBappticket( $ticket )
 	{
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'appname' ];
+		}
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
 		$fields = array( 'appname' );
 		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return $row ? $row['appname'] : false;
+	}
+
+	/**
+	 * Retrieves originating client application name that is logged in for a given ticket.
+	 *
+	 * Normally the application name of the passed in ticket is returned. But there is an exception.
+	 * When Smart Connection (SC) for InDesign Server (IDS) does login while the DPS tools are enabled, SC does another login.
+	 * The first time login is for "InDesign Server" while the second time is for "Digital Publishing Tools InDesign Server".
+	 * From then on, SC will use the first ticket and second ticket one by one to make sure both tickets won't expire and
+	 * the DPS seat can not be taken away by another user. But for both tickets the originating application is "InDesign Server".
+	 * The tickets are linked together by the `masterticketid`.
+	 * Ticket is not validated.
+	 *
+	 * @since 10.1.6
+	 * @param string $ticket  Unique ticket; gives user access to the system with given client application
+	 * @return string  Client application name, for example: Web, InDesign, InCopy, PhotoShop, Illustrator.
+	 *                 Returns empty string when (ticket) not found.
+	 */
+	public static function getOriginatingApplicationName( $ticket )
+	{
+		static $holdAppname = '';
+		static $holdTicket = '';
+
+		if ( $ticket == $holdTicket ) {
+			return $holdAppname;
+		}
+
+		$dbDriver = DBDriverFactory::gen();
+		$ticketsTable = $dbDriver->tablename( self::TABLENAME );
+
+		$sql = 'SELECT tickets1.`appname` as `appname`, tickets2.`appname` as `masterappname` '.
+			"FROM {$ticketsTable} tickets1 ".
+			"LEFT JOIN {$ticketsTable} tickets2 ON (tickets2.`ticketid` = tickets1.`masterticketid` ) ".
+			'WHERE tickets1.`ticketid` = ?';
+		$params = array( strval( $ticket ) );
+		$sth = $dbDriver->query( $sql, $params );
+		$row = $dbDriver->fetch( $sth );
+
+		if( $row ) {
+			$holdAppname = !is_null( $row['masterappname'] ) ? $row['masterappname'] : $row['appname'];
+		} else {
+			$holdAppname = '';
+		}
+		$holdTicket = $ticket;
+
+		return $holdAppname;
 	}
 
 	/**
@@ -469,6 +569,9 @@ class DBTicket extends DBBase
 	 */
 	public static function getClientAppVersion( $ticket )
 	{
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'appversion' ];
+		}
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
 		$fields = array( 'appversion' );
@@ -485,6 +588,9 @@ class DBTicket extends DBBase
 	 */
 	public static function DBuserticket( $ticket )
 	{
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'usr' ];
+		}
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
 		$fields = array( 'usr' );
@@ -499,9 +605,12 @@ class DBTicket extends DBBase
 	 *
 	 * @param string $ticket   Unique ticket; gives user access to the system with given client application
 	 * @param string $service  Not used
-	 * @return string          User id (short name) or FALSE when ticket not exists or expired.
+	 * @param bool $extend     Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
+	 *                         Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
+	 * @return string|bool     Short user name or FALSE when ticket not exists or expired.
+	 * @throws BizException In case of database connection error.
 	 */
-	public static function checkTicket( $ticket, $service = '' )
+	public static function checkTicket( $ticket, $service = '', $extend = true )
 	{
 		// Special treatment for background/async server job processing, for which no seat must be taken.
 		if( self::$ServerJob && self::$ServerJob->TicketSeal == $ticket ) {
@@ -512,12 +621,19 @@ class DBTicket extends DBBase
 		$db = $dbdriver->tablename(self::TABLENAME);
 		
 		// check ticket existence
-		$params = array( $ticket );
-		$sql = "SELECT `usr`, `appname`, `expire` FROM $db WHERE `ticketid` = ?";
+		$params = array( strval($ticket) );
+		$sql = "SELECT `usr`, `appname`, `appversion`, `expire`, `masterticketid` FROM $db WHERE `ticketid` = ?";
 		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) return false;
 		$row = $dbdriver->fetch($sth);
 		if (!$row) return false;
+
+		self::$ticketCache[ $ticket ] = array(
+			'usr' => $row['usr'],
+			'appname' => $row['appname'],
+			'appversion' => $row['appversion'],
+			'masterticketid' => $row['masterticketid']
+		);
 
 		// check expiration
 		$now = date('Y-m-d\TH:i:s');
@@ -529,20 +645,23 @@ class DBTicket extends DBBase
 		$user = $row['usr'];
 		$user = trim($user);
 
-		// user touched server, so postpone expiration
-		$expire = self::_expire($row['appname']);
-		$params = array( $expire, $ticket );
-		$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
-		$sth = $dbdriver->query( $sql, $params );
+		if( $extend ) {
 
-		// Auto-postpone WebEditor ticket when Web(App) goes along, or vice versa(!).
-		// This is to avoid any logon dialogs while user works a while at one of them and then starts using the other one again.
-		if( ($otherTicket  = self::getOtherTicket($row['appname'],$user)) ) {
-			$params = array( $expire, $otherTicket );
+			// user touched server, so postpone expiration
+			$expire = self::_expire( $row['appname'] );
+			$params = array( $expire, strval($ticket) );
 			$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
 			$sth = $dbdriver->query( $sql, $params );
+
+			// Auto-postpone WebEditor ticket when Web(App) goes along, or vice versa(!).
+			// This is to avoid any logon dialogs while user works a while at one of them and then starts using the other one again.
+			if( ( $otherTicket = self::getOtherTicket( $row['appname'], $user ) ) ) {
+				$params = array( $expire, strval($otherTicket) );
+				$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
+				$sth = $dbdriver->query( $sql, $params );
+			}
 		}
-		
+
 		// do some automatic logging
 		//if ($service) $this->DBlog($user, $service); // EKL: let's not do this since it gives duplicate messages with empty data!
 
@@ -552,11 +671,12 @@ class DBTicket extends DBBase
 	/**
 	 * Remove ticket from database.
 	 *
-	 * @param string $ticket   Unique ticket; gives user access to the system with given client application
-	 * @return resource        Database connection or FALSE on error
+	 * @param string $ticket Unique ticket; gives user access to the system with given client application
+	 * @throws  BizException In case of database connection error.
 	 */
 	public static function DBendticket( $ticket )
 	{
+		unset( self::$ticketCache[ $ticket ] );
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
 
@@ -566,15 +686,16 @@ class DBTicket extends DBBase
 		if( ($appname = self::DBappticket( $ticket )) && $appname == 'Web' ) {
 			if( ($user = self::DBuserticket( $ticket )) ) {
 				if( ($otherTicket = self::getOtherTicket($appname,$user)) ) {
-					$sql = "DELETE FROM $db WHERE `ticketid` = '$otherTicket'";
-					$dbdriver->query($sql);
+					$params = array( strval($otherTicket) );
+					$sql = "DELETE FROM {$db} WHERE `ticketid` = ?";
+					$dbdriver->query( $sql, $params );
 				}
 			}
 		}
 		// remove the given ticket
-		$sql = "DELETE FROM $db WHERE `ticketid` = '$ticket'";
-		$sth = $dbdriver->query($sql);
-		return $sth;
+		$params = array( strval($ticket) );
+		$sql = "DELETE FROM {$db} WHERE `ticketid` = ?";
+		$sth = $dbdriver->query( $sql, $params );
 	}
 
 	/**
@@ -583,6 +704,7 @@ class DBTicket extends DBBase
 	 * @param string $appname
 	 * @param string $user
 	 * @return string The other ticket.
+	 * @throws BizException In case of database connection error.
 	 */
 	private static function getOtherTicket( $appname, $user )
 	{
@@ -597,8 +719,9 @@ class DBTicket extends DBBase
 			$otherApp = null;
 		}
 		if( $otherApp ) {
-			$sql = "SELECT `ticketid` FROM $db WHERE `usr`='$user' AND `appname`='$otherApp'";
-			$sth = $dbdriver->query($sql);
+			$sql = "SELECT `ticketid` FROM $db WHERE `usr`= ? AND `appname`= ? ";
+			$params = array( strval( $user ), strval( $otherApp ) );
+			$sth = $dbdriver->query($sql, $params );
 			$row = $sth ? $dbdriver->fetch($sth) : null;
 			$otherTicket = $row ? $row['ticketid'] : null;
 		} else {
@@ -611,6 +734,7 @@ class DBTicket extends DBBase
 	 * Remove tickets by user
 	 * 
 	 * @param string $user
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function DbPurgeTicketsByUser( $user = null )
 	{
@@ -619,6 +743,25 @@ class DBTicket extends DBBase
 			$params = array( $user );
 			self::deleteRows( self::TABLENAME, $where, $params );
 		}
+	}
+
+	/**
+	 * Resolves the user names and the client applications of online users, given a list of client IPs.
+	 *
+	 * @since 10.1.4
+	 * @param string[] $clientIps
+	 * @return array
+	 * @throws BizException In case of database connection error.
+	 */
+	public static function resolveOnlineUsersFromClientIps( $clientIps )
+	{
+		$rows = array();
+		if( $clientIps ) {
+			$fields = array( 'ticketid', 'usr', 'clientip', 'appname', 'appversion' );
+			$where = "`clientip` IN ('".implode( "','", $clientIps )."')";
+			$rows = self::listRows( self::TABLENAME, null, null, $where, $fields );
+		}
+		return $rows;
 	}
 
 	// ------------------------------------------------------------------------
@@ -657,5 +800,55 @@ class DBTicket extends DBBase
 		$private = crypt( $input, $salt );
 		$public = substr( $private, strlen($salt) ); // remove salt (at prefix)
 		return $public;
+	}
+
+	/**
+	 * Returns the Id of the user linked to the ticket.
+	 *
+	 * @param string $ticket
+	 * @return int
+	 * @throws BizException In case of database connection error.
+	 */
+	static public function getUserIdByTicket( string $ticket ): int
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$dbTickets = $dbdriver->tablename(self::TABLENAME);
+		$dbUsers = $dbdriver->tablename('users');
+		$userId = 0;
+
+		$sql =   'SELECT users.`id` '.
+					"FROM {$dbTickets} tickets ".
+					"INNER JOIN {$dbUsers} users ON ( tickets.`usr` = users.`user` ) ".
+					'WHERE tickets.`ticketid` = ?';
+		$params = array( strval( $ticket ) );
+		$sth = $dbdriver->query( $sql, $params );
+		$row = $dbdriver->fetch( $sth );
+
+		if ( $row ) {
+			$userId = intval( $row['id'] );
+		}
+
+		return $userId;
+	}
+
+	/**
+	 * Returns all tickets of the specified user.
+	 *
+	 * @param string $user Short user name.
+	 * @return string[]
+	 * @throws BizException In case of database connection error.
+	 */
+	static public function getTicketsByUser( string $user ): array
+	{
+		$tickets = array();
+		if( $user ) {
+			$where = '`usr` = ? ';
+			$params = array( strval( $user ) );
+			$rows = self::listRows( self::TABLENAME, '', '', $where, array( 'ticketid' ), $params );
+			if( $rows ) {
+				$tickets = array_map( function( $ticket ) { return $ticket['ticketid']; }, $rows);
+			}
+		}
+		return $tickets;
 	}
 }

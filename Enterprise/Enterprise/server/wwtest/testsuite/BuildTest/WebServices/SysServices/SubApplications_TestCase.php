@@ -51,7 +51,7 @@ class WW_TestSuite_BuildTest_WebServices_SysServices_SubApplications_TestCase ex
 	/**
 	 * Call the SysGetSubApplications service in various ways.
 	 *
-	 * @param bool $pluginActive Whether or not the AddSubApplication is activated.
+	 * @param bool $pluginEnabled Whether or not the AddSubApplication is activated.
 	 */
 	private function testSubApplications( $pluginEnabled )
 	{
