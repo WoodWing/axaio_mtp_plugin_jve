@@ -49,6 +49,7 @@ SET IDENTITY_INSERT [smart_config] OFF
 CREATE TABLE [smart_deletedobjects] (
   [id] bigint NOT NULL  IDENTITY(1,1),
   [documentid] varchar(512) NOT NULL  default '',
+  [masterid] bigint NOT NULL  default '0',
   [type] varchar(20) NOT NULL  default '',
   [name] varchar(255) NOT NULL  default '',
   [publication] int NOT NULL  default '0',
@@ -221,6 +222,7 @@ CREATE  INDEX [child_type_id] ON [smart_objectrelations]([child], [type], [id]) 
 CREATE TABLE [smart_objects] (
   [id] bigint NOT NULL  IDENTITY(1,1),
   [documentid] varchar(512) NOT NULL  default '',
+  [masterid] bigint NOT NULL  default '0',
   [type] varchar(20) NOT NULL  default '',
   [name] varchar(255) NOT NULL  default '',
   [publication] int NOT NULL  default '0',

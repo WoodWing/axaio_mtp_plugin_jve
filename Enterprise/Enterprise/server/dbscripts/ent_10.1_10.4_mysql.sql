@@ -1,4 +1,6 @@
 ALTER TABLE `smart_authorizations` CHANGE `rights`   `rights` varchar(1024) NOT NULL  default '';
+ALTER TABLE `smart_deletedobjects`
+ADD   `masterid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_deletedobjects` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_log` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_log` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
@@ -8,6 +10,8 @@ ALTER TABLE `smart_objectlocks` CHANGE `object`   `object` bigint(11) NOT NULL  
 ALTER TABLE `smart_objectrelations` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectrelations` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelations` CHANGE `child`   `child` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_objects`
+ADD   `masterid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objects` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectversions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectversions` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';

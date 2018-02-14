@@ -5,6 +5,7 @@ ALTER TABLE `smart_authorizations`
 ADD   `bundle` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_authorizations` CHANGE `rights`   `rights` varchar(1024) NOT NULL  default '';
 ALTER TABLE `smart_deletedobjects`
+ADD   `masterid` bigint(11) NOT NULL  default '0',
 ADD   `orientation` tinyint(4) NOT NULL  default '0';
 ALTER TABLE `smart_deletedobjects` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double NOT NULL  default '0';
@@ -17,6 +18,7 @@ ALTER TABLE `smart_objectrelations` CHANGE `id`   `id` bigint(11) NOT NULL  auto
 ALTER TABLE `smart_objectrelations` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelations` CHANGE `child`   `child` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objects`
+ADD   `masterid` bigint(11) NOT NULL  default '0',
 ADD   `orientation` tinyint(4) NOT NULL  default '0';
 ALTER TABLE `smart_objects` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objects` CHANGE `dpi`   `dpi` double NOT NULL  default '0';

@@ -20,6 +20,7 @@ EXEC (@sql);
 ALTER TABLE smart_authorizations ALTER COLUMN   [rights] varchar(1024) NOT NULL ;
 ALTER TABLE [smart_authorizations] ADD DEFAULT ('') FOR [rights];
 ALTER TABLE [smart_deletedobjects] ADD 
+  [masterid] bigint NOT NULL  default '0',
   [orientation] tinyint NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_deletedobjects', @columnName = 'id', @constraintName = @constraintName OUTPUT
@@ -100,6 +101,7 @@ CREATE  INDEX [pachty_objectrelations] ON [smart_objectrelations]([parent], [chi
 CREATE  INDEX [child_type_id] ON [smart_objectrelations]([child], [type], [id]) ;
 ALTER TABLE [smart_objectrelations] ADD DEFAULT ('0') FOR [child];
 ALTER TABLE [smart_objects] ADD 
+  [masterid] bigint NOT NULL  default '0',
   [orientation] tinyint NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objects', @columnName = 'id', @constraintName = @constraintName OUTPUT

@@ -45,6 +45,7 @@ INSERT INTO `smart_config` (`id`, `name`, `value`) VALUES (1, 'version', '00');
 CREATE TABLE `smart_deletedobjects` (
   `id` bigint(11) NOT NULL  auto_increment,
   `documentid` varchar(512) NOT NULL  default '',
+  `masterid` bigint(11) NOT NULL  default '0',
   `type` varchar(20) NOT NULL  default '',
   `name` varchar(255) NOT NULL  default '',
   `publication` int(11) NOT NULL  default '0',
@@ -187,6 +188,7 @@ CREATE  INDEX `child_type_id` ON `smart_objectrelations`(`child`, `type`, `id`) 
 CREATE TABLE `smart_objects` (
   `id` bigint(11) NOT NULL  auto_increment,
   `documentid` varchar(512) NOT NULL  default '',
+  `masterid` bigint(11) NOT NULL  default '0',
   `type` varchar(20) NOT NULL  default '',
   `name` varchar(255) NOT NULL  default '',
   `publication` int(11) NOT NULL  default '0',
