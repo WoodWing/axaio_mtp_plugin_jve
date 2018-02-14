@@ -3517,18 +3517,28 @@ class BizObject
 	 * Returns true when specified object name already exists in database.
 	 *
 	 * Can be used for new and existing objects.
+	 * Object name checking is case-insensitive and accented-sensitive:
+	 * - 'Object123' is seen as the same as 'object123'.
+	 * - 'object123' is not seen as the same as 'öbject123' (EN-89017).
 	 *
 	 * @param array $issueIds List of issue ids to check for object name uniqueness
 	 * @param string $name Object name
 	 * @param string $type Object type
 	 * @param int $id Object id if object already exists
-	 *
-	 * @return int object id if name exists
+	 * @return bool True when object name already exists, false otherwise.
 	 */
 	public static function objectNameExists( $issueIds, $name, $type, $id=null)
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		return DBObject::objectNameExists( $issueIds, $name, $type, $id );
+		$caseAndAccentInsensitiveNames = DBObject::getObjectNamesIgnoringCaseAndAccentedCharacters( $issueIds, $name, $type, $id );
+		$exists = false;
+		if( $caseAndAccentInsensitiveNames ) foreach ( $caseAndAccentInsensitiveNames as $caseAndAccentInsensitiveName ) {
+			if( strcmp( strtolower( $caseAndAccentInsensitiveName ), strtolower ( $name )) === 0 ) {
+				$exists = true;
+				break; // duplicate found, not needed to check further, bail out.
+			}
+		}
+		return $exists;
 	}
 
 	/**

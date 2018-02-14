@@ -663,38 +663,51 @@ class DBObject extends DBBase
 	}
 
 	/**
-	 * Returns true when specified object name already exists in database.
-	 * Can be used for new and existing objects. Only objecttargets are taken
-	 * into account.
+	 * Returns a list of names retrieved from database when the names are the same as the
+	 * requested name ($name) where letter-case and accented characters are ignored (insensitive).
 	 *
+	 * This function can be used for new and existing objects. Only objecttargets are taken
+	 * into account.
+	 * When none is found, empty list will be returned.
+	 *
+	 * Example: Requested $name = Dossier123.
+	 * The objects with following names will be returned.
+	 * dossier123
+	 * Dossier123
+	 * dössier123
+	 * Dössier123
+	 *
+	 * @since 10.3.1 Renamed the function from objectNameExists to getObjectNamesIgnoringCaseAndAccentedCharacters.
 	 * @param array $issueIds List of issue ids to check for object name uniqueness
 	 * @param string $name Object name
 	 * @param string $type Object type
 	 * @param int $id Object id if object already exists
-	 * 
-	 * @return int object id if name exists
+	 * @return string[]
 	 */
-	static public function objectNameExists( $issueIds, $name, $type, $id=null )
+	static public function getObjectNamesIgnoringCaseAndAccentedCharacters( $issueIds, $name, $type, $id=null )
 	{
 		$dbdriver = DBDriverFactory::gen();
 		$objectsTable = $dbdriver->tablename(self::TABLENAME);
 		$targetsTable = $dbdriver->tablename('targets');
 		$issueIdsStr = implode( ', ', $issueIds );
 
-		$sql  = "SELECT o.`id` FROM $objectsTable o ";
+		$sql  = "SELECT o.`name` FROM $objectsTable o ";
 		$sql .= "INNER JOIN $targetsTable tar ON (tar.`objectid` = o.`id`) ";
 		$sql .= 'WHERE o.`name` = ? ';
 		$sql .= 'AND o.`type` = ? ';
 		$sql .= "AND tar.`issueid` IN ( $issueIdsStr ) ";
-		$params = array( $name, $type );
+		$params = array( strval( $name ), strval( $type ));
 		if ($id){
 			$sql .= 'AND o.`id` != ? ';
-			$params[] = $id;
+			$params[] = intval( $id );
 		}
 
 		$sth = $dbdriver->query( $sql, $params );
-		$row = $dbdriver->fetch($sth);
-		return (bool)$row;
+		$caseAndAccentInsensitiveNames = array();
+		while( ( $row = $dbdriver->fetch( $sth ))) {
+			$caseAndAccentInsensitiveNames[] = $row['name'];
+		}
+		return $caseAndAccentInsensitiveNames;
 	}
 
 	/**
