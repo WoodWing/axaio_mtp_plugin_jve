@@ -1673,6 +1673,7 @@ Después de cambiar la configuración, no olvide reiniciar el servicio Web o el 
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Número de objetos con este {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Hay objetos y objetos eliminados que aun están vinculados a esta edición.</Term>
   <Term key="OBJ_ON">En</Term>
+  <Term key="OBJ_ORIGINAL_ID">ID del original</Term>
   <Term key="OBJ_OTHER">Otros</Term>
   <Term key="OBJ_OTHER_FILE">Otro archivo</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Secuencias de comandos de ruta de salida</Term>

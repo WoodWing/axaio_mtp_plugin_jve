@@ -1673,6 +1673,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">この{STATE}を持つオブジェクトの数：</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">まだこの問題に関連するオブジェクトおよび削除されたオブジェクトがあります。</Term>
   <Term key="OBJ_ON">次と等しい</Term>
+  <Term key="OBJ_ORIGINAL_ID">ID/オリジナル</Term>
   <Term key="OBJ_OTHER">その他</Term>
   <Term key="OBJ_OTHER_FILE">別ファイル</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">出力パススクリプト</Term>
