@@ -1672,6 +1672,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">이{STATE}를 가지는 오브젝트의 수：</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">이 오브젝트들과 삭제된 오브젝트 들은 아직 이슈에 연결되어 있습니다..</Term>
   <Term key="OBJ_ON">우측값입니다</Term>
+  <Term key="OBJ_ORIGINAL_ID">Original ID</Term>
   <Term key="OBJ_OTHER">그 외</Term>
   <Term key="OBJ_OTHER_FILE">다른 파일</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">출력 경로 스크립트</Term>

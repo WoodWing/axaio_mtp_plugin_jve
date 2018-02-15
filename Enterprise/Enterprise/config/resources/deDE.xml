@@ -1673,6 +1673,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Anzahl der Objekte mit diesem {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Es sind Objekte und gelöschte Objekte vorhanden, die noch an diese Ausgabe gebunden sind.</Term>
   <Term key="OBJ_ON">am</Term>
+  <Term key="OBJ_ORIGINAL_ID">Original ID</Term>
   <Term key="OBJ_OTHER">Andere</Term>
   <Term key="OBJ_OTHER_FILE">Andere Datei</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Ausgabepfad Skripts</Term>

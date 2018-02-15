@@ -1673,6 +1673,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Количество объектов на этом статусе:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Это объекты и удаленные объекты, связанные с этим выпуском.</Term>
   <Term key="OBJ_ON">На</Term>
+  <Term key="OBJ_ORIGINAL_ID">Original ID</Term>
   <Term key="OBJ_OTHER">Другое</Term>
   <Term key="OBJ_OTHER_FILE">Другой файл</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Скрипты выводного пути</Term>

@@ -1672,6 +1672,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">此 {STATE}的对象数量:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">还有一些对象及删除的对象还关联在这一期</Term>
   <Term key="OBJ_ON">在</Term>
+  <Term key="OBJ_ORIGINAL_ID">Original ID</Term>
   <Term key="OBJ_OTHER">其他</Term>
   <Term key="OBJ_OTHER_FILE">另外的文件</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">输出路径脚本</Term>
