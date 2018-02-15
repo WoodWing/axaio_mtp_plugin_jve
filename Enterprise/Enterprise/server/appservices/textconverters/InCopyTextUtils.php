@@ -65,7 +65,7 @@ class InCopyUtils
 		if($entries->length >0){ //version maybe found.
 			$version = $entries->item(0)->getAttribute('ea:WWVersion');
 			if( version_compare( $version,  '2.0', '>=' ) ){ //version = '2.0' is found, it is an IC CS5 article
-				self::replaceGUIDsForInCopyCS5($icDoc, $replacedGuids);
+				self::replaceGUIDsForInCopyCS5AndHigher($icDoc, $replacedGuids);
 			}
 		}else{ //if no version specified,meaning it is an IC CS4 article.
 			//For CS4
@@ -114,12 +114,12 @@ class InCopyUtils
 	}
 	
 	/**
-	 * Replaces the GUIDs in a InCopy CS5 DOMDocument. Typically used to instantiate a new document.
+	 * Replaces the GUIDs in a InCopy CS5 (or higher) DOMDocument. Typically used to instantiate a new document.
 	 * More info see: replaceGUIDsForInCopyCS4()
 	 * @param DOMDocument &icDoc Reference to the DOMDocument to replace the GUIDs in
 	 * @param array &$replacedGuids Reference to an array with old-new GUIDs mapping (old=key, new=value)
 	**/	
-	static private function replaceGUIDsForInCopyCS5( &$icDoc, &$replacedGuids)
+	static private function replaceGUIDsForInCopyCS5AndHigher( &$icDoc, &$replacedGuids)
 	{
 		// Determine GUIDs map and replace GUIDs for all Story elements
 		$xpath = new DOMXPath( $icDoc );
@@ -143,7 +143,7 @@ class InCopyUtils
 			$entries = $xpath->query($query);
 			foreach( $entries as $entry ) {
 				$oldGUID = $entry->getAttribute( 'Guid' );
-				if( $oldGUID ) { 
+				if( $oldGUID && isset( $replacedGuids[$oldGUID] ) ) { // EN-88744 Inline textframes have no Guid.
 					$entry->setAttribute( 'Guid', $replacedGuids[$oldGUID] );
 				}
 			}
