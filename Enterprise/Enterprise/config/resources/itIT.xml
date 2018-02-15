@@ -1673,7 +1673,7 @@ Dopo avere apportato le modifiche necessarie, riavviare il servizio Web e/o quel
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Numero di oggetti che presentano questo {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Alcuni oggetti e oggetti eliminati sono ancora associati all'edizione.</Term>
   <Term key="OBJ_ON">Su</Term>
-  <Term key="OBJ_ORIGINAL_ID">Original ID</Term>
+  <Term key="OBJ_ORIGINAL_ID">ID dell’originale</Term>
   <Term key="OBJ_OTHER">Altro</Term>
   <Term key="OBJ_OTHER_FILE">Altro file</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Script percorsi di output</Term>

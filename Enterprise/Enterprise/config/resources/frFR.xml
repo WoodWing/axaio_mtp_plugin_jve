@@ -1672,7 +1672,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Nombre d'objets dotés de cet {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Des objets, supprimés ou non, sont encore liés à cette parution.</Term>
   <Term key="OBJ_ON">sur</Term>
-  <Term key="OBJ_ORIGINAL_ID">Original ID</Term>
+  <Term key="OBJ_ORIGINAL_ID">ID de l’original</Term>
   <Term key="OBJ_OTHER">Autre</Term>
   <Term key="OBJ_OTHER_FILE">Autre fichier</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Scripts de chemin de sortie</Term>

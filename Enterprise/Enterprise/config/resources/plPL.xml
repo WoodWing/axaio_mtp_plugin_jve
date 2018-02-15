@@ -1673,7 +1673,7 @@ Po zmianie ustawień należy pamiętać o ponownym uruchomieniu usługi WWW i/lu
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Liczba obiektów o stanie {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Istnieją obiekty i obiekty usunięte nadal powiązane z tym wydaniem.</Term>
   <Term key="OBJ_ON">wstawiony do</Term>
-  <Term key="OBJ_ORIGINAL_ID">Original ID</Term>
+  <Term key="OBJ_ORIGINAL_ID">ID oryginału</Term>
   <Term key="OBJ_OTHER">Inny</Term>
   <Term key="OBJ_OTHER_FILE">Inny plik</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Ścieżka skryptów wyjściowych</Term>

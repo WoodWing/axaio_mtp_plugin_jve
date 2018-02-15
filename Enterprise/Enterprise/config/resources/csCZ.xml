@@ -1672,7 +1672,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Počet objektů s tímto {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Existují objekty a odstraněné objekty, které jsou stále vázané na toto vydání.</Term>
   <Term key="OBJ_ON">Zapnuto</Term>
-  <Term key="OBJ_ORIGINAL_ID">Original ID</Term>
+  <Term key="OBJ_ORIGINAL_ID">ID of original</Term>
   <Term key="OBJ_OTHER">Jiný</Term>
   <Term key="OBJ_OTHER_FILE">Jiný soubor</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Skripty výstupní cesty</Term>
