@@ -1673,6 +1673,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Number of objects with this {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">There are objects and deleted objects that are still bound to this Issue.</Term>
   <Term key="OBJ_ON">On</Term>
+  <Term key="OBJ_ORIGINAL_ID">ID of original</Term>
   <Term key="OBJ_OTHER">Other</Term>
   <Term key="OBJ_OTHER_FILE">Other File</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Output Path Scripts</Term>
