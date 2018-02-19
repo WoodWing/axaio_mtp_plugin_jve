@@ -47,8 +47,8 @@ class WW_TestSuite_HealthCheck2_ImageMagick_TestCase extends TestCase
 		if( !$utils->validateFilePath( $this, IMAGE_MAGICK_APP_PATH, $help, true, 'ERROR', WW_Utils_TestSuite::VALIDATE_PATH_NO_SPACE ) ) {
 			return;	
 		}
-		$imApp = (OS == 'WIN') ? 'convert.exe' : 'convert';
-		if( !$utils->validateFilePath( $this, IMAGE_MAGICK_APP_PATH.'/'.$imApp, $help, false ) ) { 
+		$imApp = (OS == 'WIN') ? 'magick.exe' : 'magick';
+		if( !$utils->validateFilePath( $this, IMAGE_MAGICK_APP_PATH.'/'.$imApp, $help, false ) ) {
 			return;
 		}
 		$help = 'Check the GHOST_SCRIPT_APP_PATH option at the configserver.php file.';
@@ -78,6 +78,13 @@ class WW_TestSuite_HealthCheck2_ImageMagick_TestCase extends TestCase
 		$imVersion = ImageMagick::getImageMagicksVersionInfo();
 		if( !$imVersion ) {
 			$this->setResult( 'ERROR', 'Could not find ImageMagick application.', $help );
+			return;
+		}
+		$imNumericVersion = explode( ' ', $imVersion );
+		if( !version_compare( $imNumericVersion[1], '7', '>=' ) ) {
+			$helpSupportedVersion = "Supported ImageMagick versions: ImageMagick version 7 or above.<br/>";
+			$helpSupportedVersion .= "Please make sure you have installed a supported version.<br/>";
+			$this->setResult( 'ERROR', 'Unsupported version of ImageMagick installed: ' . $imVersion, $helpSupportedVersion );
 			return;
 		}
 		LogHandler::Log('wwtest', 'INFO', 'Found ImageMagick application: '.$imVersion );
