@@ -80,7 +80,7 @@ class DBActionproperty extends DBBase
         
         return self::fetchResults($sth);		
 	}
-	
+
 	/**
 	 * Returns the action properties with the display name/category defined either
 	 * on object type level or generic level.
@@ -107,17 +107,11 @@ class DBActionproperty extends DBBase
 
 		$nullObjType1 = '';
 		$nullObjType2 = '';
-		// For oracle, the comparison between null values of 2 tables fields returns zero row,
-		// therefore we need to check if a particular field is a null value or not.
-		if( $objType == '' ) {
-			$nullObjType1 = 'OR pr.`objtype` IS NULL ';
-			$nullObjType2 = 'OR pr2.`objtype` IS NULL ';
-		}
 
 		if( !$onlyAllObjectType ) {
-			$nullObjType1 .= 'OR ap.`type` = ? OR ap.`type` IS NULL ';
+			$nullObjType1 .= 'OR ap.`type` = ? ';
 			$params[] = '';
-			$nullObjType2 .= 'OR ap.`type` = ? OR ap.`type` IS NULL ';
+			$nullObjType2 .= 'OR ap.`type` = ?  ';
 			$params[] = '';
 		}
 
@@ -138,7 +132,7 @@ class DBActionproperty extends DBBase
 
 		$sth = $dbDriver->query($sql, $params);
 
-        return self::fetchResults($sth);
+       return self::fetchResults($sth);
 	}
 	
 	/**
