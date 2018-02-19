@@ -103,11 +103,12 @@ class BizQuery extends BizQueryBase
 	 *          1 = Listed in Search Results (View) right.
 	 *          2 = Read right.
 	 *          11 = List in Publication Overview.
+	 * @param string $where
 	 * @return WflQueryObjectsResponse|WflNamedQueryResponse
 	 * @throws BizException
 	 * @since 10.2.0
 	 */
-	static public function queryObjects2( WflQueryObjectsRequest $request, $user, $accessRight = 1 )
+	static public function queryObjects2( WflQueryObjectsRequest $request, $user, $accessRight = 1, $where = null )
 	{
 		if( is_null( $request->Areas ) ) {
 			$request->Areas = array( 'Workflow' );
@@ -138,7 +139,8 @@ class BizQuery extends BizQueryBase
 				$request->RequestProps,
 				$request->Areas,
 				$accessRight,
-				$request->Hierarchical );
+				$request->Hierarchical,
+				$where );
 		}
 
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
@@ -325,7 +327,8 @@ class BizQuery extends BizQueryBase
 	 * @see BizQuery::queryObjectRows
 	 */
 	static private function runDatabaseUserQuery(
-		$shortusername, $params, $firstEntry, $maxEntries, $queryOrder, $mode, $minimalProps, $requestProps, $areas, $accessRight, $hierarchical )
+		$shortusername, $params, $firstEntry, $maxEntries, $queryOrder, $mode, $minimalProps, $requestProps, $areas,
+		$accessRight, $hierarchical, $where = null )
 	{
 		// Prepare the sql
 		$queryOrder = self::resolveQueryOrder( $queryOrder, $areas );
@@ -335,7 +338,7 @@ class BizQuery extends BizQueryBase
 		} else {
 			$deletedObjects = false;
 		}
-		$sqlStruct = self::buildSQLArray( $requestedPropNames, $params, $queryOrder, $deletedObjects );
+		$sqlStruct = self::buildSQLArray( $requestedPropNames, $params, $queryOrder, $deletedObjects, $where );
 		if ( empty( $sqlStruct ) )  {
 			throw new BizException( 'ERR_INVALID_OPERATION', 'Server', 'Invalid sql in query');
 		}
