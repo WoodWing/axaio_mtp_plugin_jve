@@ -281,6 +281,14 @@
 					<element name="Publication"     type="tns:Publication"      nillable="true"/>   <!-- v6.0: Publication that ‘owns’ the object -->
 					<element name="Category"        type="tns:Category"         nillable="true"/>   <!-- v6.0: Category of the object, formerly named Section -->
 					<element name="ContentSource"   type="xsd:string"           nillable="true"/>   <!-- v6.0: Content provider, this is technical thing, for example DAM system ID -->
+					<element name="MasterId"        type="xsd:string"           nillable="true"/>
+						<!--
+							v10.4: ID of original. Tracks the original object that this one is a copy of.
+							When an object is a copy of another object, this indicates the object ID of
+							the object it was copied from. When the object being copied is itself already
+							a copy, it's MasterId will be used. That means all copies will share the same
+							MasterId which makes it easy to find all copies on a specific object.
+						-->
 				</all>
 			</complexType>
 			<complexType name="RightsMetaData">

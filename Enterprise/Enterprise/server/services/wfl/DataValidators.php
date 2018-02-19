@@ -223,6 +223,13 @@ class WflBasicMetaDataValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'MasterId' ) ) {
+			$validator->enterPath( 'MasterId' );
+			if( !is_null( $datObj->MasterId ) ) {
+				$validator->checkType( $datObj->MasterId, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 

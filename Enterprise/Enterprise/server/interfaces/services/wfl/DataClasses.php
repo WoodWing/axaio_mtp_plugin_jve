@@ -42,6 +42,7 @@ class BasicMetaData
 	public $Publication;
 	public $Category;
 	public $ContentSource;
+	public $MasterId;
 
 	/**
 	 * @param string               $ID                   Nullable.
@@ -51,8 +52,9 @@ class BasicMetaData
 	 * @param Publication          $Publication          Nullable.
 	 * @param Category             $Category             Nullable.
 	 * @param string               $ContentSource        Nullable.
+	 * @param string               $MasterId             Nullable.
 	 */
-	public function __construct( $ID=null, $DocumentID=null, $Name=null, $Type=null, $Publication=null, $Category=null, $ContentSource=null)
+	public function __construct( $ID=null, $DocumentID=null, $Name=null, $Type=null, $Publication=null, $Category=null, $ContentSource=null, $MasterId=null)
 	{
 		$this->ID                   = $ID;
 		$this->DocumentID           = $DocumentID;
@@ -61,6 +63,7 @@ class BasicMetaData
 		$this->Publication          = $Publication;
 		$this->Category             = $Category;
 		$this->ContentSource        = $ContentSource;
+		$this->MasterId             = $MasterId;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflBasicMetaData'; } // AMF object type mapping

@@ -22,6 +22,7 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _Publication:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflPublication;
 		private var _Category:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflCategory;
 		private var _ContentSource:String;
+		private var _MasterId:String;
 
 		public function WflBasicMetaData() {
 		}
@@ -73,6 +74,13 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set ContentSource(ContentSource:String):void {
 			this._ContentSource = ContentSource;
+		}
+
+		public function get MasterId():String {
+			return this._MasterId;
+		}
+		public function set MasterId(MasterId:String):void {
+			this._MasterId = MasterId;
 		}
 
 	}

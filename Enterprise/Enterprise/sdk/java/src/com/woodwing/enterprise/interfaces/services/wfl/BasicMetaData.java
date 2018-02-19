@@ -22,6 +22,8 @@ public class BasicMetaData  implements java.io.Serializable {
 
     private java.lang.String contentSource;
 
+    private java.lang.String masterId;
+
     public BasicMetaData() {
     }
 
@@ -32,7 +34,8 @@ public class BasicMetaData  implements java.io.Serializable {
            com.woodwing.enterprise.interfaces.services.wfl.ObjectType type,
            com.woodwing.enterprise.interfaces.services.wfl.Publication publication,
            com.woodwing.enterprise.interfaces.services.wfl.Category category,
-           java.lang.String contentSource) {
+           java.lang.String contentSource,
+           java.lang.String masterId) {
            this.ID = ID;
            this.documentID = documentID;
            this.name = name;
@@ -40,6 +43,7 @@ public class BasicMetaData  implements java.io.Serializable {
            this.publication = publication;
            this.category = category;
            this.contentSource = contentSource;
+           this.masterId = masterId;
     }
 
 
@@ -182,6 +186,26 @@ public class BasicMetaData  implements java.io.Serializable {
         this.contentSource = contentSource;
     }
 
+
+    /**
+     * Gets the masterId value for this BasicMetaData.
+     * 
+     * @return masterId
+     */
+    public java.lang.String getMasterId() {
+        return masterId;
+    }
+
+
+    /**
+     * Sets the masterId value for this BasicMetaData.
+     * 
+     * @param masterId
+     */
+    public void setMasterId(java.lang.String masterId) {
+        this.masterId = masterId;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof BasicMetaData)) return false;
@@ -214,7 +238,10 @@ public class BasicMetaData  implements java.io.Serializable {
               this.category.equals(other.getCategory()))) &&
             ((this.contentSource==null && other.getContentSource()==null) || 
              (this.contentSource!=null &&
-              this.contentSource.equals(other.getContentSource())));
+              this.contentSource.equals(other.getContentSource()))) &&
+            ((this.masterId==null && other.getMasterId()==null) || 
+             (this.masterId!=null &&
+              this.masterId.equals(other.getMasterId())));
         __equalsCalc = null;
         return _equals;
     }
@@ -246,6 +273,9 @@ public class BasicMetaData  implements java.io.Serializable {
         }
         if (getContentSource() != null) {
             _hashCode += getContentSource().hashCode();
+        }
+        if (getMasterId() != null) {
+            _hashCode += getMasterId().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -296,6 +326,12 @@ public class BasicMetaData  implements java.io.Serializable {
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("contentSource");
         elemField.setXmlName(new javax.xml.namespace.QName("", "ContentSource"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("masterId");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "MasterId"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
