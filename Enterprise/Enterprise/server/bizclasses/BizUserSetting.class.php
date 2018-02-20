@@ -129,7 +129,7 @@ class WW_BizClasses_UserSetting
 
 	/**
 	 * Validate and enrich the client application name before using it for get, save or delete operations.
-	 * Return "Content Station" for CS9 (or before) or "Content Station Multichannel" for CS11 (or later).
+	 * Return "Content Station" for CS9 (or before) or "Content Station Print/Multichannel" for CS11 (or later).
 	 *
 	 * Content Station is a special case because the user settings stored with CS9 (or before) should be seen
 	 * as a different collection than the ones stored with CS11. Note that CS10 does not read/save settings at all.
@@ -143,14 +143,14 @@ class WW_BizClasses_UserSetting
 	 *
 	 * In the User Queries admin page and in Smart Mover it should be clear to the admin user which Content Station
 	 * flavour the listed settings apply to. CS9 should be displayed as "Content Station Basic/Pro Edition" and
-	 * CS11 should be displayed as "Content Station Multichannel". Those names should be post-fixed to the setting names.
+	 * CS11 should be displayed as "Content Station Print/Multichannel". Those names should be post-fixed to the setting names.
 	 * However, the `setting` field in the smart_settings table contains the values "Content Station" for CS9 and
-	 * "Content Station Multichannel" for CS11.
+	 * "Content Station Print/Multichannel" for CS11.
 	 *
 	 * For production, when CS9 does logon/logoff, the settings are loaded/saved. These settings are saved for
 	 * client application name "Content Station". Since CS11, another collection of settings is loaded/saved
 	 * through new web services introduced by ES10.3: GetUserSettings, SaveUserSettings and DeleteUserSettings.
-	 * These settings are stored for client application name "Content Station Multichannel".
+	 * These settings are stored for client application name "Content Station Print/Multichannel".
 	 *
 	 * @param string $clientAppName
 	 * @throws BizException when the type or value of the parameters is not correct.
@@ -168,7 +168,7 @@ class WW_BizClasses_UserSetting
 			}
 			$clientVersion = BizSession::getClientVersion( null, null, 3 );
 			if( version_compare( $clientVersion, '11.0.0', '>=' ) ) {
-				$clientAppName = 'Content Station Multichannel';
+				$clientAppName = 'Content Station Print/Multichannel';
 			} elseif( version_compare( $clientVersion, '10.0.0', '>=' ) ) {
 				$clientAppName = 'Content Station 10'; // should never happen, paranoid avoidance mixing CS10 with CS9 setting
 			} // else CS9 or before
@@ -176,7 +176,7 @@ class WW_BizClasses_UserSetting
 	}
 
 	/**
-	 * If provided name is "Content Station" return "Content Station Multichannel" or "Content Station Basic/Pro Edition".
+	 * If provided name is "Content Station" return "Content Station Print/Multichannel" or "Content Station Basic/Pro Edition".
 	 *
 	 * The returned name can be added to setting names to enable the system administrator to distinguish
 	 * between user settings saved by CS9 (or before) and CS11 (or later). See also validateAndRepairClientAppName().
