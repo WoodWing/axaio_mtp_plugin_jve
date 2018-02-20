@@ -103,8 +103,13 @@ class DBActionproperty extends DBBase
 	 * or "ALL" object type for custom property.
 	 * The second left join, will search for "ALL" brand with exact object type level defined properties
 	 * OR "ALL" object type for custom property.
-	 *
 	 * When the first join, exact brand-object type level defined properties is found the second join values will be ignored.
+	 * Note that it is not possible to modify the standard metadata properties both on <All> level and on a specific
+	 * object type level. So if the display name of the 'Name' property is changed on the <All> level, the display name
+	 * cannot be changed anymore on 'Article' level. The consequense is that for the 'Name' property in smart_properties
+	 * either the 'objtype' is filled with 'Article' or that it is empty in case of 'All'. There cannot be two entries.
+	 * So the join of the smart_actionproperties.`type` must be either on smart_properties.`objtype` or in case of <All>
+	 * on smart_properties.`objtype` = ''.
 	 *
 	 * @param integer $publ Publication on with action property is defined
 	 * @param string $objType Object type on which action property is defined
@@ -115,38 +120,35 @@ class DBActionproperty extends DBBase
 	static public function listActionPropertyWithNames( $publ, $objType, $action, $onlyAllObjectType )
 	{
 		$dbDriver = DBDriverFactory::gen();
-		$dbap = $dbDriver->tablename(self::TABLENAME);
-		$dbpr = $dbDriver->tablename('properties');
+		$dbap = $dbDriver->tablename( self::TABLENAME );
+		$dbpr = $dbDriver->tablename( 'properties' );
 		$params = array();
 
-		$nullObjType1 = '';
-		$nullObjType2 = '';
-
+		$allObjectTypes = '';
 		if( !$onlyAllObjectType ) {
-			$nullObjType1 .= 'OR ap.`type` = ? ';
-			$params[] = '';
-			$nullObjType2 .= 'OR ap.`type` = ?  ';
-			$params[] = '';
+			$allObjectTypes .= "OR ap.`type` = '' ";
 		}
 
-		$sql =  "SELECT ap.`id`, ap.`orderid`, ap.`property`, ap.`edit`,".
-				"ap.`mandatory`, ap.`restricted`, ap.`refreshonchange`, ap.`multipleobjects`, pr.`publication`, " .
-				"pr.`category`, pr.`dispname`, pr2.`category` as `category2`, pr2.`dispname` as `dispname2` ".
-				"FROM $dbap ap ".
-				"LEFT JOIN $dbpr pr ON ( pr.`publication`= ap.`publication` AND pr.`name` = ap.`property` ".
-				"AND ( ap.`type` = pr.`objtype` " . $nullObjType1 . "OR pr.`name` LIKE 'C_%' ) ) ".
-				"LEFT JOIN $dbpr pr2 ON ( pr2.`publication` = 0 AND pr2.`name` = ap.`property` ".
-				"AND ( ap.`type` = pr2.`objtype` ".$nullObjType2 . "OR pr2.`name` LIKE 'C_%' ) ) ".
-				"WHERE ap.`publication` = ? AND ap.`type` = ? AND ap.`action` = ? ".
-				"ORDER BY ap.`orderid`, ap.`id`";
+		require_once BASEDIR.'/server/dbclasses/DBQuery.class.php';
+		$escaped = DBQuery::escape4like( 'C_%', '|' );
+		$sql = "SELECT ap.`id`, ap.`orderid`, ap.`property`, ap.`edit`,".
+			"ap.`mandatory`, ap.`restricted`, ap.`refreshonchange`, ap.`multipleobjects`, pr.`publication`, ".
+			"pr.`category`, pr.`dispname`, pr2.`category` as `category2`, pr2.`dispname` as `dispname2` ".
+			"FROM {$dbap} ap ".
+			"LEFT JOIN {$dbpr} pr ON ( pr.`publication`= ap.`publication` AND pr.`name` = ap.`property` ".
+			"AND ( ( ap.`type` = pr.`objtype` OR pr.`objtype` = '' ) ".$allObjectTypes."OR pr.`name` LIKE '{$escaped}%' ) ) ".
+			"LEFT JOIN $dbpr pr2 ON ( pr2.`publication` = 0 AND pr2.`name` = ap.`property` ".
+			"AND ( ( ap.`type` = pr2.`objtype` OR pr.`objtype` = '' ) ".$allObjectTypes."OR pr2.`name` LIKE '{$escaped}%' ) ) ".
+			"WHERE ap.`publication` = ? AND ap.`type` = ? AND ap.`action` = ? ".
+			"ORDER BY ap.`orderid`, ap.`id`";
 
 		$params[] = $publ;
 		$params[] = $objType;
 		$params[] = $action;
 
-		$sth = $dbDriver->query($sql, $params);
+		$sth = $dbDriver->query( $sql, $params );
 
-       return self::fetchResults($sth);
+		return self::fetchResults( $sth );
 	}
 	
 	/**
