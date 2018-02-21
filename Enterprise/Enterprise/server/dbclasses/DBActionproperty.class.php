@@ -130,15 +130,15 @@ class DBActionproperty extends DBBase
 		}
 
 		require_once BASEDIR.'/server/dbclasses/DBQuery.class.php';
-		$escaped = DBQuery::escape4like( 'C_%', '|' );
+		$escaped = DBQuery::escape4like( 'C_', '|' );
 		$sql = "SELECT ap.`id`, ap.`orderid`, ap.`property`, ap.`edit`,".
 			"ap.`mandatory`, ap.`restricted`, ap.`refreshonchange`, ap.`multipleobjects`, pr.`publication`, ".
 			"pr.`category`, pr.`dispname`, pr2.`category` as `category2`, pr2.`dispname` as `dispname2` ".
 			"FROM {$dbap} ap ".
 			"LEFT JOIN {$dbpr} pr ON ( pr.`publication`= ap.`publication` AND pr.`name` = ap.`property` ".
-			"AND ( ( ap.`type` = pr.`objtype` OR pr.`objtype` = '' ) ".$allObjectTypes."OR pr.`name` LIKE '{$escaped}%' ) ) ".
+			"AND ( ( ap.`type` = pr.`objtype` OR pr.`objtype` = '' ) ".$allObjectTypes."OR pr.`name` LIKE '{$escaped}%' ESCAPE '|' ) ) ".
 			"LEFT JOIN $dbpr pr2 ON ( pr2.`publication` = 0 AND pr2.`name` = ap.`property` ".
-			"AND ( ( ap.`type` = pr2.`objtype` OR pr.`objtype` = '' ) ".$allObjectTypes."OR pr2.`name` LIKE '{$escaped}%' ) ) ".
+			"AND ( ( ap.`type` = pr2.`objtype` OR pr.`objtype` = '' ) ".$allObjectTypes."OR pr2.`name` LIKE '{$escaped}%' ESCAPE '|' ) ) ".
 			"WHERE ap.`publication` = ? AND ap.`type` = ? AND ap.`action` = ? ".
 			"ORDER BY ap.`orderid`, ap.`id`";
 
