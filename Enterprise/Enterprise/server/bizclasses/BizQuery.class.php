@@ -103,7 +103,7 @@ class BizQuery extends BizQueryBase
 	 *          1 = Listed in Search Results (View) right.
 	 *          2 = Read right.
 	 *          11 = List in Publication Overview.
-	 * @param string $where
+	 * @param string|null $where Optionally provide a WHERE-clause to overrule the $request->Params.
 	 * @return WflQueryObjectsResponse|WflNamedQueryResponse
 	 * @throws BizException
 	 * @since 10.2.0
@@ -321,6 +321,7 @@ class BizQuery extends BizQueryBase
 	 *                         2 = Read right
 	 *                         11 = List in Publication Overview
 	 * @param bool $hierarchical Add child objects to the top level objects
+	 * @param string|null $where Optionally provide a WHERE-clause to overrule the $params.
 	 * @return WflQueryObjectsResponse Response containing all requested information (rows)
 	 * @throws BizException
 	 * @internal param bool $deletedObjects When true search the deletedobjects-table in stead of objects
@@ -328,7 +329,7 @@ class BizQuery extends BizQueryBase
 	 */
 	static private function runDatabaseUserQuery(
 		$shortusername, $params, $firstEntry, $maxEntries, $queryOrder, $mode, $minimalProps, $requestProps, $areas,
-		$accessRight, $hierarchical, $where = null )
+		$accessRight, $hierarchical, $where )
 	{
 		// Prepare the sql
 		$queryOrder = self::resolveQueryOrder( $queryOrder, $areas );
@@ -628,85 +629,78 @@ class BizQuery extends BizQueryBase
 
     static private function buildSelect( $propertyNames )
     {
-		// Get the complete map of Property <-> smart_objects
-        require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-        $objFields = BizProperty::getMetaDataObjFields();
-		$joinProps = BizProperty::getJoinProps();
-		$jfldProps = BizProperty::getJFldProps();
+	    // Get the complete map of Property <-> smart_objects
+	    require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+	    $objFields = BizProperty::getMetaDataObjFields();
+	    $joinProps = BizProperty::getJoinProps();
+	    $jfldProps = BizProperty::getJFldProps();
 
-		// Walk through the requested properties
-        $selects = array();
-    
+	    // Walk through the requested properties
+	    $selects = array();
+
 	    foreach( $propertyNames as $propertyName ) {
 
-			// Debug: Fail when property is unknown (but respect custom props)
-			if( LogHandler::debugMode() ) {
-				if( !array_key_exists( $propertyName, $objFields ) && stripos( $propertyName, 'c_' ) !== 0 ) {
-					throw new BizException( '', 'Server', '', __METHOD__.' - Querying for unknown property: '.$propertyName );
-				}
-			}
+		    // Debug: Fail when property is unknown (but respect custom props)
+		    if( LogHandler::debugMode() ) {
+			    if( !array_key_exists( $propertyName, $objFields ) && stripos( $propertyName, 'c_' ) !== 0 ) {
+				    throw new BizException( '', 'Server', '', __METHOD__.' - Querying for unknown property: '.$propertyName );
+			    }
+		    }
 
-			// Determine SQL SELECT snippets and required tables to JOIN with
-            switch( $propertyName )
-            {
-				case 'Version':
-					{
-			        $dbdriver = DBDriverFactory::gen();
-                    $selects['Version'] = $dbdriver->concatFields(array("o.`majorversion`", "'.'", "o.`minorversion`")) . " as \"Version\" ";
-                    break;
-                }
+		    // Determine SQL SELECT snippets and required tables to JOIN with
+		    switch( $propertyName ) {
+			    case 'Version': {
+				    $dbdriver = DBDriverFactory::gen();
+				    $selects['Version'] = $dbdriver->concatFields( array( "o.`majorversion`", "'.'", "o.`minorversion`" ) )." as \"Version\" ";
+				    break;
+			    }
 
-				case 'RouteTo':
-					{
-					$selects['RouteTo'] = "o.`routeto` as \"RouteTo\" ";
-					$selects['RouteToUser'] = "rtu.`fullname` as \"RouteToUser\" ";
-					BizQueryBase::requireJoin('rtu');
-					$selects['RouteToGroup'] = "rtg.`name` as \"RouteToGroup\" ";
-					BizQueryBase::requireJoin('rtg');
-					break;
-				}
-	         case 'Dimensions':
-				case 'HasChildren':
-				case 'PlacedOn':
-				case 'PlacedOnPage':
-					// Dimensions, HasChildren, PlacedOn and PlacedOnPage will be resolved later
-					break;
+			    case 'RouteTo': {
+				    $selects['RouteTo'] = "o.`routeto` as \"RouteTo\" ";
+				    $selects['RouteToUser'] = "rtu.`fullname` as \"RouteToUser\" ";
+				    BizQueryBase::requireJoin( 'rtu' );
+				    $selects['RouteToGroup'] = "rtg.`name` as \"RouteToGroup\" ";
+				    BizQueryBase::requireJoin( 'rtg' );
+				    break;
+			    }
+			    case 'Dimensions':
+			    case 'HasChildren':
+			    case 'PlacedOn':
+			    case 'PlacedOnPage':
+				    // Dimensions, HasChildren, PlacedOn and PlacedOnPage will be resolved later
+				    break;
 
-				default:
-					{ // props that need no special treatments and custom props, most of them now.
+			    default: // props that need no special treatments and custom props, most of them now.
+				    if( DBProperty::isCustomPropertyName( $propertyName ) ) { // custom prop?
+					    $objField = $propertyName;
+					    $selects[ $propertyName ] = "o.`$objField` as \"$propertyName\"";
+				    } else { // built-in prop:
+					    $objField = $objFields[ $propertyName ];
+					    $alias = $joinProps[ $propertyName ];
+					    $joinfieldname = $jfldProps[ $propertyName ];
 
-					if ( DBProperty::isCustomPropertyName( $propertyName ) ) { // custom prop?
-	                    $objField = $propertyName;
-	                    $selects[$propertyName] = "o.`$objField` as \"$propertyName\"";
-						} else { // built-in prop:
-	                    $objField = $objFields[$propertyName];
-						$alias = $joinProps[$propertyName];
-						$joinfieldname = $jfldProps[$propertyName];
-						
-						if (empty($joinfieldname)) { // no join found for this property, so try to find by objField
-							if (!empty($objField)) { // use objField
-								$selects[$propertyName] = "o.`$objField` as \"$propertyName\"";
-								} else {
-								;	// do nothing, as this prop has no field in the objects-table AND has no join.
-									// It will probably be calculated after having executed the query
-							}
-							} else { // join found: use alias and joinfieldname to select. Also require the join.
-							$selects[$propertyName] = "$alias.`$joinfieldname` as \"$propertyName\"";
-							BizQueryBase::requireJoin($alias);
-						}
-                    }
-                }
-            }                
-        }
-        
-        // Build the SQL select statement (out of collected snippets)
-        $sql = ' SELECT ';
-        $comma = ' ';
-        foreach ($selects as $select) {
-            $sql .= $comma . $select;
-            $comma = ', ';
-        }
-        return $sql;
+					    if( empty( $joinfieldname ) ) { // no join found for this property, so try to find by objField
+						    if( !empty( $objField ) ) { // use objField
+							    $selects[ $propertyName ] = "o.`$objField` as \"$propertyName\"";
+						    } // else: Do nothing, as this prop has no field in the objects-table AND has no join.
+						    //         It will probably be calculated after having executed the query.
+					    } else { // join found: use alias and joinfieldname to select. Also require the join.
+						    $selects[ $propertyName ] = "$alias.`$joinfieldname` as \"$propertyName\"";
+						    BizQueryBase::requireJoin( $alias );
+					    }
+				    }
+				    break;
+		    }
+	    }
+
+	    // Build the SQL select statement (out of collected snippets)
+	    $sql = ' SELECT ';
+	    $comma = ' ';
+	    foreach( $selects as $select ) {
+		    $sql .= $comma.$select;
+		    $comma = ', ';
+	    }
+	    return $sql;
     }
 
 	static private function requireWhere( $wherestring = null )
