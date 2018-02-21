@@ -722,16 +722,15 @@ class FileStorage
 				require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 				$extension = MimeTypeHandler::mimeType2FileExt( $this->format );
 				if( file_exists( $fileMinor ) === true ) {
-					$ret = $fileMinor; // found!
+					$ret = $fileMinor;
 				} elseif( file_exists( $fileNoVer ) === true ) {
 					// 'Current' files that are stored before v6.0 have NO version in the name.
 					// Here we try "<name>" when asked for "X.Y".
-					$ret = $fileNoVer; // found!
-				} //Try it with extension (REALFILE before v6.0)
-				elseif( !empty( $extension ) && file_exists( $fileMinor.$extension ) === true ) {
+					$ret = $fileNoVer;
+				} elseif( !empty( $extension ) && file_exists( $fileMinor.$extension ) === true ) { //Try it with extension (REALFILE before v6.0)
 					$ret = $fileMinor.$extension;
 				} elseif( !empty( $extension ) && file_exists( $fileNoVer.$extension ) === true ) {
-					$ret = $fileNoVer.$extension; // found!
+					$ret = $fileNoVer.$extension;
 				}
 			}
 		}
