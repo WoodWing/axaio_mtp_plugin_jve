@@ -251,6 +251,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflTrashCan_TestCase extend
 		$response->Objects[0]->MetaData->BasicMetaData->Publication = $this->imagePublication;
 		$response->Objects[0]->MetaData->BasicMetaData->Category = $this->imageCategory;
 		$response->Objects[0]->MetaData->BasicMetaData->ContentSource = '';
+		$response->Objects[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->Objects[0]->MetaData->RightsMetaData = new RightsMetaData();
 		$response->Objects[0]->MetaData->RightsMetaData->CopyrightMarked = false;
 		$response->Objects[0]->MetaData->RightsMetaData->Copyright = '';
@@ -456,6 +457,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflTrashCan_TestCase extend
 		$response->Objects[0]->MetaData->BasicMetaData->Publication = $this->imagePublication;
 		$response->Objects[0]->MetaData->BasicMetaData->Category = $this->imageCategory;
 		$response->Objects[0]->MetaData->BasicMetaData->ContentSource = '';
+		$response->Objects[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->Objects[0]->MetaData->RightsMetaData = new RightsMetaData();
 		$response->Objects[0]->MetaData->RightsMetaData->CopyrightMarked = false;
 		$response->Objects[0]->MetaData->RightsMetaData->Copyright = '';

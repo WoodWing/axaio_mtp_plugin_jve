@@ -492,6 +492,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->BasicMetaData->Category->Id = $this->vars['BuildTest_Admin']['category']->Id;
 		$response->Objects[0]->MetaData->BasicMetaData->Category->Name = $this->vars['BuildTest_Admin']['category']->Name;
 		$response->Objects[0]->MetaData->BasicMetaData->ContentSource = '';
+		$response->Objects[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->Objects[0]->MetaData->RightsMetaData = new RightsMetaData();
 		$response->Objects[0]->MetaData->RightsMetaData->CopyrightMarked = false;
 		$response->Objects[0]->MetaData->RightsMetaData->Copyright = '';
@@ -701,6 +702,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->BasicMetaData->Category->Id = $this->vars['BuildTest_Admin']['category']->Name;
 		$response->Objects[0]->MetaData->BasicMetaData->Category->Name = $this->vars['BuildTest_Admin']['category']->Name;
 		$response->Objects[0]->MetaData->BasicMetaData->ContentSource = '';
+		$response->Objects[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->Objects[0]->MetaData->RightsMetaData = new RightsMetaData();
 		$response->Objects[0]->MetaData->RightsMetaData->CopyrightMarked = false;
 		$response->Objects[0]->MetaData->RightsMetaData->Copyright = '';
@@ -1074,6 +1076,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->BasicMetaData->Category->Id = $this->vars['BuildTest_Admin']['category']->Id;
 		$response->Objects[0]->MetaData->BasicMetaData->Category->Name = $this->vars['BuildTest_Admin']['category']->Name;
 		$response->Objects[0]->MetaData->BasicMetaData->ContentSource = '';
+		$response->Objects[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->Objects[0]->MetaData->RightsMetaData = new RightsMetaData();
 		$response->Objects[0]->MetaData->RightsMetaData->CopyrightMarked = false;
 		$response->Objects[0]->MetaData->RightsMetaData->Copyright = '';
