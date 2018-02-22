@@ -1,5 +1,3 @@
-ALTER TABLE `smart_actionproperties`
-ADD   `multipleobjects` char(2) NOT NULL  default '';
 ALTER TABLE `smart_actionproperties` CHANGE `orderid`   `orderid` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_authorizations`
 ADD   `bundle` int(11) NOT NULL  default '0';
@@ -11,6 +9,9 @@ ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double NOT NULL  default
 ALTER TABLE `smart_log` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_log` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_log` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_objectlocks`
+ADD   `appname` varchar(200) NOT NULL  default '',
+ADD   `appversion` varchar(200) NOT NULL  default '';
 ALTER TABLE `smart_objectlocks` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectlocks` CHANGE `object`   `object` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelations` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
@@ -66,10 +67,7 @@ CREATE TABLE `smart_objectoperations` (
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `objid_objectoperations` ON `smart_objectoperations`(`objid`) ;
 ALTER TABLE `smart_properties` CHANGE `templateid`   `templateid` bigint(11) NOT NULL  default 0;
-ALTER TABLE `smart_publications`
-ADD   `calculatedeadlines` char(2) NOT NULL  default '';
 ALTER TABLE `smart_publobjects` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_routing` CHANGE `routeto`   `routeto` varchar(255) NOT NULL  default '';
 ALTER TABLE `smart_settings` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_states`
 ADD   `phase` varchar(40) NOT NULL  default 'Production',
@@ -100,20 +98,12 @@ ALTER TABLE `smart_appsessions` CHANGE `templateid`   `templateid` bigint(11) NO
 ALTER TABLE `smart_appsessions` CHANGE `layoutid`   `layoutid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_dsqueryplacements` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_dsobjupdates` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_issues`
-ADD   `calculatedeadlines` char(2) NOT NULL  default '';
 ALTER TABLE `smart_targets` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_targets` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_targets` CHANGE `objectrelationid`   `objectrelationid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_publishhistory`
-ADD   `user` varchar(255) NOT NULL  default '';
 ALTER TABLE `smart_publishhistory` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_publishhistory` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_pubpublishedissues` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
-ALTER TABLE `smart_publishedobjectshist`
-ADD   `objectname` varchar(255) NOT NULL  default '',
-ADD   `objecttype` varchar(40) NOT NULL  default '',
-ADD   `objectformat` varchar(128) NOT NULL  default '';
 ALTER TABLE `smart_publishedobjectshist` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_publishedobjectshist` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_publishedobjectshist` CHANGE `publishid`   `publishid` bigint(11) NOT NULL  default '0';
@@ -162,7 +152,6 @@ ALTER TABLE `smart_indesignserverjobs` CHANGE `objid`   `objid` bigint(11) NOT N
 ALTER TABLE `smart_indesignserverjobs` CHANGE `errormessage`   `errormessage` varchar(1024) NOT NULL  default '';
 ALTER TABLE `smart_indesignserverjobs` CHANGE `servermajorversion`   `minservermajorversion` mediumint(9) NOT NULL  default '0';
 ALTER TABLE `smart_indesignserverjobs` CHANGE `serverminorversion`   `minserverminorversion` mediumint(9) NOT NULL  default '0';
-CREATE  INDEX `objid_indesignserverjobs` ON `smart_indesignserverjobs`(`objid`) ;
 CREATE  INDEX `prid_indesignserverjobs` ON `smart_indesignserverjobs`(`prio`, `jobid`) ;
 CREATE  INDEX `ts_indesignserverjobs` ON `smart_indesignserverjobs`(`ticketseal`) ;
 CREATE  INDEX `ttjtstrt_indesignserverjobs` ON `smart_indesignserverjobs`(`ticket`, `jobtype`, `starttime`, `readytime`) ;
@@ -212,4 +201,4 @@ ALTER TABLE `smart_objectlabels` CHANGE `objid`   `objid` bigint(11) NOT NULL  d
 ALTER TABLE `smart_objectlabels` CHANGE `name`   `name` varchar(250) NOT NULL  default '';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `labelid`   `labelid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `childobjid`   `childobjid` bigint(11) NOT NULL  default '0';
-UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.3' where `name` = 'version';

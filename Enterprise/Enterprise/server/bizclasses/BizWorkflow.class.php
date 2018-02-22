@@ -1617,7 +1617,7 @@ class BizWorkflow
 					if( $usage->Editable ) {
 
 						if( ($objType == 'PublishForm' || $objType == 'PublishFormTemplate' || $disableDossierProperty ) &&
-                            ( !self::objectIsCreated( $action ) ) ) {
+								( !self::objectIsCreated( $action ) ) ) {
 							$usage->Editable = false;
 							LogHandler::Log( 'GetDialog', 'INFO', 'Set the '.$usage->Name.' property to read-only ' .
 								'because dialog type is '.$action.' and object type is '.$objType );
@@ -1636,7 +1636,7 @@ class BizWorkflow
 							// Happens for single target dialogs only, such as ID/IC. (BZ#17069, BZ#14916, BZ#16686)
 							$usage->Editable = false;
 							LogHandler::Log( 'GetDialog', 'INFO', 'Set the '.$usage->Name.' property to read-only because targets are hidden from dialog.' );
-                        } else if( !self::objectIsCreated( $action ) ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
+						} else if( !self::objectIsCreated( $action ) ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
 							if( $redrawOnPub ) {
 								$usage->Editable = true; // BZ#31415 - Set field to editable, to avoid GUI deadlocks
 							} else {
