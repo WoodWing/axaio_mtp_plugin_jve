@@ -1672,6 +1672,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Aantal objecten met deze {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Er zijn objecten en verwijderde objecten die nog steeds verbonden zijn aan deze uitgave.</Term>
   <Term key="OBJ_ON">op</Term>
+  <Term key="OBJ_ORIGINAL_ID">ID van het origineel</Term>
   <Term key="OBJ_OTHER">Overig</Term>
   <Term key="OBJ_OTHER_FILE">Ander bestand</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Scripts voor outputpad</Term>
