@@ -2103,11 +2103,11 @@ class License
 			$thelog .= "- key1=$key1\r\n";
 			$thelog .= "- key1src=$key1src\r\n";
 			if ( $starttime )
-				$thelog .= "- starttime=$starttime (" . date( "Y-m-d H:i:s", $starttime ) . ")\r\n";
+				$thelog .= "- starttime=$starttime (" . date( "Y-m-d H:i:s", intval($starttime) ) . ")\r\n";
 			if ( $expiretime )
-				$thelog .= "- expiretime=$expiretime (" . date( "Y-m-d H:i:s", $expiretime ) . ")\r\n";
+				$thelog .= "- expiretime=$expiretime (" . date( "Y-m-d H:i:s", intval($expiretime) ) . ")\r\n";
 			if ( $renewtime )
-				$thelog .= "- renewtime=$renewtime (" . date( "Y-m-d H:i:s", $renewtime ) . ")\r\n";
+				$thelog .= "- renewtime=$renewtime (" . date( "Y-m-d H:i:s", intval($renewtime) ) . ")\r\n";
 			$thelog .= "- expiremaxobj=$expiremaxobj\r\n";
 			$thelog .= "- errorstart=$errorstart\r\n";
 			$thelog .= "- testflags=" . $this->mTestFlags . "\r\n";
@@ -2228,10 +2228,16 @@ class License
 										'', true, $productcode, $appserial );
 		}
 
+		// NFR subscription may have an expire but no renew
+		$renewOrExpireTime = $renewtime;
+		if ( !$renewOrExpireTime && $expiretime ) {
+			$renewOrExpireTime = $expiretime;
+		}
+
 		//Subscription?
-		if ( $renewtime )
+		if ( $renewOrExpireTime )
 		{
-			$togoSeconds = $renewtime - $thistime;
+			$togoSeconds = $renewOrExpireTime - $thistime;
 			$days = intval( $togoSeconds / (60 * 60 * 24) );
 			//Try to renew a few weeks before expiration
 			if ( $days < TRYRENEW_DAYSBEFOREEXPIRATION ) 
@@ -3291,6 +3297,7 @@ class License
 			$pcname = $this->getName( $pc );
 			$licenseStatus = $this->getLicenseStatus( $pc, $serial, $info, $errorMessage );
 			$limitsArr[ $i ] = $info;
+			$limitsArr[ $i ]['serial' ] = $serial;
 			$limitsArr[ $i ]['licensestatus' ] = $licenseStatus;
 			
 //			print "<br>$pc, $serial, $curusage, $maxusage, $usageLimitReached, $errorMessage, $expires";
@@ -3376,6 +3383,7 @@ class License
 
 			print "<tr bgcolor='#cccccc'>";
 			print "<th class='text'>" . BizResources::localize('LIC_APPLICATION') . "</th>";
+			print "<th class='text'>" . BizResources::localize('LIC_THE_SERIAL') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_STATUS') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_MESSAGE') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_RENEW') . "</th>";
@@ -3408,6 +3416,7 @@ class License
 				$w3 = $tabwidth - $w2 - $w1;
 
 				$name = $limitArr2[ 'name' ];
+				$serial = $limitArr2[ 'serial' ];
 				$pcode = $limitArr2[ 'pcode' ];
 				
 				if ( ($max == '0') && ($max != '*' ) ) {
@@ -3423,6 +3432,7 @@ class License
 
 				print "<tr bgcolor='$tablebg'>";
 				print "<td><font color='$fontcolor'>$name</font></td>";
+				print "<td><font color='$fontcolor'>$serial</font></td>";
 				print "<td><img src='images/" . $limitArr2['color' ] . ".gif' width='10' height='10'>" . $limitArr2[ 'status' ] . "</td>";
 				print "<td>" . $limitArr2[ 'error' ] . "</td>";
 				print "<td>" . $limitArr2[ 'renew' ] . "</td>";
@@ -3453,7 +3463,7 @@ class License
 					}
 				}
 
-				if ( $limitArr2[ 'renew' ] != '&nbsp;' )
+				if ( $limitArr2[ 'renew' ] != '&nbsp;' || $limitArr2[ 'expires' ] != '&nbsp;' )
 					$manageStr .= "<input type='button' value='" . BizResources::localize("LIC_RENEW") . "' onClick=\"r('renew.php', '$pcode', '$name', 'renew');\">";
 
 				if ( $limitArr2[ 'licensestatus' ] == WW_LICENSE_OK_TMPCONFIG )

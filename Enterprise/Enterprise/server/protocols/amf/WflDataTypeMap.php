@@ -4,9 +4,11 @@
  * @package Enterprise
  * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
- * 
- * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
  */
+
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflFeature', 'Feature' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflBasicMetaData', 'BasicMetaData' );

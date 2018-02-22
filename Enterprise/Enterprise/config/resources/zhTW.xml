@@ -1672,6 +1672,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">項目是此 {STATE}的數目:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">還有一些對象及刪除的對象還關聯在這一期</Term>
   <Term key="OBJ_ON">開</Term>
+  <Term key="OBJ_ORIGINAL_ID">原始帳號</Term>
   <Term key="OBJ_OTHER">其他</Term>
   <Term key="OBJ_OTHER_FILE">另外的檔</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">輸出路徑語法</Term>
