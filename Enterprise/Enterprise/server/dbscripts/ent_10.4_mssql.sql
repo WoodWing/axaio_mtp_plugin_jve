@@ -199,6 +199,8 @@ CREATE TABLE [smart_objectlocks] (
   [timestamp] timestamp NOT NULL ,
   [ip] varchar(30) NOT NULL  default '',
   [lockoffline] varchar(2) NOT NULL  default '',
+  [appname] varchar(200) NOT NULL  default '',
+  [appversion] varchar(200) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 CREATE UNIQUE INDEX [ob_objectlocks] ON [smart_objectlocks]([object]) ;

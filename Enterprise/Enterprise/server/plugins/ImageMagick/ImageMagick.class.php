@@ -122,7 +122,7 @@ class ImageMagick
 	private static function convertFile( $inputFilename, $outputFilename, $imageSize, $orientation )
 	{
 		$size = intval( $imageSize ); // robustness: just to make sure having numeric value
-		$cmdline = self::makeExecutable( IMAGE_MAGICK_APP_PATH, 'convert' ) . ' ';
+		$cmdline = self::makeExecutable( IMAGE_MAGICK_APP_PATH, 'magick' ) . ' ';
 		if( LogHandler::debugMode() ) {
 			$cmdline .= '-verbose ';
 		}
@@ -190,7 +190,7 @@ class ImageMagick
 		}
 		
 		self::setEnvironment();
-		$executable = self::makeExecutable( IMAGE_MAGICK_APP_PATH, 'convert' );
+		$executable = self::makeExecutable( IMAGE_MAGICK_APP_PATH, 'magick' );
 		$imVersion = shell_exec( $executable . ' -version' );
 		if( empty( $imVersion ) ) {
 			return ''; // error
@@ -437,8 +437,8 @@ class ImageMagick
 		/** @noinspection PhpDeprecationInspection */
 		$outputFilename = self::createOutputFile();
 		$format = ' -units PixelsPerInch -format "Format:%m\nColorSpace:%[colorspace]\nDpi:%x\nHeight:%[height]\nWidth:%[width]" ';
-		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'identify');
-		$cmdline = $executable. ' -verbose -define jpeg:size=64x64 '.$format.escapeshellarg( $fileName.'[0]' ).' > '.
+		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'magick');
+		$cmdline = $executable. ' identify -verbose -define jpeg:size=64x64 '.$format.escapeshellarg( $fileName.'[0]' ).' > '.
 					escapeshellarg($outputFilename);
 		$ret = self::imageMagickCmd( 'identify', $cmdline );
 		if ( $ret ) {
@@ -454,7 +454,7 @@ class ImageMagick
 		LogHandler::logRaw('ImageMagick',
 								 'DEBUG',
 								 LogHandler::encodeLogMessage( "ImageMagick identify output:\r\n" ).LogHandler::composeCodeBlock( $output ) );
-	
+
 		$lines = explode( "\n", $output );
 		if ( $lines ) foreach ( $lines as $line ) {
 			if ( $line ) { // Skip empty lines (especially the last one).
@@ -503,7 +503,7 @@ class ImageMagick
 	{
 		/** @noinspection PhpDeprecationInspection */
 		$outputFilename = self::createOutputFile();
-		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'convert');
+		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'magick');
 		$cmdline = $executable. ' -ping '.escapeshellarg($fileName.'[0]').' xmp:'.escapeshellarg( $outputFilename );
 		$ret = self::imageMagickCmd( 'convert', $cmdline, false );
 		if ( $ret ) {
@@ -559,7 +559,7 @@ class ImageMagick
 	{
 		/** @noinspection PhpDeprecationInspection */
 		$outputFilename = self::createOutputFile();
-		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'convert');
+		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'magick');
 		$cmdline = $executable. ' -ping '.escapeshellarg($fileName.'[0]').' iptc:'.escapeshellarg($outputFilename);
 		$ret = self::imageMagickCmd( 'convert', $cmdline, false );
 		if ( $ret ) {

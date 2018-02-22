@@ -15,6 +15,9 @@ ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double NOT NULL  default
 ALTER TABLE `smart_log` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_log` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_log` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_objectlocks`
+ADD   `appname` varchar(200) NOT NULL  default '',
+ADD   `appversion` varchar(200) NOT NULL  default '';
 ALTER TABLE `smart_objectlocks` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectlocks` CHANGE `object`   `object` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelations`

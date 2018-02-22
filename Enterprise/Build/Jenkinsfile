@@ -1,0 +1,15 @@
+pipeline {
+    agent {
+    	node {
+    		label 'zetes'
+    	}
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Hello'
+            }
+        }
+    }
+}
