@@ -684,7 +684,7 @@ class DBObject extends DBBase
 	 * @param int $id Object id if object already exists
 	 * @return string[]
 	 */
-	static public function getObjectNamesIgnoringCaseAndAccentedCharacters( $issueIds, $name, $type, $id=null )
+	static public function getObjectNamesIgnoringCaseAndAccentedCharacters( array $issueIds, string $name, string $type, $id=null ):array
 	{
 		$dbdriver = DBDriverFactory::gen();
 		$objectsTable = $dbdriver->tablename(self::TABLENAME);
@@ -703,8 +703,9 @@ class DBObject extends DBBase
 		}
 
 		$sth = $dbdriver->query( $sql, $params );
+		$rows = self::fetchResults( $sth );
 		$caseAndAccentInsensitiveNames = array();
-		while( ( $row = $dbdriver->fetch( $sth ))) {
+		if( $rows ) foreach( $rows as $row ) {
 			$caseAndAccentInsensitiveNames[] = $row['name'];
 		}
 		return $caseAndAccentInsensitiveNames;

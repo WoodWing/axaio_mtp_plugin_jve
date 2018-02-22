@@ -19,7 +19,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	private $categoryInfoObj = null;
 	private $pubChannelObj = null;
 	private $issueObj = null;
-	private $autoRenamedDossierObj = null;
+	private $autoRenamedDossierObjs = null;
 
 
 	public function getDisplayName() { return 'Auto Naming Rule'; }
@@ -31,19 +31,23 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 		 	<li>Create test dossier objects.</li>
 		 	<li>Create dossier object with ApplyAutoNaming = True.</li>
 		 	<li>Create dossier object with ApplyAutoNaming = False.</li>
-			<li>Create dossier object when ApplyAutoNaming = Null.</li>
-			<li>Move create dossier object to TrashCan.</li>
+			<li>Create dossier object with ApplyAutoNaming = Null.</li>
+			<li>Create dossier object with accented name with ApplyAutoNaming = Null.</li>
+			<li>Move dossier objects to TrashCan.</li>
 			<li>Create dossier object with ApplyAutoNaming = True.</li>
 			<li>Create dossier object with ApplyAutoNaming = True.</li>
-			<li>Restore dossier object that will automatic apply autonaming.</li>
+			<li>Create dossier object with accented name with ApplyAutoNaming = Null</li>
+			<li>Restore dossier objects that will automatic apply autonaming.</li>
 			<li>Logon as Smart Mover client, autonaming always set to True.</li>
 			<li>Create dossier object with ApplyAutoNaming = True.</li>
 			<li>Create dossier object with ApplyAutoNaming = False.</li>
-			<li>Create dossier object when ApplyAutoNaming = Null.</li>
-			<li>Move create dossier object to TrashCan.</li>
+			<li>Create dossier object with ApplyAutoNaming = Null.</li>
+			<li>Create dossier object with accented name with ApplyAutoNaming = Null.</li>
+			<li>Move create dossier objects to TrashCan.</li>
 			<li>Create dossier object with ApplyAutoNaming = True.</li>
 			<li>Create dossier object with ApplyAutoNaming = True.</li>
-			<li>Restore dossier object that will automatic apply autonaming.</li>
+			<li>Create dossier object with accented name with ApplyAutoNaming = Null</li>
+			<li>Restore dossier objects that will automatic apply autonaming.</li>
 		 	<li>Logoff as Smart Mover client.</li>
 		 	<li>Teardown test objects.</li>
 		 </ol>';
@@ -165,6 +169,17 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	}
 
 	/**
+	 * Returns "dossier_$appName_xyz" ( y = with a diaeresis y )
+	 *
+	 * @param string $appName Client application name, Web|Mover
+	 * @return string
+	 */
+	private function getDossierNameWithAccent( $appName )
+	{
+		return 'dossier_'.$appName.'_x' .chr( 0xC3 ).chr( 0xBF ) . 'z';
+	}
+
+	/**
 	 * Logon TESTSUITE user as Smart Mover client
 	 *
 	 */
@@ -233,6 +248,12 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 		// Test create dossier that having auto naming = null
 		$this->testNullAutoNaming( $appName );
 
+		// Test create dossier with accented name that having auto naming = null
+		$this->testFirstNullAutoNamingWithAccentedName( $appName );
+
+		// Test create second dossier with accented name that having auto naming = null
+		$this->testSecondNullAutoNamingWithAccentedName( $appName );
+
 		// Move the renamed dossier object to TrashCan
 		$this->moveDossierToTrashCan();
 
@@ -241,6 +262,9 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 
 		// Test create third dossier that having auto naming = true
 		$this->testThirdTrueAutoNaming( $appName );
+
+		// Test create third dossier with accented name that having auto naming = null
+		$this->testThirdNullAutoNamingWithAccentedName( $appName );
 
 		// Test restoring object with name already exists in DB
 		$this->testRestoreObjectAutoNaming();
@@ -278,8 +302,8 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 			$this->dossiers = null;
 		}
 		// Delete the dossier object from TrashCan, this is possible when there is a test failed in the middle before restoring the object
-		if( $this->autoRenamedDossierObj ) {
-			$dossierId = $this->autoRenamedDossierObj->MetaData->BasicMetaData->ID;
+		if( $this->autoRenamedDossierObjs ) foreach( $this->autoRenamedDossierObjs as $autoRenamedDossierObj ) {
+			$dossierId = $autoRenamedDossierObj->MetaData->BasicMetaData->ID;
 			$this->deleteObjects( array($dossierId), true );
 		}
 	}
@@ -398,6 +422,8 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	/**
 	 * Test auto naming with applyautonaming is true
 	 *
+	 * When $appName = 'mover', applyautonaming is always true.
+	 *
 	 * @param string $appName Client application name Web|Mover
 	 */
 	private function testFirstTrueAutoNaming( $appName )
@@ -410,12 +436,14 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 			$this->assertInstanceOf( 'Object', $response->Objects[0] );
 			$this->dossiers[] = $response->Objects[0];
 			$this->assertEquals( $expectedUniqueName, $response->Objects[0]->MetaData->BasicMetaData->Name );
-			$this->autoRenamedDossierObj = $response->Objects[0];
+			$this->autoRenamedDossierObjs[] = $response->Objects[0];
 		}
 	}
 
 	/**
 	 * Test auto naming with applyautonaming is false
+	 *
+	 * When $appName = 'mover', applyautonaming is always true.
 	 *
 	 * @param string $appName Client application name Web|Mover
 	 */
@@ -436,14 +464,58 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	/**
 	 * Test auto naming when applyautonaming is null
 	 *
+	 * When $appName = 'mover', applyautonaming is always true.
+	 *
 	 * @param string $appName Client application name Web|Mover
 	 */
 	private function testNullAutoNaming( $appName )
 	{
 		$dossierName = 'dossier_'.$appName.'_xyz';
 		$stepInfo = 'Test auto naming = null(Core server will decide the auto naming).';
-		$expectedError = ($appName == 'web') ? '(S1025)' : null;
-		$expectedUniqueName = $dossierName . '_' . str_pad( 1, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
+		$expectedError = ( $appName == 'web' ) ? '(S1025)' : null;
+		$expectedUniqueName = $dossierName.'_'.str_pad( 1, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
+		$response = $this->createDossier( $dossierName, $stepInfo, $expectedError );
+		if( $response ) {
+			$this->assertInstanceOf( 'Object', $response->Objects[0] );
+			$this->dossiers[] = $response->Objects[0];
+			$this->assertEquals( $expectedUniqueName, $response->Objects[0]->MetaData->BasicMetaData->Name );
+		}
+	}
+
+	/**
+	 * Create object for the first time when applyautonaming is null
+	 *
+	 * When $appName = 'mover', applyautonaming is always true.
+	 *
+	 * @param string $appName Client application name Web|Mover
+	 */
+	private function testFirstNullAutoNamingWithAccentedName( $appName )
+	{
+		$dossierName = self::getDossierNameWithAccent( $appName );
+		$stepInfo = 'Test auto naming = null(Core server will decide the auto naming).';
+		$expectedUniqueName = $dossierName;
+		$response = $this->createDossier( $dossierName, $stepInfo );
+		if( $response ) {
+			$this->assertInstanceOf( 'Object', $response->Objects[0] );
+			$this->dossiers[] = $response->Objects[0];
+			$this->assertEquals( $expectedUniqueName, $response->Objects[0]->MetaData->BasicMetaData->Name );
+			$this->autoRenamedDossierObjs[] = $response->Objects[0];
+		}
+	}
+
+	/**
+	 * Create object for the second time with the same object name where applyautonaming is null.
+	 *
+	 * When $appName = 'mover', applyautonaming is always true.
+	 *
+	 * @param string $appName Client application name Web|Mover
+	 */
+	private function testSecondNullAutoNamingWithAccentedName( $appName )
+	{
+		$dossierName = self::getDossierNameWithAccent( $appName );
+		$stepInfo = 'Test auto naming = null(Core server will decide the auto naming).';
+		$expectedError = ( $appName == 'web' ) ? '(S1025)' : null;
+		$expectedUniqueName = $dossierName.'_'.str_pad( 1, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
 		$response = $this->createDossier( $dossierName, $stepInfo, $expectedError );
 		if( $response ) {
 			$this->assertInstanceOf( 'Object', $response->Objects[0] );
@@ -458,11 +530,11 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	 */
 	private function moveDossierToTrashCan()
 	{
-		if( $this->autoRenamedDossierObj ) {
+		if( $this->autoRenamedDossierObjs ) foreach( $this->autoRenamedDossierObjs as $autoRenamedDossierObj ) {
 			$errorReport = null;
-			$id = $this->autoRenamedDossierObj->MetaData->BasicMetaData->ID;
-			$stepInfo = 'Move auto renamed dossier object with Name="'. $this->autoRenamedDossierObj->MetaData->BasicMetaData->Name.'" to TrashCan.';
-			if( !$this->utils->deleteObject( $this, $this->ticket, $this->autoRenamedDossierObj->MetaData->BasicMetaData->ID, $stepInfo, $errorReport, null, false ) ) {
+			$id = $autoRenamedDossierObj->MetaData->BasicMetaData->ID;
+			$stepInfo = 'Move auto renamed dossier object with Name="'. $autoRenamedDossierObj->MetaData->BasicMetaData->Name.'" to TrashCan.';
+			if( !$this->utils->deleteObject( $this, $this->ticket, $autoRenamedDossierObj->MetaData->BasicMetaData->ID, $stepInfo, $errorReport, null, false ) ) {
 				$this->setResult( 'ERROR',  'Could not tear down object with id '.$id.'.' );
 			}
 		}
@@ -472,13 +544,15 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	 * Test to create second time for the same object name when applyautonaming is true
 	 * Expected unique object name appended with "0001" as suffix return
 	 *
+	 * When $appName = 'mover', applyautonaming is always true.
+	 *
 	 * @param string $appName Client application name Web|Mover
 	 */
 	private function testSecondTrueAutoNaming( $appName )
 	{
 		$dossierName = 'dossier_'.$appName.'_123';
 		$expectedUniqueName = $dossierName . '_' . str_pad( 1, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
-		$stepInfo = 'Test with dossier object with Name="'. $dossierName .'" that will return AutoNaming = null{Core server will decide the autonaming).';
+		$stepInfo = 'Test with dossier object with Name="'. $dossierName .'" that will return AutoNaming = true{Auto naming applied).';
 		$response = $this->createDossier( $dossierName, $stepInfo );
 		if( $response ) {
 			$this->assertInstanceOf( 'Object', $response->Objects[0] );
@@ -491,13 +565,15 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	 * Test to create third time for the same object name when applyautonaming is true
 	 * Expected unique incremental name as '0002' from last auto naming object name in DB.
 	 *
+	 * When $appName = 'mover', applyautonaming is always true.
+	 *
 	 * @param string $appName Client application name Web|Mover
 	 */
 	private function testThirdTrueAutoNaming( $appName )
 	{
 		$dossierName = 'dossier_'.$appName.'_123';
 		$expectedUniqueName = $dossierName . '_' . str_pad( 2, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
-		$stepInfo = 'Test with dossier object with Name="'. $dossierName .'" that will return AutoNaming = null{Core server will decide the autonaming).';
+		$stepInfo = 'Test with dossier object with Name="'. $dossierName .'" that will return AutoNaming = true{Auto naming applied).';
 		$response = $this->createDossier( $dossierName, $stepInfo );
 		if( $response ) {
 			$this->assertInstanceOf( 'Object', $response->Objects[0] );
@@ -507,19 +583,43 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	}
 
 	/**
-	 * Test auto naming when restore an object which name already exists in DB
+	 * Test to create second time for the same object name when applyautonaming is null
+	 *
+	 * There's one object in the TrashCan with the same object name,
+	 * therefore the expected name should be the same as the original intended name ( no error should be thrown )
+	 * When $appName = 'mover', applyautonaming is always true.
+	 *
+	 * @param string $appName Client application name Web|Mover
+	 */
+	private function testThirdNullAutoNamingWithAccentedName( $appName )
+	{
+		$dossierName = self::getDossierNameWithAccent( $appName );
+		$stepInfo = 'Test auto naming = null(Core server will decide the auto naming).';
+		$expectedUniqueName = $dossierName;
+		$response = $this->createDossier( $dossierName, $stepInfo );
+		if( $response ) {
+			$this->assertInstanceOf( 'Object', $response->Objects[0] );
+			$this->dossiers[] = $response->Objects[0];
+			$this->assertEquals( $expectedUniqueName, $response->Objects[0]->MetaData->BasicMetaData->Name );
+		}
+	}
+
+	/**
+	 * Test auto naming when restore objects which name already exists in DB
 	 */
 	private function testRestoreObjectAutoNaming()
 	{
-		if( $this->autoRenamedDossierObj ) {
-			$dossierId = $this->autoRenamedDossierObj->MetaData->BasicMetaData->ID;
-			$stepInfo = 'Restore the auto rename dossier object from the TrashCan.';
-			$expectedUniqueName = $this->autoRenamedDossierObj->MetaData->BasicMetaData->Name . '_' . str_pad( 1, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
-			$response = $this->restoreObject( $dossierId, $stepInfo );
-			if( !$response ) {
-				$this->setResult( 'ERROR',  'Could not restore dossier from trashCan with id '.$dossierId.'.' );
+		if( $this->autoRenamedDossierObjs ) {
+			foreach( $this->autoRenamedDossierObjs as $autoRenamedDossierObj ) {
+				$dossierId = $autoRenamedDossierObj->MetaData->BasicMetaData->ID;
+				$stepInfo = 'Restore the auto rename dossier object from the TrashCan.';
+				$expectedUniqueName = $autoRenamedDossierObj->MetaData->BasicMetaData->Name . '_' . str_pad( 1, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
+				$response = $this->restoreObject( $dossierId, $stepInfo );
+				if( !$response ) {
+					$this->setResult( 'ERROR',  'Could not restore dossier from trashCan with id '.$dossierId.'.' );
+				}
 			}
-			$this->autoRenamedDossierObj = null;
+			$this->autoRenamedDossierObjs = null;
 		}
 	}
 }
