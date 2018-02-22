@@ -36,11 +36,25 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectVariants_TestCase 
 
 	public function getDisplayName() { return 'Object Variants'; }
 	public function getTestGoals()   { return 'Checks if the MasterId property is handled well by the workflow web services.'; }
-	public function getTestMethods() { return ''; } // TODO
 	public function getPrio()        { return 450; }
 	public function isSelfCleaning() { return true; }
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	public function getTestMethods()
+	{
+		return
+			'Validate the MasterId property after calling all kind of workflow services: <ul>'.
+				'<li>Create an article to be used as the original/master object (CreateObjects).</li>'.
+				'<li>Make a copy of that article and validate the MasterId (CopyObjects).</li>'.
+				'<li>Attempt to adjust the MasterId which should be read-only (SetObjectProperties, MultiSetObjectProperties, SaveObjects)</li>'.
+				'<li>Make a copy of the copied article (c-o-c) and validate the MasterId (CopyObjects).</li>'.
+				'<li>Trash and restore the c-o-c article and validate the MasterId (DeleteObjects, RestoreObjects).</li>'.
+				'<li>Search for the MasterId and validate whether all three articles are returned (NamedQuery).</li>'.
+				'<li>Simulate a client performing a Save As of the article and validate the MasterId (GetObjects, CreateObjects).</li>'.
+				'<li>Cleanup all the articles created/copied for this test.</li>'.
+			'</ul>';
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - TEST SCRIPTS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	final public function runTest()
 	{
@@ -95,8 +109,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectVariants_TestCase 
 		}
 		$this->tearDownTestData();
 	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/**
 	 * Construct data used by this test script.

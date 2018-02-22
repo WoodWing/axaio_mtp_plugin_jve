@@ -2649,22 +2649,18 @@ class BizObject
 		// When an object is a copy of another object, this indicates the object ID of the object it was copied from.
 		// When the object being copied is itself already a copy, it's MasterId will be used. That means all copies will
 		// share the same MasterId which makes it easy to find all copies on a specific object.
+		require_once BASEDIR.'/server/bizclasses/BizObjectType.class.php';
 		$exceptionTypes = array(
-			// The MasterId does not make much sense for:
-			'AdvertTemplate',
-			'ArticleTemplate',
-			'Dossier',
-			'DossierTemplate',
 			'Hyperlink',
-			'LayoutTemplate',
-			'LayoutModuleTemplate',
 			'Library',
-			'Plan',
-			'PublishFormTemplate',
-			'Task',
 		);
+		$exceptionFlags = BizObjectType::OBSOLETED | BizObjectType::CONTAINER | BizObjectType::TEMPLATE;
+		// The MasterId does not make much sense for $exceptionTypes and $exceptionFlags.
 		if( !in_array( $meta->BasicMetaData->Type, $exceptionTypes ) && // destination
-			!in_array( $objProps['Type'], $exceptionTypes ) ) {          // source
+			!in_array( $objProps['Type'], $exceptionTypes ) && // source
+			!BizObjectType::isObjectTypeAnyOf( $meta->BasicMetaData->Type, $exceptionFlags ) && // destination
+			!BizObjectType::isObjectTypeAnyOf( $objProps['Type'], $exceptionFlags ) // source
+		) {
 			$meta->BasicMetaData->MasterId = $objProps['MasterId'] ? $objProps['MasterId'] : $objProps['ID'];
 		}
 
