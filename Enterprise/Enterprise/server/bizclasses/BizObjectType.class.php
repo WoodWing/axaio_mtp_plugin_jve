@@ -8,10 +8,16 @@
 
 class BizObjectType
 {
-	const OBSOLETED  = 0x0001;
-	const TEMPLATE   = 0x0002;
-	const CONTAINER  = 0x0004;
-	const LAYOUTKIND = 0x0008;
+	/**
+	 * List of bit flags. Each flag represents a collection of object types.
+	 *
+	 * When adding new flags, make sure none of the bits are matching with existing flags.
+	 * For example, after 0x0008, you should add 0x0010, 0x0020, 0x0040, 0x0080, 0x0100, etc
+	 */
+	const OBSOLETED  = 0x0001; // Object types that are (or should be) no longer in use by the system.
+	const TEMPLATE   = 0x0002; // Object types that are any kind of template.
+	const CONTAINER  = 0x0004; // Object types that may contain other objects (through 'Contained' relations).
+	const LAYOUTKIND = 0x0008; // Object types that are any kind of a Layout.
 
 	/**
 	 * List all object types defined in the workflow WSDL (SCEnterprise.wsdl).
@@ -38,7 +44,7 @@ class BizObjectType
 			'LayoutTemplate' => self::LAYOUTKIND | self::TEMPLATE | self::CONTAINER,
 			'LayoutModuleTemplate' => self::LAYOUTKIND | self::TEMPLATE | self::CONTAINER,
 			'Library' => 0,
-			'Plan' => self::OBSOLETED,
+			'Plan' => self::OBSOLETED, // Was used by the VanGennep planning integration internally to save their project files.
 			'PublishForm' => 0,
 			'PublishFormTemplate' => self::TEMPLATE,
 			'Presentation' => 0,
