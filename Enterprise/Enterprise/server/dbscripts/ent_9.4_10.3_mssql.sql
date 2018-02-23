@@ -47,6 +47,9 @@ SET @sql = 'ALTER TABLE smart_log DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_log ALTER COLUMN   [parent] bigint NOT NULL ;
 ALTER TABLE [smart_log] ADD DEFAULT ('0') FOR [parent];
+ALTER TABLE [smart_objectlocks] ADD 
+  [appname] varchar(200) NOT NULL  default '',
+  [appversion] varchar(200) NOT NULL  default '';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objectlocks', @columnName = 'id', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_objectlocks DROP CONSTRAINT ' + @constraintName
@@ -583,4 +586,4 @@ ALTER TABLE [smart_objectrelationlabels] ADD PRIMARY KEY ([labelid], [childobjid
 CREATE  INDEX [objrellabels_childobjid] ON [smart_objectrelationlabels]([childobjid]) ;
 ALTER TABLE [smart_objectrelationlabels] ADD DEFAULT ('0') FOR [childobjid];
 DROP PROCEDURE [dbo].[SCE_GetConstraintName];
-UPDATE [smart_config] set [value] = '10.2' where [name] = 'version';
+UPDATE [smart_config] set [value] = '10.3' where [name] = 'version';

@@ -1471,13 +1471,9 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 	 * L> 19. Brand, Issue/Issues, Targets and Editions widget should be exists and editable.
 	 * L> 20. There should not be PubChannels in widgets+metadata.
 	 *
-	 * For Dossier that is targeted to PubChannels that supports PublishForm(Create, CopyTo):
+	 * For Dossier that is targeted to PubChannels that supports PublishForm(Create, CopyTo, SetProperties):
 	 * L> 21. Brand widget should be editable.
 	 * L> 22. Publish In(Targets,Issue/Issues) widget should be editable.
-	 *
-	 * For Dossier that is targeted to PubChannels that supports PublishForm(SetProperties):
-	 * L> 23. Brand widget should be read-only.
-	 * L> 24. Publish In(Targets,Issue/Issues) widget should be read-only.
 	 *
 	 * @param GetDialog2Response $response The response to be validated.
 	 * @param string $objType
@@ -1657,38 +1653,20 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 					}
 
 				} else if( $objType == 'Dossier' ) {
-					if( $dialogAction == 'Create' || $dialogAction == 'CopyTo' ) {
-						switch( $propName ) {
-							case 'Publication': // Rule 21.
-							case 'Issue': // Rule 22.
-							case 'Issues': // Rule 22.
-							case 'Targets': // Rule 22
-								if( !$respDialogTabWidget->PropertyUsage->Editable ) {
-									$this->setResult( 'ERROR',  'Response returned by getDialog2 with '.
-										'action="'.$dialogAction.'" and object type = "'.$objType.'" has "'.$propName.'" '.
-										'widget set to read-only."'.$propName.'" widget is expected to be editable.',
-										'Please check in the getDialog2->Response->Dialog->Tabs[n]->DialogTab->Widgets[n].'.
-											$this->tipMsg );
-									$result = false;
-								}
-								break;
-						}
-					} else if( $dialogAction == 'SetProperties' ) {
-						switch ( $propName ) {
-							case 'Publication': // Rule 23.
-							case 'Issue': // Rule 24.
-							case 'Issues': // Rule 24.
-							case 'Targets': // Rule 24.
-								if( $respDialogTabWidget->PropertyUsage->Editable ) {
-									$this->setResult( 'ERROR',  'Response returned by getDialog2 with '.
-										'action="'.$dialogAction.'" and object type = "'.$objType.'" has "'.$propName.'" widget set '.
-										'to editable. "'.$propName.'" widget is expected to be read-only.',
-										'Please check in the getDialog2->Response->Dialog->Tabs[n]->DialogTab->Widgets[n]. '.
-											$this->tipMsg );
-									$result = false;
-								}
-								break;
-						}
+					switch( $propName ) {
+						case 'Publication': // Rule 21.
+						case 'Issue': // Rule 22.
+						case 'Issues': // Rule 22.
+						case 'Targets': // Rule 22
+							if( !$respDialogTabWidget->PropertyUsage->Editable ) {
+								$this->setResult( 'ERROR',  'Response returned by getDialog2 with '.
+									'action="'.$dialogAction.'" and object type = "'.$objType.'" has "'.$propName.'" '.
+									'widget set to read-only."'.$propName.'" widget is expected to be editable.',
+									'Please check in the getDialog2->Response->Dialog->Tabs[n]->DialogTab->Widgets[n].'.
+										$this->tipMsg );
+								$result = false;
+							}
+							break;
 					}
 				}
 			}

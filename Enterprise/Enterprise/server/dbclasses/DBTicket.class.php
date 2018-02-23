@@ -152,8 +152,9 @@ class DBTicket extends DBBase
 	}
 
 	/**
-	 * Calculates the new session expiration time for given client. <br>
-	 * For 'Web' applications the EXPIREWEB option is used. For others EXPIREDEFAULT is used. <br>
+	 * Calculates the new session expiration time for given client.
+	 * 
+	 * For 'Web' applications the EXPIREWEB option is used. For others EXPIREDEFAULT is used.
 	 *
 	 * @param string $app  Name of client application; 'Web', 'InCopy' or 'InDesign'
 	 * @return string      Current time (SOAP datetime format) plus configured expiration
@@ -174,13 +175,12 @@ class DBTicket extends DBBase
      */
     public static function getExpireTime( $app )
     {
-        if( $app == 'Web' || $app == 'WebEditor' ) {
-            $time = EXPIREWEB;
-        } else {
-            $time = EXPIREDEFAULT;
-        }
-
-        return $time;
+	    if( $app == 'Web' ) {
+		    $time = EXPIREWEB;
+	    } else {
+		    $time = EXPIREDEFAULT;
+	    }
+	    return $time;
     }
 
 	/**
@@ -190,18 +190,12 @@ class DBTicket extends DBBase
 	 * @return boolean unique (true=not found)
 	 * @throws BizException In case of database connection error.
 	 */
-	public static function checkUniqueTicket($ticket)
+	public static function checkUniqueTicket( $ticket )
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
-		$sql = 'SELECT * FROM '.$db.' WHERE `ticketid` = ? ';
-		$params = array(strval( $ticket ) );
-		$sth = $dbdriver->query($sql, $params );
-		$result = $dbdriver->fetch($sth);
-		if( $result ) {
-			return false;
-		}
-		return true;
+		$where = '`ticketid` = ?';
+		$params = array( strval( $ticket ) );
+		$row = self::getRow( self::TABLENAME, $where, array( 'id' ), $params );
+		return !isset( $row['id'] );
 	}
 
 	/**
@@ -229,9 +223,7 @@ class DBTicket extends DBBase
 		$appname, $appversion, $appserial, $appproductcode, &$usageLimitReached, 
 		&$errorMessage, $masterTicket )
 	{
-		$dbdriver = DBDriverFactory::gen();
-
-		//The last valid logon is saved in the license check, 
+		//The last valid logon is saved in the license check,
 		//and checks later on will compare the tickets (and optionally the users table) against this logon time.
 		//To avoid small time differences, be sure to use the same date/time for both the license check and the tickets!
 		//So use the variable $now for both calling 'getLicenseStatus' and inserting rows in the tickets table.
@@ -249,7 +241,6 @@ class DBTicket extends DBBase
 		}
 		$now = date('Y-m-d\TH:i:s', $dbtime );
 
-		$db_tickets = $dbdriver->tablename(self::TABLENAME);
 		$installTicketID = $lic->getInstallTicketID();
 
 		if ( self::licenseCheckIsNeeded( $usr, $installTicketID, $ticketid, $appserial, $appname ) ) {
@@ -286,41 +277,36 @@ class DBTicket extends DBBase
 			}
 		}
 
-		$usr = $dbdriver->toDBString($usr);
-		$database = $dbdriver->toDBString($database);
-		$clientname = $dbdriver->toDBString($clientname);
-		$clientip = $dbdriver->toDBString($clientip);
-		$appname = $dbdriver->toDBString($appname);
-		$appversion = $dbdriver->toDBString($appversion);
-		$appserial = $dbdriver->toDBString($appserial);
-
-		$expire = self::_expire($appname);
-
-		$sql = "INSERT INTO $db_tickets (`ticketid`, `usr`, `db`, `clientname`, `clientip`, ".
-					"`appname`, `appversion`, `appserial`, `appproductcode`, `expire`, ".
-					"`logon`, `masterticketid`) VALUES ".
-				"('$ticketid', '$usr', '$database', '$clientname', '$clientip', ".
-					"'$appname', '$appversion', '$appserial', '$appproductcode', '$expire', ".
-					"'$now', '$masterTicket')";
-		$sql = $dbdriver->autoincrement($sql);
-		$sth = $dbdriver->query($sql);
-
-		if ( !$sth )
-		{
-			$errorMessage = $dbdriver->error();
+		$values = array(
+			'ticketid' => strval( $ticketid ),
+			'usr' => strval( $usr ),
+			'db' => strval( $database ),
+			'clientname' => strval( $clientname ),
+			'clientip' => strval( $clientip ),
+			'appname' => strval( $appname ),
+			'appversion' => strval( $appversion ),
+			'appserial' => strval( $appserial ),
+			'appproductcode' => strval( $appproductcode ),
+			'expire' => self::_expire($appname),
+			'logon' => strval( $now ),
+			'masterticketid' => strval( $masterTicket )
+		);
+		if( self::insertRow( self::TABLENAME, $values ) === false ) {
 			return false;
 		}
 
-		$db_users = $dbdriver->tablename("users");
-		$sql = "UPDATE $db_users SET `lastlogondate`='$now' WHERE `user`= ? ";
-		$sth = $dbdriver->query($sql, array( strval( $usr ) ) );
-		if ( !$sth )
-		{
-			$errorMessage = $dbdriver->error();
-			return false;
-		}
+		// cache ticket data
+		self::$ticketCache[ strval( $ticketid ) ] = array(
+			'usr' => strval( $usr ),
+			'appname' => strval( $appname ),
+			'appversion' => strval( $appversion ),
+			'masterticketid' => strval( $masterTicket )
+		);
 
-		return true;
+		$values = array( 'lastlogondate' => strval( $now ) );
+		$where = '`user`= ?';
+		$params = array( strval( $usr ) );
+		return self::updateRow( 'users', $values, $where, $params );
 	}
 
 	/**
@@ -395,14 +381,10 @@ class DBTicket extends DBBase
 			$params[] = strval( $appserial );
 		}
 
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
-		$sql = "SELECT `ticketid` FROM $db WHERE ".implode( ' AND ', $wheres );
-		$sth = $dbdriver->query( $sql, $params );
-		if (!$sth) return false;
-		$row = $dbdriver->fetch($sth);
-		if (!$row) return false;
-		return $row['ticketid'];
+		$fields = array( 'ticketid' );
+		$where = implode( ' AND ', $wheres );
+		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
+		return $row ? $row['ticketid'] : false;
 	}
 	
 	/**
@@ -416,9 +398,9 @@ class DBTicket extends DBBase
 		if( array_key_exists( $ticket, self::$ticketCache ) ) {
 			return self::$ticketCache[ $ticket ][ 'masterticketid' ];
 		}
-		$where = '`ticketid` = ?';
-		$params = array( $ticket );
 		$fields = array( 'masterticketid' );
+		$where = '`ticketid` = ?';
+		$params = array( strval( $ticket ) );
 		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return $row ? $row['masterticketid'] : false;
 	}
@@ -439,26 +421,25 @@ class DBTicket extends DBBase
 	/**
 	 * Returns the tickets that are expired.
 	 *
-	 * @return array Array with tickets.'id' as key and tickets.'ticketid' as value.
+	 * @return array Array with record id ('id' field) as key and ticket ('ticketid' field) as value.
 	 * @throws  BizException In case of database connection error.
 	 */
 	static public function getExpiredTicketsIndexedById(): array
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$dbTickets = $dbDriver->tablename( self::TABLENAME );
-		$expire = date( 'Y-m-d\TH:i:s' );
 		include_once( BASEDIR.'/server/utils/license/license.class.php' );
 		$lic = new License();
-		$installTicketID = $lic->getInstallTicketID();
-		$sql = "SELECT `id`, `ticketid` FROM {$dbTickets} WHERE `expire` < ? OR `appname`= ? ";
-		$params = array( strval( $expire ), strval( $installTicketID ) );
-		$sth = $dbDriver->query( $sql, $params, null, false ); //Don't write in log
-		$rows = array();
-		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
-			$rows[ $row['id'] ] = $row['ticketid'];
-		}
 
-		return $rows;
+		$fields = array( 'id', 'ticketid' );
+		$where = '`expire` < ? OR `appname`= ?';
+		$params = array( strval( date( 'Y-m-d\TH:i:s' ) ), strval( $lic->getInstallTicketID() ) );
+		$rows = self::listRows( self::TABLENAME, '', '', $where, $fields, $params,
+			null, null, null, null, false );
+
+		$map = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$map[ $row['id'] ] = $row['ticketid'];
+		}
+		return $map;
 	}
 
 	/**
@@ -488,9 +469,9 @@ class DBTicket extends DBBase
 	 */
 	public static function getTicket( $ticket )
 	{
+		$fields = '*';
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
-		$fields = '*';
 		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return $row ? $row : false;
 	}	
@@ -507,9 +488,9 @@ class DBTicket extends DBBase
 		if( array_key_exists( $ticket, self::$ticketCache ) ) {
 			return self::$ticketCache[ $ticket ][ 'appname' ];
 		}
-		$where = '`ticketid` = ?';
-		$params = array( $ticket );
 		$fields = array( 'appname' );
+		$where = '`ticketid` = ?';
+		$params = array( strval( $ticket ) );
 		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return $row ? $row['appname'] : false;
 	}
@@ -572,9 +553,9 @@ class DBTicket extends DBBase
 		if( array_key_exists( $ticket, self::$ticketCache ) ) {
 			return self::$ticketCache[ $ticket ][ 'appversion' ];
 		}
-		$where = '`ticketid` = ?';
-		$params = array( $ticket );
 		$fields = array( 'appversion' );
+		$where = '`ticketid` = ?';
+		$params = array( strval( $ticket ) );
 		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return $row ? $row['appversion'] : null;
 	}
@@ -591,9 +572,9 @@ class DBTicket extends DBBase
 		if( array_key_exists( $ticket, self::$ticketCache ) ) {
 			return self::$ticketCache[ $ticket ][ 'usr' ];
 		}
-		$where = '`ticketid` = ?';
-		$params = array( $ticket );
 		$fields = array( 'usr' );
+		$where = '`ticketid` = ?';
+		$params = array( strval( $ticket ) );
 		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return $row ? $row['usr'] : false;
 	}
@@ -616,18 +597,29 @@ class DBTicket extends DBBase
 		if( self::$ServerJob && self::$ServerJob->TicketSeal == $ticket ) {
 			return self::$ServerJob->ActingUser;
 		}
-		
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
-		
-		// check ticket existence
-		$params = array( strval($ticket) );
-		$sql = "SELECT `usr`, `appname`, `appversion`, `expire`, `masterticketid` FROM $db WHERE `ticketid` = ?";
-		$sth = $dbdriver->query( $sql, $params );
-		if (!$sth) return false;
-		$row = $dbdriver->fetch($sth);
-		if (!$row) return false;
 
+		// when cached, assume ticket is still valid and does not need to extend
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'usr' ];
+		}
+
+		// check ticket existence
+		$fields = array( 'usr', 'appname', 'appversion', 'expire', 'masterticketid' );
+		$where = '`ticketid` = ?';
+		$params = array( strval( $ticket ) );
+		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
+		if( !$row ) {
+			return false;
+		}
+
+		// check expiration
+		$now = date( 'Y-m-d\TH:i:s' );
+		$expire = trim( $row['expire'] );
+		if( !empty( $expire ) && strncmp( $expire, $now, 19 ) < 0 ) {
+			return false; // ticket expired
+		}
+
+		// cache ticket data
 		self::$ticketCache[ $ticket ] = array(
 			'usr' => $row['usr'],
 			'appname' => $row['appname'],
@@ -635,37 +627,15 @@ class DBTicket extends DBBase
 			'masterticketid' => $row['masterticketid']
 		);
 
-		// check expiration
-		$now = date('Y-m-d\TH:i:s');
-		$expire = trim($row['expire']);
-		if( !empty($expire) && strncmp( $expire, $now, 19 ) < 0 ) {
-			return false; // ticket expired
-		}
-
-		$user = $row['usr'];
-		$user = trim($user);
-
+		// user touched server, so postpone expiration
 		if( $extend ) {
-
-			// user touched server, so postpone expiration
-			$expire = self::_expire( $row['appname'] );
-			$params = array( $expire, strval($ticket) );
-			$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
-			$sth = $dbdriver->query( $sql, $params );
-
-			// Auto-postpone WebEditor ticket when Web(App) goes along, or vice versa(!).
-			// This is to avoid any logon dialogs while user works a while at one of them and then starts using the other one again.
-			if( ( $otherTicket = self::getOtherTicket( $row['appname'], $user ) ) ) {
-				$params = array( $expire, strval($otherTicket) );
-				$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
-				$sth = $dbdriver->query( $sql, $params );
-			}
+			$values = array( 'expire' => strval( $expire ) );
+			$where = '`ticketid` = ?';
+			$params = array( strval( $ticket ) );
+			self::updateRow( self::TABLENAME, $values, $where, $params );
 		}
 
-		// do some automatic logging
-		//if ($service) $this->DBlog($user, $service); // EKL: let's not do this since it gives duplicate messages with empty data!
-
-		return $user;
+		return trim( $row['usr'] );
 	}
 	
 	/**
@@ -676,58 +646,12 @@ class DBTicket extends DBBase
 	 */
 	public static function DBendticket( $ticket )
 	{
-		unset( self::$ticketCache[ $ticket ] );
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
-
-		// Auto-remove WebEditor ticket on Web(App) logoff (but NOT* vice versa!)
-		// This is to avoid any pending web tickets when user explicitly logs off.
-		// * Note that WebEditor supports silent logon based on Web(App) ticket and they logoff on any doc close.
-		if( ($appname = self::DBappticket( $ticket )) && $appname == 'Web' ) {
-			if( ($user = self::DBuserticket( $ticket )) ) {
-				if( ($otherTicket = self::getOtherTicket($appname,$user)) ) {
-					$params = array( strval($otherTicket) );
-					$sql = "DELETE FROM {$db} WHERE `ticketid` = ?";
-					$dbdriver->query( $sql, $params );
-				}
-			}
+		if( $ticket ) {
+			unset( self::$ticketCache[ $ticket ] );
+			$where = '`ticketid` = ?';
+			$params = array( strval( $ticket ) );
+			self::deleteRows( self::TABLENAME, $where, $params );
 		}
-		// remove the given ticket
-		$params = array( strval($ticket) );
-		$sql = "DELETE FROM {$db} WHERE `ticketid` = ?";
-		$sth = $dbdriver->query( $sql, $params );
-	}
-
-	/**
-	 * Returns WebEditor ticket when Web(App) is passed or vice versa.
-	 *
-	 * @param string $appname
-	 * @param string $user
-	 * @return string The other ticket.
-	 * @throws BizException In case of database connection error.
-	 */
-	private static function getOtherTicket( $appname, $user )
-	{
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
-		
-		if( $appname == 'Web' ) {
-			$otherApp = 'WebEditor';
-		} else if( $appname == 'WebEditor' ) {
-			$otherApp = 'Web';
-		} else {
-			$otherApp = null;
-		}
-		if( $otherApp ) {
-			$sql = "SELECT `ticketid` FROM $db WHERE `usr`= ? AND `appname`= ? ";
-			$params = array( strval( $user ), strval( $otherApp ) );
-			$sth = $dbdriver->query($sql, $params );
-			$row = $sth ? $dbdriver->fetch($sth) : null;
-			$otherTicket = $row ? $row['ticketid'] : null;
-		} else {
-			$otherTicket = null;
-		}
-		return $otherTicket;
 	}
 
 	/**
@@ -736,11 +660,16 @@ class DBTicket extends DBBase
 	 * @param string $user
 	 * @throws BizException In case of database connection error.
 	 */
-	public static function DbPurgeTicketsByUser( $user = null )
+	public static function DbPurgeTicketsByUser( $user )
 	{
 		if( $user ) {
+			foreach( self::$ticketCache as $ticket => $ticketData ) {
+				if( $ticketData['usr'] == $user ) {
+					unset( self::$ticketCache[$ticket] );
+				}
+			}
 			$where = '`usr` = ?';
-			$params = array( $user );
+			$params = array( strval( $user ) );
 			self::deleteRows( self::TABLENAME, $where, $params );
 		}
 	}
@@ -764,47 +693,10 @@ class DBTicket extends DBBase
 		return $rows;
 	}
 
-	// ------------------------------------------------------------------------
-	// Called ASYNCHRONOUS
-	// ------------------------------------------------------------------------
-
-	/**
-	 * @see ServerJobProcessor::bizBuddyCB().
-	 * @param string $input The magical question
-	 * @param object $caller The calling instance
-	 * @param ServerJob $job
-	 * @return string The magical answer
-	 */
-	final static public function dbBuddy( $input, $caller, $job )
-	{ // L> Anti-hack: Function is made FINAL to block any subclass abusing this function!
-
-		// Anti hack: Check if the calling ServerJob business class is ours.
-		$salt = '$1$EntBiZlr$'; // salt for biz layer
-		$private = crypt( $input, $salt );
-		$public = substr( $private, strlen($salt) ); // remove salt (at prefix)
-		$output = $caller && method_exists( $caller, 'dbBuddyCB' ) 
-				? $caller->dbBuddyCB( $input ) : '';
-				// L> Anti-hack: Be silent when caller does not exists or has no 'buddy' function (hide what we are doing at PHP logging!)
-
-		$buddySecure = ( $output && $output == $public );
-		if( !$buddySecure ) {
-			echo __METHOD__.': Hey, I do not deal with service hijackers!<br/>'; // TODO: report
-			return ''; // error
-		}
-
-		// Remember the ticket seal for checkTicket checksum later.
-		self::$ServerJob = $job;
-		
-		// Anti hack: Return caller who we are
-		$salt = '$1$EntDblYr$'; // salt for DB layer
-		$private = crypt( $input, $salt );
-		$public = substr( $private, strlen($salt) ); // remove salt (at prefix)
-		return $public;
-	}
-
 	/**
 	 * Returns the Id of the user linked to the ticket.
 	 *
+	 * @since 10.2.1
 	 * @param string $ticket
 	 * @return int
 	 * @throws BizException In case of database connection error.
@@ -834,6 +726,7 @@ class DBTicket extends DBBase
 	/**
 	 * Returns all tickets of the specified user.
 	 *
+	 * @since 10.2.1
 	 * @param string $user Short user name.
 	 * @return string[]
 	 * @throws BizException In case of database connection error.
@@ -850,5 +743,43 @@ class DBTicket extends DBBase
 			}
 		}
 		return $tickets;
+	}
+
+	// ------------------------------------------------------------------------
+	// Called ASYNCHRONOUS
+	// ------------------------------------------------------------------------
+
+	/**
+	 * @see ServerJobProcessor::bizBuddyCB().
+	 * @param string $input The magical question
+	 * @param object $caller The calling instance
+	 * @param ServerJob $job
+	 * @return string The magical answer
+	 */
+	final static public function dbBuddy( $input, $caller, $job )
+	{ // L> Anti-hack: Function is made FINAL to block any subclass abusing this function!
+
+		// Anti hack: Check if the calling ServerJob business class is ours.
+		$salt = '$1$EntBiZlr$'; // salt for biz layer
+		$private = crypt( $input, $salt );
+		$public = substr( $private, strlen($salt) ); // remove salt (at prefix)
+		$output = $caller && method_exists( $caller, 'dbBuddyCB' )
+			? $caller->dbBuddyCB( $input ) : '';
+		// L> Anti-hack: Be silent when caller does not exists or has no 'buddy' function (hide what we are doing at PHP logging!)
+
+		$buddySecure = ( $output && $output == $public );
+		if( !$buddySecure ) {
+			echo __METHOD__.': Hey, I do not deal with service hijackers!<br/>'; // TODO: report
+			return ''; // error
+		}
+
+		// Remember the ticket seal for checkTicket checksum later.
+		self::$ServerJob = $job;
+
+		// Anti hack: Return caller who we are
+		$salt = '$1$EntDblYr$'; // salt for DB layer
+		$private = crypt( $input, $salt );
+		$public = substr( $private, strlen($salt) ); // remove salt (at prefix)
+		return $public;
 	}
 }

@@ -2,7 +2,7 @@ name: WoodWing Enterprise
 type: module
 description: Integrates Drupal 8 as a Content and Publishing platform for web publishing.
 core: 8.x
-version: "10.2.0 Build 215"
+version: "10.3.0 Build 227"
 dependencies:
   - basic_auth
   - image
