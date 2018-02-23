@@ -784,6 +784,39 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		return self::returnResponse($resp);
 	}
 
+	public function GetRelatedPages( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesService.class.php';
+
+		try {
+			$service = new WflGetRelatedPagesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
+			$transferServer->switchFilePathToURL( $object );
+		}
+
+		return self::returnResponse($resp);
+	}
+
+	public function GetRelatedPagesInfo( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesInfoService.class.php';
+
+		try {
+			$service = new WflGetRelatedPagesInfoService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
 	public function CreateObjectLabels( $req )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflCreateObjectLabelsService.class.php';

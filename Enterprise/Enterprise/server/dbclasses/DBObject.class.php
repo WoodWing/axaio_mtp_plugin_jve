@@ -2021,4 +2021,19 @@ class DBObject extends DBBase
 
 		return $result;
 	}
+
+	/**
+	 * Resolve the object variants (ids) of a given object.
+	 *
+	 * @param integer $objectId The master id of an object. When zero, pass in the object id.
+	 * @return integer[] Object id of variants. Empty when none found.
+	 */
+	static public function getObjectIdsOfVariants( $objectId )
+	{
+		$fields = array( 'id' );
+		$where = '`id` = ? OR `masterid` = ?';
+		$params = array( intval( $objectId ), intval( $objectId ) );
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where, $fields, $params );
+		return array_map( 'intval', array_keys( $rows ) );
+	}
 }

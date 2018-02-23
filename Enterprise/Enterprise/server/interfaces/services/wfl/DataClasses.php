@@ -3076,7 +3076,7 @@ class PageObject
 	public $PlacementInfos;
 
 	/**
-	 * @param integer              $IssuePagePosition    
+	 * @param integer              $IssuePagePosition    Nullable.
 	 * @param integer              $PageOrder            
 	 * @param string               $PageNumber           
 	 * @param integer              $PageSequence         
@@ -3084,7 +3084,7 @@ class PageObject
 	 * @param float                $Width                
 	 * @param string               $ParentLayoutId       
 	 * @param boolean              $OutputRenditionAvailable 
-	 * @param PlacementInfo[]      $PlacementInfos       
+	 * @param PlacementInfo[]      $PlacementInfos       Nullable.
 	 */
 	public function __construct( $IssuePagePosition=null, $PageOrder=null, $PageNumber=null, $PageSequence=null, $Height=null, $Width=null, $ParentLayoutId=null, $OutputRenditionAvailable=null, $PlacementInfos=null)
 	{
@@ -3162,6 +3162,8 @@ class LayoutObject
 	public $LockedBy;
 	public $Flag;
 	public $FlagMsg;
+	public $Publication;
+	public $Target;
 
 	/**
 	 * @param string               $Id                   
@@ -3172,8 +3174,10 @@ class LayoutObject
 	 * @param string               $LockedBy             
 	 * @param int                  $Flag                 Nullable.
 	 * @param string               $FlagMsg              Nullable.
+	 * @param Publication          $Publication          Nullable.
+	 * @param Target               $Target               Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Category=null, $State=null, $Version=null, $LockedBy=null, $Flag=null, $FlagMsg=null)
+	public function __construct( $Id=null, $Name=null, $Category=null, $State=null, $Version=null, $LockedBy=null, $Flag=null, $FlagMsg=null, $Publication=null, $Target=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
@@ -3183,6 +3187,8 @@ class LayoutObject
 		$this->LockedBy             = $LockedBy;
 		$this->Flag                 = $Flag;
 		$this->FlagMsg              = $FlagMsg;
+		$this->Publication          = $Publication;
+		$this->Target               = $Target;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflLayoutObject'; } // AMF object type mapping
@@ -3195,6 +3201,12 @@ class LayoutObject
 		}
 		if( is_object( $this->State ) ) {
 			$this->State->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Publication ) ) {
+			$this->Publication->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Target ) ) {
+			$this->Target->sanitizeProperties4Php();
 		}
 	}
 }

@@ -24,6 +24,10 @@ public class LayoutObject  implements java.io.Serializable {
 
     private java.lang.String flagMsg;
 
+    private com.woodwing.enterprise.interfaces.services.wfl.Publication publication;
+
+    private com.woodwing.enterprise.interfaces.services.wfl.Target target;
+
     public LayoutObject() {
     }
 
@@ -35,7 +39,9 @@ public class LayoutObject  implements java.io.Serializable {
            java.lang.String version,
            java.lang.String lockedBy,
            java.lang.Integer flag,
-           java.lang.String flagMsg) {
+           java.lang.String flagMsg,
+           com.woodwing.enterprise.interfaces.services.wfl.Publication publication,
+           com.woodwing.enterprise.interfaces.services.wfl.Target target) {
            this.id = id;
            this.name = name;
            this.category = category;
@@ -44,6 +50,8 @@ public class LayoutObject  implements java.io.Serializable {
            this.lockedBy = lockedBy;
            this.flag = flag;
            this.flagMsg = flagMsg;
+           this.publication = publication;
+           this.target = target;
     }
 
 
@@ -206,6 +214,46 @@ public class LayoutObject  implements java.io.Serializable {
         this.flagMsg = flagMsg;
     }
 
+
+    /**
+     * Gets the publication value for this LayoutObject.
+     * 
+     * @return publication
+     */
+    public com.woodwing.enterprise.interfaces.services.wfl.Publication getPublication() {
+        return publication;
+    }
+
+
+    /**
+     * Sets the publication value for this LayoutObject.
+     * 
+     * @param publication
+     */
+    public void setPublication(com.woodwing.enterprise.interfaces.services.wfl.Publication publication) {
+        this.publication = publication;
+    }
+
+
+    /**
+     * Gets the target value for this LayoutObject.
+     * 
+     * @return target
+     */
+    public com.woodwing.enterprise.interfaces.services.wfl.Target getTarget() {
+        return target;
+    }
+
+
+    /**
+     * Sets the target value for this LayoutObject.
+     * 
+     * @param target
+     */
+    public void setTarget(com.woodwing.enterprise.interfaces.services.wfl.Target target) {
+        this.target = target;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof LayoutObject)) return false;
@@ -241,7 +289,13 @@ public class LayoutObject  implements java.io.Serializable {
               this.flag.equals(other.getFlag()))) &&
             ((this.flagMsg==null && other.getFlagMsg()==null) || 
              (this.flagMsg!=null &&
-              this.flagMsg.equals(other.getFlagMsg())));
+              this.flagMsg.equals(other.getFlagMsg()))) &&
+            ((this.publication==null && other.getPublication()==null) || 
+             (this.publication!=null &&
+              this.publication.equals(other.getPublication()))) &&
+            ((this.target==null && other.getTarget()==null) || 
+             (this.target!=null &&
+              this.target.equals(other.getTarget())));
         __equalsCalc = null;
         return _equals;
     }
@@ -276,6 +330,12 @@ public class LayoutObject  implements java.io.Serializable {
         }
         if (getFlagMsg() != null) {
             _hashCode += getFlagMsg().hashCode();
+        }
+        if (getPublication() != null) {
+            _hashCode += getPublication().hashCode();
+        }
+        if (getTarget() != null) {
+            _hashCode += getTarget().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -335,6 +395,18 @@ public class LayoutObject  implements java.io.Serializable {
         elemField.setXmlName(new javax.xml.namespace.QName("", "FlagMsg"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("publication");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "Publication"));
+        elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "Publication"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("target");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "Target"));
+        elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "Target"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
     }

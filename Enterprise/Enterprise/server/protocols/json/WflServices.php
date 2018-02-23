@@ -715,6 +715,37 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		return $resp;
 	}
 
+	public function GetRelatedPages( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesService.class.php';
+		$req['__classname__'] = 'WflGetRelatedPagesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new WflGetRelatedPagesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
+			$transferServer->switchFilePathToURL( $object );
+		}
+
+		return $resp;
+	}
+
+	public function GetRelatedPagesInfo( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesInfoService.class.php';
+		$req['__classname__'] = 'WflGetRelatedPagesInfoRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new WflGetRelatedPagesInfoService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
 	public function CreateObjectLabels( $req )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflCreateObjectLabelsService.class.php';

@@ -156,6 +156,8 @@ class WW_SOAP_WflClient extends WW_SOAP_Client
 		$options['classmap']['SuggestionsResponse'] = 'WflSuggestionsResponse';
 		$options['classmap']['GetPagesResponse'] = 'WflGetPagesResponse';
 		$options['classmap']['GetPagesInfoResponse'] = 'WflGetPagesInfoResponse';
+		$options['classmap']['GetRelatedPagesResponse'] = 'WflGetRelatedPagesResponse';
+		$options['classmap']['GetRelatedPagesInfoResponse'] = 'WflGetRelatedPagesInfoResponse';
 		$options['classmap']['CreateObjectLabelsResponse'] = 'WflCreateObjectLabelsResponse';
 		$options['classmap']['UpdateObjectLabelsResponse'] = 'WflUpdateObjectLabelsResponse';
 		$options['classmap']['DeleteObjectLabelsResponse'] = 'WflDeleteObjectLabelsResponse';

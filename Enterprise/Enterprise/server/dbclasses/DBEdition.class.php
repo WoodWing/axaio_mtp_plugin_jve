@@ -339,6 +339,26 @@ class DBEdition extends DBBase
 	}
 
 	/**
+	 * Retrieve editions from the smart_editions table by a list of provided edition ids.
+	 *
+	 * @since 10.4.0
+	 * @param integer[] $editionIds
+	 * @return Edition[]
+	 */
+	static public function getEditionsByIds( $editionIds )
+	{
+		$editions = array();
+		$where = self::addIntArrayToWhereClause( 'id', $editionIds );
+		if( $where ) {
+			$rows = self::listRows( self::TABLENAME, 'id', 'name', $where, null );
+			if( $rows ) foreach( $rows as $row ) {
+				$editions[ $row['id'] ] =  self::rowToObj( $row );
+			}
+		}
+		return $editions;
+	}
+
+	/**
 	 *  Converts an edition DB row into object.
 	 *
 	 *  @param array $row Edition DB row

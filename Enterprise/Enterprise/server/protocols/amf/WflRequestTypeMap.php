@@ -62,6 +62,8 @@
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflSuggestionsRequest', 'WflSuggestionsRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflGetPagesRequest', 'WflGetPagesRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflGetPagesInfoRequest', 'WflGetPagesInfoRequest' );
+	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflGetRelatedPagesRequest', 'WflGetRelatedPagesRequest' );
+	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflGetRelatedPagesInfoRequest', 'WflGetRelatedPagesInfoRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflCreateObjectLabelsRequest', 'WflCreateObjectLabelsRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflUpdateObjectLabelsRequest', 'WflUpdateObjectLabelsRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflDeleteObjectLabelsRequest', 'WflDeleteObjectLabelsRequest' );
