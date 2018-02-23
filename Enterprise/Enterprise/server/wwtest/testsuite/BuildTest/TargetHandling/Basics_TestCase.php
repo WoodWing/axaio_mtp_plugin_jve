@@ -66,6 +66,7 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 		'Does the following steps:
 		 <ol>
 		<li>Creates a layout (WflCreateObjects).</li>
+		<li>Query the layout and validate if the \'Issue\' and \'Issues\' properties are the same.</li>
 		<li>Creates an article (WflCreateObjects).</li>
 		<li>Places the article on the layout (WflCreateObjectRelations).</li>
 		<li>Saves the layout (WflSaveObjects).</li>
@@ -80,6 +81,7 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 		try {
 			$this->setupTestData();
 			$this->createLayout();
+			$this->validateIssueAndIssuesPropertyOfTheLayout();
 			$this->createArticle();
 			$this->placeArticleOnLayout();
 			$this->saveLayout();
@@ -258,6 +260,48 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 			$expectedResponse->Objects[0]->Targets, $layoutObject->Targets,
 			$expectedResponse, $layoutObject,
 			'Objects[0]->Relations', 'GetObjects after CreateObjects' );
+	}
+
+	/**
+	 * Checks if the 'Issue' and 'Issues' property are the same.
+	 *
+	 * As the layout is targeted for one issue only the 'Issue' and 'Issues' property must be the same.
+	 *
+	 * @throws BizException
+	 */
+	private function validateIssueAndIssuesPropertyOfTheLayout()
+	{
+		require_once BASEDIR.'/server/services/wfl/WflQueryObjectsService.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $this->ticket;
+		$request->Params = array();
+		$request->Params[0] = new QueryParam();
+		$request->Params[0]->Property = 'ID';
+		$request->Params[0]->Operation = '=';
+		$request->Params[0]->Value = $this->layoutObject->MetaData->BasicMetaData->ID;
+		$request->Params[0]->Special = null;
+		$request->FirstEntry = 1;
+		$request->MaxEntries = null;
+		$request->Hierarchical = false;
+		$request->Order = array();
+		$request->MinimalProps = array( 'Issue', 'Issues' );
+
+		$stepInfo = 'Query the layout to validate the Issue(s) properties.';
+		$response = $this->globalUtils->callService( $this, $request, $stepInfo );
+
+		$issueProperty = '';
+		$issuesProperty = '';
+		if( $response->Columns ) foreach( $response->Columns as $index => $column ) {
+			if( $column->Name == 'Issue' ) {
+				$issueProperty = $response->Rows[0][ $index ];
+			} elseif( $column->Name == 'Issues' ) {
+				$issuesProperty = $response->Rows[0][ $index ];
+			}
+		}
+
+		if( $issueProperty && $issuesProperty ) {
+			$this->assertEquals( $issueProperty, $issuesProperty );
+		}
 	}
 
 	/**
@@ -567,6 +611,7 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 	 * @param mixed $currentCall Actual response returned by Ent Server.
 	 * @param string $dataPathInfo Path in the data tree where to find the expected data.
 	 * @param string $serviceName Web service called (for debugging purpose only).
+	 * @throws BizException
 	 */
 	private function validateRoundtrip( 
 		$expectedData, $currentData, 
