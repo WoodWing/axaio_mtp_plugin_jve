@@ -157,7 +157,7 @@ class WW_TestSuite_BuildTest_TargetHandling_Setup_TestCase extends TestCase
 	{
 		if ( !$this->pubChannel ) { return false; }
 		$admIssue = new AdmIssue();
-		$admIssue->Name = 'Issue'.$seqNr.'_'. $this->localUtils->getTimeStamp();
+		$admIssue->Name = 'Issue'.$seqNr.','.$this->localUtils->getTimeStamp(); //EN-89997: use ',' in the issue name.
 		$admIssue->Description = 'Created by Build Test class: ' . __CLASS__;
 		$admIssue->Activated = true;
 		$issueResp = $this->globalUtils->createNewIssue(

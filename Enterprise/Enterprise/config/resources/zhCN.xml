@@ -612,7 +612,7 @@
   <Term key="CUST_REPRODEADLINE">再创建期限</Term>
   <Term key="DATE">日期</Term>
   <Term key="DAYS">日</Term>
-  <Term key="DBINSTALLER_CLICKTOSHOWTABLES">Enterprise中安装的表预览.</Term>
+  <Term key="DBINSTALLER_CLICKTOSHOWTABLES">查看Enterprise中的数据库预览表</Term>
   <Term key="DBINSTALLER_CLICK_CREATEDB_BTN">点击 '%1' 按钮在Enterprise中创建表.</Term>
   <Term key="DBINSTALLER_CLICK_LICENSE_BTN">点击 '%1' 按钮在检查软件许可.</Term>
   <Term key="DBINSTALLER_CLICK_UPDATEDB_BTN">点击 '%1' 按钮在Enterprise中升级表.</Term>
@@ -1449,7 +1449,7 @@
   <Term key="MNU_REPORTING">报告</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">任务配置</Term>
   <Term key="MNU_SERVER_JOBS">任务队列</Term>
-  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
+  <Term key="MNU_SERVER_LOGS">服务器日志</Term>
   <Term key="MNU_UPLOAD">上传</Term>
   <Term key="MNU_USER">用户</Term>
   <Term key="MNU_USER_QUERY">用户查询</Term>
