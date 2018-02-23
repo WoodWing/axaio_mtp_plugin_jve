@@ -7,10 +7,13 @@ function myconfirm(code)
 			break;
 		case 'deleteAllSelected':
 		    if( isThereAnyCheckboxesChecked() ) {
-				txt = "Are you sure you want to delete the selected properties?"; // TODO : must check if list is empty or not.
+				txt = "Are you sure you want to delete the selected properties?"; // TODO: Localise the string
 			} else {
-                return alert( "There is no checkbox selected." );
+                return alert( "There is no checkbox selected." ); // TODO: Localise the string
 			}
+		    break;
+		case 'reset':
+		    txt = "Are you sure you want to delete all properties?"; // TODO: Localise the string
 		    break;
 	}
 	return confirm(txt);
@@ -68,7 +71,7 @@ $(document).ready(function() {
         event.preventDefault();
         if( $("input[name=recs]").val() == 0 ){
             $("#dialog_confirm").dialog( "open" );
-        }else{
+        } else { // There're already records on the page
             $("#add").val( "add" );
             document.forms.propfilter.submit();
         }
@@ -156,9 +159,9 @@ function SetCombos(sPubl, sObjType, sAction)
 		<table class="listbtnbar">
 			<tr>
 				<td>
-					<input style="<!--EDIT_BUTTON-->" type="submit" id="dialog_button" name="edit" value="<!--RES:DS_DATASOURCE_EDIT-->" />
-					<input style="<!--EDIT_BUTTON-->" type="hidden" id="add" name="add" value="">
-					<input style="<!--EDIT_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
+					<input style="<!--ADD_BUTTON-->" type="submit" id="dialog_button" name="addButton" value="<!--RES:ACT_ADD-->" />
+					<input style="<!--ADD_BUTTON-->" type="hidden" id="add" name="add" value="">
+					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
 					<!--<div   style="&lt;!&ndash;EDIT_BUTTON&ndash;&gt;" id="dialog_confirm" title="Add Default fields?">-->
 					<div   style="display:none" id="dialog_confirm" title="Add Default fields?">
 						<p>
@@ -170,6 +173,7 @@ function SetCombos(sPubl, sObjType, sAction)
 					</div>
 					<input style="<!--UPDATE_BUTTON-->" type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
 					<input style="<!--DELETE_BUTTON-->" type="submit" name="delete" value="<!--RES:ACT_DELETE_SELECTED-->" onClick='return myconfirm( "deleteAllSelected" )'/>
+					<input style="<!--RESET_BUTTON-->"  type="submit" name="reset" value="<!--RES:BUT_RESET-->" onClick='return myconfirm( "reset" )'/>
 				</td>
 			</tr>
 		</table>

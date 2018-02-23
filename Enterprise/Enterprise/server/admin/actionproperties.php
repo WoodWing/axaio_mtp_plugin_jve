@@ -254,6 +254,23 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
+	 * To delete all action properties setup in the page
+	 *
+	 * @param int[] $numberOfRecords
+	 */
+	public function deleteAllActionProperty( $numberOfRecords )
+	{
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		$propIdsToBeDeleted = array();
+		for( $i=0; $i < $numberOfRecords; $i++ ) {
+			$propIdsToBeDeleted[] = intval($_REQUEST["id$i"]);
+		}
+		if( $propIdsToBeDeleted ) {
+			DBActionproperty::deleteActionProperties( $propIdsToBeDeleted );
+		}
+	}
+
+	/**
 	 * Create configured brand-object type-action link list
 	 *
 	 * @param array $objMap Array of object type
@@ -480,19 +497,23 @@ class ActionPropertiesAdminApp
 		switch( $this->mode ) {
 			case "view":
 			case "delete":
-				$txt = str_replace("<!--EDIT_BUTTON-->",  '', $txt );
-				$txt = str_replace("<!--UPDATE_BUTTON-->",'display:none', $txt );
+			case "reset":
+				$txt = str_replace("<!--ADD_BUTTON-->",  '', $txt );
+				$txt = str_replace("<!--UPDATE_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
 				$txt = str_replace("<!--DELETE_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
+				$txt = str_replace("<!--RESET_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
 				break;
 			case "add":
-				$txt = str_replace("<!--EDIT_BUTTON-->",  'display:none', $txt );
+				$txt = str_replace("<!--ADD_BUTTON-->",  'display:none', $txt );
 				$txt = str_replace("<!--UPDATE_BUTTON-->",'', $txt );
 				$txt = str_replace("<!--DELETE_BUTTON-->",'display:none', $txt );
+				$txt = str_replace("<!--RESET_BUTTON-->",'display:none', $txt );
 				break;
 			case "update";
-				$txt = str_replace("<!--EDIT_BUTTON-->",  '', $txt );
-				$txt = str_replace("<!--UPDATE_BUTTON-->",'display:none', $txt );
+				$txt = str_replace("<!--ADD_BUTTON-->",  '', $txt );
+				$txt = str_replace("<!--UPDATE_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
 				$txt = str_replace("<!--DELETE_BUTTON-->",'', $txt );
+				$txt = str_replace("<!--RESET_BUTTON---->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
 				break;
 		}
 		return $txt;
@@ -686,6 +707,7 @@ class ActionPropertiesAdminApp
 			case 'view':
 			case 'update':
 			case 'delete':
+			case 'reset':
 				$numberOfRecords = 0;
 				$detailTxt = $this->listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt, $numberOfRecords );
 				break;
@@ -741,6 +763,10 @@ class ActionPropertiesAdminApp
 			$this->mode = 'delete';
 			$numberOfRecords = isset($_REQUEST['recs']) ? intval($_REQUEST['recs']) : 0;
 			$insert = false;
+		} else if (isset($_REQUEST['reset']) && $_REQUEST['reset']) {
+			$this->mode = 'reset';
+			$numberOfRecords = isset($_REQUEST['recs']) ? intval($_REQUEST['recs']) : 0;
+			$insert = false;
 		} else if (isset($_REQUEST['add']) && $_REQUEST['add']) {
 			$this->mode = 'add';
 			$numberOfRecords = isset($_REQUEST['recs']) ? intval($_REQUEST['recs']) : 0;
@@ -752,7 +778,7 @@ class ActionPropertiesAdminApp
 		}
 
 		// handle request on Update/Add Action property
-		if( $numberOfRecords > 0 ) {
+		if( $this->mode == 'update' && $numberOfRecords > 0 ) {
 			$this->updateActionProperties( $numberOfRecords );
 		}
 		if( $insert === true ) {
@@ -760,6 +786,9 @@ class ActionPropertiesAdminApp
 		}
 		if( $this->mode == 'delete' ) {
 			$this->deleteActionProperty( $numberOfRecords );
+		}
+		if( $this->mode == 'reset' ) {
+			$this->deleteAllActionProperty( $numberOfRecords );
 		}
 	}
 
