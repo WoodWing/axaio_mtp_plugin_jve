@@ -163,7 +163,7 @@ class SolrSearchEngine extends BizQuery
 	 * indexed document in Solr can contain either the full name or the short name both must be send to Solr to make sure
 	 * that the search in Solr gives a hit. For more info see: EN-90013.
 	 * Note that both the short as the full name are mandatory fields so they cannot be empty. If the user cannot be
-	 * resolved this means the the route to parameter is invalid.
+	 * resolved this could mean that the search is done on a user group or that the entered name is invalid.
 	 *
 	 * @param QueryParam $routeToQueryParam
 	 * @return QueryParam|null New query parameter of null if the route to user could not be resolved.
@@ -182,8 +182,6 @@ class SolrSearchEngine extends BizQuery
 			} else {
 				$secondRouteToParam->Value = $userRow['user'];
 			}
-		} else {
-			LogHandler::Log( 'Solr', 'WARN', 'RouteTo user: '.$routeToQueryParam->Value.' unkown to the system.'  );
 		}
 
 		return $secondRouteToParam;
