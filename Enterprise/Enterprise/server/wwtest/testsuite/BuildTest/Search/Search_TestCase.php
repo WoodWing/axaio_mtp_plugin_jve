@@ -20,6 +20,7 @@ class WW_TestSuite_BuildTest_Search_Search_TestCase extends WW_TestSuite_BuildTe
 			<li>Search Object on "Name" property (QueryObjects)</li>
 			<li>Search Object on "Content" property (QueryObjects)</li>
 			<li>Search Object on "Placed on" property. (QueryObjects)</li>
+			<li>Search Object on "Route to" property. (QueryObjects)</li>
 		 </ol>';
 	}
 
@@ -66,6 +67,21 @@ class WW_TestSuite_BuildTest_Search_Search_TestCase extends WW_TestSuite_BuildTe
 		// Test searching on name and placed on in Solr.
 		$queryParam = array( new QueryParam( 'PlacedOn', '=', '' ) );
 		if( !$this->testSearch( $articleID, $articleName, 'Searching for article, not placed.', true, $queryParam ) ) {
+			return false;
+		}
+		
+		// Test searching on route to (short name) in Solr.
+		$userShortName = BizSession::checkTicket( $this->vars['BuildTest_Search']['ticket'] );
+		$queryParam = array( new QueryParam( 'RouteTo', '=', $userShortName ) );
+		if( !$this->testSearch( $articleID, $articleName, 'Searching for article on RouteTo (short name)', true, $queryParam ) ) {
+			return false;
+		}
+
+		// Test searching on route to (full name) in Solr.
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+		$userFullName = DBUser::getFullName( $userShortName );
+		$queryParam = array( new QueryParam( 'RouteTo', '=', $userFullName ) );
+		if( !$this->testSearch( $articleID, $articleName, 'Searching for article on RouteTo (full name)', true, $queryParam ) ) {
 			return false;
 		}
 
