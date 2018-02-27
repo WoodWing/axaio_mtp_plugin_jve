@@ -1449,7 +1449,7 @@
   <Term key="MNU_REPORTING">報告</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">任務配置</Term>
   <Term key="MNU_SERVER_JOBS">任務隊列</Term>
-  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
+  <Term key="MNU_SERVER_LOGS">服務器日誌</Term>
   <Term key="MNU_UPLOAD">上載</Term>
   <Term key="MNU_USER">用戶</Term>
   <Term key="MNU_USER_QUERY">用戶查詢</Term>
