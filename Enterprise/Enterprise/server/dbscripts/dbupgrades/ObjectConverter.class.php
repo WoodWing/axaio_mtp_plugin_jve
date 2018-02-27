@@ -50,7 +50,7 @@ abstract class WW_DbScripts_DbUpgrades_ObjectConverter extends WW_DbScripts_DbUp
 		$needsToUpdateDeletedObjects = self::getByTypes( array($objectTypeFrom), false ); // trash area
 		$needsToUpdateObjects = self::getByTypes( array($objectTypeFrom), true ); // workflow area
 
-		// If there are no objects of type 'Other' there is no need to convert.
+		// If there are no objects of type ﻿$objectTypeFrom there is no need to convert.
 		if ( !$needsToUpdateDeletedObjects && !$needsToUpdateObjects ) {
 			LogHandler::Log( __CLASS__, 'INFO',
 				'No objects of type: \'' . $objectTypeFrom . '\' to be converted to ' .
@@ -476,7 +476,7 @@ abstract class WW_DbScripts_DbUpgrades_ObjectConverter extends WW_DbScripts_DbUp
 	 * @param array $arr The array of values to be transform into a string delimited by comma.
 	 * @return string
 	 */
-	static private function arrayToSQLString( $arr )
+	static public function arrayToSQLString( $arr )
 	{
 		return $arr = count( $arr ) ? "'" . implode( "','", $arr ) . "'" : '';
 	}

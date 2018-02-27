@@ -61,6 +61,20 @@ class DBActionproperty extends DBBase
 	}
 
 	/**
+	 * Delete action property by ids
+	 *
+	 * @param array $ids Array of action property Ids
+	 * @return bool True when execution fine | False when error occur
+	 */
+	public static function deleteActionProperties( array $ids )
+	{
+		$ids = implode( ',', $ids );
+		$where = "`id` IN ( $ids )";
+
+		return self::deleteRows(self::TABLENAME, $where);
+	}
+
+	/**
 	 * Returns actions by publication and object type.
 	 *
 	 * @return array with results.
@@ -284,24 +298,50 @@ class DBActionproperty extends DBBase
 	/**
 	 * Deletes all action properties with name = $propname from the actionproperties table
 	 *
-	 * @param string $propname name of the prop to delete, in case of custom props: starting with C_ (!)
-	 * @param integer $pubId Brand/Publication Id
-	 * @return void
+	 * @param string $propname name of the property to delete, in case of custom props: starting with C_ (!)
+	 * @param int|null $pubId Publication Id of the property or null when deletion should be done for the
+	 *                        requested property regardless of the Publication.
 	 */
-	
-	static public function deletePropFromActionProperties( $propname, $pubId )
+	static public function deletePropFromActionProperties( $propname, $pubId=null )
 	{
 		$params = array();
-		
-		$dbDriver = DBDriverFactory::gen();
-		$actionpropstable = $dbDriver->tablename(self::TABLENAME);
-	
-		$sql  = "DELETE FROM $actionpropstable ";
-		$sql .= "WHERE `property` = ? AND `publication` = ?";
-		$params[] = $propname;
-		$params[] = $pubId;
-		 
-		$dbDriver->query($sql, $params);
+		$whereConditions = array();
+
+		$whereConditions[] = "`property` = ? ";
+		$params[] = strval( $propname );
+
+		if( !is_null( $pubId )) {
+			$whereConditions[] = "`publication` = ? ";
+			$params[] = intval( $pubId );
+		}
+
+		$where = implode( " AND ", $whereConditions );
+		DBBase::deleteRows( self::TABLENAME, $where, $params );
+	}
+
+	/**
+	 * Delete (action)property(s) given the property name.
+	 *
+	 * The property will not be deleted if it belongs to any of the publication listed in $pubIdsToBeExcluded.
+	 *
+	 * @since 10.1.6 Introduced since the fix for EN-84515.
+	 * @param string $propName Name of the property to be deleted. In case of custom props, it starts with C_.
+	 * @param int[] $pubIdsToBeExcluded Property will be excluded from deletion if it belongs to any of these publications.
+	 */
+	public static function deleteActionPropertiesGivenPropName( $propName, array $pubIdsToBeExcluded=array() )
+	{
+		$params = array();
+		$whereConditions = array();
+
+		$whereConditions[] = "`property` = ? ";
+		$params[] = strval( $propName );
+
+		if( $pubIdsToBeExcluded ) {
+			$whereConditions[] = "`publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) ";
+		}
+
+		$where = implode( " AND ", $whereConditions );
+		DBBase::deleteRows( self::TABLENAME, $where, $params );
 	}
 
 	/**
@@ -399,19 +439,5 @@ class DBActionproperty extends DBBase
 
 		$sth = $dbDriver->query( $sql, $params );
 		return self::fetchResults( $sth );
-	}
-
-	/**
-	 * Delete action property by ids
-	 *
-	 * @param array $ids Array of action property Ids
-	 * @return bool True when execution fine | False when error occur
-	 */
-	public static function deleteActionProperties( $ids )
-	{
-		$ids = implode( ',', $ids );
-		$where = "`id` IN ( $ids )";
-
-		return self::deleteRows(self::TABLENAME, $where);
 	}
 }

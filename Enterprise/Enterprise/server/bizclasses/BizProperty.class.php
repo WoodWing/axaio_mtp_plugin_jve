@@ -2771,4 +2771,85 @@ class BizProperty
 		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		DBProperty::deleteProperties( $ids );
 	}
+
+	/**
+	 * Returns a list of publication ids of the requested property ($propName).
+	 *
+	 * ﻿The publication ids listed in $pubIdsToBeExcluded will be excluded from being returned.
+	 *
+	 * @since 10.1.6 Introduced since the fix for EN-84515.
+	 * @param string $propName Name of the property to retrieve. In case of custom props, it starts with C_.
+	 * @param int[] $pubIdsToBeExcluded See function header.
+	 * @return int[] List of publication ids where the property belongs to.
+	 */
+	private static function getPropertyPubIds( $propName, array $pubIdsToBeExcluded )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
+		return DBProperty::getPropertyPubIds( $propName, $pubIdsToBeExcluded );
+	}
+
+	/**
+	 * Checks and deletes the property($propertyName) defined in dialog setup(smart_actionproperties)
+	 * before the property is removed from the MetaData setup(smart_properties).
+	 *
+	 * This function does not remove the property($propertyName) from MetaData setup, but only remove
+	 * from the dialog setup.
+	 * This function is typically called just right before the property is going to be removed from
+	 * the MetaData setup.
+	 *
+	 * @since 10.1.6 Introduced since the fix for EN-84515.
+	 * @param string $propertyName Property name to be removed soon, first check if any deletion needed in smart_actionproperties table.
+	 * @param int $pubId Publication id of which the property name belongs to, 0 for all publications.
+	 */
+	private static function checkAndRemoveActionPropertiesBeforePropertyDeletion( $pubId, $propertyName )
+	{
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		if( $pubId == 0 ) {
+			$pubIdsToBeExcludedFromPropDeletion = self::getPropertyPubIds( $propertyName, array( $pubId ));
+			if( $pubIdsToBeExcludedFromPropDeletion ) {
+				DBActionproperty::deleteActionPropertiesGivenPropName( $propertyName, $pubIdsToBeExcludedFromPropDeletion );
+			} else {
+				DBActionproperty::deletePropFromActionProperties( $propertyName, null );
+			}
+		} else {
+			DBActionproperty::deletePropFromActionProperties( $propertyName, $pubId );
+		}
+	}
+
+	/**
+	 * Checks and remove the relevant data from database before deleting the property.
+	 *
+	 * When a property is introduced, the property will be added as a database field in
+	 * smart_objects and smart_deletedobjects table.
+	 * Optionally, the property can also be added in the Dialog Setup.
+	 * Therefore the above mentioned data needs to be first removed before the property is deleted.
+	 *
+	 * @since 10.1.6
+	 * @param int $propId Id of the property to be deleted.
+	 * @param string $propType The type of the property to be removed.
+	 * @param string $propName The name of the property to be removed.
+	 * @param int $publ The Publication of the property, 0 to indicate all publications.
+	 */
+	public static function checkAndRemoveRelatedDataBeforeDeleteProperty( $propId, $propType, $propName, $publ )
+	{
+		if( BizProperty::isCustomPropertyName( $propName )) {
+			BizProperty::checkAndRemoveActionPropertiesBeforePropertyDeletion( $publ, $propName );
+
+			$foundDbType = BizProperty::getCustomPropType( $propId, $propType, $propName );
+			if( !$foundDbType ) { // BZ#33742 - Delete DB field only when type is not found in DB
+				BizCustomField::deleteFieldAtModel( 'objects', $propName );
+			} else { // Reset custom property value when the property removed from particular publication
+				require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
+				$updateValues = array( $propName => '' );
+				$where = '`publication` = ?';
+				$params = array( $publ );
+
+				$updateResult = DBObject::updateRow( 'objects', $updateValues, $where, $params );
+				if( $updateResult ) {
+					DBObject::updateRow( 'deletedobjects', $updateValues, $where, $params );
+				}
+			}
+		}
+		BizProperty::deleteProperty( $propId );
+	}
 }

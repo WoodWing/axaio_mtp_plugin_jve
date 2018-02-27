@@ -87,7 +87,8 @@ class WW_AMF_Server extends Zend_Amf_Server
 				if( $debug ) {
 					LogHandler::logService( $serviceName, print_r($data,true), null, 'AMF' );
 				}
-				LogHandler::Log( 'WW_AMF_Server', 'ERROR', 'Error occurred: '.$data->faultString.' Detail: '.$data->faultDetail );
+				//	LogHandler::Log( 'WW_AMF_Server', 'ERROR', 'Error occurred: '.$data->faultString.' Detail: '.$data->faultDetail );
+				// Only relevant if the error is AMF related. In case of normal BizExceptions this logging pollutes the error log.
 			} else if( $data instanceof Zend_Amf_Value_Messaging_AcknowledgeMessage ) { // response
 				if( is_null($interfaceName) || is_null($serviceName) ) {
 					LogHandler::Log( 'WW_AMF_Server', 'DEBUG', 'AMF hand-shake completed.' ); // happens before first request

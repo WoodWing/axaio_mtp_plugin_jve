@@ -142,7 +142,7 @@ class ElvisUtils {
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
-					$attachment->ContentSourceFileLink = $url;
+					$attachment->ContentSourceFileLink = self::replaceUrlForClientsAccess( $url );
 				}
 			}
 		}
@@ -321,6 +321,37 @@ class ElvisUtils {
 				break;
 		}
 		return $result;
+	}
+
+	/**
+	 * Replace the passed in $url ( that contains ELVIS_URL ) with ELVIS_CLIENT_URL.
+	 *
+	 * When a url is returned to the clients, the url that is pointing to Elvis has
+	 * to be ELVIS_CLIENT_URL ( instead of ELVIS_URL ).
+	 *
+	 * From EN-88079:
+	 * 1. When Enterprise Server sends in the request to Elvis, it uses ELVIS_URL to
+	 * connect to Elvis.
+	 * 2. When Elvis receives the request, it uses this very same url to compose the
+	 * download URL for the Elvis object.
+	 * 3. Download URL is returned to Enterprise Server.
+	 * 4. Enterprise Server returns this download URL to the clients, but not all clients can
+	 * access Elvis using this download URL. This is because ELVIS_URL that is used is
+	 * meant for communication between Enterprise Server and Elvis ( which are often located
+	 * in the same local network ).
+	 *
+	 * Therefore, the download URL ( $url ) needs to be replaced with ELVIS_CLIENT_URL
+	 * in order for the clients to be able to access Elvis.
+	 *
+	 * @since 10.1.6
+	 * @param string $url
+	 * @return string
+	 */
+	private static function replaceUrlForClientsAccess( $url )
+	{
+		$count = 0;
+		$replacedUrl = str_replace( ELVIS_URL, ELVIS_CLIENT_URL, $url, $count );
+		return ( $count == 1 ) ? $replacedUrl : $url;
 	}
 
 	/**

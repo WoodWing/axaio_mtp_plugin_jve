@@ -682,7 +682,7 @@ class BizSession
 		require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
 		self::$userName = DBTicket::checkTicket( $ticket, $service, $extend );
 		if( !self::$userName ) {
-			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
+			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 		}
 
 		// Language was not correctly loaded when called from soap-client, so making sure 
@@ -718,7 +718,7 @@ class BizSession
 				} catch( BizException $e ) {
 					// Do nothing, error is already added to the log, no need to stop.
 				}
-				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket' );
+				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 			}
 		}
 
@@ -768,7 +768,7 @@ class BizSession
 			self::$ticket != $ticket ) {
 			$message = 'Multiple session with different tickets are not supported. ';
 			$message .= 'Self ticket [' . self::$ticket . '] New ticket [' . $ticket . ']';
-			throw new BizException( 'ERR_TICKET', 'Server', $message );
+			throw new BizException( 'ERR_TICKET', 'Server', $message, null, null, 'ERROR' );
 		}
 	}
 

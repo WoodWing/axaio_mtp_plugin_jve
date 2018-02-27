@@ -496,6 +496,52 @@ class DBTicket extends DBBase
 	}
 
 	/**
+	 * Retrieves originating client application name that is logged in for a given ticket.
+	 *
+	 * Normally the application name of the passed in ticket is returned. But there is an exception.
+	 * When Smart Connection (SC) for InDesign Server (IDS) does login while the DPS tools are enabled, SC does another login.
+	 * The first time login is for "InDesign Server" while the second time is for "Digital Publishing Tools InDesign Server".
+	 * From then on, SC will use the first ticket and second ticket one by one to make sure both tickets won't expire and
+	 * the DPS seat can not be taken away by another user. But for both tickets the originating application is "InDesign Server".
+	 * The tickets are linked together by the `masterticketid`.
+	 * Ticket is not validated.
+	 *
+	 * @since 10.1.6
+	 * @param string $ticket  Unique ticket; gives user access to the system with given client application
+	 * @return string  Client application name, for example: Web, InDesign, InCopy, PhotoShop, Illustrator.
+	 *                 Returns empty string when (ticket) not found.
+	 */
+	public static function getOriginatingApplicationName( $ticket )
+	{
+		static $holdAppname = '';
+		static $holdTicket = '';
+
+		if ( $ticket == $holdTicket ) {
+			return $holdAppname;
+		}
+
+		$dbDriver = DBDriverFactory::gen();
+		$ticketsTable = $dbDriver->tablename( self::TABLENAME );
+
+		$sql = 'SELECT tickets1.`appname` as `appname`, tickets2.`appname` as `masterappname` '.
+			"FROM {$ticketsTable} tickets1 ".
+			"LEFT JOIN {$ticketsTable} tickets2 ON (tickets2.`ticketid` = tickets1.`masterticketid` ) ".
+			'WHERE tickets1.`ticketid` = ?';
+		$params = array( strval( $ticket ) );
+		$sth = $dbDriver->query( $sql, $params );
+		$row = $dbDriver->fetch( $sth );
+
+		if( $row ) {
+			$holdAppname = !is_null( $row['masterappname'] ) ? $row['masterappname'] : $row['appname'];
+		} else {
+			$holdAppname = '';
+		}
+		$holdTicket = $ticket;
+
+		return $holdAppname;
+	}
+
+	/**
 	 * Retrieves client application version that is logged in for a given ticket.
 	 * Ticket is not validated.
 	 *

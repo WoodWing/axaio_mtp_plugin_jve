@@ -649,7 +649,7 @@ function step7_zipExternalModules {
 	done
 
 	echo "step7d: Zipping examples plug-ins ..."
-	plugins="CopyrightValidationDemo SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample"
+	plugins="CopyrightValidationDemo CopyWithPlacements SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample"
 	for plugin in ${plugins}; do
 		zipFolder "${WORKSPACE}/Enterprise_release/plugins/examples" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
