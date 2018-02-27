@@ -1449,7 +1449,7 @@
   <Term key="MNU_REPORTING">レポート</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">ジョブコンフィグレーション</Term>
   <Term key="MNU_SERVER_JOBS">ジョブクエリ</Term>
-  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
+  <Term key="MNU_SERVER_LOGS">サーバーログ</Term>
   <Term key="MNU_UPLOAD">アップロード</Term>
   <Term key="MNU_USER">ユーザ</Term>
   <Term key="MNU_USER_QUERY">ユーザクエリ</Term>
