@@ -107,28 +107,24 @@ class DBObjectLock extends DBBase
 		}
 		return $lockedObjIds;
 	}
-	
+
 	/**
 	 * Checks if an object is locked (checked out). If so it returns the short name of the user who locked the object.
 	 * If not locked, null is returned
 	 *
-	 * @param string $objectID 	Object to check if it is locked
+	 * @param string $objectID Object to check if it is locked
 	 * @return string|null User that has locked the object, or null in case it's not locked
-	 * @throws BizException
 	 */
 	static public function checkLock( $objectID )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename(self::TABLENAME);
-		$sql = "SELECT `usr` FROM $db WHERE `object` = ?";
-		$sth = $dbDriver->query($sql, array( intval( $objectID )));
-		if (!$sth) {
-			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-		}
-		$row = $dbDriver->fetch($sth);
+		$where = "`object` = ?";
+		$params = array( intval( $objectID ) );
+		$row = self::getRow( self::TABLENAME, $where, array( 'usr' ), $params );
 
-		if ($row) { return $row['usr']; }
-		
+		if( $row ) {
+			return $row['usr'];
+		}
+
 		return null;
 	}
 	
@@ -287,6 +283,14 @@ class DBObjectLock extends DBBase
 			$row['lockoffline'] = ( $obj->lockOffLine == true ? 'on' : '' );
 		}
 
+		if( isset( $obj->appName )) {
+			$row['appname'] = strval( $obj->appName );
+		}
+
+		if( isset( $obj->appVersion )) {
+			$row['appversion'] = strval( $obj->appVersion );
+		}
+
 		return $row;
 	}
 
@@ -304,6 +308,8 @@ class DBObjectLock extends DBBase
 		$objectLock->shortUserName = $row['usr'];
 		$objectLock->ipAddress = $row['ip'];
 		$objectLock->lockOffLine = $row['lockoffline'] == 'on' ? true : false;
+		$objectLock->appName = $row['appname'];
+		$objectLock->appVersion = $row['appversion'];
 
 		return $objectLock;
 	}

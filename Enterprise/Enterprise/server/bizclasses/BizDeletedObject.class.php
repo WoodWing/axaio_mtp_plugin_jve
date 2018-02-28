@@ -99,7 +99,6 @@ class BizDeletedObject
 		require_once BASEDIR.'/server/bizclasses/BizPublishing.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 
 		if( !BizContentSource::isAlienObject( $id ) ) { // Continue to get object relations if it is not alien object
@@ -160,7 +159,9 @@ class BizDeletedObject
 							$publishFormId = $childInfo->ID;
 
 							// Check that the object is not checked out / locked, in which case we cannot remove the Object.
-							if ( DBObjectLock::checkLock( $publishFormId ) ) {
+							require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+							$objectLock = new BizObjectLock( $publishFormId );
+							if ( $objectLock->isLocked() ) {
 								throw new BizException( 'ERR_LOCKED', 'Client', $id.':'.$publishFormId );
 							}
 
@@ -180,7 +181,9 @@ class BizDeletedObject
 							if ($objectType == 'PublishForm') {
 
 								// Check that the object is not checked out / locked, in which case we cannot remove the Object.
-								if ( DBObjectLock::checkLock( $relation->Child ) ) {
+								require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+								$objectLock = new BizObjectLock( $relation->Child );
+								if ( $objectLock->isLocked() ) {
 									throw new BizException( 'ERR_LOCKED', 'Client', $id.':'.$relation->Child );
 								}
 
@@ -433,8 +436,9 @@ class BizDeletedObject
 		// check lock
 		LogHandler::Log( 'DeletedObjects', 'DEBUG', "objectOrItsParentLocked: id=$id, level=$recursionlevel" );
 		$dbDriver = DBDriverFactory::gen();
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-		if( DBObjectLock::checkLock( $id ) ){
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$objectLock = new BizObjectLock( $id );
+		if( $objectLock->isLocked( $id ) ){
 			LogHandler::Log( 'DeletedObjects', 'DEBUG', "objectOrItsParentLocked: object $id is locked. (recursion level = $recursionlevel)" );
 			return true;
 		}

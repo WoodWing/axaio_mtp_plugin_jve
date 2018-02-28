@@ -88,8 +88,9 @@ class IdsAutomationUtils
 
 		LogHandler::Log('IdsAutomation', 'DEBUG', "Caling BizInDesignServerJobs::createJob()");
 		require_once BASEDIR . '/server/bizclasses/BizInDesignServerJob.class.php';
-		require_once BASEDIR . '/server/dbclasses/DBObjectLock.class.php';
-		if (DBObjectLock::checkLock($layoutID)) {
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$objectLock = new BizObjectLock( $layoutID );
+		if ( $objectLock->isLocked() ) {
 			// If the involved layout is locked put the job on HALT by setting the status to LOCKED.
 			$job->JobStatus = new InDesignServerJobStatus();
 			$job->JobStatus->setStatus(InDesignServerJobStatus::LOCKED);
