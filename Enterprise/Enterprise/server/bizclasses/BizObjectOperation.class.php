@@ -45,7 +45,9 @@ class BizObjectOperation
 		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 		$lockedBy = DBObjectLock::checkLock( $objectId );
 		if( is_null( $lockedBy ) ) { // nobody has lock?
-			DBObjectLock::lockObject( $objectId, $user ); // throws ERR_LOCKED when locked due to race condition
+			require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+			$objectLock = new BizObjectLock( $objectId, $user);
+			$objectLock->lockObject(); // throws ERR_LOCKED when locked due to race condition
 			$lockedByUs = true;
 		} else {
 			if( $lockedBy != $user ) { // no locked by caller?

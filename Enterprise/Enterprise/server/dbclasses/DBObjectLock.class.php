@@ -12,9 +12,19 @@ require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 class DBObjectLock extends DBBase
 {
 	const TABLENAME = 'objectlocks';
-	
-	static public function lockObject( $object, $user )
+
+	/**
+	 * Adds an object(Id) to the table with all the locked objects.
+	 *
+	 * @param int $object Id of the object that must be locked.
+	 * @param string $user User on which behalve the object is locked.
+	 * @deprecated since 10.1.3
+	 * @throws BizException
+	 */
+	static public function lockObject( int $object, string $user )
 	{
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'Please use WW_BizClasses_ObjectLock->lockObject() instead.' );
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 
 		$dbDriver = DBDriverFactory::gen();
@@ -227,4 +237,75 @@ class DBObjectLock extends DBBase
 			self::deleteRows( self::TABLENAME, $where, $params );
 		}
 	}
+
+	/**
+	 * Insert BizObjectLock object into smart_objectslock table.
+	 *
+	 * @since 10.3.1.
+	 * @param class $objectLock
+	 * @throws BizException In case of database error.
+	 * @return integer|boolean New inserted objectslock DB Id when record is successfully inserted; False otherwise.
+	 */
+	public static function insertObjectLock( BizObjectLock $objectLock )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$row = self::objToRow( $objectLock );
+		$row['timestamp'] = $dbDriver->nowStamp();
+		$result = self::insertRow( self::TABLENAME, $row, true, null, false );
+
+		if( !$result && ( $dbDriver->errorcode() == DB_ERROR_ALREADY_EXISTS ||
+				$dbDriver->errorcode() == DB_ERROR_CONSTRAINT ) ) {
+			throw new BizException( 'ERR_LOCKED', 'Client', $objectLock->objectId );
+		}
+		if( !$result ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Converts a BizObjectLock instance into a DB objectslock record (array).
+	 *
+	 * @since 10.3.1
+	 * @param BizObjectLock $obj
+	 * @return array
+	 */
+	private static function objToRow( BizObjectLock $obj )
+	{
+		$row = array();
+		if( isset( $obj->objectId ) ) {
+			$row['object'] = intval( $obj->objectId );
+		}
+		if( isset( $obj->shortUserName ) ) {
+			$row['usr'] = strval( $obj->shortUserName );
+		}
+		if( isset( $obj->ipAddress ) ) {
+			$row['ip'] = strval( $obj->ipAddress );
+		}
+		if( isset( $obj->lockOffLine ) ) {
+			$row['lockoffline'] = ( $obj->lockOffLine == true ? 'on' : '' );
+		}
+
+		return $row;
+	}
+
+	/**
+	 * Converts  a DB objectslock record (array) into a BizObjectLock instance.
+	 *
+	 * @since 10.3.1
+	 * @param array $row
+	 * @return BizObjectLock
+	 */
+	private static function rowToObj( $row )
+	{
+		$objectLock = new BizObjectLock();
+		$objectLock->objectId = intval( $row['object'] );
+		$objectLock->shortUserName = $row['usr'];
+		$objectLock->ipAddress = $row['ip'];
+		$objectLock->lockOffLine = $row['lockoffline'] == 'on' ? true : false;
+
+		return $objectLock;
+	}
+
 }
