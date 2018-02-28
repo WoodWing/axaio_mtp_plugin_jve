@@ -3633,9 +3633,10 @@ class BizObject
 	private static function Lock( $id, $user )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 		DBObjectFlag::lockObjectFlags( $id );
-		DBObjectLock::lockObject( $id, $user );
+		$objectLock = new BizObjectLock( $id, $user);
+		$objectLock->lockObject();
 
 		// Notify event plugins
 		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
