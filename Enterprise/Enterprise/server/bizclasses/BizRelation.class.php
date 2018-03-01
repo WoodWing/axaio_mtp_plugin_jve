@@ -1770,6 +1770,7 @@ class BizRelation
 
 	/**
 	 * Returns an array with all the "DPS Object Types" as keys. The values are always boolean true.
+	 * Spreadsheet is added, although it can not published, because of EN-90205.
 	 *
 	 * @return array
 	 */
