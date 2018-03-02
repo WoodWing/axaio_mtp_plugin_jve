@@ -216,8 +216,27 @@ class WW_BizClasses_RelatedPages
 	 */
 	public function getRelatedPages( $layoutId, $pageSequences, $rendition )
 	{
-		// TODO
-		return array();
-	}
+		// Validate and repair the input parameters.
+		$pageSequences = array_map( 'intval', $pageSequences );
+		$layoutId = intval( $layoutId );
+		if( !$layoutId || !$pageSequences || !$rendition ) {
+			return;
+		}
 
+		// Resolve the layout variants.
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$masterId = intval( DBObject::getColumnValueByName( $layoutId, 'Workflow', 'masterid' ) );
+		$masterIdOrObjectId = $masterId ? $masterId : $layoutId;
+		$variantIds = DBObject::getObjectIdsOfVariants( $masterIdOrObjectId );
+		$variantObjectIdsTargets = $this->accessFilterForListInPublicationOverviewAndResolveTargets( $variantIds );
+		if( !$variantObjectIdsTargets ) {
+			return;
+		}
+		$variantIds = array_keys( $variantObjectIdsTargets );
+
+		require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
+		$pages = BizPage::getPages2( null, null, $variantIds, array( $rendition ) );
+
+		return $pages;
+	}
 }
