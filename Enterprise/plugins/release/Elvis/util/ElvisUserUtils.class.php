@@ -19,13 +19,19 @@ class ElvisUserUtils
 	}
 
 	/**
-	 * Get the Enterprise user given the username or when not found, the acting user is returned.
+	 * Get the Enterprise user given the username or when not found, either the acting user is returned
+	 * or the unknown username is returned as it is.
+	 *
+	 * By default, when the $username cannot be found in Enterprise, depending on the flag $replaceUnknownUserWithActingUser,
+	 * if $replaceUnknownUserWithActingUser is set to true, the current acting user is returned, when set to false,
+	 * the $username is returned as it is.
 	 *
 	 * @since 10.1.4 QP
 	 * @param string $username Username that is passed from Elvis, to be mapped into Enterprise user.
+	 * @param bool $replaceUnknownUserWithActingUser Whether or not to replace an uknown user with acting user.
 	 * @return AdmUser|null
 	 */
-	public static function getUserByUsernameOrActingUser( $username )
+	public static function getUserByUsernameOrActingUser( $username, $replaceUnknownUserWithActingUser )
 	{
 		if (empty( $username )) {
 			return null;
@@ -33,14 +39,18 @@ class ElvisUserUtils
 
 		$user = self::getUser( $username );
 		if( is_null( $user ) ) { // The user is not found
-			require_once BASEDIR . '/server/utils/VersionUtils.class.php';
-			$serverVer = explode( ' ', SERVERVERSION ); // split '9.2.0' from 'build 123'
-			if (VersionUtils::versionCompare( $serverVer[0], '9.4.0', '>=' )) {
-				$username = BizSession::getUserInfo( 'user' ); // Get the current acting user
-				$user = self::getUser( $username );
+			if( $replaceUnknownUserWithActingUser ) {
+				require_once BASEDIR . '/server/utils/VersionUtils.class.php';
+				$serverVer = explode( ' ', SERVERVERSION ); // split '9.2.0' from 'build 123'
+				if (VersionUtils::versionCompare( $serverVer[0], '9.4.0', '>=' )) {
+					$username = BizSession::getUserInfo( 'user' ); // Get the current acting user
+					$user = self::getUser( $username );
+				} else {
+					require_once dirname(__FILE__).'/../config.php';
+					$user = self::getUser(ELVIS_ENT_ADMIN_USER);
+				}
 			} else {
-				require_once dirname(__FILE__).'/../config.php';
-				$user = self::getUser(ELVIS_ENT_ADMIN_USER);
+				$user = $username;
 			}
 		}
 
