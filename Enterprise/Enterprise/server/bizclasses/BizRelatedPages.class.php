@@ -158,7 +158,9 @@ class WW_BizClasses_RelatedPages
 		// Resolve the edition names of all editions that appear in the search results.
 		$invokedEditionIds = array();
 		if( $response->Rows ) foreach( $response->Rows as $row ) {
-			$layoutEditionIds = array_map( 'trim', explode( ',', $row[ $indexes['EditionIds'] ] ) );
+			$layoutEditionIds = ($row[ $indexes['EditionIds'] ])
+				? array_map( 'trim', explode( ',', $row[ $indexes['EditionIds'] ] ) )
+				: array();
 			$invokedEditionIds = array_merge( $invokedEditionIds, $layoutEditionIds );
 		}
 		$invokedEditionIds = array_unique( $invokedEditionIds );
@@ -174,7 +176,9 @@ class WW_BizClasses_RelatedPages
 			$target->Issue = new Issue();
 			$target->Issue->Id = $row[ $indexes['IssueId'] ];
 			$target->Issue->Name = $row[ $indexes['Issue'] ];
-			$layoutEditionIds = array_map( 'trim', explode( ',', $row[ $indexes['EditionIds'] ] ) );
+			$layoutEditionIds = ($row[ $indexes['EditionIds'] ])
+				? array_map( 'trim', explode( ',', $row[ $indexes['EditionIds'] ] ) )
+				: array();
 			if( $layoutEditionIds ) {
 				$target->Editions = array();
 				foreach( $layoutEditionIds as $layoutEditionId ) {
