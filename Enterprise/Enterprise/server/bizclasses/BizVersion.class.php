@@ -750,7 +750,6 @@ class BizVersion
 			}
 			$restoreVersion = $versions[0];
 
-			// place lock
 			require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 			$objectLock = new BizObjectLock( $id, $user);
 			$objectLock->lockObject();
@@ -818,9 +817,10 @@ class BizVersion
 			// Update the version of the parent object to keep the changes in sync.
 			BizObject::updateVersionOfParentObject( $object );
 
-			// release lock
-			require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-			DBObjectLock::unlockObject( $id, $user );
+			// Release lock.
+			require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+			$objectLock = new BizObjectLock( $id );
+			$objectLock->releaseLock();
 
 			$restored = true;
 		}

@@ -42,20 +42,18 @@ class BizObjectOperation
 		}
 
 		// Lock the object when not locked yet. Error when could not lock or locked by someone else.
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-		$lockedBy = DBObjectLock::checkLock( $objectId );
-		if( is_null( $lockedBy ) ) { // nobody has lock?
-			require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-			$objectLock = new BizObjectLock( $objectId, $user);
-			$objectLock->lockObject(); // throws ERR_LOCKED when locked due to race condition
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$objectLock = new BizObjectLock( $objectId, $user );
+		if( !$objectLock->isLocked() ) {
+			$objectLock->lockObject();
 			$lockedByUs = true;
 		} else {
-			if( $lockedBy != $user ) { // no locked by caller?
+			if( !$objectLock->isLockedByUser( $user ) ) {
 				throw new BizException( 'ERR_LOCKED', 'Client', $objectId );
 			}
 			$lockedByUs = false;
 		}
-		
+
 		// Catch errors so we can unlock the objects again.
 		try {
 			// Error when the caller does not provide the current object version.
@@ -77,7 +75,7 @@ class BizObjectOperation
 		
 		// Unlock the object when it was locked by us above.
 		if( $lockedByUs ) {
-			DBObjectLock::unlockObjects( array( $objectId ), $user );
+			$objectLock->releaseLock();
 		}
 		
 		// Re-throw the exception to tell caller the creation failed.

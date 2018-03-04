@@ -114,9 +114,12 @@ class DBObjectLock extends DBBase
 	 *
 	 * @param string $objectID Object to check if it is locked
 	 * @return string|null User that has locked the object, or null in case it's not locked
+	 * @deprecated since 10.3.1.
 	 */
 	static public function checkLock( $objectID )
 	{
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'Please use WW_BizClasses_ObjectLock->isLocked() instead.' );
 		$where = "`object` = ?";
 		$params = array( intval( $objectID ) );
 		$row = self::getRow( self::TABLENAME, $where, array( 'usr' ), $params );
@@ -127,20 +130,38 @@ class DBObjectLock extends DBBase
 
 		return null;
 	}
+
+	/**
+	 * Reads the lock of an object.
+	 *
+	 * @since 10.3.1
+	 * @param $objectId
+	 * @return BizObjectLock|null Returns the objectlock or null if not found.
+	 */
+	static public function readObjectLock( $objectId )
+	{
+		$objectLock = null;
+		$where = "`object` = ?";
+		$params = array( intval( $objectId ) );
+		$row = self::getRow( self::TABLENAME, $where, '*', $params );
+
+		if( $row ) {
+			$objectLock = self::rowToObj( $row );
+		}
+
+		return $objectLock;
+	}
 	
 	static public function unlockObject( $object, $usr )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename(self::TABLENAME);
-		$sql = "DELETE FROM $db WHERE `object` = ?";
+		$where = "`object` = ? ";
 		$params = array( intval( $object ));
 		if ($usr) {
-			$sql .= " AND `usr`= ?";
+			$where .= "AND `usr`= ?";
 			$params[] = strval( $usr );
 		}
-		
-		$sth = $dbDriver->query($sql, $params);
-		return $sth;
+
+		return self::deleteRows( self::TABLENAME, $where, $params );
 	}
 
 	/**
@@ -160,9 +181,19 @@ class DBObjectLock extends DBBase
 		}
 	}
 
-	
+	/**
+	 * Updates the lockoffline property of a locked object. If the object is not locked by the user no update is done.
+	 *
+	 * @param $object
+	 * @param $usr
+	 * @param $bKeepLockForOffline
+	 * @return bool|null|resource
+	 * @deprecated since 10.1.3
+	 */
 	static public function changeOnlineStatus( $object, $usr, $bKeepLockForOffline ) 
 	{
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'Please use WW_BizClasses_ObjectLock->releaseObject() instead.' );
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
 		$sql = 'SELECT * FROM '.$db.' WHERE `usr`= ? AND `object`= ?';
@@ -180,6 +211,27 @@ class DBObjectLock extends DBBase
 
 		$sth = $dbDriver->query($sql, array($object));
 		return $sth;
+	}
+
+	/**
+	 * Updates the 'lockoffline' property of a locked object.
+	 *
+	 * @since 10.3.1
+	 * @param $objectId
+	 * @param $lockForOffline
+	 * @return bool true if succeeded, false if an error occurred.
+	 */
+	static public function updateOnlineStatus( $objectId, $lockForOffline )
+	{
+		if( $lockForOffline ) {
+			$values = array( 'lockoffline' => 'on');
+		} else {
+			$values = array( 'lockoffline' => '');
+		}
+		$where = '`object` = ?';
+		$params = array( intval( $objectId ));
+
+		return self::updateRow( self::TABLENAME, $values, $where, $params );
 	}
 
 	/**
@@ -203,9 +255,9 @@ class DBObjectLock extends DBBase
 	/**
 	 * Removes locks of childs objects if they are locked by user acting from the
 	 * ip-address.
-	 * @param type $ipAddress
-	 * @param type $user
-	 * @param type $parent
+	 * @param string $ipAddress
+	 * @param string $user
+	 * @param int $parent
 	 * @return mixed null if failure else true. 
 	 */
 	public static function deleteLocksOfChildren($ipAddress, $user, $parent)
@@ -213,7 +265,7 @@ class DBObjectLock extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$placements = $dbDriver->tablename('placements');
 		$where = "`ip` = ? AND `usr` = ? AND object IN ( SELECT `child` FROM $placements WHERE `type` = 'Placed' AND `parent` = ? )"; 
-		$params = array($ipAddress, $user, $parent);	
+		$params = array( strval( $ipAddress ), strval( $user ), intval( $parent ) );
 		$result = self::deleteRows(self::TABLENAME, $where, $params);
 
 		return $result;
@@ -238,11 +290,11 @@ class DBObjectLock extends DBBase
 	 * Insert BizObjectLock object into smart_objectslock table.
 	 *
 	 * @since 10.3.1.
-	 * @param class $objectLock
+	 * @param stdClass $objectLock
 	 * @throws BizException In case of database error.
 	 * @return integer|boolean New inserted objectslock DB Id when record is successfully inserted; False otherwise.
 	 */
-	public static function insertObjectLock( BizObjectLock $objectLock )
+	public static function insertObjectLock( $objectLock )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$row = self::objToRow( $objectLock );
@@ -264,10 +316,10 @@ class DBObjectLock extends DBBase
 	 * Converts a BizObjectLock instance into a DB objectslock record (array).
 	 *
 	 * @since 10.3.1
-	 * @param BizObjectLock $obj
-	 * @return array
+	 * @param stdClass $obj
+	 * @return array database row
 	 */
-	private static function objToRow( BizObjectLock $obj )
+	private static function objToRow( $obj )
 	{
 		$row = array();
 		if( isset( $obj->objectId ) ) {
@@ -298,12 +350,12 @@ class DBObjectLock extends DBBase
 	 * Converts  a DB objectslock record (array) into a BizObjectLock instance.
 	 *
 	 * @since 10.3.1
-	 * @param array $row
-	 * @return BizObjectLock
+	 * @param array $row database row
+	 * @return stdClass Object
 	 */
 	private static function rowToObj( $row )
 	{
-		$objectLock = new BizObjectLock();
+		$objectLock = new stdClass();
 		$objectLock->objectId = intval( $row['object'] );
 		$objectLock->shortUserName = $row['usr'];
 		$objectLock->ipAddress = $row['ip'];

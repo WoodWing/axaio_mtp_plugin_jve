@@ -138,7 +138,7 @@ class DBUser extends DBBase
 
 				// cascading delete locks (on name, not id!)
 				require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-				DBObjectLock::deleteLocksByUser( $user );
+				DBObjectLock::deleteLocksByUser( $user ); // Todo Add to BizObjectLock.class.php
 
 				require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
 				$bizTicket = new BizTicket();
