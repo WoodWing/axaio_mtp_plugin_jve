@@ -331,24 +331,24 @@ class DBObjectLock extends DBBase
 	private static function objToRow( $obj )
 	{
 		$row = array();
-		if( isset( $obj->objectId ) ) {
+		if( !is_null( $obj->objectId ) ) {
 			$row['object'] = intval( $obj->objectId );
 		}
-		if( isset( $obj->shortUserName ) ) {
+		if( !is_null( $obj->shortUserName ) ) {
 			$row['usr'] = strval( $obj->shortUserName );
 		}
-		if( isset( $obj->ipAddress ) ) {
+		if( !is_null( $obj->ipAddress ) ) {
 			$row['ip'] = strval( $obj->ipAddress );
 		}
-		if( isset( $obj->lockOffLine ) ) {
+		if( !is_null( $obj->lockOffLine ) ) {
 			$row['lockoffline'] = ( $obj->lockOffLine == true ? 'on' : '' );
 		}
 
-		if( isset( $obj->appName )) {
+		if( !is_null( $obj->appName )) {
 			$row['appname'] = strval( $obj->appName );
 		}
 
-		if( isset( $obj->appVersion )) {
+		if( !is_null( $obj->appVersion )) {
 			$row['appversion'] = strval( $obj->appVersion );
 		}
 
