@@ -224,7 +224,7 @@ class WW_BizClasses_RelatedPages
 		$pageSequences = array_map( 'intval', $pageSequences );
 		$layoutId = intval( $layoutId );
 		if( !$layoutId || !$pageSequences || !$rendition ) {
-			return;
+			return array();
 		}
 
 		// Resolve the layout variants.
@@ -234,7 +234,7 @@ class WW_BizClasses_RelatedPages
 		$variantIds = DBObject::getObjectIdsOfVariants( $masterIdOrObjectId );
 		$variantObjectIdsTargets = $this->accessFilterForListInPublicationOverviewAndResolveTargets( $variantIds );
 		if( !$variantObjectIdsTargets ) {
-			return;
+			return array();
 		}
 		$variantIds = array_keys( $variantObjectIdsTargets );
 
