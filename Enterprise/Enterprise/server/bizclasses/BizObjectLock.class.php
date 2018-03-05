@@ -34,7 +34,7 @@ class BizObjectLock
 
 	public function __construct( $objectId )
 	{
-		$this->objectId = $objectId;
+		$this->objectId = intval( $objectId );
 		$this->readLockAndUpdateProperties();
 	}
 
@@ -46,7 +46,7 @@ class BizObjectLock
 	 * @param $shortUserName string Short user name of the user that locks the object.
 	 * @throws BizException
 	 */
-	public function lockObject( $shortUserName )
+	public function lockObject( string $shortUserName )
 	{
 		if( !$shortUserName ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Missing parameter $shortUserName for: '.__METHOD__.'().' );
@@ -57,18 +57,13 @@ class BizObjectLock
 		$this->appName = BizSession::getClientName();
 		$this->appVersion = BizSession::getClientVersion();
 		$objectLock = $this->createObjectLockObject();
-		try {
-			DBObjectLock::insertObjectLock( $objectLock );
-			$this->isLocked = true;
-		} catch ( BizException $e ) {
-		   throw $e;
-		}
+		DBObjectLock::insertObjectLock( $objectLock );
+		$this->isLocked = true;
 	}
 
 	/**
 	 * Releases a locked object. No check is done if the object is locked on beforehand.
 	 *
-	 * @throws BizException
 	 * @return bool|null
 	 */
 	public function releaseLock()
@@ -77,11 +72,12 @@ class BizObjectLock
 		if( $result ) {
 			$this->isLocked = false;
 		}
+
 		return $result;
 	}
 
 	/**
-	 * Checks if an object is alreay locked.
+	 * Checks if an object is already locked.
 	 *
 	 * @return bool
 	 */
@@ -96,7 +92,7 @@ class BizObjectLock
 	 * @param string $shortUserName
 	 * @return bool
 	 */
-	public function isLockedBySameUserAndApplication( $shortUserName )
+	public function isLockedBySameUserAndApplication( string $shortUserName )
 	{
 		return ( $this->isLocked ) &&
 			( strtolower( $this->shortUserName ) == strtolower( $shortUserName ) ) &&
@@ -111,11 +107,16 @@ class BizObjectLock
 	 * @param string $shortUserName
 	 * @return bool
 	 */
-	public function isLockedByUser( $shortUserName )
+	public function isLockedByUser( string $shortUserName )
 	{
 		return ( $this->isLocked && ( strtolower( $this->shortUserName ) == strtolower( $shortUserName ) ) );
 	}
 
+	/**
+	 * Returns the short user name of the user that locked the object.
+	 *
+	 * @return string Short user name.
+	 */
 	public function getLockedByShortUserName()
 	{
 		return $this->shortUserName;
@@ -124,14 +125,17 @@ class BizObjectLock
 	/**
 	 * Updates the online status of a locked object.
 	 *
-	 * @param $onLineStatus
+	 * @param bool $onLineStatus
 	 * @return bool true on success, false on error.
 	 */
-	public function changeOnLineStatus( $onLineStatus )
+	public function changeOnLineStatus( bool $onLineStatus )
 	{
 		return DBObjectLock::updateOnlineStatus( $this->objectId, $onLineStatus );
 	}
 
+	/**
+	 * Populates the stored properties to the member properties of the current object.
+	 */
 	private function readLockAndUpdateProperties()
 	{
 		$storedObjectLock = DBObjectLock::readObjectLock( $this->objectId );

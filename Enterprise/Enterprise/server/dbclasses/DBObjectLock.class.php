@@ -91,9 +91,9 @@ class DBObjectLock extends DBBase
 				if( $objectIdsToLock ) {
 					// E.g: $values = array( array(1,2,3,4), array(5,6,7,8) )
 					$values = array();
+					$appName = BizSession::getClientName();
+					$appVersion = BizSession::getClientVersion();
 					foreach( $objectIdsToLock as $objectIdToLock ) {
-						$appName = BizSession::getClientName();
-						$appVersion = BizSession::getClientVersion();
 						$values[] = array( $objectIdToLock, $user, $nowStamp, $ip, $appName, $appVersion );
 					}
 
@@ -137,10 +137,10 @@ class DBObjectLock extends DBBase
 	 * Reads the lock of an object.
 	 *
 	 * @since 10.3.1
-	 * @param $objectId
+	 * @param int $objectId
 	 * @return stdClass Object|null Returns the objectlock or null if not found.
 	 */
-	static public function readObjectLock( $objectId )
+	static public function readObjectLock( int $objectId )
 	{
 		$objectLock = null;
 		$where = "`object` = ?";
@@ -153,8 +153,15 @@ class DBObjectLock extends DBBase
 
 		return $objectLock;
 	}
-	
-	static public function unlockObject( $object, $usr )
+
+	/**
+	 * Unlocks an object. The short user name is optional (and not realy needed).
+	 *
+	 * @param int $object
+	 * @param string|null $usr
+	 * @return bool|null
+	 */
+	static public function unlockObject( int $object, $usr )
 	{
 		$where = "`object` = ? ";
 		$params = array( intval( $object ));
@@ -186,9 +193,9 @@ class DBObjectLock extends DBBase
 	/**
 	 * Updates the lockoffline property of a locked object. If the object is not locked by the user no update is done.
 	 *
-	 * @param $object
-	 * @param $usr
-	 * @param $bKeepLockForOffline
+	 * @param int $object
+	 * @param string $usr
+	 * @param bool $bKeepLockForOffline
 	 * @return bool|null|resource
 	 * @deprecated since 10.1.3
 	 */
@@ -219,11 +226,11 @@ class DBObjectLock extends DBBase
 	 * Updates the 'lockoffline' property of a locked object.
 	 *
 	 * @since 10.3.1
-	 * @param $objectId
-	 * @param $lockForOffline
+	 * @param int $objectId
+	 * @param bool $lockForOffline
 	 * @return bool true if succeeded, false if an error occurred.
 	 */
-	static public function updateOnlineStatus( $objectId, $lockForOffline )
+	static public function updateOnlineStatus( int $objectId, bool $lockForOffline )
 	{
 		if( $lockForOffline ) {
 			$values = array( 'lockoffline' => 'on');
@@ -355,7 +362,7 @@ class DBObjectLock extends DBBase
 	 * @param array $row database row
 	 * @return stdClass Object
 	 */
-	private static function rowToObj( $row )
+	private static function rowToObj( array $row )
 	{
 		$objectLock = new stdClass();
 		$objectLock->objectId = intval( $row['object'] );
