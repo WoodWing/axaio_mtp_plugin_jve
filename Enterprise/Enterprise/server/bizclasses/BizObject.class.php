@@ -853,7 +853,7 @@ class BizObject
 			foreach ($object->Relations as $relation) {
 				// If someone else has object lock, send notification
 				require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-				$objectLock = new BizObjectLock( $relation-Child );
+				$objectLock = new BizObjectLock( $relation->Child );
 				if ( $objectLock->isLockedByUser( $user ) ) {
 					new smartevent_updateobjectrelation(BizSession::getTicket(), $relation->Child, $relation->Type, $id, $newRow['name']);
 				}
@@ -1342,7 +1342,7 @@ class BizObject
 				if (!$objectLock->releaseLock() ) {
 					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 				}
-			} else { // Different, non-admin user
+			} else { // Different user and non-admin user.
 				$lockedByUser = BizUser::resolveFullUserName( $objectLock->getLockedByShortUserName() );
 				$msg = BizResources::localize('OBJ_LOCKED_BY') . ' ' . $lockedByUser;
 				throw new BizException( null, 'Client',  $id, $msg );
