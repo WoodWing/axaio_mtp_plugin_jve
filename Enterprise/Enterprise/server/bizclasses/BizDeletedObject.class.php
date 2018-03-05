@@ -438,7 +438,7 @@ class BizDeletedObject
 		$dbDriver = DBDriverFactory::gen();
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 		$objectLock = new BizObjectLock( $id );
-		if( $objectLock->isLocked( $id ) ){
+		if( $objectLock->isLocked() ){
 			LogHandler::Log( 'DeletedObjects', 'DEBUG', "objectOrItsParentLocked: object $id is locked. (recursion level = $recursionlevel)" );
 			return true;
 		}
