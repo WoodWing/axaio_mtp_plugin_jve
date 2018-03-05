@@ -73,6 +73,7 @@ class BizObjectLock
 	/**
 	 * Releases a locked object. No check is done if the object is locked on beforehand.
 	 *
+	 * @throws BizException
 	 * @return bool|null
 	 */
 	public function releaseLock()

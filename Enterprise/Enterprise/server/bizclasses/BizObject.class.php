@@ -852,7 +852,7 @@ class BizObject
 			&& strtolower(UPDATE_GEOM_SAVE) == strtolower('ON') ) {
 			foreach ($object->Relations as $relation) {
 				// If someone else has object lock, send notification
-				require_once BASEDIR.'/server/bizclasses/BizObjectLock.class';
+				require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 				$objectLock = new BizObjectLock( $relation-Child );
 				if ( $objectLock->isLockedByUser( $user ) ) {
 					new smartevent_updateobjectrelation(BizSession::getTicket(), $relation->Child, $relation->Type, $id, $newRow['name']);

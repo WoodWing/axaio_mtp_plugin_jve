@@ -136,7 +136,7 @@ class DBObjectLock extends DBBase
 	 *
 	 * @since 10.3.1
 	 * @param $objectId
-	 * @return BizObjectLock|null Returns the objectlock or null if not found.
+	 * @return stdClass Object|null Returns the objectlock or null if not found.
 	 */
 	static public function readObjectLock( $objectId )
 	{
