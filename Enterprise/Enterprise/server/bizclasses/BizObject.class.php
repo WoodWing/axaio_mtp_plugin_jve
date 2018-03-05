@@ -3630,8 +3630,8 @@ class BizObject
 		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 		DBObjectFlag::lockObjectFlags( $id );
-		$objectLock = new BizObjectLock( $id, $user);
-		$objectLock->lockObject();
+		$objectLock = new BizObjectLock( $id );
+		$objectLock->lockObject( $user );
 
 		// Notify event plugins
 		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';

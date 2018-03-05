@@ -32,32 +32,27 @@ class BizObjectLock
 	/** @var bool isLocked Is the object in the objectlocks table. */
 	private $isLocked = false;
 
-	public function __construct( $objectId = null, $shortUserName = '' )
+	public function __construct( $objectId )
 	{
-		if( $shortUserName ) {
-			$this->shortUserName = $shortUserName;
-		}
-		if( $objectId ) {
-			$this->objectId = $objectId;
-			$this->readLockAndUpdateProperties();
-		}
+		$this->objectId = $objectId;
+		$this->readLockAndUpdateProperties();
 	}
 
 	/**
 	 * Locks an object.
 	 *
 	 * Tries to lock the object. If the object is already locked a database error is thrown.
+	 *
+	 * @param $shortUserName string Short user name of the user that locks the object.
 	 * @throws BizException
 	 */
-	public function lockObject()
+	public function lockObject( $shortUserName )
 	{
-		if( !$this->objectId ) {
-			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Missing parameter $objectId for: '.__METHOD__.'().' );
+		if( !$shortUserName ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Missing parameter $shortUserName for: '.__METHOD__.'().' );
 		}
+		$this->shortUserName = $shortUserName;
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
-		if( !$this->shortUserName ) {
-			$this->shortUserName = BizSession::getShortUserName();
-		}
 		$this->ipAddress = WW_Utils_UrlUtils::getClientIP();
 		$this->appName = BizSession::getClientName();
 		$this->appVersion = BizSession::getClientVersion();
@@ -78,9 +73,6 @@ class BizObjectLock
 	 */
 	public function releaseLock()
 	{
-		if( !$this->objectId ) {
-			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Missing parameter $objectId for: '.__METHOD__.'().' );
-		}
 		$result = DBObjectLock::unlockObject( $this->objectId, null );
 		if( $result ) {
 			$this->isLocked = false;

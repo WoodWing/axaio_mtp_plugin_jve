@@ -43,9 +43,9 @@ class BizObjectOperation
 
 		// Lock the object when not locked yet. Error when could not lock or locked by someone else.
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $objectId, $user );
+		$objectLock = new BizObjectLock( $objectId );
 		if( !$objectLock->isLocked() ) {
-			$objectLock->lockObject();
+			$objectLock->lockObject( $user );
 			$lockedByUs = true;
 		} else {
 			if( !$objectLock->isLockedByUser( $user ) ) {

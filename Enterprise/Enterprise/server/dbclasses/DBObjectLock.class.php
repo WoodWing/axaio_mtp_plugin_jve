@@ -72,7 +72,7 @@ class DBObjectLock extends DBBase
 			$dbDriver = DBDriverFactory::gen();
 			// Prepares the Db fields and its values.
 			// DB column Names.
-			$columnNames = array( 'object', 'usr', 'timestamp', 'ip' );
+			$columnNames = array( 'object', 'usr', 'timestamp', 'ip', 'appname', 'appversion' );
 
 			// Collecting DB column Values.
 			$nowStamp = $dbDriver->nowStamp();
@@ -92,7 +92,9 @@ class DBObjectLock extends DBBase
 					// E.g: $values = array( array(1,2,3,4), array(5,6,7,8) )
 					$values = array();
 					foreach( $objectIdsToLock as $objectIdToLock ) {
-						$values[] = array( $objectIdToLock, $user, $nowStamp, $ip );
+						$appName = BizSession::getClientName();
+						$appVersion = BizSession::getClientVersion();
+						$values[] = array( $objectIdToLock, $user, $nowStamp, $ip, $appName, $appVersion );
 					}
 
 					// Try to obtain lock for all the objects at once.
