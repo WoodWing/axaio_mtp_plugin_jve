@@ -7,7 +7,7 @@ class MetadataHandler
 	private $fieldHandlersByElvisMetadata;
 	/** @var  string[] $metadataToReturn Elvis field names */
 	private $metadataToReturn;
-	/** @var string The handler type name ( the context ) that is calling MetaData handler, e.g 'VersionHandler', 'UserFieldHandler' and etc. */
+	/** @var string Can be used to set handler type name ( the context ) that is calling MetaData handler, e.g 'VersionHandler', 'UserFieldHandler' and etc. */
 	private $handlerName;
 
 	/**
