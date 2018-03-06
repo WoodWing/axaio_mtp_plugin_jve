@@ -306,9 +306,11 @@ class DBObjectLock extends DBBase
 	public static function insertObjectLock( $objectLock )
 	{
 		$dbDriver = DBDriverFactory::gen();
-		$row = self::objToRow( $objectLock );
-		$row['timestamp'] = $dbDriver->nowStamp();
-		$result = self::insertRow( self::TABLENAME, $row, true, null, false );
+		$values = array( $objectLock->objectId, $objectLock->shortUserName, $dbDriver->nowStamp(), $objectLock->ipAddress,
+			$objectLock->appName, $objectLock->appVersion );
+		$columnNames = array( 'object', 'usr', 'timestamp', 'ip', 'appname', 'appversion' );
+		$result = self::insertRows( self::TABLENAME, $columnNames, array( $values ), true, true, false );
+		// self::inserRow() cannot be used as this method is not able to handle the timestamp column.
 
 		if( !$result && ( $dbDriver->errorcode() == DB_ERROR_ALREADY_EXISTS ||
 				$dbDriver->errorcode() == DB_ERROR_CONSTRAINT ) ) {
