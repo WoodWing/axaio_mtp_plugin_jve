@@ -75,24 +75,52 @@ class DBActionproperty extends DBBase
 	}
 
 	/**
-	 * Returns actions by publication and object type.
+	 * Returns list of workflow actions by publication and object type.
 	 *
+	 * @since 10.x.x Renamed from ﻿listActionpropertyGroups to listWorkflowActionPropertyGroups.
+	 * @param int $publ
 	 * @return array with results.
 	 */
-	static public function listActionpropertyGroups()
+	static public function listWorkflowActionPropertyGroups( $publ )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$dbap = $dbDriver->tablename( self::TABLENAME );
+
+		$sql = "SELECT DISTINCT actprops.`publication` AS `pubid`, pubs.`code`, pubs.`publication`, actprops.`type`, actprops.`action` ";
+		$sql .= "FROM $dbap actprops ";
+		$sql .= "LEFT JOIN `smart_publications` pubs ON ( actprops.`publication`  = pubs.`id` ) ";
+		$sql .= "WHERE actprops.publication = ? ";
+		$sql .= "GROUP BY actprops.`publication`, actprops.`type`, pubs.`code`, pubs.`publication`, actprops.`action` ";
+		$sql .= "ORDER BY pubs.`code` ASC, actprops.`type` ASC, actprops.`action` ASC";
+
+		$params = array( intval( $publ ));
+		$sth = $dbDriver->query( $sql, $params );
+
+		return self::fetchResults($sth);
+	}
+
+	/**
+	 * Returns list of query actions.
+	 *
+	 * Unlike For query actions, the query actions cannot be grouped by object type nor publication.
+	 *
+	 * @since 10.x.x
+	 * @return string[]
+	 */
+	public static function listQueryActionPropertyGroups()
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbap = $dbDriver->tablename(self::TABLENAME);
-				
-		$sql = "SELECT DISTINCT actprops.`publication` AS `pubid`, pubs.`code`, pubs.`publication`, actprops.`type`, actprops.`action` ";
+
+		$sql = "SELECT DISTINCT actprops.`action` ";
 		$sql .= "FROM $dbap actprops ";
-        $sql .= "LEFT JOIN `smart_publications` pubs ON ( actprops.`publication`  = pubs.`id` ) ";
-        $sql .= "GROUP BY actprops.`publication`, actprops.`type`, pubs.`code`, pubs.`publication`, actprops.`action` ";
-        $sql .= "ORDER BY pubs.`code` ASC, actprops.`type` ASC, actprops.`action` ASC";
-        
-        $sth = $dbDriver->query($sql);
-        
-        return self::fetchResults($sth);		
+		$sql .= "WHERE actprops.publication = -1 ";
+		$sql .= "GROUP BY actprops.`action` ";
+		$sql .= "ORDER BY actprops.`action` ASC";
+
+		$sth = $dbDriver->query($sql);
+
+		return self::fetchResults($sth);
 	}
 	
 	/**

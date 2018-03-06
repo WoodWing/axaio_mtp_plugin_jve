@@ -11,34 +11,32 @@ checkSecure('admin');
 
 $sysProps= BizProperty::getSystemPropIds();
 $objMap	= getObjectTypeMap();
-$actMap = getWorkflowActionTypeMap();
+$actMap = getQueryActionTypeMap();
 
 // determine incoming mode
-$publ    = isset($_REQUEST['publ'])    ? intval($_REQUEST['publ']) : 0; // Publication id. Zero for all.
+$publ = -1; // Not applicable.
+$objType = ''; // Not applicable.
 $action  = isset($_REQUEST['action'])  ? $_REQUEST['action']  : ''; 	// Internal action string, such as 'CopyTo'. Empty for <all>.
-$objType = isset($_REQUEST['objtype']) ? $_REQUEST['objtype'] : ''; 	// Internal object type string, such as ArticleTemplate. Empty for <all>.
 
 // Validate data retrieved from form (XSS attacks)
 if( !array_key_exists($action, $actMap) ) { $action = '' ; }
 if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
 
 $dum = '';
-cookie('actionproperties', !(isset($_REQUEST['isform']) && $_REQUEST['isform']), $publ, $action, $objType, $dum, $dum, $dum, $dum);
+//cookie('actionpropertiesquery', false, $action, $dum,    $dum, $dum, $dum, $dum, $dum);
 
 // Re-validate data retrieved from cookie! (XSS attacks)
-$publ = intval($publ);
 if( !array_key_exists($action, $actMap) ) { $action = ''; }
 if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
-//echo 'DEBUG: publ=['. $publ .'] action=['. $action .'] objtype=['. $objType .']</br>';
 
-$app = new ActionPropertiesAdminApp( $publ, $objType, $action, $sysProps );
+$app = new ActionPropertiesQueryAdminApp( $publ, $objType, $action, $sysProps );
 
 $app->processRequestData();
 
 $txt = $app->loadHtmlTemplate();
 
 // Upper part - build selection of combo box for Brand, Object Type and Action
-$txt = $app->buildSelectionComboBoxes( $objMap, $actMap, $txt );
+$txt = $app->buildSelectionComboBoxes( $actMap, $txt );
 
 // Middle part - build Brand-Object Type-Action link list
 $txt = $app->createBrandObjectTypeActionLinks( $objMap, $actMap, $txt );
@@ -52,12 +50,13 @@ print HtmlDocument::buildDocument( $txt );
 /**
  * Helper class for the admin application: Dialog Setup Admin Page
  */
-class ActionPropertiesAdminApp
+class ActionPropertiesQueryAdminApp
 {
 	private $publ = null;
 	private $objType = null;
 	private $action = null;
-	private $onlyQuery = null;
+//	private $onlyQuery = null;
+	private $onlyAllObjectType = null;
 	private $mode = null;
 	private $sAll = null;
 	private $sysProps = null;
@@ -80,55 +79,11 @@ class ActionPropertiesAdminApp
 	 *
 	 * @return string $txt HTML strings
 	 */
-	public function buildSelectionComboBoxes( $objMap, $actMap, $txt )
+	public function buildSelectionComboBoxes( $actMap, $txt )
 	{
-		$combo = $this->buildBrandComboBox();
-		$txt = str_replace('<!--COMBO:PUBL-->', $combo, $txt );
-
-		$combo = $this->buildObjectTypeComboBox( $objMap );
-		$txt = str_replace('<!--COMBO:TYPE-->', $combo, $txt );
-
 		$combo = $this->buildActionComboBox( $actMap );
 		$txt = str_replace('<!--COMBO:ACTION-->', $combo, $txt );
 		return $txt;
-	}
-
-	/**
-	 * Build Brand combo box
-	 *
-	 * @return string $combo Brand HTML combo element text
-	 */
-	private function buildBrandComboBox()
-	{
-		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		$rows = DBPublication::listPublications(array('id', 'publication'));
-		$combo = inputvar( 'isform', '1', 'hidden' );
-		$combo .= '<select name="publ" onchange="submit();">';
-		$combo .= '<option value="">&lt;'.$this->sAll.'&gt;</option>';
-		foreach( $rows as $row ) {
-			$selected = ($row['id'] == $this->publ) ? 'selected="selected"' : '';
-			$combo .= '<option value="'.$row['id'].'" '.$selected.'>'.formvar($row['publication']).'</option>';
-		}
-		$combo .= '</select>';
-		return $combo;
-	}
-
-	/**
-	 * Build object type combo box
-	 *
-	 * @param array $objMap Array of object type
-	 * @return string $combo Object type HTML combo element text
-	 */
-	private function buildObjectTypeComboBox( $objMap )
-	{
-		$combo = '<select name="objtype" onchange="submit();">';
-		$combo .= '<option value="">&lt;'.$this->sAll.'&gt;</option>';
-		foreach( $objMap as $k => $sDisplayType ) {
-			$selected = ($k == $this->objType) ? 'selected="selected"' : '';
-			$combo .= '<option value="'.$k.'" '.$selected.'>'.formvar($sDisplayType).'</option>';
-		}
-		$combo .= '</select>';
-		return $combo;
 	}
 
 	/**
@@ -279,22 +234,14 @@ class ActionPropertiesAdminApp
 	 */
 	public function createBrandObjectTypeActionLinks( $objMap, $actMap,  $txt )
 	{
-		$rows = DBActionproperty::listWorkflowActionPropertyGroups( $this->publ );
+		$rows = DBActionproperty::listQueryActionPropertyGroups();
 		// Show results in a list of hyperlinks to select the Brand/Type/Act combos when user clicks on them...
 		$brandTypeActionlist = "";
 
 		foreach( $rows as $row ) {
 			// Skip SetPublishProperties action for PublishFormTemplates, they should never be editable from the action properties page.
-			if (isset($row['action']) && isset($row['type']) && trim($row['action']) == 'SetPublishProperties' && trim($row['type']) == 'PublishFormTemplate') {
+			if (isset($row['action']) && trim($row['action']) == 'SetPublishProperties' && trim($row['type']) == 'PublishFormTemplate') {
 				continue;
-			}
-			$disp_pub = $row['publication'];
-			if( !$disp_pub ) $disp_pub = '<'.$this->sAll.'>'; // set to "<all>" when not defined
-			$disp_type = trim($row['type']);
-			if( $disp_type ) {
-				$disp_type = $objMap[$disp_type];
-			} else {
-				$disp_type = '<'.$this->sAll.'>'; // set to "<all>" when not defined
 			}
 			$disp_act = trim($row['action']);
 			if( $disp_act ) {
@@ -302,8 +249,8 @@ class ActionPropertiesAdminApp
 			} else {
 				$disp_act = '<'.$this->sAll.'>'; // set to "<all>" when not defined
 			}
-			$brandTypeActionlist .= '<a href="javascript:SetCombos(\''.$row['pubid'].'\',\''.formvar(trim($row['type'])).'\',\''.formvar(trim($row['action'])).'\');">';
-			$brandTypeActionlist .= formvar($disp_pub).' - '.formvar($disp_type).' - '.formvar($disp_act).'</a><br/>';
+			$brandTypeActionlist .= '<a href="javascript:SetCombos(\''.formvar(trim($row['action'])).'\');">';
+			$brandTypeActionlist .= formvar($disp_act).'</a><br/>';
 		}
 		$txt = str_replace("<!--PUB_TYPE_ACTION_LIST-->", $brandTypeActionlist, $txt );
 		return $txt;
@@ -357,33 +304,34 @@ class ActionPropertiesAdminApp
 			$clr = $color[$flip];
 			$flip = 1- $flip;
 			$deltxt = inputvar("multiDelete$i", '', 'checkbox', null, true, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS"));
-			if( $this->onlyQuery ) {
+//			if( $this->onlyQuery ) {
+//				$deltxt = "<a href='actionproperties.php?delete=1&id=".$row["id"]."' onClick='return myconfirm(\"delaction\")'>" . BizResources::localize("ACT_DEL") . "</a>";
 				$detailTxt .= "<tr$clr>";
 				$detailTxt .= "<td>$deltxt</td>";
 				$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
 				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
 				$detailTxt .= '</tr>';
-			} else {
-				$detailTxt .= "<tr$clr>";
-				$detailTxt .= "<td>$deltxt</td>";
-				$detailTxt .= "<td>".$row['category'].'</td>';
-				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
-				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				if( in_array($row['property'], $this->sysProps) ) {
-					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
-				} else {
-					$detailTxt .= '<td align="center">'.inputvar("edit$i", $row['edit'], 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
-				}
-				$detailTxt .= '<td align="center">'.inputvar("mandatory$i", $row['mandatory'], 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
-				$detailTxt .= '<td align="center">'.inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
-				// $detailTxt .= '<td align="center">'.inputvar("refreshonchange$i", $row['refreshonchange'], 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
-				if( $showMultiObj ) {
-					$detailTxt .= '<td align="center">'.inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
-				} else { // Don't fill in the multiple objects column.
-					$detailTxt .= '<td style="display:none"></td>'; // No checkbox.
-				}
-				$detailTxt .= "</tr>";
-			}
+//			} else {
+//				$detailTxt .= "<tr$clr>";
+//				$detailTxt .= "<td>$deltxt</td>";
+//				$detailTxt .= "<td>".$row['category'].'</td>';
+//				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
+//				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
+//				if( in_array($row['property'], $this->sysProps) ) {
+//					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
+//				} else {
+//					$detailTxt .= '<td align="center">'.inputvar("edit$i", $row['edit'], 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
+//				}
+//				$detailTxt .= '<td align="center">'.inputvar("mandatory$i", $row['mandatory'], 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
+//				$detailTxt .= '<td align="center">'.inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
+//				// $detailTxt .= '<td align="center">'.inputvar("refreshonchange$i", $row['refreshonchange'], 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
+//				if( $showMultiObj ) {
+//					$detailTxt .= '<td align="center">'.inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
+//				} else { // Don't fill in the multiple objects column.
+//					$detailTxt .= '<td style="display:none"></td>'; // No checkbox.
+//				}
+//				$detailTxt .= "</tr>";
+//			}
 			$detailTxt .= inputvar( "id$i", $row['id'], 'hidden' );
 			$i++;
 		}
@@ -406,27 +354,27 @@ class ActionPropertiesAdminApp
 	private function listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt )
 	{
 		// 1 row to enter new record
-		if( $this->onlyQuery ) {
+//		if( $this->onlyQuery ) {
 			$detailTxt .= '<tr>';
 			$detailTxt .= '<td>'.inputvar('order', '', 'small').'</td>';
 			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
 			$detailTxt .= '</tr>';
 			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
-		} else {
-			$detailTxt .= '<tr><td></td><td>'.inputvar('order', '', 'small').'</td>';
-			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
-			$detailTxt .= '<td align="center">'.inputvar('edit','', 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
-			$detailTxt .= '<td align="center">'.inputvar('mandatory','', 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
-			$detailTxt .= '<td align="center">'.inputvar('restricted','', 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
-			// $detailTxt .= '<td align="center">'.inputvar('refreshonchange','', 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
-			if( $showMultiObj ) {
-				$detailTxt .= '<td align="center">'.inputvar('multipleobjects','', 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
-			} else {
-				$detailTxt .= '<td style="display:none"></td>';
-			}
-			$detailTxt .= '<td style="display:none"></td></tr>';
-			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
-		}
+//		} else {
+//			$detailTxt .= '<tr><td></td><td>'.inputvar('order', '', 'small').'</td>';
+//			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
+//			$detailTxt .= '<td align="center">'.inputvar('edit','', 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
+//			$detailTxt .= '<td align="center">'.inputvar('mandatory','', 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
+//			$detailTxt .= '<td align="center">'.inputvar('restricted','', 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
+//			// $detailTxt .= '<td align="center">'.inputvar('refreshonchange','', 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
+//			if( $showMultiObj ) {
+//				$detailTxt .= '<td align="center">'.inputvar('multipleobjects','', 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
+//			} else {
+//				$detailTxt .= '<td style="display:none"></td>';
+//			}
+//			$detailTxt .= '<td style="display:none"></td></tr>';
+//			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
+//		}
 		// show other states as info
 		$color = array (" bgcolor='#eeeeee'", '');
 		$flip = 0;
@@ -458,28 +406,28 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			if( $this->onlyQuery ) {
+//			if( $this->onlyQuery ) {
 				$detailTxt .= "<tr$clr><td>".$row['orderid'].'</td><td>'.formvar($prop).'</td>';
 				//$detailTxt .= '<td style="display:none"></td><td style="display:none"></td></tr>';
-			} else {
-				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
-				$detailTxt .= '<td>'.formvar($prop).'</td>';
-				if( in_array($row['property'], $this->sysProps) ){
-					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:LOCKIMAGE).'</td>';
-				} else {
-					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:'').'</td>';
-				}
-				$detailTxt .= '<td align="center">'.(trim($row['mandatory'])?CHECKIMAGE:'').'</td>';
-				$detailTxt .= '<td align="center">'.(trim($row['restricted'])?CHECKIMAGE:'').'</td>';
-				// $detailTxt .= '<td align="center">'.(trim($row['refreshonchange'])?CHECKIMAGE:'').'</td>'; // EN-2164, Marked for future use
-
-				if( $showMultiObj ) {
-					$detailTxt .= '<td align="center">'.(trim($row['multipleobjects'])?CHECKIMAGE:'').'</td>';
-				} else {
-					$detailTxt .= '<td style="display:none"></td>';
-				}
-				$detailTxt .= '<td style="display:none"></td></tr>';
-			}
+//			} else {
+//				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
+//				$detailTxt .= '<td>'.formvar($prop).'</td>';
+//				if( in_array($row['property'], $this->sysProps) ){
+//					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:LOCKIMAGE).'</td>';
+//				} else {
+//					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:'').'</td>';
+//				}
+//				$detailTxt .= '<td align="center">'.(trim($row['mandatory'])?CHECKIMAGE:'').'</td>';
+//				$detailTxt .= '<td align="center">'.(trim($row['restricted'])?CHECKIMAGE:'').'</td>';
+//				// $detailTxt .= '<td align="center">'.(trim($row['refreshonchange'])?CHECKIMAGE:'').'</td>'; // EN-2164, Marked for future use
+//
+//				if( $showMultiObj ) {
+//					$detailTxt .= '<td align="center">'.(trim($row['multipleobjects'])?CHECKIMAGE:'').'</td>';
+//				} else {
+//					$detailTxt .= '<td style="display:none"></td>';
+//				}
+//				$detailTxt .= '<td style="display:none"></td></tr>';
+//			}
 		}
 		return $detailTxt;
 	}
@@ -519,13 +467,13 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
-	 * Load different Html Template.
+	 * Load different Html Template
 	 *
 	 * @return string $txt HTML strings
 	 */
 	public function loadHtmlTemplate()
 	{
-		return HtmlDocument::loadTemplate( 'actionproperties.htm' );
+		return HtmlDocument::loadTemplate( 'actionpropertiesquery.htm' );
 	}
 
 	/**
@@ -555,12 +503,23 @@ class ActionPropertiesAdminApp
 		}
 
 		$limitPub = true;
-		switch( $this->action ) {
-			case 'SendTo':
-				$allProps = $wfProps;
-				break;
-			case 'Preview':
+		switch( $this->action )
+		{
+			case 'Query':
 				$allProps = array_merge($staticProps, $dynamicProps, $xmpProps, $readonlyProps);
+				$limitPub = false;
+				break;
+			case 'QueryOut':
+			case 'QueryOutInDesign':
+			case 'QueryOutInCopy':
+			case 'QueryOutContentStation':
+			case 'QueryOutPlanning':
+				$allProps = array_merge($staticProps, $dynamicProps, $xmpProps, $readonlyProps);
+				$limitPub = false;
+				$already[] = 'ID';
+				$already[] = 'Type';
+				$already[] = 'Name';
+				$already[] = 'Issue'; // BZ#27830 In the query result only 'Issues' are of interest.
 				break;
 			default:
 				$allProps = array_merge($dynamicProps, $xmpProps);
@@ -573,8 +532,8 @@ class ActionPropertiesAdminApp
 		// get customfields
 		$cust = array();
 		$trans = array();
-		$publication = $limitPub ? $this->publ : 0;
-		$propObjs = BizProperty::getProperties( $publication, $this->objType, null, null, false, false, true );
+//		$publication = $limitPub ? $this->publ : 0;
+		$propObjs = BizProperty::getProperties( $this->publ, $this->objType, null, null, false, false, $this->onlyAllObjectType );
 
 		require_once BASEDIR.'/server/bizclasses/BizCustomField.class.php';
 		$excludedPropTypes = BizCustomField::getExcludedObjectFields();
@@ -595,20 +554,20 @@ class ActionPropertiesAdminApp
 			if( $propObj->DisplayName ) $trans[$name] = $propObj->DisplayName;
 		}
 
-		$hasCust = count($cust);
-		if( $limitPub && $this->action != 'SendTo' ) {
-			$properties = DBProperty::listPropertyDisplayNames();
-			foreach( $properties as $propertyName => $property ) {
-				if( BizProperty::isCustomPropertyName( $propertyName ) &&
-					!isset( $propObjs[$propertyName] )) { // Only continues if it is not yet checked in the top foreach loop.
-					if ( $hasCust ) {
-						continue;			// if there are already specific customfields, skip generic customfields
-					} else {
-						$cust[] = $propertyName;
-					}
-				}
-			}
-		}
+//		$hasCust = count($cust);
+//		if( $limitPub && $this->action != 'SendTo' ) {
+//			$properties = DBProperty::listPropertyDisplayNames();
+//			foreach( $properties as $propertyName => $property ) {
+//				if( BizProperty::isCustomPropertyName( $propertyName ) &&
+//					!isset( $propObjs[$propertyName] )) { // Only continues if it is not yet checked in the top foreach loop.
+//					if ( $hasCust ) {
+//						continue;			// if there are already specific customfields, skip generic customfields
+//					} else {
+//						$cust[] = $propertyName;
+//					}
+//				}
+//			}
+//		}
 		$allProps = array_merge($allProps, $cust);
 
 		$props = array();
@@ -645,39 +604,12 @@ class ActionPropertiesAdminApp
 		$multiObjAllowedActions = array( '', 'SetProperties', 'SendTo' ); // Action that supports multiple-objects
 		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
 
- 		if( $usages ) {
- 			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
- 		} else {
-		   $addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
-		   if( $this->mode == 'add' ) {
-			   if( $addDefaultDynamicFields == 'true' ) {
-				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
-			   } else {
-				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
-			   }
-
-			   require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
-			   BizWorkflow::fixDossierPropertyUsage( $this->mode, $this->objType, '', $usages );
-			   // TODO: Mark asterisk on the fields that might be removed when Client doesn't support the field(s).
-
-			   $order = 0;
-			   if( $usages ) foreach( $usages as $usage ) {
-				   $values = array();
-				   $values['publication'] = $this->publ;
-				   $values['action'] = $this->action;
-				   $values['type'] = $this->objType;
-				   $values['orderid'] = $order;
-				   $values['property'] = $usage->Name;
-				   $values['edit'] = $usage->Editable ? 'on' : '';
-				   $values['mandatory'] = $usage->Mandatory ? 'on' : '';
-				   $values['restricted'] = $usage->Restricted ? 'on' : '';
-				   $values['multipleobjects'] = $usage->MultipleObjects ? 'on' : '';
-					$this->insertActionProperty( $values );
-				   $order += 5;
-			   }
-		   }
-		   $rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
-	   }
+		if( $usages ) {
+			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
+		} else {
+			$rows = array();
+			// TODO: To cater for the mandatory and default fields here
+		}
 
 		switch( $this->mode ) {
 			case 'view':
@@ -695,8 +627,6 @@ class ActionPropertiesAdminApp
 
 		$txt = $this->showOrHideButtons( $txt, $numberOfRecords );
 		$txt = str_replace("<!--DELETE_COLUMN-->", ( $this->mode == 'add' ) ? 'display:none' : (( $numberOfRecords > 0 ) ? '' : 'display:none'), $txt );
-		$txt = str_replace("<!--WORKFLOW_COLUMNS-->",$this->onlyQuery ? 'display:none' : '', $txt );
-		$txt = str_replace("<!--PREVIEW_COLUMNS-->",$this->onlyQuery ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--MULTIPLE_OBJECTS_CELL-->", $showMultiObj ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
 		$txt = str_replace("<!--IMG_LOCKIMG-->", LOCKIMAGE, $txt);
@@ -708,10 +638,25 @@ class ActionPropertiesAdminApp
 	 */
 	public function processRequestData()
 	{
-		$this->onlyQuery = false;
-		switch( $this->action ) {
-			case 'Preview':
-				$this->onlyQuery = true;
+//		$this->onlyQuery = false;
+//		$this->onlyAllObjectType = true;
+		switch( $this->action )
+		{
+			case 'QueryOut': // 'Query Result Columns'
+			case 'QueryOutInDesign':
+			case 'QueryOutInCopy':
+			case 'QueryOutContentStation':
+			case 'QueryOutPlanning':
+				$this->onlyAllObjectType = false; // Set to false, to include also specific object type
+//				$this->onlyQuery = true;
+//				$this->publ = -1;
+//				$this->objType = '';
+				break;
+			case 'Query': // 'Query Parameters'
+				$this->onlyAllObjectType = true;
+//				$this->onlyQuery = true;
+//				$this->publ = -1;
+//				$this->objType = '';
 				break;
 		}
 

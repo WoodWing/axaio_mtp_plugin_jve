@@ -140,10 +140,10 @@ function SetCombos(sPubl, sObjType, sAction)
 		</table>
 		<br/>
 		<table class="listpane">
-			<tr>
-				<td style="<!--LAST_COLUMN-->">
+			<tr style="<!--WORKFLOW_COLUMNS-->">
+				<th style="<!--DELETE_COLUMN-->">
 					<input type="checkbox" title="Multi Delete Toggle" name="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes(); " />
-				</td>
+				</th>
 				<th><!--RES:OBJ_CATEGORY--></th>
 				<th><!--RES:LIS_ORDER--></th>
 				<th><!--RES:OBJ_PROPERTY--></th>
@@ -152,6 +152,13 @@ function SetCombos(sPubl, sObjType, sAction)
 				<th><!--RES:OBJ_RESTRICTED--></th>
 				<!-- <th><!--RES:OBJ_REFRESH--><!-- </th> -->
 				<th style="<!--MULTIPLE_OBJECTS_CELL-->"><!--RES:OBJ_MULTIPLE_OBJECTS--></th>
+			</tr>
+			<tr style="<!--PREVIEW_COLUMNS-->">
+				<th style="<!--DELETE_COLUMN-->">
+					<input type="checkbox" title="Multi Delete Toggle" name="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes(); " />
+				</th>
+				<th><!--RES:LIS_ORDER--></th>
+				<th><!--RES:OBJ_PROPERTY--></th>
 			</tr>
 		<!--ROWS-->
 		</table>
@@ -162,7 +169,6 @@ function SetCombos(sPubl, sObjType, sAction)
 					<input style="<!--ADD_BUTTON-->" type="submit" id="dialog_button" name="addButton" value="<!--RES:ACT_ADD-->" />
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="add" name="add" value="">
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
-					<!--<div   style="&lt;!&ndash;EDIT_BUTTON&ndash;&gt;" id="dialog_confirm" title="Add Default fields?">-->
 					<div   style="display:none" id="dialog_confirm" title="Add Default fields?">
 						<p>
 							<span style="float: left; margin: 0 0px 0px 0;"></span>
