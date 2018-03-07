@@ -126,16 +126,26 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	}
 	
 	/**
-	 * Composes a name based on a given prefix and a generated time stamp.
+	 * Composes a name based on a given prefix and a time stamp.
 	 *
 	 * @return string Generated name
 	 */
 	private function composeName()
 	{
+		$name = $this->namePrefix.$this->getTimeStamp();
+		return $name;
+	}
+
+	/**
+	 * Generates a timestamp that can be used for unique names.
+	 *
+	 * @return string Generated timestamp.
+	 */
+	public function getTimeStamp()
+	{
 		$microTime = explode( ' ', microtime() );
 		$miliSec = sprintf( '%03d', round($microTime[0]*1000) );
-		$name = $this->namePrefix.date( 'Y m d H i s', $microTime[1] ).' '.$miliSec;
-		return $name;
+		return date( 'Y m d H i s', $microTime[1] ).' '.$miliSec;
 	}
 
 	/**
@@ -1211,11 +1221,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 * @param string $stepInfo Extra logging info.
 	 * @param integer $publicationId
 	 * @param integer $pubChannelId
+	 * @param integer $issueId Default is 0.
 	 * @param string|null $editionName Name of edition. Null to use autofill name.
 	 * @return AdmEdition
 	 * @throws BizException on unexpected system response
 	 */
-	public function createEdition( $stepInfo, $publicationId, $pubChannelId, $editionName=null )
+	public function createEdition( $stepInfo, $publicationId, $pubChannelId, $issueId = 0, $editionName = null )
 	{
 		$edition = new AdmEdition();
 		$edition->Name = !is_null($editionName) ? $editionName : $this->composeName();
@@ -1227,7 +1238,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$request->PublicationId = $publicationId;
 		$request->PubChannelId = $pubChannelId;
 		$request->Editions = array( $edition );
-		$request->IssueId = 0;
+		$request->IssueId = $issueId;
 
 		$expectedError = $this->expectedError;
 		$response = $this->callService( $request, $stepInfo );
