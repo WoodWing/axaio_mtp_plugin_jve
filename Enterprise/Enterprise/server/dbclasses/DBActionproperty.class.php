@@ -78,10 +78,9 @@ class DBActionproperty extends DBBase
 	 * Returns list of workflow actions by publication and object type.
 	 *
 	 * @since 10.x.x Renamed from ﻿listActionpropertyGroups to listWorkflowActionPropertyGroups.
-	 * @param int $publ
 	 * @return array with results.
 	 */
-	static public function listWorkflowActionPropertyGroups( $publ )
+	static public function listWorkflowActionPropertyGroups()
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbap = $dbDriver->tablename( self::TABLENAME );
@@ -89,12 +88,11 @@ class DBActionproperty extends DBBase
 		$sql = "SELECT DISTINCT actprops.`publication` AS `pubid`, pubs.`code`, pubs.`publication`, actprops.`type`, actprops.`action` ";
 		$sql .= "FROM $dbap actprops ";
 		$sql .= "LEFT JOIN `smart_publications` pubs ON ( actprops.`publication`  = pubs.`id` ) ";
-		$sql .= "WHERE actprops.publication = ? ";
+		$sql .= "WHERE actprops.`action` NOT LIKE 'Query%' ";
 		$sql .= "GROUP BY actprops.`publication`, actprops.`type`, pubs.`code`, pubs.`publication`, actprops.`action` ";
 		$sql .= "ORDER BY pubs.`code` ASC, actprops.`type` ASC, actprops.`action` ASC";
 
-		$params = array( intval( $publ ));
-		$sth = $dbDriver->query( $sql, $params );
+		$sth = $dbDriver->query( $sql );
 
 		return self::fetchResults($sth);
 	}
@@ -114,7 +112,7 @@ class DBActionproperty extends DBBase
 
 		$sql = "SELECT DISTINCT actprops.`action` ";
 		$sql .= "FROM $dbap actprops ";
-		$sql .= "WHERE actprops.publication = -1 ";
+		$sql .= "WHERE actprops.`action` LIKE 'Query%' ";
 		$sql .= "GROUP BY actprops.`action` ";
 		$sql .= "ORDER BY actprops.`action` ASC";
 

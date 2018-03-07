@@ -279,7 +279,7 @@ class ActionPropertiesAdminApp
 	 */
 	public function createBrandObjectTypeActionLinks( $objMap, $actMap,  $txt )
 	{
-		$rows = DBActionproperty::listWorkflowActionPropertyGroups( $this->publ );
+		$rows = DBActionproperty::listWorkflowActionPropertyGroups();
 		// Show results in a list of hyperlinks to select the Brand/Type/Act combos when user clicks on them...
 		$brandTypeActionlist = "";
 
@@ -648,8 +648,9 @@ class ActionPropertiesAdminApp
  		if( $usages ) {
  			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
  		} else {
-		   $addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
+		   $rows = array();
 		   if( $this->mode == 'add' ) {
+			   $addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
 			   if( $addDefaultDynamicFields == 'true' ) {
 				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
 			   } else {
@@ -675,8 +676,8 @@ class ActionPropertiesAdminApp
 					$this->insertActionProperty( $values );
 				   $order += 5;
 			   }
+			   $rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
 		   }
-		   $rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
 	   }
 
 		switch( $this->mode ) {

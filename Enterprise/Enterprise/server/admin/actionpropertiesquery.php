@@ -14,7 +14,7 @@ $objMap	= getObjectTypeMap();
 $actMap = getQueryActionTypeMap();
 
 // determine incoming mode
-$publ = -1; // Not applicable.
+$publ = 0; // Not applicable
 $objType = ''; // Not applicable.
 $action  = isset($_REQUEST['action'])  ? $_REQUEST['action']  : ''; 	// Internal action string, such as 'CopyTo'. Empty for <all>.
 
@@ -95,7 +95,6 @@ class ActionPropertiesQueryAdminApp
 	private function buildActionComboBox( $actMap )
 	{
 		$combo = '<select name="action" onchange="submit();">';
-		$combo .= '<option value="">&lt;'.$this->sAll.'&gt;</option>';
 		foreach( $actMap as $k => $sDisplayValue ) {
 			$selected = ($k == $this->action) ? 'selected="selected"' : '';
 			$combo .= '<option value="'.$k.'" '.$selected.'>'.formvar($sDisplayValue).'</option>';
@@ -497,14 +496,13 @@ class ActionPropertiesQueryAdminApp
 			true,  // BZ#14553: Request NOT to fall back at global definition levels. Specified level only.
 			null,
 			$wiwiwUsages, // $wiwiwUsages = null when it is not for Template and PublishForm.
-			false ); //
+			false );
 		if( $usages ) foreach( $usages as $usage ) { // $onlyMultiSetProperties = false: Returns all properties regardless of single/multi-set properties support.
 			$already[] = $usage->Name;
 		}
 
 		$limitPub = true;
-		switch( $this->action )
-		{
+		switch( $this->action ) {
 			case 'Query':
 				$allProps = array_merge($staticProps, $dynamicProps, $xmpProps, $readonlyProps);
 				$limitPub = false;
