@@ -39,6 +39,42 @@ function checkDeleteCheckboxes()
     }
     return false;
 }
+$(document).ready(function() {
+    $(function dialogBox() {
+        $("#dialog_confirm").dialog({
+            autoOpen: false,
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            zIndex: 1000,
+            buttons: {
+                "Yes": function( ) {
+                    $("#add").val( "add" );
+                    $("#addDefaultDynamic").val( "true" );
+                    $( this ).dialog( "close" );
+                    $("form[name=propfilter]").submit(); // document.forms.propfilter.submit();
+                },
+                "No": function() {
+                    $("#add").val( "add" );
+                    $("#addDefaultDynamic").val( "false" );
+                    $( this ).dialog( "close" );
+                    $("form[name=propfilter]").submit(); // document.forms.propfilter.submit();
+                }
+            },
+        }).parent().appendTo($("#propfilter"));
+    });
+
+    $("#dialog_button").click( function( event ){
+        event.preventDefault();
+        if( $("input[name=recs]").val() == 0 ){
+            $("#dialog_confirm").dialog( "open" );
+        } else { // There're already records on the page
+            $("#add").val( "add" );
+            document.forms.propfilter.submit();
+        }
+    });
+});
 function SetCombos(sAction)
 {
 	var f = document.forms.propfilter;
@@ -92,7 +128,17 @@ function SetCombos(sAction)
 		<table class="listbtnbar">
 			<tr>
 				<td>
-					<input style="<!--ADD_BUTTON-->" type="submit" id="dialog_button" name="add" value="<!--RES:ACT_ADD-->" />
+					<input style="<!--ADD_BUTTON-->" type="submit" id="dialog_button" name="addButton" value="<!--RES:ACT_ADD-->" />
+					<input style="<!--ADD_BUTTON-->" type="hidden" id="add" name="add" value="">
+					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
+					<div   style="display:none" id="dialog_confirm" title="Add Default fields?">
+						<p>
+							<span style="float: left; margin: 0 0px 0px 0;"></span>
+							Some ompulsory fields will be added.
+							However, there are also some regular used fields, do you want to add them?
+							(You will still be able to remove these regular used fields later.)
+						</p>
+					</div>
 					<input style="<!--UPDATE_BUTTON-->" type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
 					<input style="<!--DELETE_BUTTON-->" type="submit" name="delete" value="<!--RES:ACT_DELETE_SELECTED-->" onClick='return myconfirm( "deleteAllSelected" )'/>
 					<input style="<!--RESET_BUTTON-->"  type="submit" name="reset" value="<!--RES:BUT_RESET-->" onClick='return myconfirm( "reset" )'/>

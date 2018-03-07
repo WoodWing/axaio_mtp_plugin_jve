@@ -41,7 +41,19 @@ class DBActionproperty extends DBBase
 	static public function insertActionproperty($values)
 	{
 		return self::insertRow(self::TABLENAME, $values);
-		
+	}
+
+	/**
+	 * Same as insertActionproperty() but this function inserts multiple records at one call.
+	 *
+	 * @since 10.x.x
+	 * @param string[] $columns The list of DB field names.
+	 * @param string[] $values List of array list which contains the DB fields ( $columns ) values.
+	 * @return bool
+	 */
+	public static function insertActionsProperty( $columns, $values )
+	{
+		return self::insertRows(self::TABLENAME, $columns, $values );
 	}
 
 	/**

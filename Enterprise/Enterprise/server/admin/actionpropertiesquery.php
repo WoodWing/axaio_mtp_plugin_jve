@@ -14,20 +14,21 @@ $objMap	= getObjectTypeMap();
 $actMap = getQueryActionTypeMap();
 
 // determine incoming mode
-$publ = 0; // Not applicable
-$objType = ''; // Not applicable.
-$action  = isset($_REQUEST['action'])  ? $_REQUEST['action']  : ''; 	// Internal action string, such as 'CopyTo'. Empty for <all>.
+$publ = 0; // Cannot set/configure at brand level but for DB saving, publication needs a value.
+$objType = ''; // Cannot set/configure at brand level but for DB saving, object type needs a value.
+$action  = isset($_REQUEST['action'])  ? $_REQUEST['action']  : 'Query'; 	// Internal action string, such as 'Query', 'QueryOut'.
 
 // Validate data retrieved from form (XSS attacks)
 if( !array_key_exists($action, $actMap) ) { $action = '' ; }
 if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
 
-$dum = '';
+// @TODO: Uncomment the below to support the cookie().
+//$dum = '';
 //cookie('actionpropertiesquery', false, $action, $dum,    $dum, $dum, $dum, $dum, $dum);
 
 // Re-validate data retrieved from cookie! (XSS attacks)
-if( !array_key_exists($action, $actMap) ) { $action = ''; }
-if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
+//if( !array_key_exists($action, $actMap) ) { $action = ''; }
+//if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
 
 $app = new ActionPropertiesQueryAdminApp( $publ, $objType, $action, $sysProps );
 
@@ -143,6 +144,19 @@ class ActionPropertiesQueryAdminApp
 	{
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		DBActionproperty::insertActionproperty( $values );
+	}
+
+	/**
+	 * Inserts multiple new action property records into database in one call.
+	 *
+	 * @since 10.x.x
+	 * @param string[] $columns
+	 * @param string[] $values
+	 */
+	public function insertActionsProperty( $columns, $values )
+	{
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		DBActionproperty::insertActionsProperty( $columns, $values );
 	}
 
 	/**
@@ -276,6 +290,7 @@ class ActionPropertiesQueryAdminApp
 		foreach( $rows as $row ) {
 			$dprop = $row['dispname'];
 			$prop = $row['property'];
+			$isConfigurable = $this->isConfigurableField( $prop );
 			$isCustomProperty = BizProperty::isCustomPropertyName( $prop );
 			if( !$dprop ) {
 				if( $exactBrandFound ) {
@@ -302,35 +317,12 @@ class ActionPropertiesQueryAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$deltxt = inputvar("multiDelete$i", '', 'checkbox', null, true, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS"));
-//			if( $this->onlyQuery ) {
-//				$deltxt = "<a href='actionproperties.php?delete=1&id=".$row["id"]."' onClick='return myconfirm(\"delaction\")'>" . BizResources::localize("ACT_DEL") . "</a>";
-				$detailTxt .= "<tr$clr>";
-				$detailTxt .= "<td>$deltxt</td>";
-				$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
-				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				$detailTxt .= '</tr>';
-//			} else {
-//				$detailTxt .= "<tr$clr>";
-//				$detailTxt .= "<td>$deltxt</td>";
-//				$detailTxt .= "<td>".$row['category'].'</td>';
-//				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
-//				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-//				if( in_array($row['property'], $this->sysProps) ) {
-//					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
-//				} else {
-//					$detailTxt .= '<td align="center">'.inputvar("edit$i", $row['edit'], 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
-//				}
-//				$detailTxt .= '<td align="center">'.inputvar("mandatory$i", $row['mandatory'], 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
-//				$detailTxt .= '<td align="center">'.inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
-//				// $detailTxt .= '<td align="center">'.inputvar("refreshonchange$i", $row['refreshonchange'], 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
-//				if( $showMultiObj ) {
-//					$detailTxt .= '<td align="center">'.inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
-//				} else { // Don't fill in the multiple objects column.
-//					$detailTxt .= '<td style="display:none"></td>'; // No checkbox.
-//				}
-//				$detailTxt .= "</tr>";
-//			}
+			$deltxt = inputvar( "multiDelete$i", '', 'checkbox', null, true, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS"), !$isConfigurable );
+			$detailTxt .= "<tr$clr>";
+			$detailTxt .= "<td>$deltxt</td>";
+			$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
+			$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
+			$detailTxt .= '</tr>';
 			$detailTxt .= inputvar( "id$i", $row['id'], 'hidden' );
 			$i++;
 		}
@@ -503,11 +495,11 @@ class ActionPropertiesQueryAdminApp
 
 		$limitPub = true;
 		switch( $this->action ) {
-			case 'Query':
-				$allProps = array_merge($staticProps, $dynamicProps, $xmpProps, $readonlyProps);
+			case 'Query': // 'Query Parameters'
+				$allProps = array_merge( $dynamicProps, $xmpProps, $readonlyProps);
 				$limitPub = false;
 				break;
-			case 'QueryOut':
+			case 'QueryOut': // 'Query Result Columns'
 			case 'QueryOutInDesign':
 			case 'QueryOutInCopy':
 			case 'QueryOutContentStation':
@@ -551,21 +543,6 @@ class ActionPropertiesQueryAdminApp
 			if( $isCustomProperty && $propObj->AdminUI ) $cust[] = $name;
 			if( $propObj->DisplayName ) $trans[$name] = $propObj->DisplayName;
 		}
-
-//		$hasCust = count($cust);
-//		if( $limitPub && $this->action != 'SendTo' ) {
-//			$properties = DBProperty::listPropertyDisplayNames();
-//			foreach( $properties as $propertyName => $property ) {
-//				if( BizProperty::isCustomPropertyName( $propertyName ) &&
-//					!isset( $propObjs[$propertyName] )) { // Only continues if it is not yet checked in the top foreach loop.
-//					if ( $hasCust ) {
-//						continue;			// if there are already specific customfields, skip generic customfields
-//					} else {
-//						$cust[] = $propertyName;
-//					}
-//				}
-//			}
-//		}
 		$allProps = array_merge($allProps, $cust);
 
 		$props = array();
@@ -606,7 +583,41 @@ class ActionPropertiesQueryAdminApp
 			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
 		} else {
 			$rows = array();
-			// TODO: To cater for the mandatory and default fields here
+			if( $this->mode == 'add' ) {
+				$rows = array();
+				$addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
+				if( $addDefaultDynamicFields == 'true' ) {
+					switch( $this->action ) {
+						case 'Query': // Query Parameters
+							$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
+							break;
+						default:
+							break;
+					}
+
+					$order = 0;
+					$listOfValues = array();
+					if( $usages ) foreach( $usages as $usage ) {
+						$values = array();
+						$values = array(
+							$this->publ,
+							$this->action,
+							$this->objType,
+							$order,
+							$usage->Name,
+							$usage->Editable ? 'on' : '',
+							$usage->Mandatory ? 'on' : '',
+							$usage->Restricted ? 'on' : '',
+							$usage->MultipleObjects ? 'on' : ''
+						);
+						$listOfValues[] = $values;
+						$order += 5;
+					}
+					$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
+					$this->insertActionsProperty( $fields, $listOfValues );
+					$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
+				}
+			}
 		}
 
 		switch( $this->mode ) {
@@ -711,5 +722,28 @@ class ActionPropertiesQueryAdminApp
 			}
 		}
 		return $isExactBrandFound;
+	}
+
+	/**
+	 * Based on the Action, it checks if the property can be configured from the UI.
+	 *
+	 * For certain properties, they are the mandatory fields and therefore user cannot edit nor remove them.
+	 *
+	 * @since 10.x.x
+	 * @param string $prop
+	 * @return bool Returns true when the property can be configured from the UI, false otherwise.
+	 */
+	private function isConfigurableField( $prop )
+	{
+		$editable = true;
+		switch( $this->action ) {
+			case 'Query':
+				switch( $prop ) {
+					case 'Name':
+						$editable = false;
+				}
+				break;
+		}
+		return $editable;
 	}
 }

@@ -174,7 +174,18 @@ class BizProperty
 	 */
 	public static function getDefaultDialogDynamicPropIds()
 	{
-		return array( 'Dossier', 'RouteTo','Comment' );
+		return array( 'Dossier', 'RouteTo', 'Comment' );
+	}
+
+	/**
+	 * Returns a list of default properties that can be used as query parameters.
+	 *
+	 * @since 10.x.x
+	 * @return string[]
+	 */
+	public static function getDefaultDialogQueryPropIds()
+	{
+		return array( 'Name', 'RouteTo', 'Comment' );
 	}
 
 	/**
@@ -288,7 +299,15 @@ class BizProperty
 		$usages = array();
 		$refreshProps = array_flip( self::getDefaultRefreshPropIds() );
 		$targetProps = array_flip( self::getTargetRelatedPropIds() );
-		$props = self::getDefaultDialogPropIds( $onlyStatic );
+
+		switch( $action ) {
+			case 'Query':
+				$props = self::getDefaultDialogQueryPropIds();
+				break;
+			default:
+				$props = self::getDefaultDialogPropIds( $onlyStatic );
+				break;
+		}
 		if( $props ) foreach( $props as $prop ) {
 			// TODO: Re-visit this part when DialogSetup improvements is implemented for Multiset properties.
 			// For other non-static default dialog props, it is safe to put false here since
@@ -314,6 +333,7 @@ class BizProperty
 	/**
 	 * Enrich usages list with default property(ies) on top of the already defined usages from DialogSetup page.
 	 *
+	 * @since 10.x.x
 	 * @param array $usages
 	 * @param string $action
 	 * @return string[] array
