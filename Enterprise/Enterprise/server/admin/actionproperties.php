@@ -22,8 +22,7 @@ $objType = isset($_REQUEST['objtype']) ? $_REQUEST['objtype'] : ''; 	// Internal
 if( !array_key_exists($action, $actMap) ) { $action = '' ; }
 if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
 
-$dum = '';
-cookie('actionproperties', !(isset($_REQUEST['isform']) && $_REQUEST['isform']), $publ, $action, $objType, $dum, $dum, $dum, $dum);
+cookie('actionproperties', !(isset($_REQUEST['isform']) && $_REQUEST['isform']), $publ, $action, $objType, '', '', '', '' );
 
 // Re-validate data retrieved from cookie! (XSS attacks)
 $publ = intval($publ);
@@ -105,7 +104,7 @@ class ActionPropertiesAdminApp
 		$combo = inputvar( 'isform', '1', 'hidden' );
 		$combo .= '<select name="publ" onchange="submit();">';
 		$combo .= '<option value="">&lt;'.$this->sAll.'&gt;</option>';
-		foreach( $rows as $row ) {
+		if( $rows ) foreach( $rows as $row ) {
 			$selected = ($row['id'] == $this->publ) ? 'selected="selected"' : '';
 			$combo .= '<option value="'.$row['id'].'" '.$selected.'>'.formvar($row['publication']).'</option>';
 		}
@@ -232,13 +231,6 @@ class ActionPropertiesAdminApp
 	 */
 	public function deleteActionProperty( $numberOfRecords )
 	{
-		// >>> START TODO: To be removed when Query Setup page is separated from Dialog Setup page.
-		$id = isset( $_REQUEST['id'] ) ? intval($_REQUEST['id']) : 0 ; // Record id. Used in POST and GET requests.
-		if( $id > 0 ) {
-			DBActionproperty::deleteActionproperty( $id );
-		}
-		// END <<<
-
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		$propIdsToBeDeleted = array();
 		for( $i=0; $i < $numberOfRecords; $i++ ) {
@@ -283,7 +275,7 @@ class ActionPropertiesAdminApp
 		// Show results in a list of hyperlinks to select the Brand/Type/Act combos when user clicks on them...
 		$brandTypeActionlist = "";
 
-		foreach( $rows as $row ) {
+		if( $rows ) foreach( $rows as $row ) {
 			// Skip SetPublishProperties action for PublishFormTemplates, they should never be editable from the action properties page.
 			if (isset($row['action']) && isset($row['type']) && trim($row['action']) == 'SetPublishProperties' && trim($row['type']) == 'PublishFormTemplate') {
 				continue;
@@ -327,7 +319,7 @@ class ActionPropertiesAdminApp
 		$color = array (" bgcolor='#eeeeee'", '');
 		$flip = 0;
 		$exactBrandFound = $this->isExactBrandFound( $rows );
-		foreach( $rows as $row ) {
+		if( $rows ) foreach( $rows as $row ) {
 			$dprop = $row['dispname'];
 			$prop = $row['property'];
 			$isCustomProperty = BizProperty::isCustomPropertyName( $prop );

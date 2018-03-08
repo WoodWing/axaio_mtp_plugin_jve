@@ -255,13 +255,10 @@ class BizProperty
 				}
 			}
 		}
-		if( empty( $usages ) ) {
-			// No customization found, return defaults
-			if ( $withStaticProps ) {
+		if( $withStaticProps ) {
+			if( empty( $usages )) { // No customization found, return defaults
 				$usages = self::defaultPropertyUsageWhenNoUsagesAvailable( $action, false );
-			}
-		} else {
-			if ( $withStaticProps ) {
+			} else {
 				$usages = self::defaultPropertyUsageWhenUsagesAvailable( $usages, $action );
 			}
 		}
@@ -288,7 +285,7 @@ class BizProperty
 	}
 
 	/**
-	 * Returns usages list with default property(ies) on an empty usages ( no setup in DialogSetup page yet).
+	 * Returns usages list with default property(ies) on an empty usages ( no setup in Dialog/Query Setup page yet).
 	 *
 	 * @param string $action
 	 * @param bool $onlyStatic
