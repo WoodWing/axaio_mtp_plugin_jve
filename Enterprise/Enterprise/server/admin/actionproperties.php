@@ -22,7 +22,8 @@ $objType = isset($_REQUEST['objtype']) ? $_REQUEST['objtype'] : ''; 	// Internal
 if( !array_key_exists($action, $actMap) ) { $action = '' ; }
 if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
 
-cookie('actionproperties', !(isset($_REQUEST['isform']) && $_REQUEST['isform']), $publ, $action, $objType, '', '', '', '' );
+$dum = '';
+cookie('actionproperties', !(isset($_REQUEST['isform']) && $_REQUEST['isform']), $publ, $action, $objType, $dum, $dum, $dum, $dum );
 
 // Re-validate data retrieved from cookie! (XSS attacks)
 $publ = intval($publ);
