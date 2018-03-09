@@ -152,7 +152,7 @@ class ActionPropertiesAdminApp
 	/**
 	 * Insert new action property retrieved from the Form value.
 	 */
-	public function insertActionPropertyFromTheForm()
+	private function insertActionPropertyFromTheForm()
 	{
 		$order = isset($_REQUEST['order']) ? intval($_REQUEST['order']) : 0; // Sorting order field. Zero when not filled.
 		$prop = isset($_REQUEST['prop']) ? $_REQUEST['prop'] : '';           // Name of action property. Always set.
@@ -185,7 +185,7 @@ class ActionPropertiesAdminApp
 	 *
 	 * @param string[] $values
 	 */
-	public function insertActionProperty( $values )
+	private function insertActionProperty( $values )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		DBActionproperty::insertActionproperty( $values );
@@ -196,7 +196,7 @@ class ActionPropertiesAdminApp
 	 *
 	 * @param integer $numberOfRecords Number of records count
 	 */
-	public function updateActionProperties( $numberOfRecords )
+	private function updateActionProperties( $numberOfRecords )
 	{
 		for( $i=0; $i < $numberOfRecords; $i++ ) {
 			$id = intval($_REQUEST["id$i"]);        // Record id. Used in POST and GET requests.
@@ -230,7 +230,7 @@ class ActionPropertiesAdminApp
 	 *
 	 * @param int $numberOfRecords
 	 */
-	public function deleteActionProperty( $numberOfRecords )
+	private function deleteActionProperty( $numberOfRecords )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		$propIdsToBeDeleted = array();
@@ -250,7 +250,7 @@ class ActionPropertiesAdminApp
 	 *
 	 * @param int[] $numberOfRecords
 	 */
-	public function deleteAllActionProperty( $numberOfRecords )
+	private function deleteAllActionProperty( $numberOfRecords )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		$propIdsToBeDeleted = array();
@@ -323,6 +323,7 @@ class ActionPropertiesAdminApp
 		if( $rows ) foreach( $rows as $row ) {
 			$dprop = $row['dispname'];
 			$prop = $row['property'];
+			$isConfigurable = $this->isConfigurableField( $prop );
 			$isCustomProperty = BizProperty::isCustomPropertyName( $prop );
 			if( !$dprop ) {
 				if( $exactBrandFound ) {
@@ -349,7 +350,7 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$deltxt = inputvar("multiDelete$i", '', 'checkbox', null, true, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS"));
+			$deltxt = inputvar( "multiDelete$i", '', 'checkbox', null, true, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS"), !$isConfigurable );
 			if( $this->onlyQuery ) {
 				$detailTxt .= "<tr$clr>";
 				$detailTxt .= "<td>$deltxt</td>";
@@ -365,10 +366,10 @@ class ActionPropertiesAdminApp
 				if( in_array($row['property'], $this->sysProps) ) {
 					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
 				} else {
-					$detailTxt .= '<td align="center">'.inputvar("edit$i", $row['edit'], 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
+					$detailTxt .= '<td align="center">'.inputvar("edit$i", $row['edit'], 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE"), !$isConfigurable ).'</td>';
 				}
-				$detailTxt .= '<td align="center">'.inputvar("mandatory$i", $row['mandatory'], 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
-				$detailTxt .= '<td align="center">'.inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
+				$detailTxt .= '<td align="center">'.inputvar("mandatory$i", $row['mandatory'], 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY"), !$isConfigurable ).'</td>';
+				$detailTxt .= '<td align="center">'.inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED"), !$isConfigurable ).'</td>';
 				// $detailTxt .= '<td align="center">'.inputvar("refreshonchange$i", $row['refreshonchange'], 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
 				if( $showMultiObj ) {
 					$detailTxt .= '<td align="center">'.inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
@@ -762,5 +763,33 @@ class ActionPropertiesAdminApp
 			}
 		}
 		return $isExactBrandFound;
+	}
+
+	/**
+	 * Based on the Action, it checks if the property can be configured from the UI.
+	 *
+	 * For certain properties, they are the mandatory fields and therefore user cannot edit nor remove them.
+	 *
+	 * @since 10.x.x
+	 * @param string $prop
+	 * @return bool Returns true when the property can be configured from the UI, false otherwise.
+	 */
+	private function isConfigurableField( $prop )
+	{
+		$editable = true;
+		switch( $prop ) {
+			case 'Name':
+			case 'Publication':
+			case 'PubChannels':
+			case 'Targets':
+			case 'Issues':
+			case 'Issue':
+			case 'Editions':
+			case 'Category':
+			case 'State':
+				$editable = false;
+				break;
+		}
+		return $editable;
 	}
 }

@@ -36,7 +36,9 @@ function checkDeleteCheckboxes()
     var countCheckBoxes = document.forms['propfilter'].recs.value;
     for(var i = 0; i < countCheckBoxes; i++) {
         var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
-		objCheckBox.checked = !(objCheckBox.checked)
+        if( objCheckBox.disabled == false ) {
+            objCheckBox.checked = !(objCheckBox.checked)
+		}
 	}
     return false;
 }
@@ -138,7 +140,9 @@ function SetCombos(sPubl, sObjType, sAction)
 				<td valign="top"><!--PUB_TYPE_ACTION_LIST--></td>
 			</tr>
 		</table>
-		<br/>
+		<!-- TODO: Localise the string -->
+		<table class="listpane"><tr><td><font color="red">**Do note that some additional fields may be added or some fields might be removed <br/>
+			depending on the object and action type and clients request.</font></td></tr></table>
 		<table class="listpane">
 			<tr style="<!--WORKFLOW_COLUMNS-->">
 				<th style="<!--DELETE_COLUMN-->">
