@@ -107,7 +107,7 @@ class ActionPropertiesQueryAdminApp
 	/**
 	 * Insert new action property retrieved from the Form value.
 	 */
-	public function insertActionPropertyFromTheForm()
+	private function insertActionPropertyFromTheForm()
 	{
 		$order = isset($_REQUEST['order']) ? intval($_REQUEST['order']) : 0; // Sorting order field. Zero when not filled.
 		$prop = isset($_REQUEST['prop']) ? $_REQUEST['prop'] : '';           // Name of action property. Always set.
@@ -140,7 +140,7 @@ class ActionPropertiesQueryAdminApp
 	 *
 	 * @param string[] $values
 	 */
-	public function insertActionProperty( $values )
+	private function insertActionProperty( $values )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		DBActionproperty::insertActionproperty( $values );
@@ -153,10 +153,38 @@ class ActionPropertiesQueryAdminApp
 	 * @param string[] $columns
 	 * @param string[] $values
 	 */
-	public function insertActionsProperty( $columns, $values )
+	private function insertActionsProperty( $columns, $values )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		DBActionproperty::insertActionsProperty( $columns, $values );
+	}
+
+	/**
+	 * Compose Query default property usages and create Query actions properties.
+	 */
+	private function composeAndInsertActionsProperty()
+	{
+		$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
+		$order = 0;
+		$listOfValues = array();
+		if( $usages ) foreach( $usages as $usage ) {
+			$values = array();
+			$values = array(
+				$this->publ,
+				$this->action,
+				$this->objType,
+				$order,
+				$usage->Name,
+				$usage->Editable ? 'on' : '',
+				$usage->Mandatory ? 'on' : '',
+				$usage->Restricted ? 'on' : '',
+				$usage->MultipleObjects ? 'on' : ''
+			);
+			$listOfValues[] = $values;
+			$order += 5;
+		}
+		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
+		$this->insertActionsProperty( $fields, $listOfValues );
 	}
 
 	/**
@@ -164,7 +192,7 @@ class ActionPropertiesQueryAdminApp
 	 *
 	 * @param integer $numberOfRecords Number of records count
 	 */
-	public function updateActionProperties( $numberOfRecords )
+	private function updateActionProperties( $numberOfRecords )
 	{
 		for( $i=0; $i < $numberOfRecords; $i++ ) {
 			$id = intval($_REQUEST["id$i"]);        // Record id. Used in POST and GET requests.
@@ -198,15 +226,8 @@ class ActionPropertiesQueryAdminApp
 	 *
 	 * @param int $numberOfRecords
 	 */
-	public function deleteActionProperty( $numberOfRecords )
+	private function deleteActionProperty( $numberOfRecords )
 	{
-		// >>> START TODO: To be removed when Query Setup page is separated from Dialog Setup page.
-		$id = isset( $_REQUEST['id'] ) ? intval($_REQUEST['id']) : 0 ; // Record id. Used in POST and GET requests.
-		if( $id > 0 ) {
-			DBActionproperty::deleteActionproperty( $id );
-		}
-		// END <<<
-
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		$propIdsToBeDeleted = array();
 		for( $i=0; $i < $numberOfRecords; $i++ ) {
@@ -225,7 +246,7 @@ class ActionPropertiesQueryAdminApp
 	 *
 	 * @param int[] $numberOfRecords
 	 */
-	public function deleteAllActionProperty( $numberOfRecords )
+	private function deleteAllActionProperty( $numberOfRecords )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		$propIdsToBeDeleted = array();
@@ -251,7 +272,7 @@ class ActionPropertiesQueryAdminApp
 		// Show results in a list of hyperlinks to select the Brand/Type/Act combos when user clicks on them...
 		$brandTypeActionlist = "";
 
-		foreach( $rows as $row ) {
+		if( $rows ) foreach( $rows as $row ) {
 			// Skip SetPublishProperties action for PublishFormTemplates, they should never be editable from the action properties page.
 			if (isset($row['action']) && trim($row['action']) == 'SetPublishProperties' && trim($row['type']) == 'PublishFormTemplate') {
 				continue;
@@ -287,7 +308,7 @@ class ActionPropertiesQueryAdminApp
 		$color = array (" bgcolor='#eeeeee'", '');
 		$flip = 0;
 		$exactBrandFound = $this->isExactBrandFound( $rows );
-		foreach( $rows as $row ) {
+		if( $rows ) foreach( $rows as $row ) {
 			$dprop = $row['dispname'];
 			$prop = $row['property'];
 			$isConfigurable = $this->isConfigurableField( $prop );
@@ -587,34 +608,7 @@ class ActionPropertiesQueryAdminApp
 				$rows = array();
 				$addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
 				if( $addDefaultDynamicFields == 'true' ) {
-					switch( $this->action ) {
-						case 'Query': // Query Parameters
-							$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
-							break;
-						default:
-							break;
-					}
-
-					$order = 0;
-					$listOfValues = array();
-					if( $usages ) foreach( $usages as $usage ) {
-						$values = array();
-						$values = array(
-							$this->publ,
-							$this->action,
-							$this->objType,
-							$order,
-							$usage->Name,
-							$usage->Editable ? 'on' : '',
-							$usage->Mandatory ? 'on' : '',
-							$usage->Restricted ? 'on' : '',
-							$usage->MultipleObjects ? 'on' : ''
-						);
-						$listOfValues[] = $values;
-						$order += 5;
-					}
-					$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
-					$this->insertActionsProperty( $fields, $listOfValues );
+					$this->composeAndInsertActionsProperty();
 					$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
 				}
 			}
@@ -741,6 +735,7 @@ class ActionPropertiesQueryAdminApp
 				switch( $prop ) {
 					case 'Name':
 						$editable = false;
+						break;
 				}
 				break;
 		}

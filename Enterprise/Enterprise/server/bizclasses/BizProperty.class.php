@@ -301,6 +301,13 @@ class BizProperty
 			case 'Query':
 				$props = self::getDefaultDialogQueryPropIds();
 				break;
+			case 'QueryOut':
+			case 'QueryOutContentStation':
+			case 'QueryOutInDesign':
+			case 'QueryOutInCopy':
+			case 'QueryOutPlanning':
+				$props = self::getStandardQueryPropIds();
+				break;
 			default:
 				$props = self::getDefaultDialogPropIds( $onlyStatic );
 				break;
