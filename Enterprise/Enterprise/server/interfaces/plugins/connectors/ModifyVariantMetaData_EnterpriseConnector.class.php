@@ -18,8 +18,19 @@ abstract class ModifyVariantMetaData_EnterpriseConnector extends DefaultConnecto
 	 * Enables this connector to override metadata values when creating a variant. The values of both the source (original)
 	 * and the target (variant) can be overridden.
 	 *
-	 * @param Object &$source
-	 * @param Object &$target
+	 * It allows to hook into the Create Print Variant action and set predefined metadata such as a custom name, status
+	 * or targets.
+	 *
+	 * Default behaviour of the Create Print Variant operation is to copy the source metadata directly onto the target.
+	 *
+	 * This function is ONLY called when creating a print variant from a digital article to a print article.
+	 * This means that the ContentStation plugin should be enabled if you want to implement this connector.
+	 *
+	 * The way that metadata should be modified should be defined per implementation.
+	 * For an example see the ContentStation plugin's ModifyVariantMetadata connector.
+	 *
+	 * @param Object &$source The source object from which a variant is created.
+	 * @param Object &$target The target object, or created variant.
 	 */
 	abstract public function modifyVariantMetadata( &$source, &$target );
 
