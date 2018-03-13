@@ -968,8 +968,12 @@ class WW_AMF_WflServices extends WW_AMF_Services
 
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();
-		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
-			$transferServer->switchFilePathToURL( $object );
+		if( $resp->ObjectPageInfos ) foreach( $resp->ObjectPageInfos as $pageInfo ) {
+			if( $pageInfo->Pages ) foreach( $pageInfo->Pages as $page ) {
+				if( $page->Files ) foreach( $page->Files as $file ) {
+					$transferServer->filePathToURL( $file );
+				}
+			}
 		}
 
 		return $resp;
