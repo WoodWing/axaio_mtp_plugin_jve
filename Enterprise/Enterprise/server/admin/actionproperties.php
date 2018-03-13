@@ -651,11 +651,13 @@ class ActionPropertiesAdminApp
 				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
 			   }
 
-			   require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
-			   BizWorkflow::fixDossierPropertyUsage( $this->mode, $this->objType, '', $usages );
+			   if( $this->action != '' ) { // When action is general, don't fix anything as some action needs 'Dossier' and some don't.
+				   require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
+				   BizWorkflow::fixDossierPropertyUsage( $this->action, $this->objType, '', $usages );
+			   }
 			   // TODO: Mark asterisk on the fields that might be removed when Client doesn't support the field(s).
 
-			   $order = 0;
+			   $order = 5;
 			   if( $usages ) foreach( $usages as $usage ) {
 				   $values = array();
 				   $values['publication'] = $this->publ;
@@ -666,6 +668,7 @@ class ActionPropertiesAdminApp
 				   $values['edit'] = $usage->Editable ? 'on' : '';
 				   $values['mandatory'] = $usage->Mandatory ? 'on' : '';
 				   $values['restricted'] = $usage->Restricted ? 'on' : '';
+				   $values['refreshonchange'] = $usage->RefreshOnChange ? 'on' : '';
 				   $values['multipleobjects'] = $usage->MultipleObjects ? 'on' : '';
 					$this->insertActionProperty( $values );
 				   $order += 5;

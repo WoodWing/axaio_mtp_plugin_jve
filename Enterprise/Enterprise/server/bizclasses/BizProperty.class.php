@@ -287,6 +287,7 @@ class BizProperty
 	/**
 	 * Returns usages list with default property(ies) on an empty usages ( no setup in Dialog/Query Setup page yet).
 	 *
+	 * @since 10.x.x
 	 * @param string $action
 	 * @param bool $onlyStatic
 	 * @return mixed
@@ -355,7 +356,8 @@ class BizProperty
 			$wflProps = self::getWorkflowPropIds();
 			$tempUsages = array();
 			if( $usages ) foreach( $usages as $usage ) {
-				if( in_array($usage->Name, $wflProps) ) {
+				if( in_array( $usage->Name, $wflProps ) ||
+					in_array( $usage->Name, $staticProps )) { // 10.x.x: $usages can also be static properties that are retrieved from DB.
 					$tempUsages[$usage->Name] = $usage;
 				}
 			}
@@ -363,20 +365,25 @@ class BizProperty
 		}
 		$usages = array_reverse( $usages, true );
 		foreach( $staticProps as $staticProp ) {
-			$propUsage = self::composePropUsage( $staticProp, $refreshProps );
-
-			if( !array_key_exists( $staticProp, $usages ) ) {
-				if ($action == 'SendTo') {
-					if ($staticProp == 'State') {
-						$propUsage->Mandatory = true;
-					} else {
-						$propUsage->Editable = false;
-					}
-				} else if( ($staticProp == 'Issue') || isset( $targetProps[$staticProp] ) ) { // BZ#16792
-					// nothing to do; use default
-				} else {
+			$propUsage = array_key_exists( $staticProp, $usages ) ? $usages[$staticProp] : self::composePropUsage( $staticProp, $refreshProps );;
+			if ($action == 'SendTo') {
+				if ($staticProp == 'State') {
+					$propUsage->Editable = true;
 					$propUsage->Mandatory = true;
+				} else if( $staticProp == 'Name' || $staticProp == 'Publication' || $staticProp == 'Issue' ||
+					$staticProp == 'Editions' || $staticProp == 'Category' ) {
+					$propUsage->Editable = false;
+					// 10.x.x: 'Mandatory' setting should be set to true, however, in order not to break the current design, set it to false for now.
+					// The reason this setting is not causing problem so far, is due to client will always pre-filled this field in the Dialog and since
+					// it is a non-editable field, user can never modify it to make it empty.
+					$propUsage->Mandatory = false; // Should be set to true, read above.
+				} else {
+					$propUsage->Editable = false;
 				}
+			} else if( ($staticProp == 'Issue') || isset( $targetProps[$staticProp] ) ) { // BZ#16792
+				// nothing to do; use default
+			} else {
+				$propUsage->Mandatory = true;
 			}
 			$usages[$staticProp] = $propUsage;
 		}
