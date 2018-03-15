@@ -30,7 +30,7 @@ class WflGetRelatedPagesInfoService extends EnterpriseService
 	{
 		require_once BASEDIR.'/server/bizclasses/BizRelatedPages.class.php';
 		$biz = new WW_BizClasses_RelatedPages();
-		$biz->getRelatedPagesInfo( $request->LayoutId, $request->PageSequences );
+		$biz->resolveRelatedPagesInfo( $request->LayoutId, $request->PageSequences );
 
 		$response = new WflGetRelatedPagesInfoResponse();
 		$response->EditionsPages = $biz->getEditionsPages();

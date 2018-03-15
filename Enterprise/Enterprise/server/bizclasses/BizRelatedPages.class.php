@@ -62,7 +62,7 @@ class WW_BizClasses_RelatedPages
 	 * @param string $layoutId The object id of the layout to resolve the variants from.
 	 * @param integer[] $pageSequences The user selected page. Provide two pages when spread is selected.
 	 */
-	public function getRelatedPagesInfo( $layoutId, $pageSequences )
+	public function resolveRelatedPagesInfo( $layoutId, $pageSequences )
 	{
 		// Init data to be resolved by this function.
 		$this->editionsPages = array();
@@ -388,14 +388,14 @@ class WW_BizClasses_RelatedPages
 
 			// Get file rendition (if requested).
 			if( $pageRendition == $requestedRendition ) {
-				$pagenrString = ( !is_null( $pageRow['orientation'] ) && !empty( $pageRow['orientation'] ) )
+				$pageNrString = ( !is_null( $pageRow['orientation'] ) && !empty( $pageRow['orientation'] ) )
 					? '-'.$pageNr.'-'.$pageRow['orientation']
 					: '-'.$pageNr;
-				$pagenrval = preg_replace( '/[*"<>?\\\\|:]/i', '', $pageRow['pagenumber'] );
+				$pageNrVal = preg_replace( '/[*"<>?\\\\|:]/i', '', $pageRow['pagenumber'] );
 
 				require_once BASEDIR.'/server/bizclasses/BizStorage.php';
 				$pageAttachment = StorageFactory::gen( $storeName, $pageRow['objid'],
-					'page', $pageType, $layoutVersion, $pagenrval.$pagenrString, $pageRow['edition'] );
+					'page', $pageType, $layoutVersion, $pageNrVal.$pageNrString, $pageRow['edition'] );
 				$attachment = new Attachment();
 				$attachment->Rendition = $pageRendition;
 				$attachment->Type = $pageType;
