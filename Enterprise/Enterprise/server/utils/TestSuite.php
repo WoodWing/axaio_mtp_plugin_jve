@@ -812,6 +812,64 @@ class WW_Utils_TestSuite
 	}
 
 	/**
+	 * Creates a new Edition.
+	 *
+	 * @since 10.4.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket
+	 * @param int $pubId
+	 * @param int $pubChannelId
+	 * @param int $issueId
+	 * @param AdmEdition $edition
+	 * @return AdmEdition
+	 * @throws BizException
+	 */
+	public function createNewEdition( TestCase $testCase, $ticket, $pubId, $pubChannelId, $issueId, AdmEdition $edition )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateEditionsService.class.php';
+		$request = new AdmCreateEditionsRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array();
+		$request->PublicationId = $pubId;
+		$request->PubChannelId = $pubChannelId;
+		$request->IssueId = $issueId;
+		$request->Editions = array( $edition );
+
+		/** @var AdmCreateEditionsResponse $response */
+		$response = $this->callService( $testCase, $request, 'Create Edition.' );
+		$testCase->assertInstanceOf( 'AdmCreateEditionsResponse', $response );
+
+		return $response->Editions[0];
+	}
+
+	/**
+	 * Deletes an Edition.
+	 *
+	 * @since 10.4.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket
+	 * @param int $publicationId
+	 * @param int $pubChannelId
+	 * @param int $issueId
+	 * @param int $editionId
+	 * @throws BizException
+	 */
+	public function removeEdition( TestCase $testCase, $ticket, $publicationId, $pubChannelId, $issueId, $editionId )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteEditionsService.class.php';
+		$request = new AdmDeleteEditionsRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $publicationId;
+		$request->PubChannelId = $pubChannelId;
+		$request->IssueId = $issueId;
+		$request->EditionIds = array( $editionId );
+
+		/** @var AdmDeleteEditionsResponse $response */
+		$response = $this->callService( $testCase, $request, 'Remove Edition.' );
+		$testCase->assertInstanceOf( 'AdmDeleteEditionsResponse', $response );
+	}
+
+	/**
 	 * Returns those table names of the DB model that have an auto increment field defined.
 	 *
 	 * It is mainly used when caller wants to set the auto increment value for a table. 
@@ -1690,7 +1748,7 @@ class WW_Utils_TestSuite
 	 * @param TestCase $testCase The test module calling this function.
 	 * @param string $ticket The user's session ticket.
 	 * @param integer|null $publicationId The publication id.
-	 * @param integer|null $issueId The issue id.
+	 * @param integer $issueId The issue id.
 	 * @param AdmStatus|null $status The status to be created. If null, a generic status will be created.
 	 * @return integer The id of the newly created status.
 	 */
@@ -1833,6 +1891,48 @@ class WW_Utils_TestSuite
 	}
 
 	/**
+	 * Add a user to a user group.
+	 *
+	 * @since 10.4.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer $userId
+	 * @param integer $groupId
+	 */
+	public function createUserMemberships( TestCase $testCase, $ticket, $userId, $groupId )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmAddUsersToGroupService.class.php';
+		$request = new AdmAddUsersToGroupRequest();
+		$request->Ticket = $ticket;
+		$request->GroupId = $groupId;
+		$request->UserIds = array( $userId );
+		/** @var AdmAddUsersToGroupResponse $response */
+		$response = $this->callService( $testCase, $request, 'Create a user membership.' );
+		$testCase->assertInstanceOf( 'AdmAddUsersToGroupResponse', $response );
+	}
+
+	/**
+	 * Remove a user from a user group.
+	 *
+	 * @since 10.4.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer $userId
+	 * @param integer $groupId
+	 */
+	public function removeUserMemberships( TestCase $testCase, $ticket, $userId, $groupId )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmAddUsersToGroupService.class.php';
+		$request = new AdmRemoveUsersFromGroupRequest();
+		$request->Ticket = $ticket;
+		$request->GroupId = $groupId;
+		$request->UserIds = array( $userId );
+		/** @var AdmRemoveUsersFromGroupResponse $response */
+		$response = $this->callService( $testCase, $request, 'Remove a user membership.' );
+		$testCase->assertInstanceOf( 'AdmRemoveUsersFromGroupResponse', $response );
+	}
+
+	/**
 	 * Create a workflow user group authorization rule and returns the id.
 	 *
 	 * @since 10.2.0
@@ -1844,7 +1944,7 @@ class WW_Utils_TestSuite
 	 * @param integer $accessProfileId The access profile id.
 	 * @param integer|null $sectionId The section id. (optional)
 	 * @param integer|null $statusId The status id. (optional)
-	 * @return AdmWorkflowUserGroupAuthorization
+	 * @return integer user group authorization id.
 	 */
 	public function createNewWorkflowUserGroupAuthorization(
 		TestCase $testCase, $ticket, $publicationId, $issueId, $userGroupId, $accessProfileId, $sectionId, $statusId )
@@ -1888,6 +1988,50 @@ class WW_Utils_TestSuite
 		$request->UserGroupId = $userGroupId;
 		$request->WorkflowUserGroupAuthorizationIds = $wflUGAuthIds;
 		$this->callService( $testCase, $request, 'Delete one or more workflow user group authorization rules.' );
+	}
+
+	/**
+	 * Create an admin user group authorization.
+	 *
+	 * @since 10.4.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer $publicationId The brand id.
+	 * @param integer $userGroupId The user group id.
+	 */
+	public function createNewPublicationAdminAuthorization( TestCase $testCase, $ticket, $publicationId, $userGroupId )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreatePublicationAdminAuthorizationsService.class.php';
+		$request = new AdmCreatePublicationAdminAuthorizationsRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $publicationId;
+		$request->UserGroupIds = array( $userGroupId );
+
+		/** @var AdmCreatePublicationAdminAuthorizationsResponse $response */
+		$response = $this->callService( $testCase, $request, 'Create a PublicationAdminAuthorization.' );
+		$testCase->assertInstanceOf( 'AdmCreatePublicationAdminAuthorizationsResponse', $response );
+	}
+
+	/**
+	 * Remove an admin user group authorization.
+	 *
+	 * @since 10.4.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer $publicationId The brand id.
+	 * @param integer $userGroupId The user group id.
+	 */
+	public function removePublicationAdminAuthorization( TestCase $testCase, $ticket, $publicationId, $userGroupId )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeletePublicationAdminAuthorizationsService.class.php';
+		$request = new AdmDeletePublicationAdminAuthorizationsRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $publicationId;
+		$request->UserGroupIds = array( $userGroupId );
+
+		/** @var AdmDeletePublicationAdminAuthorizationsResponse $response */
+		$response = $this->callService( $testCase, $request, 'Delete a PublicationAdminAuthorization.' );
+		$testCase->assertInstanceOf( 'AdmDeletePublicationAdminAuthorizationsResponse', $response );
 	}
 
 	/**
