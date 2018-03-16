@@ -447,7 +447,7 @@ class IdsAutomationUtils
 	 */
 	private static function getLayoutObjectTypes()
 	{
-		static $types = array( 'Layout', 'LayoutModule' );
+		static $types = array( 'Layout', 'LayoutModule', 'LayoutTemplate', 'LayoutModuleTemplate'  );
 		return $types;
 	}
 	
