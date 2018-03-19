@@ -408,7 +408,6 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->Targets[0] = $this->vars['BuildTest_Admin']['printTarget'];
@@ -558,7 +557,6 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->Relations[0]->Placements = array();
 		$response->Objects[0]->Relations[0]->ParentVersion = '0.1';
 		$response->Objects[0]->Relations[0]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[0]->Geometry = null;
 		$response->Objects[0]->Relations[0]->Rating = '0';
 		$response->Objects[0]->Relations[0]->Targets = array();
 		$response->Objects[0]->Relations[0]->Targets[0] = $this->vars['BuildTest_Admin']['printTarget'];
@@ -768,7 +766,6 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->Relations[0]->Placements = array();
 		$response->Objects[0]->Relations[0]->ParentVersion = '0.1';
 		$response->Objects[0]->Relations[0]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[0]->Geometry = null;
 		$response->Objects[0]->Relations[0]->Rating = '0';
 		$response->Objects[0]->Relations[0]->Targets = array();
 		$response->Objects[0]->Relations[0]->Targets[0] = $this->vars['BuildTest_Admin']['printTarget'];
@@ -1142,7 +1139,6 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->Relations[0]->Placements = array();
 		$response->Objects[0]->Relations[0]->ParentVersion = '0.1';
 		$response->Objects[0]->Relations[0]->ChildVersion = '0.2';
-		$response->Objects[0]->Relations[0]->Geometry = null;
 		$response->Objects[0]->Relations[0]->Rating = '0';
 		$response->Objects[0]->Relations[0]->Targets = array();
 		$response->Objects[0]->Relations[0]->Targets[0] = $this->vars['BuildTest_Admin']['printTarget'];

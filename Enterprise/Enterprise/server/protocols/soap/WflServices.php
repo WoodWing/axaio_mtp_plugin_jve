@@ -429,10 +429,8 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 			$transferServer = new BizTransferServer();
-			if( $req->Relations ) foreach( $req->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$transferServer->urlToFilePath( $relation->Geometry );
-				}
+			if( $req->Objects ) foreach( $req->Objects as $object ) {
+				$transferServer->switchURLToFilePath( $object );
 			}
 			$service = new WflCreateObjectRelationsService();
 			$resp = $service->execute( $req );
@@ -449,10 +447,8 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 			$transferServer = new BizTransferServer();
-			if( $req->Relations ) foreach( $req->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$transferServer->urlToFilePath( $relation->Geometry );
-				}
+			if( $req->Objects ) foreach( $req->Objects as $object ) {
+				$transferServer->switchURLToFilePath( $object );
 			}
 			$service = new WflUpdateObjectRelationsService();
 			$resp = $service->execute( $req );
@@ -488,10 +484,8 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();
-		if( $resp->Relations ) foreach( $resp->Relations as $relation ) {
-			if ( $relation->Geometry ) {
-				$transferServer->filePathToURL( $relation->Geometry );
-			}
+		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
+			$transferServer->switchFilePathToURL( $object );
 		}
 
 		return self::returnResponse($resp);

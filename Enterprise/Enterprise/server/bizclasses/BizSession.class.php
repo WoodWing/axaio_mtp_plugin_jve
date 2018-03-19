@@ -866,9 +866,13 @@ class BizSession
 			$bKeepLockForOffline = $onlinestatus == 'TakeOffline';
 			if( $bAccessError === false ) { // user has access?
 				// change online status
-				require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-				$sth = DBObjectLock::changeOnlineStatus( $id, $user, $bKeepLockForOffline );
-				if( !$sth ) {
+				require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+				$objectLock = new BizObjectLock( $id );
+				if( $objectLock->isLockedByUser( $user )) {
+					if( !$objectLock->changeOnLineStatus( $bKeepLockForOffline ) ) {
+						throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
+					}
+				} else {
 					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 				}
 			}

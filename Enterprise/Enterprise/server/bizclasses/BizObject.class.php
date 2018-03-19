@@ -683,14 +683,12 @@ class BizObject
 		$newRow = self::validateForSave( $user, $object, $currRow );
 		$state = $newRow['state'];
 
-		// Does the user has a lock for this file?
-		$lockedby = DBObjectLock::checkLock( $id );
-		if( !$lockedby ) {
-			// object not locked at all:
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$objectLock = new BizObjectLock( $id );
+		if( !$objectLock->isLocked() ) {
 			$sErrorMessage = BizResources::localize( "ERR_NOTLOCKED" ).' '.BizResources::localize( "SAVE_LOCAL" );
 			throw new BizException( null, 'Client', $id, $sErrorMessage );
-		} else if( strtolower( $lockedby ) != strtolower( $user ) ) {
-			//locked by someone else
+		} elseif( !$objectLock->isLockedBySameUserAndApplication( $user ) ) {
 			throw new BizException( 'ERR_NOTLOCKED', 'Client', $id );
 		}
 
@@ -853,12 +851,12 @@ class BizObject
 		// XMLGeo would require a geo update file per article which we don't have
 		if( isset($object->Relations) && ( $newRow['type'] == 'Layout' || $newRow['type'] == 'PublishForm' )
 			&& strtolower(UPDATE_GEOM_SAVE) == strtolower('ON') ) {
-			if (! BizSettings::isFeatureEnabled('UseXMLGeometry') ) {
-				foreach ($object->Relations as $relation) {
-					// If someone else has object lock, send notification
-					if( strtolower(DBObjectLock::checkLock( $relation->Child )) !=  strtolower($user) ) {
-						new smartevent_updateobjectrelation(BizSession::getTicket(), $relation->Child, $relation->Type, $id, $newRow['name']);
-					}
+			foreach ($object->Relations as $relation) {
+				// If someone else has object lock, send notification
+				require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+				$objectLock = new BizObjectLock( $relation->Child );
+				if ( $objectLock->isLockedByUser( $user ) ) {
+					new smartevent_updateobjectrelation(BizSession::getTicket(), $relation->Child, $relation->Type, $id, $newRow['name']);
 				}
 			}
 		}
@@ -1062,14 +1060,9 @@ class BizObject
 
 			if( in_array('Relations', $requestInfo) ) {
 				require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
-				// BZ#14481 only attach geo info when server feature "UseXMLGeometry" is on, object type is Article and rendition != none (BZ#8657)
-				$attachGeo =
-					$objectProps['Type'] == 'Article' &&
-					BizSettings::isFeatureEnabled('UseXMLGeometry') &&
-					$rendition != 'none';
 				$relations = BizRelation::getObjectRelations(
 					$id,
-					$attachGeo,
+					null,
 					in_array( 'Targets', $requestInfo ),
 					null, // use $id in both ways to resolve relations (as parent and child)
 					false, // get from workflow and trashcan
@@ -1265,7 +1258,7 @@ class BizObject
 			if ( !$objectId ) {
 				throw new BizException( 'ERR_NOTFOUND', 'Client', 'Object ID should be set for ' . __METHOD__ . ' when relations is null.' );
 			}
-			$relations = BizRelation::getObjectRelations( $objectId, false, false, null, false, false, 'InstanceOf' );
+			$relations = BizRelation::getObjectRelations( $objectId, null, false, null, false, false, 'InstanceOf' );
 		}
 
 		if ( $relations ) foreach ( $relations as $relation ) {
@@ -1337,33 +1330,26 @@ class BizObject
 			throw new BizException( 'ERR_NOTFOUND', 'Client', $id );
 		}
 
-		// check if object has been locked in the first place (BZ#11254)
-		$lockedByUser = DBObjectLock::checkLock( $id );
-		if (! is_null($lockedByUser) ){
-			// Check if unlock is allowed by user
-			if( DBUser::isAdminUser( $user ) || // System Admin user?
-				DBUser::isPubAdmin( $user, $curr_row['publication'] ) ) { // Brand Admin user?
-				$effuser = null; // System/Brand Admin users may always unlock objects
-			} else { // Normal user
-				// Normal users are allowed to unlocked their own locks only (BZ#11160)
-				if( strtolower($lockedByUser) != strtolower($user) ) { // Locked by this user?
-					$lockedByUser = BizUser::resolveFullUserName($lockedByUser);
-					$msg = BizResources::localize('OBJ_LOCKED_BY') . ' ' . $lockedByUser; // TODO: Add user param in OBJ_LOCKED_BY resource
-					throw new BizException( null, 'Client',  $id, $msg );
-				}
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$objectLock = new BizObjectLock( $id );
+		if ( $objectLock->isLocked() ) { // Check if object has been locked in the first place (BZ#11254)
+			if( DBUser::isAdminUser( $user ) || // System Admin user.
+				DBUser::isPubAdmin( $user, $curr_row['publication'] ) || // Brand Admin user.
+				$objectLock->isLockedByUser( $user ) ) { // Users are allowed to unlocked their own locks (BZ#11160).
 				// Note: We do NOT check the "Abort Checkout" access feature here!
 				// This is because UnlockObjects service is used by SOAP clients to close the document.
 				// Without this access feature, users should be able to close their documents.
 				// Client applications are responsible to show/hide the "Abort Checkout" action from GUI.
-				$effuser = $user;
+				if (!$objectLock->releaseLock() ) {
+					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
+				}
+			} else { // Different user and non-admin user.
+				$lockedByUser = BizUser::resolveFullUserName( $objectLock->getLockedByShortUserName() );
+				$msg = BizResources::localize('OBJ_LOCKED_BY') . ' ' . $lockedByUser;
+				throw new BizException( null, 'Client',  $id, $msg );
 			}
 
-			// Now do the unlock
 			DBObjectFlag::unlockObjectFlags($id);
-			$sth = DBObjectLock::unlockObject( $id, $effuser );
-			if (!$sth) {
-				throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-			}
 
 			require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
 			// Indexing an object is an expensive operation. Check if 'LockedBy' is indexed.
@@ -1454,9 +1440,11 @@ class BizObject
 			self::getOrCreateResolvedUsers($alienId, $meta);
 		}
 
-		// Check if locked or we are the locker
-		$lockedby = DBObjectLock::checkLock( $id );
-		if( $lockedby && strtolower($lockedby) != strtolower($user) ) {
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$objectLock = new BizObjectLock( $id );
+		if( $objectLock->isLocked() && !$objectLock->isLockedBySameUserAndApplication( $user ) ) {
+			// If the object is not locked, just continue. But if it is locked then it must be locked by the current
+			// user/application combination to continue. See EN-90045.
 			throw new BizException( 'ERR_NOTLOCKED', 'Client', $id );
 		}
 
@@ -1778,7 +1766,7 @@ class BizObject
 			In case the object cannot be locked we report a standard error which will be placed in the Error reports.
 		*/
 		$user = BizSession::getShortUserName();
-		$lockedObjectIds = DBObjectLock::lockObjects( $invokedObjectIds, $user );
+		$lockedObjectIds = DBObjectLock::lockObjects( $invokedObjectIds, $user ); // TODO Add to BizObjectLock
 		$nonLockedObjectIds = array_diff( $invokedObjectIds, $lockedObjectIds );
 		if( $nonLockedObjectIds ) {
 			foreach( $nonLockedObjectIds as $nonLockedObjectId ) {
@@ -2237,11 +2225,11 @@ class BizObject
 
 			// Release lock
 			if( $lockedObjectIds ) { // Only release the objects where the lock is obtained by this function.
-				DBObjectLock::unlockObjects( $lockedObjectIds, $user );
+				DBObjectLock::unlockObjects( $lockedObjectIds, $user ); // TODO Add to BizObjectLock
 			}
 		} catch ( BizException $e ) {
 			if( $lockedObjectIds ) { // Only release the objects where the lock is obtained by this function.
-				DBObjectLock::unlockObjects( $lockedObjectIds, $user );
+				DBObjectLock::unlockObjects( $lockedObjectIds, $user ); // TODO Add to BizObjectLock
 			}
 			throw $e; // This should only happen when there's fatal error, thus bail out all the way after unlocking the objects.
 		}
@@ -3558,18 +3546,28 @@ class BizObject
 	 * Returns true when specified object name already exists in database.
 	 *
 	 * Can be used for new and existing objects.
+	 * Object name checking is case-insensitive and accented-sensitive:
+	 * - 'Object123' is seen as the same as 'object123'.
+	 * - 'object123' is not seen as the same as 'öbject123' (EN-89017).
 	 *
 	 * @param array $issueIds List of issue ids to check for object name uniqueness
 	 * @param string $name Object name
 	 * @param string $type Object type
 	 * @param int $id Object id if object already exists
-	 *
-	 * @return int object id if name exists
+	 * @return bool True when object name already exists, false otherwise.
 	 */
 	public static function objectNameExists( $issueIds, $name, $type, $id=null)
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		return DBObject::objectNameExists( $issueIds, $name, $type, $id );
+		$caseAndAccentInsensitiveNames = DBObject::getObjectNamesIgnoringCaseAndAccentedCharacters( $issueIds, $name, $type, $id );
+		$exists = false;
+		if( $caseAndAccentInsensitiveNames ) foreach ( $caseAndAccentInsensitiveNames as $caseAndAccentInsensitiveName ) {
+			if( strcmp( strtolower( $caseAndAccentInsensitiveName ), strtolower ( $name )) === 0 ) {
+				$exists = true;
+				break; // duplicate found, not needed to check further, bail out.
+			}
+		}
+		return $exists;
 	}
 
 	/**
@@ -3599,7 +3597,7 @@ class BizObject
 		// Lock the objects, so that the version can no longer change by others in the meantime.
 		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 		$haveObjectIds = array_map( function( $hv ) { return $hv->ID; }, $haveVersions );
-		$lockedObjectIds = DBObjectLock::lockObjects( $haveObjectIds, $user );
+		$lockedObjectIds = DBObjectLock::lockObjects( $haveObjectIds, $user ); // TODO Add to BizObjectLock
 
 		// Grab the latest object versions from DB (for those object that could be locked).
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
@@ -3626,7 +3624,7 @@ class BizObject
 					}
 				}
 				if( $currentVersions[$haveVersion->ID] != $haveVersion->Version ) {
-					DBObjectLock::unlockObjects( array($haveVersion->ID), $user ); // undo our lock
+					DBObjectLock::unlockObjects( array($haveVersion->ID), $user ); // TODO Add to BizObjectLock
 					unset( $lockedObjectIds[$haveVersion->ID] );
 					throw new BizException( 'ERR_OBJ_VERSION_MISMATCH', 'Client', $haveVersion->ID );
 				}
@@ -3664,9 +3662,10 @@ class BizObject
 	private static function Lock( $id, $user )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 		DBObjectFlag::lockObjectFlags( $id );
-		DBObjectLock::lockObject( $id, $user );
+		$objectLock = new BizObjectLock( $id );
+		$objectLock->lockObject( $user );
 
 		// Notify event plugins
 		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
@@ -4019,7 +4018,7 @@ class BizObject
 	static private function handleObjectRelations( $id, &$newRelations, &$relationsToBeUpdated )
 	{
 		// These 'new' relations are either to be inserted or updated. (Deletion is handled above)
-		$existingRelations = BizRelation::getObjectRelations( $id, false, false, 'childs' );
+		$existingRelations = BizRelation::getObjectRelations( $id, null, false, 'childs' );
 		$relationIndex = 0;
 		if( $newRelations ) foreach( $newRelations as $newRelation ) {
 			$currRelationFoundInDb = false; // Assume the relation is a new one ( not yet stored in DB before)
@@ -4337,15 +4336,16 @@ class BizObject
 	 */
 	public static function restoreLock( $user, $objId, $checkAccess = true)
 	{
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-
-		$lockUser = DBObjectLock::checkLock( $objId );
-		if( !$lockUser ) { // no-one else has the lock, so we try taking it back...
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$objectLock = new BizObjectLock( $objId );
+		if( !$objectLock->isLocked() ) {
 			self::getObject( $objId, $user, true, 'none', null, null, $checkAccess ); // lock, no content, BZ#17253 - checkAccess false when article created from template
 			// Note: We use getObject to trigger lock events, etc
 		} else {
-			if( strtolower($lockUser) != strtolower($user) ) { // someone else has the lock
-				throw new BizException( 'OBJ_LOCKED_BY', 'Client',  $lockUser['usr'] );
+			if( !$objectLock->isLockedByUser( $user ) ) {
+				require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+				$lockUser = DBUser::getFullName( $objectLock->getLockedByShortUserName() );
+				throw new BizException( 'OBJ_LOCKED_BY', 'Client',  $lockUser );
 			}
 		}
 	}
@@ -5508,7 +5508,7 @@ class BizObject
 		$slugline = '';
 		if ( $publishFormId ) {
 			$publishFormRow = DBObject::getObjectRows( $publishFormId, array('Workflow') );
-			$relations = BizRelation::getObjectRelations( $publishFormId, false, false);
+			$relations = BizRelation::getObjectRelations( $publishFormId, null, false);
 			$slugline = self::getPublishFormSlugLine( $publishFormId, $publishFormRow, $relations );
 		}
 		return $slugline;
@@ -5654,7 +5654,7 @@ class BizObject
 			$objectsInTrashToIndex = array();
 			$semaphoreId = null;
 			$user = BizSession::getShortUserName();
-			$dossierRelations = BizRelation::getObjectRelations( $object->MetaData->BasicMetaData->ID, false, false, null, true );
+			$dossierRelations = BizRelation::getObjectRelations( $object->MetaData->BasicMetaData->ID, null, false, null, true );
 			if( $dossierRelations ) foreach( $dossierRelations as $dossierRelation ) {
 				if ( ( $dossierRelation->Type == 'Contained' || $dossierRelation->Type == 'DeletedContained' ) &&
 					$dossierRelation->ParentInfo->Name != $dossierRelation->ChildInfo->Name // The Form name and the Dossier name is still not the same
@@ -5791,7 +5791,7 @@ class BizObject
 	{
 		$restoreSuccess = true;
 		try {
-			$publishFormRelations = BizRelation::getObjectRelations( $id, false, false, null, false );
+			$publishFormRelations = BizRelation::getObjectRelations( $id, null, false, null, false );
 			if( $publishFormRelations ) foreach( $publishFormRelations as $publishFormRelation ) {
 				if( $publishFormRelation->Type == 'Contained' &&
 					$publishFormRelation->Child == $id &&

@@ -87,12 +87,6 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 		// LIBRARIES
     	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		
-		// Test if we can find our own JavaChart lib:
-		if( !file_exists(BASEDIR.'/server/javachart/jars') ) {
-			$this->setResult( 'ERROR', 'PHP library "JavaChart" not installed, should be present at: '.
-				BASEDIR."/server/javachart", self::PACKAGE_HELP );
-			return;
-		}		
 		LogHandler::Log( 'wwtest', 'INFO', 'JavaChart library checked' );
 
     	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -232,6 +226,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 		$help = 'Check your configserver.php file for the SERVERFEATURES setting and remove the obsoleted option from that list.';
 		$deprecatedFeatures = array( 
 			array( 'name' => 'ServerCreateImagePreview', 'help' => 'This option is no longer used. Please enable/disable the preview Server Plug-ins instead.' ),
+			array( 'name' => 'UseXMLGeometry', 'help' => 'This option is no longer used. Please remove this setting from config_overrule.php and configserver.php.' ),
 		);
 		foreach( $deprecatedFeatures as $opt ) {
 			if( BizSettings::isFeatureEnabled( $opt['name'] ) ) {

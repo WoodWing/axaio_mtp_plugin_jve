@@ -1397,7 +1397,6 @@ Nes eossit hiliqui doles accus, quis deruntiur abore re nonsequias et optas re c
 		$request->Objects[0]->Relations[0]->Placements[4]->SplineID = '328';
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->Targets[0] = $this->composeTarget();
@@ -1689,7 +1688,6 @@ Nes eossit hiliqui doles accus, quis deruntiur abore re nonsequias et optas re c
 		$response->Objects[0]->Relations[0]->Placements[4]->SplineID = '328';
 		$response->Objects[0]->Relations[0]->ParentVersion = '0.1';
 		$response->Objects[0]->Relations[0]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[0]->Geometry = null;
 		$response->Objects[0]->Relations[0]->Rating = '0';
 		$response->Objects[0]->Relations[0]->Targets = array();
 		$response->Objects[0]->Relations[0]->Targets[0] = $this->composeTarget();
@@ -1908,7 +1906,6 @@ Occupta ate poribusdae peri officipsum, aut et ere qui vit remporporeic to disit
 		$request->Relations[0]->Placements[4]->SplineID = '328';
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -2207,7 +2204,6 @@ Occupta ate poribusdae peri officipsum, aut et ere qui vit remporporeic to disit
 		$response->Relations[0]->Placements[9]->SplineID = '328';
 		$response->Relations[0]->ParentVersion = '0.1';
 		$response->Relations[0]->ChildVersion = '0.1';
-		$response->Relations[0]->Geometry = null;
 		$response->Relations[0]->Rating = '0';
 		$response->Relations[0]->Targets = array();
 		$response->Relations[0]->Targets[0] = $this->composeTarget();
@@ -2443,7 +2439,6 @@ Occupta ate poribusdae peri officipsum, aut et ere qui vit remporporeic to disit
 		$request->Objects[0]->Relations[0]->Placements[4]->SplineID = '328';
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -2769,7 +2764,6 @@ Occupta ate poribusdae peri officipsum, aut et ere qui vit remporporeic to disit
 		$response->Objects[0]->Relations[0]->Placements[4]->SplineID = '328';
 		$response->Objects[0]->Relations[0]->ParentVersion = '0.2';
 		$response->Objects[0]->Relations[0]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[0]->Geometry = null;
 		$response->Objects[0]->Relations[0]->Rating = '0';
 		$response->Objects[0]->Relations[0]->Targets = array();
 		$response->Objects[0]->Relations[0]->Targets[0] = $this->composeTarget();
@@ -3052,7 +3046,6 @@ Occupta ate poribusdae peri officipsum, aut et ere qui vit remporporeic to disit
 		$request->Relations[0]->Placements = array();
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = array();
 		$request->Relations[0]->Targets[0] = $this->composeSingleTarget();
@@ -3077,7 +3070,6 @@ Occupta ate poribusdae peri officipsum, aut et ere qui vit remporporeic to disit
 		$response->Relations[0]->Placements = array();
 		$response->Relations[0]->ParentVersion = '0.1';
 		$response->Relations[0]->ChildVersion = '0.1';
-		$response->Relations[0]->Geometry = null;
 		$response->Relations[0]->Rating = '0';
 		$response->Relations[0]->Targets = array();
 		$response->Relations[0]->Targets[0] = $this->composeSingleTarget();

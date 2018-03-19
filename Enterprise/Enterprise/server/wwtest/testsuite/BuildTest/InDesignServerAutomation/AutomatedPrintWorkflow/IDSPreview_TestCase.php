@@ -292,7 +292,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -417,7 +416,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -542,7 +540,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -669,7 +666,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -1007,7 +1003,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->Targets[0] = new Target();
@@ -1064,7 +1059,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[1]->Placements[0]->SplineID = '239';
 		$request->Objects[0]->Relations[1]->ParentVersion = null;
 		$request->Objects[0]->Relations[1]->ChildVersion = null;
-		$request->Objects[0]->Relations[1]->Geometry = null;
 		$request->Objects[0]->Relations[1]->Rating = null;
 		$request->Objects[0]->Relations[1]->Targets = array();
 		$request->Objects[0]->Relations[1]->Targets[0] = new Target();
@@ -1269,7 +1263,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[0]->Placements[0]->SplineID = '250';
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -1322,7 +1315,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[1]->Placements[0]->SplineID = '251';
 		$request->Objects[0]->Relations[1]->ParentVersion = null;
 		$request->Objects[0]->Relations[1]->ChildVersion = null;
-		$request->Objects[0]->Relations[1]->Geometry = null;
 		$request->Objects[0]->Relations[1]->Rating = null;
 		$request->Objects[0]->Relations[1]->Targets = null;
 		$request->Objects[0]->Relations[1]->ParentInfo = null;
@@ -1363,7 +1355,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[2]->Placements[0]->SplineID = '252';
 		$request->Objects[0]->Relations[2]->ParentVersion = null;
 		$request->Objects[0]->Relations[2]->ChildVersion = null;
-		$request->Objects[0]->Relations[2]->Geometry = null;
 		$request->Objects[0]->Relations[2]->Rating = null;
 		$request->Objects[0]->Relations[2]->Targets = null;
 		$request->Objects[0]->Relations[2]->ParentInfo = null;
@@ -1416,7 +1407,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Relations[3]->Placements[0]->SplineID = '239';
 		$request->Objects[0]->Relations[3]->ParentVersion = null;
 		$request->Objects[0]->Relations[3]->ChildVersion = null;
-		$request->Objects[0]->Relations[3]->Geometry = null;
 		$request->Objects[0]->Relations[3]->Rating = null;
 		$request->Objects[0]->Relations[3]->Targets = null;
 		$request->Objects[0]->Relations[3]->ParentInfo = null;
@@ -1601,7 +1591,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Objects[0]->Relations[0]->Placements = array();
 		$response->Objects[0]->Relations[0]->ParentVersion = '0.1';
 		$response->Objects[0]->Relations[0]->ChildVersion = '0.2';
-		$response->Objects[0]->Relations[0]->Geometry = null;
 		$response->Objects[0]->Relations[0]->Rating = '0';
 		$response->Objects[0]->Relations[0]->Targets = array();
 		$response->Objects[0]->Relations[0]->Targets[0] = new Target();
@@ -1679,7 +1668,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Objects[0]->Relations[1]->Placements[0]->SplineID = '239';
 		$response->Objects[0]->Relations[1]->ParentVersion = '0.2';
 		$response->Objects[0]->Relations[1]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[1]->Geometry = null;
 		$response->Objects[0]->Relations[1]->Rating = '0';
 		$response->Objects[0]->Relations[1]->Targets = array();
 		$response->Objects[0]->Relations[1]->Targets[0] = new Target();
@@ -1745,7 +1733,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Objects[0]->Relations[2]->Placements[0]->SplineID = '250';
 		$response->Objects[0]->Relations[2]->ParentVersion = '0.2';
 		$response->Objects[0]->Relations[2]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[2]->Geometry = null;
 		$response->Objects[0]->Relations[2]->Rating = '0';
 		$response->Objects[0]->Relations[2]->Targets = array();
 		$response->Objects[0]->Relations[2]->Targets[0] = new Target();
@@ -1823,7 +1810,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Objects[0]->Relations[3]->Placements[0]->SplineID = '251';
 		$response->Objects[0]->Relations[3]->ParentVersion = '0.2';
 		$response->Objects[0]->Relations[3]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[3]->Geometry = null;
 		$response->Objects[0]->Relations[3]->Rating = '0';
 		$response->Objects[0]->Relations[3]->Targets = array();
 		$response->Objects[0]->Relations[3]->Targets[0] = new Target();
@@ -1889,7 +1875,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Objects[0]->Relations[4]->Placements[0]->SplineID = '252';
 		$response->Objects[0]->Relations[4]->ParentVersion = '0.2';
 		$response->Objects[0]->Relations[4]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[4]->Geometry = null;
 		$response->Objects[0]->Relations[4]->Rating = '0';
 		$response->Objects[0]->Relations[4]->Targets = array();
 		$response->Objects[0]->Relations[4]->Targets[0] = new Target();
@@ -2525,7 +2510,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[0]->Placements[0]->SplineID = '250';
 		$response->Relations[0]->ParentVersion = null;
 		$response->Relations[0]->ChildVersion = null;
-		$response->Relations[0]->Geometry = null;
 		$response->Relations[0]->Rating = null;
 		$response->Relations[0]->Targets = null;
 		$response->Relations[0]->ParentInfo = new ObjectInfo();
@@ -2588,7 +2572,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[1]->Placements[0]->SplineID = '251';
 		$response->Relations[1]->ParentVersion = null;
 		$response->Relations[1]->ChildVersion = null;
-		$response->Relations[1]->Geometry = null;
 		$response->Relations[1]->Rating = null;
 		$response->Relations[1]->Targets = null;
 		$response->Relations[1]->ParentInfo = new ObjectInfo();
@@ -2637,7 +2620,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[2]->Placements[0]->SplineID = '252';
 		$response->Relations[2]->ParentVersion = null;
 		$response->Relations[2]->ChildVersion = null;
-		$response->Relations[2]->Geometry = null;
 		$response->Relations[2]->Rating = null;
 		$response->Relations[2]->Targets = null;
 		$response->Relations[2]->ParentInfo = new ObjectInfo();

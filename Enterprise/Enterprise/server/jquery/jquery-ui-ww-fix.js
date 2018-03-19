@@ -1,5 +1,6 @@
 /**
- * @since Enterprise 10.2.1 This module has been introduced.
+ * @since 10.1.6 This module has been introduced.
+ * @since 10.2.1 This module has been introduced.
  *
  * This should be seen as temporary solution to the incompatible problem between the
  * jQuery-ui 1.8.24 and jQuery 1.10.

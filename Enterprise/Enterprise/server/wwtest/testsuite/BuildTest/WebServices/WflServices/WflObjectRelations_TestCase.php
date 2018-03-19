@@ -453,7 +453,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectRelations_TestCase
 					'Relation->ParentVersion' => true, // will be 'manually' checked later
 					'Relation->ChildVersion' => true, // will be 'manually' checked later
 					'Relation->Placements' => true, // is not being used here, used during getObjects.
-					'Relation->Geometry' => true, // is not being used here, used during getObjects.
 					'Relation->Targets[0]->PublishedDate' => true, // Null and empty are allowed.
 				) );
 		if( !$phpCompare->compareTwoObjects( $this->relation, $relation ) ){
@@ -539,7 +538,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectRelations_TestCase
 		
 		$phpCompare->initCompare( array( 
 						'Relation->Placements' => true, // is not being used here, used during getObjects.
-						'Relation->Geometry' => true, // is not being used here, used during getObjects.
 						'Relation->Targets[0]->PublishedDate' => true, // Null and empty are allowed.
 					));			
 

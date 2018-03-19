@@ -264,7 +264,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_RelationTargets_
 		
 		if( $this->form->Relations ) {
 			foreach( $this->form->Relations as &$relation ) {
-				$relation->Geometry = null; // To repair the Geometry ( This should not be needed, need to find out why Geometry is filled in with array but empty element).
 				$relation->Rating = null; // To repair the Rating ( This should not be needed. same as above).
 				if( $relation->Parent == $this->form->MetaData->BasicMetaData->ID &&
 					$relation->Child == $this->image->MetaData->BasicMetaData->ID &&

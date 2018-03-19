@@ -78,7 +78,7 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 
 				//Get the parent Dossier.
 				require_once BASEDIR . '/server/bizclasses/BizRelation.class.php';
-				$relations = BizRelation::getObjectRelations( $objectId, false, false );
+				$relations = BizRelation::getObjectRelations( $objectId, null, false );
 				if ( $relations ) foreach ( $relations as $relation ) {
 					if ( $relation->Type == 'Contained' ) {
 						$dossierId = $relation->Parent;
@@ -234,7 +234,7 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 						
 						//Check if we have the dossier relations
 						if (!isset($dossierRelations)) {
-							$dossierRelations = BizRelation::getObjectRelations( $dossierId, false, false );								  
+							$dossierRelations = BizRelation::getObjectRelations( $dossierId, null, false );
 						}	  
 							
 						//Search in the dossier relations for the correct article
@@ -252,7 +252,7 @@ class PublishFormArticleSelector_WflGetDialog2 extends WflGetDialog2_EnterpriseC
 					} else if ($rule['type'] == 'dossier') {		
 						//We search for an article in the dossier
 						if (!isset($dossierRelations)) {
-							$dossierRelations = BizRelation::getObjectRelations( $dossierId, false, false );								  
+							$dossierRelations = BizRelation::getObjectRelations( $dossierId, null, false );
 						}	  
 						
 						//Search in the dossier relations for the correct article

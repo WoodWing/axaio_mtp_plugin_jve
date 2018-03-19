@@ -389,6 +389,12 @@ abstract class WW_DbDrivers_DriverBase
 	 */
 	abstract public function newid($table, $after);
 
+	/**
+	 * Returns 'now' (time stamp)
+	 *
+	 * @return mixed
+	 */
+	abstract public function nowStamp();
 
 }
 

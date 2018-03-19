@@ -547,10 +547,8 @@ class WW_AMF_WflServices extends WW_AMF_Services
 			$req = $this->objectToRequest( $req, 'WflCreateObjectRelationsRequest' );
 			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 			$transferServer = new BizTransferServer();
-			if( $req->Relations ) foreach( $req->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$transferServer->urlToFilePath( $relation->Geometry );
-				}
+			if( $req->Objects ) foreach( $req->Objects as $object ) {
+				$transferServer->switchURLToFilePath( $object );
 			}
 			$service = new WflCreateObjectRelationsService();
 			$resp = $service->execute( $req );
@@ -569,10 +567,8 @@ class WW_AMF_WflServices extends WW_AMF_Services
 			$req = $this->objectToRequest( $req, 'WflUpdateObjectRelationsRequest' );
 			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 			$transferServer = new BizTransferServer();
-			if( $req->Relations ) foreach( $req->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$transferServer->urlToFilePath( $relation->Geometry );
-				}
+			if( $req->Objects ) foreach( $req->Objects as $object ) {
+				$transferServer->switchURLToFilePath( $object );
 			}
 			$service = new WflUpdateObjectRelationsService();
 			$resp = $service->execute( $req );
@@ -613,10 +609,8 @@ class WW_AMF_WflServices extends WW_AMF_Services
 
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();
-		if( $resp->Relations ) foreach( $resp->Relations as $relation ) {
-			if ( $relation->Geometry ) {
-				$transferServer->filePathToURL( $relation->Geometry );
-			}
+		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
+			$transferServer->switchFilePathToURL( $object );
 		}
 
 		return $resp;

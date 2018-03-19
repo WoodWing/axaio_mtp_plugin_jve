@@ -46,111 +46,49 @@ class InCopyUtils
 			}
 		}
 	}
-		
+
 	/**
 	 * Replaces the GUIDs in a InCopy DOMDocument. Typically used to instantiate a new document.
 	 *
+	 * ﻿'//ea:Stories/ea:Story/Document/Story' xpath query for copying 'normal' articles.
+	 * '//ea:Stories/ea:wwst_template/ea:wwst_stories/Document/Story' xpath query for copying article created from a template.
+	 * '//ea:Stories/ea:Story/Document/Spread/Rectangle' ); // BZ#14792 xpath query for copying an article created from a image (graphical article)
+	 *
 	 * @param DOMDocument &icDoc Reference to the DOMDocument to replace the GUIDs in
 	 * @param array &$replacedGuids Reference to an array with old-new GUIDs mapping (old=key, new=value)
-	**/	
-	static private function replaceGUIDsForInCopy( &$icDoc, &$replacedGuids)
+	 **/
+	static private function replaceGUIDsForInCopy( &$icDoc, &$replacedGuids )
 	{
 		// Determine GUIDs map and replace GUIDs for all Story elements
 		$xpath = new DOMXPath( $icDoc );
 		$xpath->registerNamespace( 'ea', 'urn:SmartConnection_v3' );
-		
-		$query = '/ea:Stories';
-		$entries = $xpath->query($query);
-		
-		if($entries->length >0){ //version maybe found.
-			$version = $entries->item(0)->getAttribute('ea:WWVersion');
-			if( version_compare( $version,  '2.0', '>=' ) ){ //version = '2.0' is found, it is an IC CS5 article
-				self::replaceGUIDsForInCopyCS5($icDoc, $replacedGuids);
-			}
-		}else{ //if no version specified,meaning it is an IC CS4 article.
-			//For CS4
-			self::replaceGUIDsForInCopyCS4($icDoc, $replacedGuids);
-		}
-	}
-
-	/**
-	 * Replaces the GUIDs in a InCopy CS4 DOMDocument. Typically used to instantiate a new document.
-	 * '//Stories/Story/SnippetRoot/cflo' xpath query for copying 'normal' articles.
-	 * '//Stories/wwst_template/wwst_stories/SnippetRoot/cflo' xpath query for copying article created from a template.
-	 * '//Stories/Story/SnippetRoot/crec' ); // BZ#14792 xpath query for copying an article created from a image (graphical article) 
-	 * 
-	 * @param DOMDocument &icDoc Reference to the DOMDocument to replace the GUIDs in
-	 * @param array &$replacedGuids Reference to an array with old-new GUIDs mapping (old=key, new=value)
-	 */
-	static private function replaceGUIDsForInCopyCS4( &$icDoc, &$replacedGuids)
-	{	
-		$xpath = new DOMXPath( $icDoc );
-		$query = '//Stories/Story';
-		$entries = $xpath->query($query);
-		foreach( $entries as $entry ) {
-			$oldGUID = $entry->getAttribute( 'GUID' );
-			if( $oldGUID ) {
-				$replacedGuids[$oldGUID] = strtoupper(InCopyUtils::createGUID());
-				$entry->setAttribute( 'GUID', $replacedGuids[$oldGUID] );
-			}
-		}
-
-		// Replace other GUIDs that did refer to the old (replaced) Story GUIDs
-		$queries = array( 
-			'//Stories/Story/SnippetRoot/cflo', 
-			'//Stories/wwst_template/wwst_stories/SnippetRoot/cflo',
-			'//Stories/Story/SnippetRoot/crec' ); // BZ#14792
-		foreach( $queries as $query ) {
-			$entries = $xpath->query($query);
-			foreach( $entries as $entry ) {
-				$oldGUID = $entry->getAttribute( 'GUID' ); // GUID has k_ or c_ prefixes
-				if( $oldGUID ) { 
-					$newGUID = new ICDBToken( $oldGUID );
-					$newGUID->value = $replacedGuids[$newGUID->value];
-					$entry->setAttribute( 'GUID', $newGUID->toString() ); 
-				}
-			}
-		}	
-	}
-	
-	/**
-	 * Replaces the GUIDs in a InCopy CS5 DOMDocument. Typically used to instantiate a new document.
-	 * More info see: replaceGUIDsForInCopyCS4()
-	 * @param DOMDocument &icDoc Reference to the DOMDocument to replace the GUIDs in
-	 * @param array &$replacedGuids Reference to an array with old-new GUIDs mapping (old=key, new=value)
-	**/	
-	static private function replaceGUIDsForInCopyCS5( &$icDoc, &$replacedGuids)
-	{
-		// Determine GUIDs map and replace GUIDs for all Story elements
-		$xpath = new DOMXPath( $icDoc );
 		$query = '/ea:Stories/ea:Story';
-		$entries = $xpath->query($query);
+		$entries = $xpath->query( $query );
 
 		foreach( $entries as $entry ) {
-			$oldGUID = $entry->getAttribute('ea:GUID');
+			$oldGUID = $entry->getAttribute( 'ea:GUID' );
 			if( $oldGUID ) {
-				$replacedGuids[$oldGUID] = strtoupper(InCopyUtils::createGUID());
-				$entry->setAttribute('ea:GUID', $replacedGuids[$oldGUID] );
+				$replacedGuids[ $oldGUID ] = strtoupper( InCopyUtils::createGUID() );
+				$entry->setAttribute( 'ea:GUID', $replacedGuids[ $oldGUID ] );
 			}
 		}
-				
+
 		$queries = array(
-				'//ea:Stories/ea:Story/Document/Story', //equivalent to CS4: //Stories/Story/SnippetRoot/cflo'
-				'//ea:Stories/ea:wwst_template/ea:wwst_stories/Document/Story', //equivalent to CS4: //Stories/wwst_template/wwst_stories/SnippetRoot/cflo
-				'//ea:Stories/ea:Story/Document/Spread/Rectangle'); // equivalent to CS4: //Stories/Story/SnippetRoot/crec
-																	
+			'//ea:Stories/ea:Story/Document/Story',
+			'//ea:Stories/ea:wwst_template/ea:wwst_stories/Document/Story',
+			'//ea:Stories/ea:Story/Document/Spread/Rectangle' );
+
 		foreach( $queries as $query ) {
-			$entries = $xpath->query($query);
+			$entries = $xpath->query( $query );
 			foreach( $entries as $entry ) {
 				$oldGUID = $entry->getAttribute( 'Guid' );
-				if( $oldGUID ) { 
-					$entry->setAttribute( 'Guid', $replacedGuids[$oldGUID] );
+				if( $oldGUID && isset( $replacedGuids[ $oldGUID ] ) ) { // EN-88744 Inline textframes have no Guid.
+					$entry->setAttribute( 'Guid', $replacedGuids[ $oldGUID ] );
 				}
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Generate unique GUID (in 8-4-4-4-12 format) that can be used for Adobe InCopy stories.
 	 *
