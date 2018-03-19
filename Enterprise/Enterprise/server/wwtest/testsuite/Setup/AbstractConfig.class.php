@@ -76,7 +76,7 @@ abstract class WW_TestSuite_Setup_AbstractConfig
 	 * @param stdClass $dataConfig The home brewed data structure object to copy from.
 	 * @param mixed $dataClass The admin data class to copy to.
 	 */
-	protected function copyConfigPropertiesToClass( $dataConfig, $dataClass )
+	protected function copyConfigPropertiesToAdminClass( $dataConfig, $dataClass )
 	{
 		foreach( array_keys( get_class_vars( get_class( $dataClass ) ) ) as $prop ) {
 			if( array_key_exists( $prop, $dataConfig ) ) {

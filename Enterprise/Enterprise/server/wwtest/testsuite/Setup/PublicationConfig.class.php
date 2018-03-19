@@ -38,7 +38,7 @@ class WW_TestSuite_Setup_PublicationConfig extends WW_TestSuite_Setup_AbstractCo
 		if( isset( $this->config->Publications ) ) {
 			foreach( $this->config->Publications as $publicationConfig ) {
 				$publication = new AdmPublication();
-				$this->copyConfigPropertiesToClass( $publicationConfig, $publication );
+				$this->copyConfigPropertiesToAdminClass( $publicationConfig, $publication );
 				$publication->PubChannels = null; // handled separately below
 				$pubId = $this->testSuiteUtils->createNewPublication( $this->testCase, $this->ticket, $publication );
 				$this->publicationNameIdMap[ $publicationConfig->Name ] = $pubId;
@@ -46,7 +46,7 @@ class WW_TestSuite_Setup_PublicationConfig extends WW_TestSuite_Setup_AbstractCo
 				if( isset( $publicationConfig->PubChannels ) ) {
 					foreach( $publicationConfig->PubChannels as $pubChannelConfig ) {
 						$pubChannel = new AdmPubChannel();
-						$this->copyConfigPropertiesToClass( $pubChannelConfig, $pubChannel );
+						$this->copyConfigPropertiesToAdminClass( $pubChannelConfig, $pubChannel );
 						$pubChannel->Issues = null; // handled separately below
 						$pubChannel->Editions = null; // handled separately below
 						$response = $this->testSuiteUtils->createNewPubChannel( $this->testCase, $this->ticket, $pubId, $pubChannel );
@@ -56,7 +56,7 @@ class WW_TestSuite_Setup_PublicationConfig extends WW_TestSuite_Setup_AbstractCo
 						if( isset( $pubChannelConfig->Issues ) ) {
 							foreach( $pubChannelConfig->Issues as $issueConfig ) {
 								$issue = new AdmIssue();
-								$this->copyConfigPropertiesToClass( $issueConfig, $issue );
+								$this->copyConfigPropertiesToAdminClass( $issueConfig, $issue );
 								$response = $this->testSuiteUtils->createNewIssue( $this->testCase, $this->ticket, $pubId, $pubChannelId, $issue );
 								$issueId = $response->Issues[0]->Id;
 								$this->issueNameIdMap[ $publicationConfig->Name ][ $pubChannelConfig->Name ][ $issueConfig->Name ] = $issueId;
@@ -66,7 +66,7 @@ class WW_TestSuite_Setup_PublicationConfig extends WW_TestSuite_Setup_AbstractCo
 						if( isset( $pubChannelConfig->Editions ) ) {
 							foreach( $pubChannelConfig->Editions as $editionConfig ) {
 								$edition = new AdmEdition();
-								$this->copyConfigPropertiesToClass( $editionConfig, $edition );
+								$this->copyConfigPropertiesToAdminClass( $editionConfig, $edition );
 								$newEdition = $this->testSuiteUtils->createNewEdition( $this->testCase, $this->ticket, $pubId, $pubChannelId, 0, $edition );
 								$editionId = $newEdition->Id;
 								$this->editionNameIdMap[ $publicationConfig->Name ][ $pubChannelConfig->Name ][ $editionConfig->Name ] = $editionId;
@@ -78,7 +78,7 @@ class WW_TestSuite_Setup_PublicationConfig extends WW_TestSuite_Setup_AbstractCo
 				if( isset( $publicationConfig->States ) ) {
 					foreach( $publicationConfig->States as $statusConfig ) {
 						$status = new AdmStatus();
-						$this->copyConfigPropertiesToClass( $statusConfig, $status );
+						$this->copyConfigPropertiesToAdminClass( $statusConfig, $status );
 						$statusId = $this->testSuiteUtils->createNewStatus( $this->testCase, $this->ticket, $pubId, 0, $status );
 						$this->statusNameIdMap[ $publicationConfig->Name ][ $statusConfig->Name ] = $statusId;
 					}
@@ -87,7 +87,7 @@ class WW_TestSuite_Setup_PublicationConfig extends WW_TestSuite_Setup_AbstractCo
 				if( isset( $publicationConfig->Categories ) ) {
 					foreach( $publicationConfig->Categories as $categoryConfig ) {
 						$category = new AdmSection();
-						$this->copyConfigPropertiesToClass( $categoryConfig, $category );
+						$this->copyConfigPropertiesToAdminClass( $categoryConfig, $category );
 						$categoryId = $this->testSuiteUtils->createNewSection( $this->testCase, $this->ticket, $pubId, 0, $category );
 						$this->categoryNameIdMap[ $publicationConfig->Name ][ $categoryConfig->Name ] = $categoryId;
 					}

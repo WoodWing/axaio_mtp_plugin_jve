@@ -43,7 +43,7 @@ class WW_TestSuite_Setup_AuthorizationConfig extends WW_TestSuite_Setup_Abstract
 		if( isset( $this->config->Users ) ) {
 			foreach( $this->config->Users as $userConfig ) {
 				$user = new AdmUser();
-				$this->copyConfigPropertiesToClass( $userConfig, $user );
+				$this->copyConfigPropertiesToAdminClass( $userConfig, $user );
 				$userId = $this->testSuiteUtils->createNewUser( $this->testCase, $this->ticket, $user );
 				$this->userNameIdMap[ $userConfig->Name ] = $userId;
 			}
@@ -51,7 +51,7 @@ class WW_TestSuite_Setup_AuthorizationConfig extends WW_TestSuite_Setup_Abstract
 		if( isset( $this->config->UserGroups ) ) {
 			foreach( $this->config->UserGroups as $groupConfig ) {
 				$group = new AdmUserGroup();
-				$this->copyConfigPropertiesToClass( $groupConfig, $group );
+				$this->copyConfigPropertiesToAdminClass( $groupConfig, $group );
 				$groupId = $this->testSuiteUtils->createNewUserGroup( $this->testCase, $this->ticket, $group );
 				$this->groupNameIdMap[ $groupConfig->Name ] = $groupId;
 			}
