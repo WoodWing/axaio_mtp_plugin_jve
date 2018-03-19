@@ -20,8 +20,9 @@ switch( $_REQUEST['act'] ) {
 	break;
 
 	case 'logfile': // show a given server log file
-		$logFolder = LogHandler::getLogFolder();
+		$clientIpFolder = $_REQUEST['clientipfolder'];
 		$logFile = $_REQUEST['file'];
+		$logFolder = LogHandler::getLogFolder( $clientIpFolder, false );
 		if( $logFolder && $logFile &&
 			// anti-hack: block file paths...
 			strpos( $logFile, '..' ) === false &&
