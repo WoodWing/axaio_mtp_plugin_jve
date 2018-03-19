@@ -204,12 +204,16 @@ class ElvisRESTClient extends ElvisClient
 	 * @param string $elvisId Id of asset
 	 * @param array $metadata Changed metadata
 	 * @param Attachment|null $file
+	 * @param string|null $clearCheckOutState Set to 'true' or null(default) to checkin the object, set to 'false' to retain the checkout status of the object.
 	 * @throws BizException
 	 */
-	public static function update( $elvisId, $metadata, $file = null )
+	public static function update( $elvisId, $metadata, $file = null, $clearCheckOutState=null )
 	{
 		$post = array();
 		$post['id'] = $elvisId;
+		if( !is_null( $clearCheckOutState )) {
+			$post['clearCheckoutState'] = $clearCheckOutState;
+		}
 		if( !empty( $metadata ) ) {
 			$post['metadata'] = json_encode( $metadata );
 		}

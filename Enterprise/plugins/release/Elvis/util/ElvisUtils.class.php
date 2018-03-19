@@ -14,11 +14,16 @@ class ElvisUtils {
 	}
 
 	/**
+	 * Returns boolean to indicate if the SaveObject call releases the lock or retains the lock.
+	 *
+	 * True when the SaveObject call releases the lock(check-in),
+	 * false when the SaveObject call retains the lock (remains checkout/save-version)
+	 *
 	 * @return bool
 	 */
 	public static function saveObjectsDoesReleaseObjectLock()
 	{
-		return self::$unlock === false;
+		return self::$unlock === true;
 	}
 
 	/**
@@ -268,9 +273,12 @@ class ElvisUtils {
 			}
 		}
 	}
-	
+
 	/**
+	 * Enrich user AdmUser object.
+	 *
 	 * @param AdmUser $user
+	 * @return AdmUser
 	 */
 	public static function enrichUser($user) {
 		//require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';

@@ -108,16 +108,12 @@ class MetadataHandler
 	 * @param string $elvisId Id of asset
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
 	 * @param Attachment|null $file
+	 * @param string|null $clearCheckOutState Set to 'true' or null(default) to checkin the object during update, 'false' to retain the checkout status of the object.
 	 */
-	public function update( $elvisId, $entMetadataOrValues, $file=null )
+	public function update( $elvisId, $entMetadataOrValues, $file=null, $clearCheckOutState=null )
 	{
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
-
-		if( ElvisUtils::saveObjectsDoesReleaseObjectLock() ) {
-			// save object detected; keep asset in checkout state on Elvis side
-			$elvisMetadata['clearCheckoutState'] = 'false';
-		}
 
 		require_once dirname( __FILE__ ).'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
@@ -139,7 +135,7 @@ class MetadataHandler
 		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $editableFields ) );
 		if( $elvisMetadata ) {
 			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
-			ElvisRESTClient::update( $elvisId, $elvisMetadata, $file );
+			ElvisRESTClient::update( $elvisId, $elvisMetadata, $file, $clearCheckOutState );
 		}
 	}
 
@@ -153,11 +149,6 @@ class MetadataHandler
 	{
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
-
-		if( ElvisUtils::saveObjectsDoesReleaseObjectLock() ) {
-			// save object detected; keep asset in checkout state on Elvis side
-			$elvisMetadata['clearCheckoutState'] = 'false';
-		}
 
 		if( !empty( $elvisMetadata ) ) {
 			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
