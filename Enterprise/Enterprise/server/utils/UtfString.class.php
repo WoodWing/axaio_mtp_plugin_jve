@@ -75,10 +75,8 @@ class UtfString
 	 */
 	public static function removeIllegalUnicodeCharacters( $inString )
 	{
-		//Remove non-printable characters from begin and end (TODO check if x7F is really illegal)
-		$inString = trim( $inString, "\x7F\x00..\x1F" );
 		// BZ#12513 remove illegal XML characters (all before 0x1F except for tab, newline, carriage return)
-		$inString = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F]/', '', $inString );
+		$inString = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/', '', $inString );
 
 		$inString = self::filterOutNonUtf8Characters( $inString );
 
