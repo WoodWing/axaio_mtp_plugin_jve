@@ -24,7 +24,8 @@ class IdsAutomation_EnterprisePlugin extends EnterprisePlugin
 		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = 'Creates a preview, PDF or EPS from layout (or Layout Module) pages '.
 			'using Adobe InDesign Server. This happens in the background after saving a layout or '.
-			'a placed article, image or spreadsheet or after changing a layout status. ';
+			'a placed article, image or spreadsheet or after changing a layout status. '.
+			 'The above is also applicable for layout (module) templates.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
 	}

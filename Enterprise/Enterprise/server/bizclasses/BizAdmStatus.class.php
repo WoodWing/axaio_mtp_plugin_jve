@@ -71,7 +71,7 @@ class BizAdmStatus
 	 *
 	 * @param AdmStatus $status The admin status object
 	 * @throws BizException Throws BizException when invalid status is given, see {@link:validateStatus()}
-	 * @return Object
+	 * @return AdmStatus
 	 */
 	static public function createStatus( $status )
 	{
@@ -149,7 +149,7 @@ class BizAdmStatus
 	 * Retrieves a status objects from DB.
 	 *
 	 * @param integer $statusId
-	 * @return object status
+	 * @return AdmStatus status
 	 */
 	public static function getStatusWithId( $statusId )
 	{

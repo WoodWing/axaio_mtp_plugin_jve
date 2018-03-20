@@ -93,7 +93,7 @@ class DBAdmStatus extends DBBase
 	 * Create new admin status object
 	 *  
 	 * @param object $status Status that need to be created
-	 * @return object The created status objects (from DB), or null on failure
+	 * @return AdmStatus The created status objects (from DB), or null on failure
 	**/
 	public static function createStatus( $status )
 	{	

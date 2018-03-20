@@ -1444,4 +1444,27 @@ class DBInDesignServerJob extends DBBase
 
 		return $result;
 	}
+
+	/**
+	 * Checks if there is a job for the specified object.
+	 *
+	 * @param integer $objectId
+	 * @return bool
+	 */
+	public static function jobExistsForObject( $objectId )
+	{
+		$row = self::getRow( self::TABLENAME, '`objid` = ?', array( 'jobid' ), array( intval( $objectId) ) );
+		return $row ? true : false;
+	}
+
+	/**
+	 * Deletes jobs related to an specified object.
+	 *
+	 * @param integer $objectId
+	 * @return bool|null
+	 */
+	public static function deleteJobsForObject( $objectId )
+	{
+		return self::deleteRows( self::TABLENAME, '`objid` = ?', array( intval( $objectId) ) );
+	}
 }
