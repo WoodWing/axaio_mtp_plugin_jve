@@ -81,7 +81,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Ins
 			$this->setupTestData();
 			
 			$this->createTemplate();
-			$this->instantiateTemplate();
+		$this->instantiateTemplate();
 			$this->copyLayout();
 			$this->saveLayout();
 			$this->restoreLayout();
