@@ -12,6 +12,8 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_TestCase extends TestCase
 {
+	const IDSA_JOB_TYPE = 'IDS_AUTOMATION';
+
 	/** @var WW_Utils_TestSuite $utils */
 	private $globalUtils = null;
 
@@ -168,28 +170,11 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_Te
 	 */
 	private function deleteObjects()
 	{
-		try {
-			require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
-			$request = new WflDeleteObjectsRequest();
-			$request->Ticket = $this->ticket;
-			$request->IDs = $this->createdObjecIds;
-			$request->Permanent = true;
-
-			$stepInfo = 'Delete an object (that was used for this test).';
-			$response = $this->globalUtils->callService( $this, $request, $stepInfo );
-
-			if( $response && $response->Reports ) { // Introduced in v8.0
-				$errMsg = '';
-				foreach( $response->Reports as $report ) {
-					foreach( $report->Entries as $reportEntry ) {
-						$errMsg .= $reportEntry->Message.PHP_EOL;
-					}
-				}
-				if( $errMsg ) {
-					$this->throwError( 'DeleteObjects: failed: "'.$errMsg.'"' );
-				}
+		$errorReport = null;
+		if( $this->createdObjecIds ) foreach ( $this->createdObjecIds as $objectId ) {
+			if( !$this->globalUtils->deleteObject( $this, $this->ticket, $objectId, 'Delete template', $errorReport  ) ) {
+				$this->setResult( 'ERROR',  'Could not delete layout template with id: '.$objectId.'. '.$errorReport );
 			}
-		} catch( BizException $e ) {
 		}
 	}
 
@@ -212,11 +197,16 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_Te
 		$this->assertGreaterThan( 0, $id );
 		$this->createdObjecIds[] = $id;
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
-		$jobCreated = DBInDesignServerJob::jobExistsForObject( $id );
+		$jobCreated = DBInDesignServerJob::jobExistsForObject( $id, self::IDSA_JOB_TYPE );
 		$this->assertEquals( !$this->skipIdsa, $jobCreated );
-		/* $result = */DBInDesignServerJob::deleteJobsForObject( $id );
+		/* $result = */DBInDesignServerJob::deleteJobsForObject( $id, self::IDSA_JOB_TYPE );
 	}
 
+	/**
+	 * Returns a request to create a layout template.
+	 *
+	 * @return WflCreateObjectsRequest
+	 */
 	private function composeCreateTemplateRequest()
 	{
 		$request = new WflCreateObjectsRequest();
@@ -404,7 +394,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_Te
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 		$newAdmStatus = BizAdmStatus::getStatusWithId( $this->templateStatus->Id );
-		$newAdmStatus->Name = $this->getTimeStamp();
+		$newAdmStatus->Name = 'SkipIdsa '.$this->getTimeStamp();
 		$newAdmStatus->SkipIdsa = $this->skipIdsa;
 		$newAdmStatus->Produce = false;
 		$statusIds = BizAdmStatus::createStatuses( $this->pubObj->Id, null, array( $newAdmStatus )  );
