@@ -48,6 +48,9 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_Te
 	/** @var array runTimeStatusIds */
 	private $runTimeStatusIds;
 
+	/** @var bool skipIdsa */
+	private $skipIdsa;
+
 	public function getDisplayName()
 	{
 		return 'Toggle InDesign Server Automation setting.';
@@ -80,7 +83,8 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_Te
 			$this->setupTestData();
 			$skipIdsaMode = array( true, false );
 			foreach( $skipIdsaMode as $skipIdsa ) {
-				$this->createRunTimeStatus( $skipIdsa );
+				$this->skipIdsa = $skipIdsa;
+				$this->createRunTimeStatus();
 				$this->createTemplate();
 			}
 		} catch( BizException $e ) {
@@ -209,7 +213,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_Te
 		$this->createdObjecIds[] = $id;
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		$jobCreated = DBInDesignServerJob::jobExistsForObject( $id );
-		$this->assertEquals( !$this->runTimeStatus->SkipIdsa, $jobCreated );
+		$this->assertEquals( !$this->skipIdsa, $jobCreated );
 		/* $result = */DBInDesignServerJob::deleteJobsForObject( $id );
 	}
 
@@ -395,22 +399,23 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_Te
 
 	/**
 	 * Creates a status. Status is based on the status defined for layout templates of the build test brand.
-	 *
-	 * @param bool $skipIdsa Whether or not the status should have the 'SkipIdsa' property set.
 	 */
-	private function createRunTimeStatus( $skipIdsa )
+	private function createRunTimeStatus()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-		$status = BizAdmStatus::getStatusWithId( $this->templateStatus->Id );
-		$status->Name = $this->getTimeStamp();
-		$status->SkipIdsa = $skipIdsa;
-		$status->Produce = false;
-		$statusIds = BizAdmStatus::createStatuses( $this->pubObj->Id, null, array( $status )  );
-		$this->runTimeStatusIds[] = $statusIds[0];
-		$this->runTimeStatus = BizAdmStatus::getStatusWithId( $statusIds[0] );
-		BizAdmStatus::restructureMetaDataStatusColor( $this->runTimeStatus->Id, $this->runTimeStatus->Color );
+		$newAdmStatus = BizAdmStatus::getStatusWithId( $this->templateStatus->Id );
+		$newAdmStatus->Name = $this->getTimeStamp();
+		$newAdmStatus->SkipIdsa = $this->skipIdsa;
+		$newAdmStatus->Produce = false;
+		$statusIds = BizAdmStatus::createStatuses( $this->pubObj->Id, null, array( $newAdmStatus )  );
+		$newAdmStatus = BizAdmStatus::getStatusWithId( $statusIds[0] );
+		$this->runTimeStatus = BizAdmStatus::convertAdminStatusToWflStatus( $newAdmStatus );
+		$this->runTimeStatusIds[] = $this->runTimeStatus->Id;
 	}
 
+	/**
+	 * Deletes the runtime status from the database.
+	 */
 	private function deleteRunTimeStatus()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
