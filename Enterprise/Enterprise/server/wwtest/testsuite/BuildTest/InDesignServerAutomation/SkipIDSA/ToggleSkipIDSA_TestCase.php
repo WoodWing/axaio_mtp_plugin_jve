@@ -408,6 +408,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_SkipIDSA_ToggleSkipIDSA_Te
 		$statusIds = BizAdmStatus::createStatuses( $this->pubObj->Id, null, array( $status )  );
 		$this->runTimeStatusIds[] = $statusIds[0];
 		$this->runTimeStatus = BizAdmStatus::getStatusWithId( $statusIds[0] );
+		BizAdmStatus::restructureMetaDataStatusColor( $this->runTimeStatus->Id, $this->runTimeStatus->Color );
 	}
 
 	private function deleteRunTimeStatus()
