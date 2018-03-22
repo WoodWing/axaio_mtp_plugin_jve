@@ -30,16 +30,16 @@ class BizInDesignServerJobs
 	 */
 	public static function cleanupJobs()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizAutoPurge.class.php';
+		require_once BASEDIR .'/server/utils/ServerJobUtils.class.php';
 		require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 
 		// Cleanup old InDesign Server Jobs that are completed.
-		$purgeDate = BizAutoPurge::getDateForPurging( AUTOCLEAN_SERVERJOBS_COMPLETED );
+		$purgeDate = ServerJobUtils::getDateForDeletion( AUTOCLEAN_SERVERJOBS_COMPLETED );
 		DBInDesignServerJob::removeCompletedJobs( $purgeDate );
 
 		// Cleanup old InDesign Server Jobs that are not finished.
-		$purgeDate = BizAutoPurge::getDateForPurging( AUTOCLEAN_SERVERJOBS_UNFINISHED );
+		$purgeDate = ServerJobUtils::getDateForDeletion( AUTOCLEAN_SERVERJOBS_UNFINISHED );
 		DBInDesignServerJob::removeUnfinishedJobs( $purgeDate );
 
 		// End all foreground jobs never started and queued more than 3 minutes ago.

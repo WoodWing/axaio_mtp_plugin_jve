@@ -32,6 +32,7 @@ class BizServerJobConfig
 		'AutoPurgeTrashCan' => true,
 		'EnterpriseEvent' => true,
 		'AutoCleanServerJobs' => true,
+		'AutoCleanServiceLogs' => true,
 	);
 
 	public function __construct()
@@ -341,6 +342,11 @@ class BizServerJobConfig
 					require_once BASEDIR.'/server/bizclasses/BizServerJobCleanup.class.php';
 					$bizServerJobCleanup = new BizServerJobCleanup();
 					$bizServerJobCleanup->getJobConfig( $jobConfig );
+					break;
+				case 'AutoCleanServiceLogs':
+					require_once BASEDIR.'/server/bizclasses/BizServiceLogsCleanup.class.php';
+					$bizServiceLogsCleanup = new BizServiceLogsCleanup();
+					$bizServiceLogsCleanup->getJobConfig( $jobConfig );
 					break;
 				default:
 					throw new BizException( 'ERR_ARGUMENT', 'Server', 

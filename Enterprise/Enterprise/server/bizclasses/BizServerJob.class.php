@@ -175,9 +175,16 @@ class BizServerJob
 				break;
 				case 'AutoCleanServerJobs':
 					require_once BASEDIR . '/server/bizclasses/BizServerJobCleanup.class.php';
-					$bizServerJobCleanup = new BizServerJobCleanup();
 					if( BizServerJobCleanup::isServerJobCleanupEnabled() ) {
+						$bizServerJobCleanup = new BizServerJobCleanup();
 						$job = $bizServerJobCleanup->createJob( $pushIntoQueue );
+					}
+				break;
+				case 'AutoCleanServiceLogs':
+					require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
+					if( BizServiceLogsCleanup::isServiceLogsCleanupEnabled() ) {
+						$bizServiceLogsCleanup = new BizServiceLogsCleanup();
+						$job = $bizServiceLogsCleanup->createJob( $pushIntoQueue );
 					}
 				break;
 				default: // should not happen
@@ -415,6 +422,10 @@ class BizServerJob
 					require_once BASEDIR . '/server/bizclasses/BizServerJobCleanup.class.php';
 					$bizClass = new BizServerJobCleanup();
 				break;
+				case 'AutoCleanServiceLogs':
+					require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
+					$bizClass = new BizServiceLogsCleanup();
+				break;
 				default:
 					$foundJobHandler = false;
 					LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No core server class found to handle job {$job->JobType} (jobid = {$job->JobId})\r\n");
@@ -597,6 +608,10 @@ class BizServerJob
 				case 'AutoCleanServerJobs':
 					require_once BASEDIR . '/server/bizclasses/BizServerJobCleanup.class.php';
 					$bizClass = new BizServerJobCleanup();
+					break;
+				case 'AutoCleanServiceLogs':
+					require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
+					$bizClass = new BizServiceLogsCleanup();
 					break;
 				default:
 					$foundJobHandler = false;

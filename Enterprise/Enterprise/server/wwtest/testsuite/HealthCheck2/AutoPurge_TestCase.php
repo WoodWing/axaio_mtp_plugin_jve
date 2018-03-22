@@ -44,6 +44,7 @@ class WW_TestSuite_HealthCheck2_AutoPurge_TestCase extends TestCase
 			}
 		}
 		require_once BASEDIR.'/server/bizclasses/BizAutoPurge.class.php';
+		require_once BASEDIR .'/server/utils/ServerJobUtils.class.php';
 		// check AutoPurge enabled?
 		if( !BizAutoPurge::isAutoPurgeEnabled() ){	
 			$help = 'To enable it, please assign at least one server to the AutoPurgeTrashCan Server Job <a href="../../server/admin/servers.php'.'">here</a>.';
@@ -79,7 +80,7 @@ class WW_TestSuite_HealthCheck2_AutoPurge_TestCase extends TestCase
 					// retrieve deletedObject(s) that stays in trashCan more than the days specified
 					require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';					
 					$params = array();
-					$params[] = new QueryParam( 'Deleted', '<', BizAutoPurge::getDateForPurging($afterDayForPurging+8));
+					$params[] = new QueryParam( 'Deleted', '<', ServerJobUtils::getDateForDeletion( $afterDayForPurging+8 ) );
 					$params[] = new Queryparam( 'PublicationId','=', $pubId);
 					
 					require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
