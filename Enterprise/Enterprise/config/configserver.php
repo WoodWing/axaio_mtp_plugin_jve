@@ -1670,6 +1670,22 @@ if( !defined('AUTOCLEAN_SERVERJOBS_UNFINISHED') ) {
 }
 
 // -------------------------------------------------------------------------------------------------
+//  Enterprise Service Logs Auto Cleanup
+// -------------------------------------------------------------------------------------------------
+
+//  Automatically deletes Enterprise Service Logs entries in smart_log table when they become older than a specified
+//  number of days.
+
+// AUTOCLEAN_SERVICELOGS_DAYS
+//    Default value is 30 days, which means all records in smart_log table that are older than 30 days will be deleted.
+//    This feature is enabled only when LOGLEVEL and AUTOCLEAN_SERVICELOGS_DAYS are both set to a value more than 0
+//    respectively.
+if( !defined('AUTOCLEAN_SERVICELOGS_DAYS') ) {
+	define( 'AUTOCLEAN_SERVICELOGS_DAYS', 30 );
+}
+
+
+// -------------------------------------------------------------------------------------------------
 // Remote users
 // -------------------------------------------------------------------------------------------------
 
