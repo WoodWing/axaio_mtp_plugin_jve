@@ -306,6 +306,12 @@ class LogHandler
 	{
 		if( OUTPUTDIRECTORY == '' ) {
 			return null; // logging disabled
+		} elseif( !is_dir( OUTPUTDIRECTORY ) ) { // BZ#23964
+			// When OUTPUTDIRECTORY doesnt exists, just bail out:
+			// It is an error as the OUTPUTDIRECTORY should exists and valid,
+			// when it is not, it will be detected by the HealthCheck, no point throwing
+			// BizException here as it will end up no valid folder to write the error.
+			return null;
 		}
 
 		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
@@ -314,16 +320,7 @@ class LogHandler
 							FolderUtils::replaceDangerousChars( $clientIpFolder );
 
 		if( !isset( self::$logFolders[$newClientIP] )) {
-			// Create YYMMDD subfolder (when missing)
-			if( !is_dir( OUTPUTDIRECTORY ) ) { // BZ#23964
-				// When OUTPUTDIRECTORY doesnt exists, just bail out:
-				// It is an error as the OUTPUTDIRECTORY should exists and valid,
-				// when it is not, it will be detected by the HealthCheck, no point throwing
-				// BizException here as it will end up no valid folder to write the error.
-				return null;
-			}
-			// Create client IP subfolder (when missing)
-			self::$logFolders[$newClientIP] = OUTPUTDIRECTORY.date('Ymd').'/';
+			self::$logFolders[$newClientIP] = OUTPUTDIRECTORY.date('Ymd').'/'; // Create YYMMDD subfolder (when missing)
 			$dayPhpInfoFile = self::$logFolders[$newClientIP].'phpinfo.htm';
 			self::$logFolders[$newClientIP] = self::$logFolders[$newClientIP].$newClientIP.'/';
 
