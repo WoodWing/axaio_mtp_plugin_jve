@@ -307,7 +307,7 @@ class DBPage extends DBBase
 	 *
 	 * @param integer[] $layoutIds
 	 * @param integer[] $pageSequences
-	 * @return array 3-dim array of page fields, indexed by ids of publication, issue and edition and sorted by their names and pagesequence.
+	 * @return array 3-dim array of page fields, indexed by ids of publication, issue and edition and sorted by their 'order' and 'pagesequence'.
 	 * @since 10.4.0
 	 */
 	public static function listRelatedPagesRows( $layoutIds, $pageSequences )
@@ -338,7 +338,12 @@ class DBPage extends DBBase
 			"INNER JOIN $issuesTable iss ON ( iss.`id` = tar.`issueid` ) ".
 			"INNER JOIN $publicationsTable pub ON ( pub.`id` = cha.`publicationid` ) ".
 			"WHERE ".implode( ' AND ', $wheres )." ".
-			"ORDER BY pub.`publication`, iss.`name`, edi.`name`, pag.`pagesequence` ";
+			"ORDER BY ".
+				"pub.`code` ASC, pub.`id` ASC, ".
+				"cha.`code` ASC, cha.`id` ASC, ".
+				"iss.`code` ASC, iss.`id` ASC, ".
+				"edi.`code` ASC, edi.`id` ASC, ".
+				"pag.`pagesequence` ASC ";
 
 		$rows = array();
 		$sth = $dbDriver->query( $sql, $params );
