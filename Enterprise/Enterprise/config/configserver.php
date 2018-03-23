@@ -1677,13 +1677,14 @@ if( !defined('AUTOCLEAN_SERVERJOBS_UNFINISHED') ) {
 //  number of days.
 
 // AUTOCLEAN_SERVICELOGS_DAYS
-//    Default value is 30 days, which means all records in smart_log table that are older than 30 days will be deleted.
-//    This feature is enabled only when LOGLEVEL and AUTOCLEAN_SERVICELOGS_DAYS are both set to a value more than 0
-//    respectively.
+//    When LOGLEVEL is set to a value more than 0, the service logging is enabled and this leads to continous data grow
+//    in smart_log table.
+//    To periodically clean this table, AUTOCLEAN_SERVICELOGS_DAYS can be set to a value more than 0.
+//    Default is 30 which means all records in smart_log table that are older than 30 days will be deleted.
+//    Setting it to 0 will disable the cleanup of the table.
 if( !defined('AUTOCLEAN_SERVICELOGS_DAYS') ) {
 	define( 'AUTOCLEAN_SERVICELOGS_DAYS', 30 );
 }
-
 
 // -------------------------------------------------------------------------------------------------
 // Remote users

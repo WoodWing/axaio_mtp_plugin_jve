@@ -89,7 +89,7 @@ class BizServiceLogsCleanup extends BizServerJobHandler
 	}
 
 	/**
-	 * Checks whether if the ServiceLogsCleanup job is enabled.
+	 * Checks whether the ServiceLogsCleanup job is enabled.
 	 *
 	 * ServiceLogsCleanup job is enabled when LOGLEVEL and
 	 * AUTOCLEAN_SERVICELOGS_DAYS are both set to a value more than 0.
@@ -109,7 +109,6 @@ class BizServiceLogsCleanup extends BizServerJobHandler
 			$registered = false; // Whether it is registered in the admin page.
 			$userAssigned = false;
 			$bizJobConfig = new BizServerJobConfig();
-			$jobConfig = $bizJobConfig->newJobConfig();
 			$dbConfigs  = $bizJobConfig->listJobConfigs();
 			if( $dbConfigs ) foreach( $dbConfigs as $jobConfigs ) {
 				foreach ( $jobConfigs as $name => $jobConfig ) {
