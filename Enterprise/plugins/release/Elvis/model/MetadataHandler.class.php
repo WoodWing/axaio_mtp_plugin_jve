@@ -108,7 +108,7 @@ class MetadataHandler
 	 * @param string $elvisId Id of asset
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
 	 * @param Attachment|null $file
-	 * @param string|null $clearCheckOutState Set to 'true' or null(default) to checkin the object during update, 'false' to retain the checkout status of the object.
+	 * @param bool|null $clearCheckOutState Set to true or null(default) to checkin the object during update, false to retain the checkout status of the object.
 	 */
 	public function update( $elvisId, $entMetadataOrValues, $file=null, $clearCheckOutState=null )
 	{

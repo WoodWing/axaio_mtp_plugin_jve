@@ -445,9 +445,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		// upload original to Elvis
 		if( $object->Files ) {
 			if( ElvisUtils::saveObjectsDoesReleaseObjectLock() ) {
-				$clearCheckOutState = 'true'; // Check-in object.
+				$clearCheckOutState = true; // Check-in object.
 			} else {
-				$clearCheckOutState = 'false'; // Object remains checked-out.
+				$clearCheckOutState = false; // Object remains checked-out.
 			}
 
 			foreach( $object->Files as $file ) {
