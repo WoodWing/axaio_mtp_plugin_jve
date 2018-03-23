@@ -395,9 +395,8 @@ class BizServerJob
 
 		require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
 		if( BizServerJobConfig::isBuiltInJobType( $job->JobType ) ) { // job handled by core server
-			$foundJobHandler = true;
-			$bizClass = self::getBuiltInJobTypeHandlerClass( $job->JobType, $job->JobId, $foundJobHandler );
-
+			$bizClass = self::getBuiltInJobTypeHandlerClass( $job->JobType, $job->JobId );
+			$foundJobHandler = !is_null( $bizClass ) ? true : false;
 			if( $foundJobHandler ) {
 				// Ask the job implementation for the expected execution time.
 				$lifeTime = $bizClass->estimatedLifeTime( $job );
@@ -548,9 +547,8 @@ class BizServerJob
 
 		require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
 		if( BizServerJobConfig::isBuiltInJobType( $job->JobType ) ) { // job handled by core server
-			$foundJobHandler = true;
-			$bizClass = self::getBuiltInJobTypeHandlerClass( $job->JobType, $job->JobId, $foundJobHandler );
-
+			$bizClass = self::getBuiltInJobTypeHandlerClass( $job->JobType, $job->JobId );
+			$foundJobHandler = !is_null( $bizClass ) ? true : false;
 			if( $foundJobHandler ) {
 				$bizClass->beforeRunJob( $job );
 
@@ -615,10 +613,9 @@ class BizServerJob
 	 * @since 10.1.7
 	 * @param string $jobType The ServerJob Type.
 	 * @param string $jobId Unique identifier (GUID) of the job record.
-	 * @param bool [In/Out] $foundJobHandler Indicate whether the requested job type handler is found.
 	 * @return mixed The requested ServerJob class or null when not found.
 	 */
-	private function getBuiltInJobTypeHandlerClass( $jobType, $jobId, &$foundJobHandler )
+	private function getBuiltInJobTypeHandlerClass( $jobType, $jobId )
 	{
 		$bizClass = null;
 		switch( $jobType ) {
@@ -651,7 +648,6 @@ class BizServerJob
 				$bizClass = new BizServiceLogsCleanup();
 				break;
 			default:
-				$foundJobHandler = false;
 				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No core server class found to handle job {$jobType} (jobid = {$jobId})\r\n");
 		}
 		return $bizClass;
