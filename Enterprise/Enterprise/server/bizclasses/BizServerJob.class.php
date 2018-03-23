@@ -394,43 +394,9 @@ class BizServerJob
 		$this->dbServerJob->updateJob( $job );
 
 		require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
-		$bizClass = null;
 		if( BizServerJobConfig::isBuiltInJobType( $job->JobType ) ) { // job handled by core server
 			$foundJobHandler = true;
-			switch( $job->JobType ) {
-				case 'AsyncImagePreview':
-					require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
-					$bizClass = new BizMetaDataPreview();
-				break;
-				case 'UpdateParentModifierAndModified':
-					require_once BASEDIR.'/server/bizclasses/BizObjectJob.class.php';
-					$bizClass = new WW_BizClasses_ObjectJob();
-				break;
-				case 'TransferServerCleanUp':
-					require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-					$bizClass = new BizTransferServer();
-				break;
-				case 'AutoPurgeTrashCan':
-					require_once BASEDIR.'/server/bizclasses/BizAutoPurge.class.php';
-					$bizClass = new BizAutoPurge();
-				break;
-				case 'EnterpriseEvent':
-					require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
-					$bizClass = new BizEnterpriseEvent();
-				break;
-				case 'AutoCleanServerJobs':
-					require_once BASEDIR . '/server/bizclasses/BizServerJobCleanup.class.php';
-					$bizClass = new BizServerJobCleanup();
-				break;
-				case 'AutoCleanServiceLogs':
-					require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
-					$bizClass = new BizServiceLogsCleanup();
-				break;
-				default:
-					$foundJobHandler = false;
-					LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No core server class found to handle job {$job->JobType} (jobid = {$job->JobId})\r\n");
-					// TODO: error
-			}
+			$bizClass = self::getBuiltInJobTypeHandlerClass( $job->JobType, $job->JobId, $foundJobHandler );
 
 			if( $foundJobHandler ) {
 				// Ask the job implementation for the expected execution time.
@@ -581,43 +547,9 @@ class BizServerJob
 		$this->dbServerJob->updateJob( $job );
 
 		require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
-		$bizClass = null;
 		if( BizServerJobConfig::isBuiltInJobType( $job->JobType ) ) { // job handled by core server
 			$foundJobHandler = true;
-			switch( $job->JobType ) {
-				case 'AsyncImagePreview':
-					require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
-					$bizClass = new BizMetaDataPreview();
-					break;
-				case 'UpdateParentModifierAndModified':
-					require_once BASEDIR.'/server/bizclasses/BizObjectJob.class.php';
-					$bizClass = new WW_BizClasses_ObjectJob();
-					break;
-				case 'TransferServerCleanUp':
-					require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-					$bizClass = new BizTransferServer();
-					break;
-				case 'AutoPurgeTrashCan':
-					require_once BASEDIR.'/server/bizclasses/BizAutoPurge.class.php';
-					$bizClass = new BizAutoPurge();
-					break;
-				case 'EnterpriseEvent':
-					require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
-					$bizClass = new BizEnterpriseEvent();
-					break;
-				case 'AutoCleanServerJobs':
-					require_once BASEDIR . '/server/bizclasses/BizServerJobCleanup.class.php';
-					$bizClass = new BizServerJobCleanup();
-					break;
-				case 'AutoCleanServiceLogs':
-					require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
-					$bizClass = new BizServiceLogsCleanup();
-					break;
-				default:
-					$foundJobHandler = false;
-					LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No core server class found to handle job {$job->JobType} (jobid = {$job->JobId})\r\n");
-				// TODO: error
-			}
+			$bizClass = self::getBuiltInJobTypeHandlerClass( $job->JobType, $job->JobId, $foundJobHandler );
 
 			if( $foundJobHandler ) {
 				$bizClass->beforeRunJob( $job );
@@ -666,6 +598,63 @@ class BizServerJob
 
 		// Update job with execution status info
 		$this->dbServerJob->updateJob( $job );
+	}
+
+	/**
+	 * Returns the requested job type job handler.
+	 *
+	 * Possible returned classes:
+	 * BizAutoPurge
+	 * BizEnterpriseEvent
+	 * BizMetaDataPreview
+	 * BizServerJobCleanup
+	 * BizServiceLogsCleanup
+	 * BizTransferServer
+	 * WW_BizClasses_ObjectJob
+	 *
+	 * @since 10.1.7
+	 * @param string $jobType The ServerJob Type.
+	 * @param string $jobId Unique identifier (GUID) of the job record.
+	 * @param bool [In/Out] $foundJobHandler Indicate whether the requested job type handler is found.
+	 * @return mixed The requested ServerJob class or null when not found.
+	 */
+	private function getBuiltInJobTypeHandlerClass( $jobType, $jobId, &$foundJobHandler )
+	{
+		$bizClass = null;
+		switch( $jobType ) {
+			case 'AsyncImagePreview':
+				require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
+				$bizClass = new BizMetaDataPreview();
+				break;
+			case 'UpdateParentModifierAndModified':
+				require_once BASEDIR.'/server/bizclasses/BizObjectJob.class.php';
+				$bizClass = new WW_BizClasses_ObjectJob();
+				break;
+			case 'TransferServerCleanUp':
+				require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+				$bizClass = new BizTransferServer();
+				break;
+			case 'AutoPurgeTrashCan':
+				require_once BASEDIR.'/server/bizclasses/BizAutoPurge.class.php';
+				$bizClass = new BizAutoPurge();
+				break;
+			case 'EnterpriseEvent':
+				require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
+				$bizClass = new BizEnterpriseEvent();
+				break;
+			case 'AutoCleanServerJobs':
+				require_once BASEDIR . '/server/bizclasses/BizServerJobCleanup.class.php';
+				$bizClass = new BizServerJobCleanup();
+				break;
+			case 'AutoCleanServiceLogs':
+				require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
+				$bizClass = new BizServiceLogsCleanup();
+				break;
+			default:
+				$foundJobHandler = false;
+				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No core server class found to handle job {$jobType} (jobid = {$jobId})\r\n");
+		}
+		return $bizClass;
 	}
 
 	/**
