@@ -99,7 +99,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 //
 //		} catch( BizException $e ) {
 			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
+//			$e = $e;
 //		}
 //
 //		$this->tearDownTestData();
