@@ -216,6 +216,8 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 			array( 'name' => 'DEBUGLEVEL',	'help' => 'This option is superseded by DEBUGLEVELS.' ),
 			array( 'name' => 'NETWORK_DOMAINS',	'help' => 'This option is no longer used.' ),
 			array( 'name' => 'ATTACHSTORAGE',	'help' => 'This option is no longer used, as there is only one type of storage supported which is FILE' ),
+			array( 'name' => 'ENCRYPTION_PUBLICKEY_PATH',	'help' => 'This option is no longer used. Check the documentation on how to set up SSL.' ),
+			array( 'name' => 'ENCRYPTION_PRIVATEKEY_PATH',	'help' => 'This option is no longer used. Check the documentation on how to set up SSL.' ),
 		);
 		foreach( $obsoletedDefines as $opt ) {
 			if( defined( $opt['name'] ) ) {
