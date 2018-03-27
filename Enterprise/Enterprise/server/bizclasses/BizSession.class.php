@@ -196,8 +196,9 @@ class BizSession
 
 	/**
 	 * Check the username and password
-	 * Generate an exception in case the user can not be validated
+	 * Generate an exception in case the user can not be validated.
 	 * Call this method BEFORE calling logon()!
+	 * All log on attempts (successful and unsuccessful) are added to the service log (if enabled).
 	 *
 	 * @param string $user Can be the full name or the short user id
 	 * @param string $password
@@ -207,7 +208,7 @@ class BizSession
 	public static function validateUser( $user, $password )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-
+		DBlog::logService( $user, 'LogOn' );
 		// Decode the user typed password
 		// Although server has given public encryption key to client application, this does *not* imply
 		// client did (or supports) encryption. That means we might receive encrypted- or just plain text passwords here!
@@ -220,22 +221,20 @@ class BizSession
 			$password = $pe->DecryptPrivatePassword( $password );
 		}
 
-		//TODO check for external authentication plug-ins, for now, use LDAP
-		// When LDAP configured, create user when needed and add/remove his/her groups
+		// When LDAP is configured, create user when needed and add/remove his/her groups.
 		if( BizLDAP::isInstalled() === true ) {
 			$ldap = new BizLDAP();
 			$admUser = $ldap->authenticate( $user, $password );
 			$user = $admUser->Name;
 		}
 
-		// check user/pass against DB
-		// Note that the $user variable will be updated here (and set to the short user id) 
+		// Check user/password against DB.
+		// Note that the $user variable will be updated here (and set to the short user name)
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		self::$userRow = DBUser::checkUser( $user ); // normalizes $user ! 
 		self::$userName = $user;
-		DBlog::logService( $user, 'LogOn' ); // log after normalization
 
-		// if empty pass, create std password, to avoid differences in crypt
+		// If empty password, create standard password, to avoid differences in crypt
 		$pass = self::getUserInfo('pass');
 		if( $pass == '') {
 			$pass = ww_crypt("ww", null, true);
