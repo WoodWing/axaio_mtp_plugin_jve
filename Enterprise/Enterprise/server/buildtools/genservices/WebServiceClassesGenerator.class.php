@@ -167,8 +167,9 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	{
 		$typeMap = array(
 			// WSDL         => Flex
-			'string'        => 'String', 
+			'string'        => 'String',
 			'ArrayOfString' => 'Array',
+			'ArrayOfUnsignedInt' => 'Array',
 			'dateTime'      => 'String', // Fix: The server handles dates as strings, so this is what we send over to AMF
 			'double'        => 'Number', // Fix: Changed double into Number to let Flex send NaN values.
 			'unsignedInt'   => 'Number', // Fix: Changed uint into Number to let Flex send NaN values.
@@ -217,9 +218,16 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			$propName = $prop->getAttribute('name');
 			$propType = $prop->getAttribute('type');
 			$propType = str_replace( array('xsd:','tns:'), '', $propType ); // remove namespaces
-			if( $propType == 'ArrayOfNamedQuery' ) $propType = 'ArrayOfNamedQueryType'; // See [Note#1]
+			if( $propType == 'ArrayOfNamedQuery' ) {
+				$propType = 'ArrayOfNamedQueryType'; // See [Note#1]
+			}
 			// 'String'(capital S) is an element in wsdl, but here we actually want the php type 'string'(small S).
-			if( $propType == 'ArrayOfString' ) $propType = 'ArrayOfstring';
+			if( $propType == 'ArrayOfString' ) {
+				$propType = 'ArrayOfstring';
+			}
+			if( $propType == 'ArrayOfUnsignedInt' ) {
+				$propType = 'ArrayOfunsignedInt';
+			}
 			$propRaw = $propType;
 
 			// Getting the phpType. Like ArrayOfXX will become XX[].

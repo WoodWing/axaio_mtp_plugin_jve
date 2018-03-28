@@ -60,6 +60,7 @@ class WW_BuildTools_GenServices_Interfaces_Wfl_WebServiceDescriptor implements W
 					"\t\t}\n\n";
 				break;
 			case 'GetPages':
+			case 'GetRelatedPages':
 				$result =
 					"\n" .
 					"\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .

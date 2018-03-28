@@ -317,7 +317,7 @@ public class PageObject  implements java.io.Serializable {
         elemField.setFieldName("issuePagePosition");
         elemField.setXmlName(new javax.xml.namespace.QName("", "IssuePagePosition"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "unsignedInt"));
-        elemField.setNillable(false);
+        elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("pageOrder");
@@ -365,7 +365,7 @@ public class PageObject  implements java.io.Serializable {
         elemField.setFieldName("placementInfos");
         elemField.setXmlName(new javax.xml.namespace.QName("", "PlacementInfos"));
         elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "PlacementInfo"));
-        elemField.setNillable(false);
+        elemField.setNillable(true);
         elemField.setItemQName(new javax.xml.namespace.QName("", "PlacementInfo"));
         typeDesc.addFieldDesc(elemField);
     }

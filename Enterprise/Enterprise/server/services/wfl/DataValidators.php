@@ -223,6 +223,13 @@ class WflBasicMetaDataValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'MasterId' ) ) {
+			$validator->enterPath( 'MasterId' );
+			if( !is_null( $datObj->MasterId ) ) {
+				$validator->checkType( $datObj->MasterId, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 
@@ -4209,7 +4216,6 @@ class WflPageObjectValidator
 	{
 		if( $validator->checkExist( $datObj, 'IssuePagePosition' ) ) {
 			$validator->enterPath( 'IssuePagePosition' );
-			$validator->checkNull( $datObj->IssuePagePosition );
 			if( !is_null( $datObj->IssuePagePosition ) ) {
 				$validator->checkType( $datObj->IssuePagePosition, 'unsignedInt' );
 			}
@@ -4273,7 +4279,6 @@ class WflPageObjectValidator
 		}
 		if( $validator->checkExist( $datObj, 'PlacementInfos' ) ) {
 			$validator->enterPath( 'PlacementInfos' );
-			$validator->checkNull( $datObj->PlacementInfos );
 			if( !is_null( $datObj->PlacementInfos ) ) {
 				$validator->checkType( $datObj->PlacementInfos, 'array' );
 				if( !empty($datObj->PlacementInfos) ) foreach( $datObj->PlacementInfos as $listItem ) {
@@ -4400,6 +4405,22 @@ class WflLayoutObjectValidator
 			$validator->enterPath( 'FlagMsg' );
 			if( !is_null( $datObj->FlagMsg ) ) {
 				$validator->checkType( $datObj->FlagMsg, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Publication' ) ) {
+			$validator->enterPath( 'Publication' );
+			if( !is_null( $datObj->Publication ) ) {
+				$validator->checkType( $datObj->Publication, 'Publication' );
+				WflPublicationValidator::validate( $validator, $datObj->Publication );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Target' ) ) {
+			$validator->enterPath( 'Target' );
+			if( !is_null( $datObj->Target ) ) {
+				$validator->checkType( $datObj->Target, 'Target' );
+				WflTargetValidator::validate( $validator, $datObj->Target );
 			}
 			$validator->leavePath();
 		}

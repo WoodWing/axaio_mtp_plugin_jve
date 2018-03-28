@@ -58,12 +58,13 @@ class BizNamedQuery extends BizQueryBase
 			$hierarchicalSearch = true; 
 		}
 
-		// Check if it's a NQ from our DB, if not pass on to content sources:
-		//get the named query by $queryname
+		// The Named Query ($query) could be either:
+		// - manually configured in our DB
+		// - hard-coded in the core server
+		// - implemented by one of the Content Sources
 		$namedquery = DBQuery::getNamedQueryByName($query);
 		$inbox = self::getInboxQueryName();
-		$defaultArticleTemplate = self::getDefaultArticleTemplateQueryName();
-		$builtInQueries = array( 'Inbox', $inbox, $defaultArticleTemplate, 'PublishFormTemplates', 'PublishManager' );
+		$builtInQueries = array( 'Inbox', $inbox, 'DefaultArticleTemplate', 'PublishFormTemplates', 'PublishManager', 'OriginalObjectsAndVariants' );
 		$ret = null;
 		if (empty($namedquery) && !in_array( $query, $builtInQueries ) ) { // Exclude system queries that are handled as a named query.
 			require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
@@ -77,7 +78,7 @@ class BizNamedQuery extends BizQueryBase
 				self::validatePublishManagerQuery( $args );
 			}
 
-			$searchSucces = false; //If search by (Solr) search engine is succesful skip database search.		
+			$searchSucces = false; //If search by (Solr) search engine is succesful skip database search.
 			$mode = self::getQueryMode($ticket, false);
 			require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
 			if (BizSearch::handleSearch( $query, $args, $firstEntry, $maxEntries, $mode, $hierarchicalSearch, $queryOrder, $minimalProps, null ) ) {
@@ -96,7 +97,7 @@ class BizNamedQuery extends BizQueryBase
 					case $inbox:
 						$ret = self::runInboxDBQuery($mode, $ticket, $user, $firstEntry, $maxEntries, $queryOrder);
 						break;
-					case $defaultArticleTemplate:
+					case 'DefaultArticleTemplate':
 						$ret = self::runDefaultArticleTemplateQuery($mode, $ticket, $user, $args, $hierarchical, $firstEntry, $maxEntries, $queryOrder);
 						break;
 					case 'PublishFormTemplates':
@@ -104,6 +105,9 @@ class BizNamedQuery extends BizQueryBase
 						break;
 					case 'PublishManager':
 						$ret = self::queryObjectRelations( $ticket, $user, $args, $firstEntry, $maxEntries, $queryOrder );
+						break;
+					case 'OriginalObjectsAndVariants':
+						$ret = self::queryOriginalObjectsAndVariants( $ticket, $user, $args, $queryOrder, $hierarchical, $firstEntry, $maxEntries );
 						break;
 					default:
 						$ret = self::runHierarchicalNamedQuery($user, $query, $args, $queryOrder, $firstEntry, $maxEntries);
@@ -115,8 +119,69 @@ class BizNamedQuery extends BizQueryBase
 		DBlog::logService($user, 'NamedQuery');
 		return $ret;
 	}
-		 
- 	/**
+
+	/**
+	 * Search the workflow objects that are copied from an original object and include the original itself.
+	 *
+	 * Copied objects are marked with a MasterId property that refers to the ID of the original object they are copied from.
+	 * So objects are returned with matching MasterId (=copy) or object ID (=original).
+	 *
+	 * @since 10.4.0
+	 * @param string $ticket
+	 * @param string $userShort
+	 * @param QueryParam[] $params
+	 * @param array $queryOrder On which column to sort.
+	 * @param boolean $hierarchical When true return the objects as a tree instead of in a list
+	 * @param integer $firstEntry   Where to start fetching records
+	 * @param integer $maxEntries   How many records to fetch
+	 * @throws BizException when MasterId not provided in $params (or when its value is not numeric)
+	 * @return WflNamedQueryResponse
+	 */
+	static private function queryOriginalObjectsAndVariants( $ticket, $userShort, $params, $queryOrder, $hierarchical, $firstEntry, $maxEntries )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
+		require_once BASEDIR.'/server/utils/PHPClass.class.php';
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflNamedQueryResponse.class.php';
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->Params = null;
+		$request->FirstEntry = $firstEntry;
+		$request->MaxEntries = $maxEntries;
+		$request->Hierarchical = $hierarchical;
+		$request->Order = $queryOrder;
+		$request->MinimalProps = array( 'ID', 'Type', 'Name', 'MasterId', 'PublicationId', 'CategoryId' );
+
+		$isValid = false;
+		$masterIds = array();
+		if( $params ) foreach( $params as $param ) {
+			if( $param->Property !== 'MasterId' ) {
+				break;
+			}
+			if( $param->Operation !== '=' ) {
+				break;
+			}
+			if( !is_numeric( $param->Value ) || intval( $param->Value ) != $param->Value || $param->Value <= 0 ) {
+				break;
+			}
+			$isValid = true;
+			$masterIds[] = intval( $param->Value );
+		}
+
+		if( !$isValid ) {
+			$message = 'For the Named Query "CopiedFromOriginal" a "MasterId" parameter should be provided with a positive numeric value.';
+			throw new BizException( 'ERR_ARGUMENT', 'Client', $message );
+		}
+		$where = ' WHERE '.DBBase::addIntArrayToWhereClause( 'o.id', $masterIds ).' OR '.
+			DBBase::addIntArrayToWhereClause( 'o.masterid', $masterIds );
+		$ret = BizQuery::queryObjects2( $request, $userShort, 11, $where );
+
+		// QueryObjects returns a WflQueryObjectsResponse, but a WflNamedQueryResponse is needed.
+		return WW_Utils_PHPClass::typeCast( $ret, 'WflNamedQueryResponse' );
+	}
+
+	/**
  	 * The function retrieves the Publishing Template given the Channel Id.
 	 * When no template is found, it creates a new template on-the-fly and
 	 * returns the result to the caller.
@@ -998,16 +1063,6 @@ class BizNamedQuery extends BizQueryBase
 		$result = WW_Utils_PHPClass::typeCast( $result, 'WflNamedQueryResponse' );
 		
 		return $result;
-	}
-
-	/**
-	 * Returns the name of the hidden default article template named query.
-	 *
-	 * @return string
-	 */
-	private static function getDefaultArticleTemplateQueryName()
-	{
-		return 'DefaultArticleTemplate';
 	}
 
 	private static function addMinPropForOverRuleIssue( $mode, $minimalProps )

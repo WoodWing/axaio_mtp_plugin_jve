@@ -67,7 +67,8 @@ class UtfString
 	 * however the tab, newline and carriage return are not seen as
 	 * illegal characters and so they won't be removed.
 	 *
-	 * @since 10.1.5 Non-utf8 characters are also removed.
+	 * @since 10.1.5 Non-UTF-8 characters are also removed.
+	 * @since 10.4.0 DELETE (0x7F) characters are removed in the whole string (previously only from begin/end).
 	 *
 	 * @since 10.0.6
 	 * @param string $inString
@@ -75,10 +76,8 @@ class UtfString
 	 */
 	public static function removeIllegalUnicodeCharacters( $inString )
 	{
-		//Remove non-printable characters from begin and end (TODO check if x7F is really illegal)
-		$inString = trim( $inString, "\x7F\x00..\x1F" );
-		// BZ#12513 remove illegal XML characters (all before 0x1F except for tab, newline, carriage return)
-		$inString = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F]/', '', $inString );
+		// Remove illegal control characters, which are all except for tab (0x09), newline (0x0A), and carriage return (0x0D).
+		$inString = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/', '', $inString );
 
 		$inString = self::filterOutNonUtf8Characters( $inString );
 
@@ -86,7 +85,7 @@ class UtfString
 	}
 
 	/**
-	 * Filters out non-UTF8 characters.
+	 * Filters out non-UTF-8 characters.
 	 *
 	 * Non-UTF-8 characters are just removed from the input string.
 	 *

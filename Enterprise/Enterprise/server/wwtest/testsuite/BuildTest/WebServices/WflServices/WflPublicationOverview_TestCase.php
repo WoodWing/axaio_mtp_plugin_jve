@@ -2761,6 +2761,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$response->ObjectPageInfos[0]->MetaData->BasicMetaData->ContentSource = '';
 		$response->ObjectPageInfos[0]->MetaData->BasicMetaData->StoreName = '41/4101';
+		$response->ObjectPageInfos[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->ObjectPageInfos[0]->MetaData->RightsMetaData = null;
 		$response->ObjectPageInfos[0]->MetaData->SourceMetaData = null;
 		$response->ObjectPageInfos[0]->MetaData->ContentMetaData = null;
@@ -2852,6 +2853,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$response->ObjectPageInfos[1]->MetaData->BasicMetaData->ContentSource = '';
 		$response->ObjectPageInfos[1]->MetaData->BasicMetaData->StoreName = '41/4102';
+		$response->ObjectPageInfos[1]->MetaData->BasicMetaData->MasterId = '0';
 		$response->ObjectPageInfos[1]->MetaData->RightsMetaData = null;
 		$response->ObjectPageInfos[1]->MetaData->SourceMetaData = null;
 		$response->ObjectPageInfos[1]->MetaData->ContentMetaData = null;
@@ -2943,6 +2945,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$response->ObjectPageInfos[2]->MetaData->BasicMetaData->ContentSource = '';
 		$response->ObjectPageInfos[2]->MetaData->BasicMetaData->StoreName = '41/4103';
+		$response->ObjectPageInfos[2]->MetaData->BasicMetaData->MasterId = '0';
 		$response->ObjectPageInfos[2]->MetaData->RightsMetaData = null;
 		$response->ObjectPageInfos[2]->MetaData->SourceMetaData = null;
 		$response->ObjectPageInfos[2]->MetaData->ContentMetaData = null;
@@ -3309,6 +3312,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$response->ObjectPageInfos[0]->MetaData->BasicMetaData->ContentSource = '';
 		$response->ObjectPageInfos[0]->MetaData->BasicMetaData->StoreName = '41/4101';
+		$response->ObjectPageInfos[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->ObjectPageInfos[0]->MetaData->RightsMetaData = null;
 		$response->ObjectPageInfos[0]->MetaData->SourceMetaData = null;
 		$response->ObjectPageInfos[0]->MetaData->ContentMetaData = null;
@@ -3400,6 +3404,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$response->ObjectPageInfos[1]->MetaData->BasicMetaData->ContentSource = '';
 		$response->ObjectPageInfos[1]->MetaData->BasicMetaData->StoreName = '41/4102';
+		$response->ObjectPageInfos[1]->MetaData->BasicMetaData->MasterId = '0';
 		$response->ObjectPageInfos[1]->MetaData->RightsMetaData = null;
 		$response->ObjectPageInfos[1]->MetaData->SourceMetaData = null;
 		$response->ObjectPageInfos[1]->MetaData->ContentMetaData = null;
@@ -3491,6 +3496,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$response->ObjectPageInfos[2]->MetaData->BasicMetaData->ContentSource = '';
 		$response->ObjectPageInfos[2]->MetaData->BasicMetaData->StoreName = '41/4103';
+		$response->ObjectPageInfos[2]->MetaData->BasicMetaData->MasterId = '0';
 		$response->ObjectPageInfos[2]->MetaData->RightsMetaData = null;
 		$response->ObjectPageInfos[2]->MetaData->SourceMetaData = null;
 		$response->ObjectPageInfos[2]->MetaData->ContentMetaData = null;

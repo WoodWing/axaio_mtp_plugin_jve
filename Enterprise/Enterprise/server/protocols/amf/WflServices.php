@@ -67,6 +67,8 @@ require_once(BASEDIR.'/server/interfaces/services/wfl/WflAutocompleteRequest.cla
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflSuggestionsRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflGetPagesRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflGetPagesInfoRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/wfl/WflGetRelatedPagesRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/wfl/WflGetRelatedPagesInfoRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflCreateObjectLabelsRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflUpdateObjectLabelsRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflDeleteObjectLabelsRequest.class.php');
@@ -543,6 +545,11 @@ class WW_AMF_WflServices extends WW_AMF_Services
 
 		try {
 			$req = $this->objectToRequest( $req, 'WflCreateObjectRelationsRequest' );
+			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+			$transferServer = new BizTransferServer();
+			if( $req->Objects ) foreach( $req->Objects as $object ) {
+				$transferServer->switchURLToFilePath( $object );
+			}
 			$service = new WflCreateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -558,6 +565,11 @@ class WW_AMF_WflServices extends WW_AMF_Services
 
 		try {
 			$req = $this->objectToRequest( $req, 'WflUpdateObjectRelationsRequest' );
+			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+			$transferServer = new BizTransferServer();
+			if( $req->Objects ) foreach( $req->Objects as $object ) {
+				$transferServer->switchURLToFilePath( $object );
+			}
 			$service = new WflUpdateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -593,6 +605,12 @@ class WW_AMF_WflServices extends WW_AMF_Services
 		} catch( BizException $e ) {
 			require_once 'Zend/Amf/Server/Exception.php';
 			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
+			$transferServer->switchFilePathToURL( $object );
 		}
 
 		return $resp;
@@ -921,6 +939,47 @@ class WW_AMF_WflServices extends WW_AMF_Services
 		try {
 			$req = $this->objectToRequest( $req, 'WflGetPagesInfoRequest' );
 			$service = new WflGetPagesInfoService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function GetRelatedPages( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'WflGetRelatedPagesRequest' );
+			$service = new WflGetRelatedPagesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $resp->ObjectPageInfos ) foreach( $resp->ObjectPageInfos as $pageInfo ) {
+			if( $pageInfo->Pages ) foreach( $pageInfo->Pages as $page ) {
+				if( $page->Files ) foreach( $page->Files as $file ) {
+					$transferServer->filePathToURL( $file );
+				}
+			}
+		}
+
+		return $resp;
+	}
+
+	public function GetRelatedPagesInfo( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesInfoService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'WflGetRelatedPagesInfoRequest' );
+			$service = new WflGetRelatedPagesInfoService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
 			require_once 'Zend/Amf/Server/Exception.php';

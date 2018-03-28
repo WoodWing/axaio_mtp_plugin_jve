@@ -353,10 +353,7 @@ class BizObject
 					$dossierObject = self::createDossierFromObject($object);
 					if (! is_null($dossierObject)){
 						$relation->Parent = $dossierObject->MetaData->BasicMetaData->ID;
-					}
-					else {
-						//TODO else delete relation?
-					}
+					} // else {...} TODO else delete relation?
 				}
 
 				// Don't delete object targets for overruled issues
@@ -767,6 +764,10 @@ class BizObject
 		self::saveExtended( $id, $object, $user, false );
 		BizDeadlines::handleDeadlineForSaveObject( $object, $newRow, $currRow['deadline'] );
 
+		// Protect the MasterId from accidentally being updated in context of SaveObjects.
+		// This is a readonly field that can only be set through CreateObjects and CopyObjects.
+		unset( $newRow['masterid'] );
+
 		// Update object, both in the database as the Filestore.
 		$object = self::updateDatabaseAndFilestore( $object, $user, $newRow, $now, $currRow );
 		// Save pages, both in the database as the Filestore.
@@ -960,7 +961,7 @@ class BizObject
 				LogHandler::Log('bizobject','DEBUG','No shadow found for alien object '.$id);
 				// Determine if we should pass request to Content Source or that we should first
 				// create a shadow object out of the alien object.
-				// We do the latter when placement renditon is asked which needs a relation and thus shadow
+				// We do the latter when placement rendition is asked which needs a relation and thus shadow
 				// or when the object is locked.
 				if( $rendition == 'placement' || $lock ) {
 					// create shadow object for alien
@@ -1207,7 +1208,7 @@ class BizObject
 			throw($e);
 		}
 
-		// Do notfications:
+		// Do notifications:
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logServiceEx( $user, 'GetObjects', $objectProps, array( 'lock' => $lock, 'rendition' => $rendition ) );
 		if ( $lock ) {
@@ -1580,6 +1581,10 @@ class BizObject
 			}
 		}
 
+		// Protect the MasterId from accidentally being updated in context of SetObjectProperties.
+		// This is a readonly field that can only be set through CreateObjects and CopyObjects.
+		unset( $newRow['masterid'] );
+
 		// Save properties to DB:
 		$sth = DBObject::updateObject( $id, null, $newRow, '' );
 		if (!$sth) {
@@ -1799,7 +1804,14 @@ class BizObject
 			foreach( $metaDataValues as $index => $metaDataValue ) {
 				if( $metaDataValue->PropertyValues ) {
 					// Normalize the property values.
-					$key = 'standard';
+
+					// Protect the MasterId from accidentally being updated in context of MultiSetObjectProperties.
+					// This is a readonly field that can only be set through CreateObjects and CopyObjects.
+					if( $metaDataValue->Property == 'MasterId' ) {
+						unset( $metaDataValues[$index] );
+						continue;
+					}
+
 					$propValues = array();
 					foreach( $metaDataValue->PropertyValues as $propValue ) {
 						$propValues[] = $propValue->Value;
@@ -1819,6 +1831,7 @@ class BizObject
 						$key= 'custom';
 						$propType = BizProperty::getCustomPropertyType( $metaDataValue->Property, $publicationId, $objectType );
 					} else {
+						$key = 'standard';
 						$propType = BizProperty::getStandardPropertyType( $metaDataValue->Property );
 					}
 					$val = ( $propType == 'multilist' || $propType == 'multistring')
@@ -2074,9 +2087,11 @@ class BizObject
 				BizVersion::multiCreateVersionIfNeeded( $invokedObjectGroup, $objRow, $statuses );
 
 				// Update the properties for all objects in the database at once.
-				require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 				$objectIds = array_keys( $invokedObjectGroup );
-				DBObject::updateObject( $objectIds, null, $objRow, null );
+				if( $objRow ) {
+					require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+					DBObject::updateObject( $objectIds, null, $objRow, null );
+				}
 
 				// Dispatch all previously collected objects to the Axiao MadeToPrint dispatcher for printing.
 				if( $madeToPrintObjectIds ) {
@@ -2616,6 +2631,25 @@ class BizObject
 		// If type not filled in, put source type info dest, needed for validation
 		if( !$meta->BasicMetaData->Type ) {
 			$meta->BasicMetaData->Type = $objProps['Type'];
+		}
+
+		// [10.4.0] Object Variants feature: set the MasterId. Tracks the original object that this one is a copy of.
+		// When an object is a copy of another object, this indicates the object ID of the object it was copied from.
+		// When the object being copied is itself already a copy, it's MasterId will be used. That means all copies will
+		// share the same MasterId which makes it easy to find all copies on a specific object.
+		require_once BASEDIR.'/server/bizclasses/BizObjectType.class.php';
+		$exceptionTypes = array(
+			'Hyperlink',
+			'Library',
+		);
+		$exceptionFlags = BizObjectType::OBSOLETED | BizObjectType::CONTAINER | BizObjectType::TEMPLATE;
+		// The MasterId does not make much sense for $exceptionTypes and $exceptionFlags.
+		if( !in_array( $meta->BasicMetaData->Type, $exceptionTypes ) && // destination
+			!in_array( $objProps['Type'], $exceptionTypes ) && // source
+			!BizObjectType::isObjectTypeAnyOf( $meta->BasicMetaData->Type, $exceptionFlags ) && // destination
+			!BizObjectType::isObjectTypeAnyOf( $objProps['Type'], $exceptionFlags ) // source
+		) {
+			$meta->BasicMetaData->MasterId = $objProps['MasterId'] ? $objProps['MasterId'] : $objProps['ID'];
 		}
 
 		// If shadow object call content source to copy object BZ#11509

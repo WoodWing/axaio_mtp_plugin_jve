@@ -58,6 +58,8 @@ public interface SmartConnectionPort extends java.rmi.Remote {
     public com.woodwing.enterprise.interfaces.services.wfl.GetDialog2Response getDialog2(com.woodwing.enterprise.interfaces.services.wfl.GetDialog2 parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.GetPagesResponse getPages(com.woodwing.enterprise.interfaces.services.wfl.GetPages parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfoResponse getPagesInfo(com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfo parameters) throws java.rmi.RemoteException;
+    public com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesResponse getRelatedPages(com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPages parameters) throws java.rmi.RemoteException;
+    public com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfoResponse getRelatedPagesInfo(com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfo parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.AutocompleteResponse autocomplete(com.woodwing.enterprise.interfaces.services.wfl.Autocomplete parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.SuggestionsResponse suggestions(com.woodwing.enterprise.interfaces.services.wfl.Suggestions parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.CreateObjectLabelsResponse createObjectLabels(com.woodwing.enterprise.interfaces.services.wfl.CreateObjectLabels parameters) throws java.rmi.RemoteException;

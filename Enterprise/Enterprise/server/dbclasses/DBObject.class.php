@@ -476,6 +476,7 @@ class DBObject extends DBBase
 			$md->BasicMetaData->Category->Id = $row['section'];
 			$md->BasicMetaData->Category->Name = $row['secname'];
 			$md->BasicMetaData->ContentSource = $row['contentsource'];
+			$md->BasicMetaData->MasterId = $row['masterid'];
 			$md->ContentMetaData->Format = $row['format'];
 			$md->WorkflowMetaData->State = new State();
 			$md->WorkflowMetaData->State->Id = $row['state'];
@@ -518,7 +519,7 @@ class DBObject extends DBBase
 		$lckTbl = $dbDriver->tablename( 'objectlocks' );
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
 
-		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
+		$sql = 'SELECT o.`id`, o.`documentid`, o.`masterid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
 			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
 			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
 			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", ' .
@@ -2034,5 +2035,20 @@ class DBObject extends DBBase
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Resolve the object variants (ids) of a given object.
+	 *
+	 * @param integer $objectId The master id of an object. When zero, pass in the object id.
+	 * @return integer[] Object id of variants. Empty when none found.
+	 */
+	static public function getObjectIdsOfVariants( $objectId )
+	{
+		$fields = array( 'id' );
+		$where = '`id` = ? OR `masterid` = ?';
+		$params = array( intval( $objectId ), intval( $objectId ) );
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where, $fields, $params );
+		return array_map( 'intval', array_keys( $rows ) );
 	}
 }

@@ -427,6 +427,11 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';
 
 		try {
+			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+			$transferServer = new BizTransferServer();
+			if( $req->Objects ) foreach( $req->Objects as $object ) {
+				$transferServer->switchURLToFilePath( $object );
+			}
 			$service = new WflCreateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -440,6 +445,11 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		require_once BASEDIR.'/server/services/wfl/WflUpdateObjectRelationsService.class.php';
 
 		try {
+			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+			$transferServer = new BizTransferServer();
+			if( $req->Objects ) foreach( $req->Objects as $object ) {
+				$transferServer->switchURLToFilePath( $object );
+			}
 			$service = new WflUpdateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -470,6 +480,12 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
 			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
+			$transferServer->switchFilePathToURL( $object );
 		}
 
 		return self::returnResponse($resp);
@@ -755,6 +771,43 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 
 		try {
 			$service = new WflGetPagesInfoService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function GetRelatedPages( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesService.class.php';
+
+		try {
+			$service = new WflGetRelatedPagesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $resp->ObjectPageInfos ) foreach( $resp->ObjectPageInfos as $pageInfo ) {
+			if( $pageInfo->Pages ) foreach( $pageInfo->Pages as $page ) {
+				if( $page->Files ) foreach( $page->Files as $file ) {
+					$transferServer->filePathToURL( $file );
+				}
+			}
+		}
+
+		return self::returnResponse($resp);
+	}
+
+	public function GetRelatedPagesInfo( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesInfoService.class.php';
+
+		try {
+			$service = new WflGetRelatedPagesInfoService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
 			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
