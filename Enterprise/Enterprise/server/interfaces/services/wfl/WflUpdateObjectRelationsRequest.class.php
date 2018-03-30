@@ -71,6 +71,6 @@ class WflUpdateObjectRelationsRequest
 		}
 	}
 
-	public function mightHaveContent() { return true; }
+	public function mightHaveContent() { return false; }
 }
 

@@ -545,11 +545,6 @@ class WW_AMF_WflServices extends WW_AMF_Services
 
 		try {
 			$req = $this->objectToRequest( $req, 'WflCreateObjectRelationsRequest' );
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Objects ) foreach( $req->Objects as $object ) {
-				$transferServer->switchURLToFilePath( $object );
-			}
 			$service = new WflCreateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -565,11 +560,6 @@ class WW_AMF_WflServices extends WW_AMF_Services
 
 		try {
 			$req = $this->objectToRequest( $req, 'WflUpdateObjectRelationsRequest' );
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Objects ) foreach( $req->Objects as $object ) {
-				$transferServer->switchURLToFilePath( $object );
-			}
 			$service = new WflUpdateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -606,13 +596,6 @@ class WW_AMF_WflServices extends WW_AMF_Services
 			require_once 'Zend/Amf/Server/Exception.php';
 			throw new Zend_Amf_Server_Exception( $e->getMessage() );
 		}
-
-		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-		$transferServer = new BizTransferServer();
-		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
-			$transferServer->switchFilePathToURL( $object );
-		}
-
 		return $resp;
 	}
 
