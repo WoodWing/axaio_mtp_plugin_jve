@@ -57,7 +57,7 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 
 	public function getPrio()
 	{
-		return 1500;
+		return 1;
 	}
 
 	final public function runTest()
