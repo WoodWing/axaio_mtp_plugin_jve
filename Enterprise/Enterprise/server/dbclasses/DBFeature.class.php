@@ -28,40 +28,33 @@ class DBFeature extends DBBase
 	public static function getFeatureProfiles()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAccessFeatureProfiles.class.php';
-		$featureProfilesToReturn = array();
+		$featureProfiles = array();
 
 		// Retrieved the full set of available features
 		$fullAvailableFeatures = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
 
 		// Get all saved Profiles.
-		$profilesFromDb = self::listRows( self::TABLENAME, 'id', '', '',
+		$profileRows = self::listRows( self::TABLENAME, 'id', '', '',
 													array( 'id', 'profile' ), array(), array( 'code' => true, 'profile' => true ) );
-		if( $profilesFromDb ) {
-			$profilesFromDb = array_column( $profilesFromDb, 'profile', 'id' );
-			$profileIdsFromDb = array_keys( $profilesFromDb );
-
-			// From each saved Profile, collect its features that are checked (allow access).
-			$where = DBBase::addIntArrayToWhereClause( 'profile', $profileIdsFromDb, false );
-			$featuresFromDb = self::listRows( 'profilefeatures', 'id', '', $where, array( 'id', 'profile', 'feature' ) );
-			$featuresMapFromDb = array(); // To collect the features by Profile.
-			if( $featuresFromDb ) foreach( $featuresFromDb as $featureProfileId => $featureProfileInfo ) {
-				$featuresMapFromDb[$featureProfileInfo['profile']][$featureProfileInfo['feature']] = true;
-			}
+		if( $profileRows ) {
+			$profileRows = array_column( $profileRows, 'profile', 'id' );
+			$profileIds = array_keys( $profileRows );
+			$featuresMap = self::getEnabledFeaturesByProfile( $profileIds );
 
 			// Compiling the to be returned FeatureProfiles. Only features that are unchecked ( no access ) will be returned.
-			foreach( $profilesFromDb as $profileId => $profileName ) {
+			foreach( $profileRows as $profileId => $profileName ) {
 				$unCheckedFeaturesSet = array(); // To collect all the features that are unchecked.
 				foreach( $fullAvailableFeatures as $featureId => $featureProfileObject ) {
-					if( !isset( $featuresMapFromDb[$profileId][$featureId] ) ) { // Feature is not found in DB = It is unchecked in the admin page.
+					if( !isset( $featuresMap[$profileId][$featureId] ) ) { // Feature is not found in DB = It is unchecked in the admin page.
 						$unCheckedFeaturesSet[] = new AppFeature( $featureProfileObject->Name, 'No' ); // Only return the feature which is not checked.
 					}
 				}
 				// Add features to its Profile. When Profile has full access, feature list is empty.
-				$featureProfilesToReturn[] = new FeatureProfile( $profileName, $unCheckedFeaturesSet );
+				$featureProfiles[] = new FeatureProfile( $profileName, $unCheckedFeaturesSet );
 			}
 		}
 
-		return $featureProfilesToReturn;
+		return $featureProfiles;
 	}
 
 	/**
@@ -97,23 +90,47 @@ class DBFeature extends DBBase
 		return $featureAccessList;
 	}
 
-	/** Returns the features of profiles.
+	/** Returns Access/Workflow features. They are in the reserved range [1-99].
+	 *
+	 * This range is used by authorization module.
 	 *
 	 * @param array $profileIds Profile Ids of which the features are read.
 	 * @return array with profile/feature combinations.
-	 * @throws BizException
 	 */
 	public static function getFeaturesByProfiles( array $profileIds )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$dbpv = $dbDriver->tablename( 'profilefeatures' );
-		$sql =  'SELECT `profile`, `feature` '.
-			'FROM '.$dbpv.' '.
-			'WHERE `profile` IN (' . implode(',', $profileIds ) . ') '.
-			'AND ( `feature` < 100 OR `feature` >= 5000 ) '; // core basics: [1..99], plug-ins: [5000..5999]
-		$sth = $dbDriver->query($sql);
-		$result = self::fetchResults($sth);
+		$whereParts = array();
+		$whereParts[] = DBBase::addIntArrayToWhereClause( 'profile', $profileIds, false );
+		$whereParts[] = '`value` = ?';
+		$whereParts[] = '`feature` < ? OR `feature >= ?';
+		$params = array( 'Yes', 100, 5000 );
+		$where = implode( ' AND ', $whereParts);
+		$features = self::listRows( 'profilefeatures', '', '', $where, array( 'profile', 'feature' ), $params );
 
-		return $result;
+		return $features;
+	}
+
+	/**
+	 * Returns of each profile the enabled features.
+	 *
+	 * @param int[] $profileIds
+	 * @return array Features per profileId
+	 */
+	private static function getEnabledFeaturesByProfile( $profileIds )
+	{
+		$featuresMap = array();
+		if( $profileIds ) {
+			$whereParts = array();
+			$whereParts[] = DBBase::addIntArrayToWhereClause( 'profile', $profileIds, false );
+			$whereParts[] = '`value` = ?';
+			$params = array( 'Yes' );
+			$where = implode( ' AND ', $whereParts);
+			$features = self::listRows( 'profilefeatures', 'id', '', $where, array( 'id', 'profile', 'feature' ), $params );
+			$featuresMap = array();
+			if( $features ) foreach( $features as $featureProfileId => $featureProfileInfo ) {
+				$featuresMap[ $featureProfileInfo['profile'] ][ $featureProfileInfo['feature'] ] = true;
+			}
+		}
+		return $featuresMap;
 	}
 }
