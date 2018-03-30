@@ -90,11 +90,12 @@ class DBFeature extends DBBase
 		return $featureAccessList;
 	}
 
-	/** Returns Access/Workflow features. They are in the reserved range [1-99].
+	/** Returns Access/Workflow features and features set by plug-ins.
 	 *
-	 * This range is used by authorization module.
+	 * The Access/Workflow features range [1-99] is used by authorization module.
+	 * Feature id range [5000-5999] is reserved for features provided by server plug-ins.
 	 *
-	 * @param array $profileIds Profile Ids of which the features are read.
+	 * @param integer[] $profileIds Profile Ids of which the features are read.
 	 * @return array with profile/feature combinations.
 	 */
 	public static function getFeaturesByProfiles( array $profileIds )
@@ -102,7 +103,7 @@ class DBFeature extends DBBase
 		$whereParts = array();
 		$whereParts[] = DBBase::addIntArrayToWhereClause( 'profile', $profileIds, false );
 		$whereParts[] = '`value` = ?';
-		$whereParts[] = '`feature` < ? OR `feature >= ?';
+		$whereParts[] = '( `feature` < ? OR `feature` >= ? )';
 		$params = array( 'Yes', 100, 5000 );
 		$where = implode( ' AND ', $whereParts);
 		$features = self::listRows( 'profilefeatures', '', '', $where, array( 'profile', 'feature' ), $params );
@@ -113,7 +114,7 @@ class DBFeature extends DBBase
 	/**
 	 * Returns of each profile the enabled features.
 	 *
-	 * @param int[] $profileIds
+	 * @param integer[] $profileIds
 	 * @return array Features per profileId
 	 */
 	private static function getEnabledFeaturesByProfile( $profileIds )
