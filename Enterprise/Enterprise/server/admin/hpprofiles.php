@@ -5,19 +5,12 @@ require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/apps/functions.php';
 require_once BASEDIR.'/server/bizclasses/BizAccessFeatureProfiles.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
+require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 
 checkSecure('admin');
-
-// database stuff
-$dbh = DBDriverFactory::gen();
-$dbp = $dbh->tablename('profiles');
-$dbpv = $dbh->tablename('profilefeatures');
-$dba = $dbh->tablename('authorizations');
-
-// determine incoming mode
+// Determine incoming mode/parameters.
 $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
-
-// mode handling
+// Mode handling
 if (isset($_REQUEST['vdelete']) && $_REQUEST['vdelete']) {
 	$mode = 'delete';
 } else if (isset($_REQUEST['vupdate']) && $_REQUEST['vupdate']) {
@@ -25,109 +18,70 @@ if (isset($_REQUEST['vdelete']) && $_REQUEST['vdelete']) {
 } else {
 	$mode = ($id > 0) ? 'edit' : 'new';
 }
-
-// get param's
 $name = isset($_REQUEST['profile']) ? trim($_REQUEST['profile']) : '';
 $description = isset($_REQUEST['description']) ? $_REQUEST['description'] : '';
 
 $errors = array();
 
-// handle request
+// Handle request
 switch ($mode) {
 	case 'update':
-		// check not null
 		if (trim($name) == '') {
 			$errors[] = BizResources::localize("ERR_NOT_EMPTY");
 			$mode = 'error';
 			break;
 		}
-
-		// check duplicates
-		$sql = "select `id` from $dbp where `profile` = '" . $dbh->toDBString($name) . "' and `id` != $id";
-		$sth = $dbh->query($sql);
-		$row = $dbh->fetch($sth);
-		if ($row) {
+		if (checkDuplicateName( $name, $id )) {
 			$errors[] = BizResources::localize("ERR_DUPLICATE_NAME");
 			$mode = 'error';
 			break;
 		}
-
-		// DB
-		$sql = "update $dbp set `profile`='" . $dbh->toDBString($name) . "', `description` = '" . $dbh->toDBString($description) . "' where `id` = $id";
-		$sth = $dbh->query($sql);
-		
-		$sql = "delete from $dbpv where `profile` = $id";
-		$sth = $dbh->query($sql);
-		
-		sql_features($dbh, $id);
-		
+		updateProfile( $name, $description, $id );
+		deleteFeaturesByProfile( $id );
+		addFeaturesByProfile( $id );
 		break;
 	case 'insert':
-		// check not null
 		if (trim($name) == '') {
 			$errors[] = BizResources::localize("ERR_NOT_EMPTY");
 			$mode = 'error';
 			break;
 		}
-
-		// check duplicates
-		$sql = "select `id` from $dbp where `profile` = '" . $dbh->toDBString($name) . "'";
-		$sth = $dbh->query($sql);
-		$row = $dbh->fetch($sth);
-		if ($row) {
+		if ( checkDuplicateName( $name ) ) {
 			$errors[] = BizResources::localize("ERR_DUPLICATE_NAME");
 			$mode = 'error';
 			break;
 		}
-
-		// DB
-		$sql = "insert INTO $dbp (`profile`, `description`, `code`) VALUES ('" . $dbh->toDBString($name) . "', '" . $dbh->toDBString($description) . "', 0)";
-		$sql = $dbh->autoincrement($sql);
-		$sth = $dbh->query($sql);
-		if (!$id) $id = $dbh->newid($dbp,true);
-		
-		sql_features($dbh, $id);
+		$id = addProfile( $name, $description );
+		addFeaturesByProfile( $id);
 		break;
 	case 'delete':
 		if ($id) {
-			$sql = "delete from $dbp where `id` = $id";
-			$sth = $dbh->query($sql);
-
-			// cascading delete: profilefeatures
-			$sql = "delete from $dbpv where `profile` = $id";
-			$sth = $dbh->query($sql);
-
-			// cascading delete: authorizations
-			$sql = "delete from $dba where `profile` = $id";
-			$sth = $dbh->query($sql);
+			DBBase::deleteRows( 'profiles', '`id` = ?', array( intval( $id )) );
+			DBBase::deleteRows( 'profilefeatures', '`profile` = ?', array( intval( $id )) );
+			DBBase::deleteRows( 'authorizations', '`profile` = ?', array( intval( $id )) );
 		}
 		break;
 }
-// delete: back to overview
+// Delete: back to overview
 if ($mode == 'delete' || $mode == "insert" || $mode == "update") {
 	header("Location:profiles.php");
 	exit();
 }
-// generate upper part (edit fields)
+// Generate upper part (edit fields)
 if ($mode == 'error') {
 	$row = array ('profile' => $name, 'description' => $description);
 } elseif ($mode != "new") {
-	$sql = "select * from $dbp where `id` = $id";
-	$sth = $dbh->query($sql);
-	$row = $dbh->fetch($sth);
+	$row = DBBase::getRow( 'profiles', '`id` = ?', '*', array( intval( $id ) ) );
 } else {
 	$row = array ('profile' => '', 'description' => '');
 }
 $txt = HtmlDocument::loadTemplate( 'hpprofiles.htm' );
-
-// error handling
+// Error handling
 $err = '';
 foreach ($errors as $error) {
 	$err .= formvar($error) . '<br/>';
 }
 $txt = str_replace('<!--ERROR-->', $err, $txt);
-
-// fields
 $txt = str_replace('<!--VAR:NAME-->', '<input maxlength="255" name="profile" value="'.formvar($row['profile']).'"/>', $txt );
 $txt = str_replace('<!--VAR:HIDDEN-->', inputvar( 'id', $id, 'hidden' ), $txt );
 $txt = str_replace('<!--VAR:DESCRIPTION-->', inputvar('description', $row['description'], 'area'), $txt );
@@ -140,30 +94,30 @@ else
 	$txt = str_replace('<!--VAR:BUTTON-->', '<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>', $txt );
 
 $ft = array();
-if ($mode == 'error') {
+if( $mode == 'error' ) {
 	$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
-	foreach ($features as $fid => $feature) {
-		if ($_REQUEST['checkobj'][$fid]) $ft[$fid] = 'Yes';
+	foreach( $features as $fid => $feature ) {
+		if( array_key_exists( $fid , $_REQUEST['checkobj'] ) ) {
+			 $ft[ $fid ] = 'Yes';
+		}
 	}
-} else if ($mode != 'new') {
-	$sql = "select * from $dbpv where `profile` = $id";
-	$sth = $dbh->query($sql);
-	while( ($row = $dbh->fetch($sth) ) ) {
-		$ft[$row['feature']] = $row['value'];
+} else if( $mode != 'new' ) {
+	$profileFeaturesRows = DBBase::listRows( 'profilefeatures', '', '', '`profile` = ?', '*', array( intval( $id ) ) );
+	if( $profileFeaturesRows ) foreach( $profileFeaturesRows as $profileFeaturesRow ) {
+		$ft[ $profileFeaturesRow['feature'] ] = $profileFeaturesRow['value'];
 	}
 } else {
 	$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
-	foreach ($features as $fid => $feature) {
-		$ft[$fid] = isset($feature->Default) ? $feature->Default : 'Yes';
+	foreach( $features as $fid => $feature ) {
+		$ft[ $fid ] = isset( $feature->Default ) ? $feature->Default : 'Yes';
 	}
 }
 
-// generate lower part (3x)
+// Generate lower part (3x)
 $sSelectAll = BizResources::localize('ACT_SELECT_ALL');
 $sSelectAllRows = BizResources::localize('ACT_SELECT_ALL_ROWS');
 $sUnselectAllRows = BizResources::localize('ACT_UNSELECT_ALL_ROWS');
 $sUnselectAll = BizResources::localize('ACT_UNSELECT_ALL');
-
 $detailtxt = '';
 $featureColumns = array(
 	array(
@@ -180,8 +134,7 @@ $featureColumns = array(
 	array(
 		'FEATURE_LAYOUT'        => BizAccessFeatureProfiles::getInCopyGeometryAccessProfiles(),
 		'FEATURE_COLOR'         => BizAccessFeatureProfiles::getColorAccessProfiles(),
-		/*'FEATURE_IMAGES'      => BizAccessFeatureProfiles::getImagesAccessProfiles(), */
-		'FEATURE_WORKFLOW'      => BizAccessFeatureProfiles::getWorkflowAccessProfiles(), 
+		'FEATURE_WORKFLOW'      => BizAccessFeatureProfiles::getWorkflowAccessProfiles(),
 		'FEATURE_CONFIG'        => BizAccessFeatureProfiles::getConfigurationAccessProfiles(), 
 		'FEATURE_DATASOURCES'   => BizAccessFeatureProfiles::getDataSourcesAccessProfiles(),
 		'ANNOTATIONS'           => BizAccessFeatureProfiles::getAnnotationsAccessProfiles(),
@@ -218,20 +171,18 @@ foreach ($featureColumns as $featureset) {
 	$detailtxt .= '</table></td>';
 }
 $txt = str_replace('<!--APPLFEATURES-->', $detailtxt, $txt);
-
-// generate total page
 $txt = str_replace('<!--DETAILS-->', $detailtxt, $txt);
-
-//set focus to first field
+//Set focus to first field
 $txt .= '<script language="javascript">document.forms[0].profile.focus();</script>';
-
 print HtmlDocument::buildDocument($txt);
 
-function sql_features($dbh, $id)
+/**
+ * Adds selected features to profile. Non-selected features are skipped.
+ *
+ * @param integer $id
+ */
+function addFeaturesByProfile( $id )
 {
-	// handle insert of features
-	$dbpv = $dbh->tablename('profilefeatures');
-
 	$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
 	foreach (array_keys($features) as $fid) {
 		$value = isset($_REQUEST['checkobj'][$fid]) ? $_REQUEST['checkobj'][$fid] : '';
@@ -242,10 +193,68 @@ function sql_features($dbh, $id)
 			$save = false;
 		}
 		if ($save) {
-			$sql = "INSERT INTO $dbpv (`profile`, `feature`, `value`) ".
-					"VALUES ($id, $fid, '".$dbh->toDBString($value)."')";
-			$sql = $dbh->autoincrement($sql);
-			$dbh->query($sql);
+			$values = array( 'profile' => $id, 'feature' => $fid, 'value' => $value );
+			DBBase::insertRow( 'profilefeatures', $values );
 		}
 	}
+}
+
+/**
+ * Checks if the name of the profile already exists. If no Id is passed in all profiles are checked.
+ *
+ * @param string $name
+ * @param int|null $id
+ * @return boolean
+ */
+function checkDuplicateName( $name, $id = null )
+{
+	$where = '`profile` = ? ';
+	$params = array( strval( $name ) );
+	if( $id ) {
+		$where .= 'AND `id` != ? ';
+		$params[] = intval( $id );
+	}
+	$row = DBBase::getRow( 'profiles', $where, array( 'id' ), $params );
+	return $row ? true : false;
+}
+
+/**
+ * Update profile
+ *
+ * @param string $name
+ * @param string $description
+ * @param integer $id
+ */
+function updateProfile( $name, $description, $id )
+{
+	$values = array( 'profile' => $name, 'description' => $description );
+	$where = '`id` = ?';
+	$params = array( intval( $id ) );
+	DBBase::updateRow( 'profiles', $values, $where, $params );
+}
+
+/**
+ * Delete all features of a profile.
+ *
+ * @param integer $id
+ */
+function deleteFeaturesByProfile( $id )
+{
+	$where = '`profile` = ?';
+	$params = array( intval( $id ) );
+	DBBase::deleteRows( 'profilefeatures', $where, $params );
+}
+
+/**
+ * Adds a new profile.
+ *
+ * @param string $name
+ * @param string $description
+ * @return bool|int
+ */
+function addProfile( $name, $description )
+{
+	$values = array( 'profile' => $name, 'description' => $description, 'code' => 0 );
+	$id = DBBase::insertRow( 'profiles', $values );
+	return $id;
 }
