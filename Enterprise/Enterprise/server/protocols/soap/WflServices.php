@@ -427,11 +427,6 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';
 
 		try {
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Objects ) foreach( $req->Objects as $object ) {
-				$transferServer->switchURLToFilePath( $object );
-			}
 			$service = new WflCreateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -445,11 +440,6 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		require_once BASEDIR.'/server/services/wfl/WflUpdateObjectRelationsService.class.php';
 
 		try {
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Objects ) foreach( $req->Objects as $object ) {
-				$transferServer->switchURLToFilePath( $object );
-			}
 			$service = new WflUpdateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -481,13 +471,6 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		} catch( BizException $e ) {
 			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
 		}
-
-		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-		$transferServer = new BizTransferServer();
-		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
-			$transferServer->switchFilePathToURL( $object );
-		}
-
 		return self::returnResponse($resp);
 	}
 

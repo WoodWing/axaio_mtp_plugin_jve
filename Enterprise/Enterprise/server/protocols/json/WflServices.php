@@ -383,11 +383,6 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		$req['__classname__'] = 'WflCreateObjectRelationsRequest';
 		$req = $this->arraysToObjects( $req );
 		$req = $this->restructureObjects( $req );
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Objects ) foreach( $req->Objects as $object ) {
-				$transferServer->switchURLToFilePath( $object );
-			}
 		$service = new WflCreateObjectRelationsService();
 		$resp = $service->execute( $req );
 		$resp = $this->restructureObjects( $resp );
@@ -400,11 +395,6 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		$req['__classname__'] = 'WflUpdateObjectRelationsRequest';
 		$req = $this->arraysToObjects( $req );
 		$req = $this->restructureObjects( $req );
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Objects ) foreach( $req->Objects as $object ) {
-				$transferServer->switchURLToFilePath( $object );
-			}
 		$service = new WflUpdateObjectRelationsService();
 		$resp = $service->execute( $req );
 		$resp = $this->restructureObjects( $resp );
@@ -432,13 +422,6 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		$service = new WflGetObjectRelationsService();
 		$resp = $service->execute( $req );
 		$resp = $this->restructureObjects( $resp );
-
-		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-		$transferServer = new BizTransferServer();
-		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
-			$transferServer->switchFilePathToURL( $object );
-		}
-
 		return $resp;
 	}
 
