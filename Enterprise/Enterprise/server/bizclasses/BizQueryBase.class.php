@@ -635,11 +635,11 @@ class BizQueryBase
 		foreach ($rows as &$row) {
 			$objectid = $row['ID'];
 			$issueids = array();
-			$issuenames = '';
+			$issuenames = array();
 			$editionids = array();
-			$editionnames = '';
+			$editionnames = array();
 			$channelids = array();
-			$channelnames = '';
+			$channelnames = array();
 			// Initialize requested properties only for those objects of which they are not set. This makes it
 			// possible to call this function two times for the same $rows but with two different sets of targets.
 			if ($reqIssueIds) {$row['IssueIds'] = isset( $row['IssueIds'] ) ? $row['IssueIds'] : '';  }
@@ -670,21 +670,21 @@ class BizQueryBase
 						}
 						if (!in_array($objecttarget->Issue->Id, $issueids)) {
 							$issueids[] = $objecttarget->Issue->Id;
-							$issuenames .= $objecttarget->Issue->Name . ',';
+							$issuenames[] = $objecttarget->Issue->Name;
 						}
 					}
 					if ($objecttarget->Editions) {
 						foreach ($objecttarget->Editions as $curedition) {
 							if (!in_array($curedition->Id, $editionids)) {
 								$editionids[] = $curedition->Id;
-								$editionnames .= $curedition->Name . ', ';
+								$editionnames[] = $curedition->Name;
 							}
 						}
 					}
 					if ($objecttarget->PubChannel) {
 						if (!in_array($objecttarget->PubChannel->Id, $channelids)) {
 							$channelids[] = $objecttarget->PubChannel->Id;
-							$channelnames .= $objecttarget->PubChannel->Name . ', ';
+							$channelnames[] = $objecttarget->PubChannel->Name;
 						}
 					}
 				}
@@ -713,16 +713,14 @@ class BizQueryBase
 					}
 				}
 				if ($reqIssues) {
-				 	$issuenames = substr($issuenames,0,-1); // Sorting is only done on names of issues
-					$sorted = explode(',', $issuenames);	// BZ#20985
-					sort($sorted);
-					$row['Issues'] = implode(', ', $sorted);
+					$sorted = sort( $issuenames );
+					$row['Issues'] = implode(', ', $issuenames);
 				}
 				if ($reqEditions) {
-					$row['Editions'] = substr($editionnames,0,-2); //remove last comma and space from $editionnames
+					$row['Editions'] = implode( ', ', $editionnames );
 				}
 				if ($reqPubChannels) {
-					$row['PubChannels'] = substr($channelnames,0,-2); //remove last comma and space from $channelnames
+					$row['PubChannels'] = implode( ', ', $channelnames );
 				}
 
 				if( $addTargets ) {
