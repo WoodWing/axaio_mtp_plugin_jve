@@ -194,7 +194,7 @@ class DBUserSetting extends DBBase
 	{
 		LogHandler::log( __METHOD__, 'DEPRECATED',
 			'Please use DBUserSetting::getSettingId() instead.' );
-		return (bool)self::getSettingId( $userShortName, $settingName, $clientAppName );
+		return (bool)self::getSettingId( $userShortName, $clientAppName, $settingName );
 	}
 
 	/**
