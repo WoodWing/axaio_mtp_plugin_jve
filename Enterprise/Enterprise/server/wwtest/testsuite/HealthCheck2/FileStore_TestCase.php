@@ -125,22 +125,23 @@ class WW_TestSuite_HealthCheck2_FileStore_TestCase extends TestCase
 		LogHandler::Log('wwtest', 'INFO', 'The '.$directory.' folder is writable.' );
 
 		return true;
-	}	
-		
+	}
+
 	/**
-	 * Checks if the parent directory of passed directory is writable. 
+	 * Checks if the parent directory of passed directory is writable.
+	 *
 	 * @param string $directory Path of the directory.
 	 * @param string $define Name of the define
-	 * @return bool True if parent is valid, else false.
+	 * @return void True if parent is valid, else false.
 	 */
 	private function validateParentDirectory( $directory, $define )
 	{
 		// Check existence and write access for parent(!) of $directory folder		
-		$parentDir = substr( $directory, 0, strrpos( $directory, '/' ) ); // remove child folder name
-		$help = 'Make sure the '.$parentDir.' folder (parent of '.$define.') exists and is writable from the webserver.';
-		
 		require_once BASEDIR . '/server/utils/TestSuite.php';
 		$utils = new WW_Utils_TestSuite();
+		$parentDir = $utils->extractParentFolder( $directory );
+		$help = 'Make sure the '.$parentDir.' folder (parent of '.$define.') exists and is writable from the webserver.';
+		
 		if( !$utils->validateFilePath( $this, $parentDir, $help ) ) {
 			return;
 		}
