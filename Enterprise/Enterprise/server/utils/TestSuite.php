@@ -2169,4 +2169,62 @@ class WW_Utils_TestSuite
 			} );
 		}
 	}
+
+	/**
+	 * Creates a new Server Job via jobindex.php.
+	 *
+	 * Typically needed for recurring Server Job.
+	 *
+	 * @since 10.1.7
+	 * @param TestCase $testCase
+	 * @param string $serverJobName
+	 */
+	public function callCreateServerJob( TestCase $testCase, $serverJobName )
+	{
+		try {
+			require_once 'Zend/Http/Client.php';
+			$url = LOCALURL_ROOT.INETROOT.'/jobindex.php';
+			$client = new Zend_Http_Client();
+			$client->setUri( $url );
+			$client->setParameterGet( 'createrecurringjob', $serverJobName );
+			$client->setConfig( array( 'timeout' => 5 ) );
+			$response = $client->request( Zend_Http_Client::GET );
+
+			if( !$response->isSuccessful() ) {
+				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$response->getHeadersAsString( true, '<br/>' ) );
+			}
+		} catch ( Zend_Http_Client_Exception $e ) {
+			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$e->getMessage() );
+		}
+	}
+
+	/**
+	 * Run the job scheduler by calling the jobindex.php.
+	 *
+	 * @since 10.1.7
+	 * @param TestCase $testCase
+	 * @param int $maxExecTime The max execution time of jobindex.php in seconds.
+	 * @param int $maxJobProcesses The maximum number of jobs that the job processor is allowed to pick up at any one time.
+	 */
+	public function callRunServerJobs( TestCase $testCase, $maxExecTime = 5, $maxJobProcesses = 3 )
+	{
+		try {
+			require_once 'Zend/Http/Client.php';
+			$url = LOCALURL_ROOT.INETROOT.'/jobindex.php';
+			$client = new Zend_Http_Client();
+			$client->setUri( $url );
+			$client->setParameterGet( 'maxexectime', $maxExecTime );
+			$client->setParameterGet( 'maxjobprocesses', $maxJobProcesses );
+			$client->setConfig( array( 'timeout' => $maxExecTime + 30 ) ); // before breaking connection, let's give the job processor 30s more to complete
+			$response = $client->request( Zend_Http_Client::GET );
+
+			if( !$response->isSuccessful() ) {
+				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$response->getHeadersAsString( true, '<br/>' ) );
+			}
+		} catch ( Zend_Http_Client_Exception $e ) {
+			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$e->getMessage() );
+		}
+
+		sleep( 10 ); // To make sure that the server job is really ended.
+	}
 }
