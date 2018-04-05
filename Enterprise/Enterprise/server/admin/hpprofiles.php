@@ -31,14 +31,14 @@ switch ($mode) {
 			$mode = 'error';
 			break;
 		}
-		if (checkDuplicateName( $name, $id )) {
+		if ( HpProfilesAdminApp::checkDuplicateName( $name, $id )) {
 			$errors[] = BizResources::localize("ERR_DUPLICATE_NAME");
 			$mode = 'error';
 			break;
 		}
-		updateProfile( $name, $description, $id );
-		deleteFeaturesByProfile( $id );
-		addFeaturesByProfile( $id );
+		HpProfilesAdminApp::updateProfile( $name, $description, $id );
+		HpProfilesAdminApp::deleteFeaturesByProfile( $id );
+		HpProfilesAdminApp::addFeaturesByProfile( $id );
 		break;
 	case 'insert':
 		if (trim($name) == '') {
@@ -46,13 +46,13 @@ switch ($mode) {
 			$mode = 'error';
 			break;
 		}
-		if ( checkDuplicateName( $name ) ) {
+		if ( HpProfilesAdminApp::checkDuplicateName( $name ) ) {
 			$errors[] = BizResources::localize("ERR_DUPLICATE_NAME");
 			$mode = 'error';
 			break;
 		}
-		$id = addProfile( $name, $description );
-		addFeaturesByProfile( $id);
+		$id = HpProfilesAdminApp::addProfile( $name, $description );
+		HpProfilesAdminApp::addFeaturesByProfile( $id);
 		break;
 	case 'delete':
 		if ($id) {
@@ -176,85 +176,95 @@ $txt = str_replace('<!--DETAILS-->', $detailtxt, $txt);
 $txt .= '<script language="javascript">document.forms[0].profile.focus();</script>';
 print HtmlDocument::buildDocument($txt);
 
-/**
- * Adds selected features to profile. Non-selected features are skipped.
- *
- * @param integer $id
- */
-function addFeaturesByProfile( $id )
+class HpProfilesAdminApp
 {
-	$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
-	foreach (array_keys($features) as $fid) {
-		$value = isset($_REQUEST['checkobj'][$fid]) ? $_REQUEST['checkobj'][$fid] : '';
-		$save = true;
-		if ($value) {
-			$value = 'Yes';
-		} else {
-			$save = false;
-		}
-		if ($save) {
-			$values = array( 'profile' => $id, 'feature' => $fid, 'value' => $value );
-			DBBase::insertRow( 'profilefeatures', $values );
+	/**
+	 * @package Enterprise
+	 * @subpackage Admin
+	 * @since 10.1.7
+	 * @copyright WoodWing Software bv. All Rights Reserved.
+	 */
+
+	/**
+	 * Adds selected features to profile. Non-selected features are skipped.
+	 *
+	 * @param integer $id
+	 */
+	static public function addFeaturesByProfile( $id )
+	{
+		$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
+		foreach( array_keys( $features ) as $fid ) {
+			$value = isset( $_REQUEST['checkobj'][ $fid ] ) ? $_REQUEST['checkobj'][ $fid ] : '';
+			$save = true;
+			if( $value ) {
+				$value = 'Yes';
+			} else {
+				$save = false;
+			}
+			if( $save ) {
+				$values = array( 'profile' => intval( $id ), 'feature' => intval( $fid ), 'value' => strval( $value ) );
+				DBBase::insertRow( 'profilefeatures', $values );
+			}
 		}
 	}
-}
 
-/**
- * Checks if the name of the profile already exists. If no Id is passed in all profiles are checked.
- *
- * @param string $name
- * @param int|null $id
- * @return boolean
- */
-function checkDuplicateName( $name, $id = null )
-{
-	$where = '`profile` = ? ';
-	$params = array( strval( $name ) );
-	if( $id ) {
-		$where .= 'AND `id` != ? ';
-		$params[] = intval( $id );
+	/**
+	 * Checks if the name of the profile already exists. If no Id is passed in all profiles are checked.
+	 *
+	 * @param string $name
+	 * @param int|null $id
+	 * @return boolean
+	 */
+	static public function checkDuplicateName( $name, $id = null )
+	{
+		$where = '`profile` = ? ';
+		$params = array( strval( $name ) );
+		if( $id ) {
+			$where .= 'AND `id` != ? ';
+			$params[] = intval( $id );
+		}
+		$row = DBBase::getRow( 'profiles', $where, array( 'id' ), $params );
+		return $row ? true : false;
 	}
-	$row = DBBase::getRow( 'profiles', $where, array( 'id' ), $params );
-	return $row ? true : false;
-}
 
-/**
- * Update profile
- *
- * @param string $name
- * @param string $description
- * @param integer $id
- */
-function updateProfile( $name, $description, $id )
-{
-	$values = array( 'profile' => $name, 'description' => $description );
-	$where = '`id` = ?';
-	$params = array( intval( $id ) );
-	DBBase::updateRow( 'profiles', $values, $where, $params );
-}
+	/**
+	 * Update profile
+	 *
+	 * @param string $name
+	 * @param string $description
+	 * @param integer $id
+	 */
+	static public function updateProfile( $name, $description, $id )
+	{
+		$values = array( 'profile' => strval( $name ), 'description' => strval( $description ) );
+		$where = '`id` = ?';
+		$params = array( intval( $id ) );
+		DBBase::updateRow( 'profiles', $values, $where, $params );
+	}
 
-/**
- * Delete all features of a profile.
- *
- * @param integer $id
- */
-function deleteFeaturesByProfile( $id )
-{
-	$where = '`profile` = ?';
-	$params = array( intval( $id ) );
-	DBBase::deleteRows( 'profilefeatures', $where, $params );
-}
+	/**
+	 * Delete all features of a profile.
+	 *
+	 * @param integer $id
+	 */
+	static public function deleteFeaturesByProfile( $id )
+	{
+		$where = '`profile` = ?';
+		$params = array( intval( $id ) );
+		DBBase::deleteRows( 'profilefeatures', $where, $params );
+	}
 
-/**
- * Adds a new profile.
- *
- * @param string $name
- * @param string $description
- * @return bool|int
- */
-function addProfile( $name, $description )
-{
-	$values = array( 'profile' => $name, 'description' => $description, 'code' => 0 );
-	$id = DBBase::insertRow( 'profiles', $values );
-	return $id;
+	/**
+	 * Adds a new profile.
+	 *
+	 * @param string $name
+	 * @param string $description
+	 * @return bool|int
+	 */
+	static public function addProfile( $name, $description )
+	{
+		$values = array( 'profile' => strval( $name ), 'description' => strval( $description ), 'code' => 0 );
+		$id = DBBase::insertRow( 'profiles', $values );
+		return $id;
+	}
 }
