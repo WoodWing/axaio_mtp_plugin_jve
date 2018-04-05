@@ -50,9 +50,13 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 
 	public function getTestMethods()
 	{
-		return 'Create a user(group), add access rights, check if the rights are correctly applied. The value of the '.
-			'client feature is changed and the feature profile is removed (meaning no right). An abject is created in memory '.
-			'and of this object the workflow rights are checked.' ;
+		return '<ul>'.
+			'<li>Scenario:</li>'.
+			'<li>Create a user(group), add access rights for a newly created brand.</li>'.
+			'<li>The value of the client feature is changed and the feature profile is removed (meaning no right).</li>'.
+			'<li>Check if the disabled client feature is returned in the LogOn response.</li>'.
+			'<li>An object is composed in memory and of this object the workflow rights are checked.</li>'.
+			'</ul>';
 	}
 
 	public function getPrio()
@@ -89,9 +93,11 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 	}
 
 	/**
-	 * Sets and unsets the 'ApplyCharStyles' feature right in different ways. If a client feature is not set it is
+	 * Checks if a disabled feature is returned in the LogOn response. Only disabled features are returned.
+	 *
+	 * Enables and disables the 'ApplyCharStyles' feature right in different ways. If a client feature is disabled it is
 	 * returned in the LogOn response. The LogOn response contains those features to which the user is not entitled.
-	 * Unset means either the feature is not in the smart_profiletfeatures table or the value in this table is 'No'.
+	 * Disabling means either the feature is not in the smart_profiletfeatures table or the value is set to 'No'.
 	 */
 	private function testClientFeatures()
 	{
@@ -140,7 +146,7 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 	/**
 	 * Updates the prifilefeature record directly in the database.
 	 *
-	 * @param string $value
+	 * @param string $value 'Yes' to enable the feature, 'No' to disable.
 	 */
 	private function updateProfileFeatureRecord( string $value )
 	{
@@ -197,11 +203,11 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 	}
 
 	/**
-	 * Checks if the feature is set for the profile as it was returned by the LogOn response.
+	 * Checks if the feature for the profile, as returned by the LogOn response, is in accordance with the expectation.
 	 *
-	 * @param $isSet
+	 * @param boolean $isExpected
 	 */
-	private function checkApplyCharStyle( bool $isSet )
+	private function checkApplyCharStyle( bool $isExpected )
 	{
 		$found = false;
 		foreach( $this->featureProfile->Features as $feature ) {
@@ -210,12 +216,14 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 				break;
 			}
 		}
-		$actual = $found == true ? 'set ' : 'not set ';
-		$expected = $isSet == true ? 'expected.' : 'not expected.';
-		$message = self::APPLYCHARSTYLES_FEATURE_NAME.' feature is '.$actual.'while it is '.$expected;
-		$this->assertEquals( $isSet, $found, $message );
+		$actual = $found == true ? 'enabled ' : 'disabled ';
+		$message = self::APPLYCHARSTYLES_FEATURE_NAME.' feature is '.$actual.'which is not expected';
+		$this->assertEquals( $isExpected, $found, $message );
 	}
 
+	/**
+	 * Tear down all created test data.
+	 */
 	private function teardownTest()
 	{
 		$this->workflowFactory->teardownTestData();
