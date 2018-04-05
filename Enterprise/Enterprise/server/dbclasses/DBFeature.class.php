@@ -97,13 +97,13 @@ class DBFeature extends DBBase
 	 * @param array $profileIds Profile Ids of which the features are read.
 	 * @return array with profile/feature combinations.
 	 */
-	public static function getFeaturesByProfiles( array $profileIds )
+	public static function getEnabledWorkflowFeaturesByProfiles( array $profileIds )
 	{
 		$whereParts = array();
 		$whereParts[] = DBBase::addIntArrayToWhereClause( 'profile', $profileIds, false );
 		$whereParts[] = '`value` = ?';
-		$whereParts[] = '`feature` < ?';
-		$params = array( 'Yes', 100 );
+		$whereParts[] = '`feature` <= ?';
+		$params = array( 'Yes', 99 );
 		$where = implode( ' AND ', $whereParts);
 		$features = self::listRows( 'profilefeatures', '', '', $where, array( 'profile', 'feature' ), $params );
 
@@ -113,6 +113,7 @@ class DBFeature extends DBBase
 	/**
 	 * Returns of each profile the enabled features.
 	 *
+	 * @since 10.1.7
 	 * @param int[] $profileIds
 	 * @return array Features per profileId
 	 */
