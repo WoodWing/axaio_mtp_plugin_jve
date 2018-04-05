@@ -101,11 +101,12 @@ class BizServiceLogsCleanup extends BizServerJobHandler
 	{
 		$cleanupJobEnabled = false;
 		do {
-			if( LOGLEVEL <= 0 &&
+			if( LOGLEVEL <= 0 ||
 				AUTOCLEAN_SERVICELOGS_DAYS <= 0 ) {
 				break;
 			}
 
+			require_once BASEDIR . '/server/bizclasses/BizServerJobConfig.class.php';
 			$registered = false; // Whether it is registered in the admin page.
 			$userAssigned = false;
 			$bizJobConfig = new BizServerJobConfig();
