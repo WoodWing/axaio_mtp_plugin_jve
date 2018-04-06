@@ -368,4 +368,59 @@ class FolderUtils
 		$version = implode( '.', array_slice( explode('.',$version), 0, 2 ) );
 		return sys_get_temp_dir().'/ww_php_internal.v'.$version.'.phpdb.xml';
 	}
+
+	/**
+	 * Checks if a directory is the root directory. On Unix the root directory is '/'. On windows it is '<drive>:/',
+	 * e.g. 'C:/'. This method does not check if a directory is a UNC root folder. You cannot end up in the UNC root
+	 * folder as a path to such a directory is always something like '//volume/sharedfolder'.
+	 *
+	 * @since 10.1.7
+	 * @param string $directory
+	 * @return bool
+	 */
+	static public function isLocalRootFolder( $directory )
+	{
+		if( OS == 'WIN' ) {
+			$isLocalRoot = preg_match('/^[a-zA-Z]:\/$/', $directory);
+		} else {
+			$isLocalRoot = $directory == '/';
+		}
+
+		return $isLocalRoot;
+	}
+
+	/**
+	 * Extracts the parent directory of the passed in directory.
+	 *
+	 * The parent directory is returned without ending slash except when the parent directory is the root directory.
+	 * Unix:
+	 * $directory           $parentDir
+	 * '/parent/child/'   => '/parent'
+	 * '/parent/child'   => '/parent'
+	 * '/child/'          => '/'
+	 * '/child'          => '/'
+	 * Windows:
+	 * 'C:/parent/child/' => 'C:/parent'
+	 * 'C:/parent/child' => 'C:/parent'
+	 * 'C:/child/'        => 'C:/'
+	 * 'C:/child'        => 'C:/'
+	 *
+	 * @since 10.1.7
+	 * @param string $directory
+	 * @return string
+	 */
+	public function extractParentFolder( $directory )
+	{
+		if( strrpos($directory, '/' ) == strlen($directory) - 1 ) {
+			$directory = substr( $directory, 0, strrpos( $directory, '/' ) ); // Remove end slash
+		}
+		if( substr_count( $directory, '/') == 1 ) { // Only one remaining slash
+			$parentDir = substr( $directory, 0, strrpos( $directory, '/' ) + 1 );
+		} else {
+			$parentDir = substr( $directory, 0, strrpos( $directory, '/' ) );
+		}
+
+		return $parentDir;
+	}
+
 }
