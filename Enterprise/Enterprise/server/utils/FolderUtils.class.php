@@ -408,7 +408,7 @@ class FolderUtils
 	 * @param string $directory
 	 * @return string
 	 */
-	public function extractParentFolder( $directory )
+	static public function extractParentFolder( $directory )
 	{
 		if( strrpos($directory, '/' ) == strlen($directory) - 1 ) {
 			$directory = substr( $directory, 0, strrpos( $directory, '/' ) ); // Remove end slash
