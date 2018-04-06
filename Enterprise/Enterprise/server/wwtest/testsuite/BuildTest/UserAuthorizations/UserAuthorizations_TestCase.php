@@ -205,6 +205,8 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 	/**
 	 * Checks if the feature for the profile, as returned by the LogOn response, is in accordance with the expectation.
 	 *
+	 * A feature that is disabled is returned in the LogOn response. Features that are enabled are not returned.
+	 *
 	 * @param boolean $isExpected
 	 */
 	private function checkApplyCharStyle( bool $isExpected )
@@ -216,7 +218,7 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 				break;
 			}
 		}
-		$actual = $found == true ? 'enabled ' : 'disabled ';
+		$actual = $found == true ? 'disabled ' : 'enabled ';
 		$message = self::APPLYCHARSTYLES_FEATURE_NAME.' feature is '.$actual.'which is not expected';
 		$this->assertEquals( $isExpected, $found, $message );
 	}
