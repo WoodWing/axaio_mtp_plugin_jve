@@ -629,18 +629,4 @@ class DBIssue extends DBBase
 		$sql = "DELETE FROM $issuesectionstate WHERE `issue` = ? AND `deadlinerelative` = 0 ";
 		$dbDriver->query($sql, array( intval( $issueId ) ) );
 	}
-	
-	/**
-	 * This function checks whether the given issue id
-	 * is in active or inactive status.
-	 *
-	 * @param int $issuedId Database of the issue ID.
-	 * @return  boolean True when active, False otherwise.
-	 */
-	static public function isIssueActive( $issuedId )
-	{
-		$where = " `id` = ? AND `active` = ? ";
-		$result = self::getRow('issues', $where, 'id', array( intval( $issuedId ), 'on'));
-		return $result ? true : false;
-	}
 }

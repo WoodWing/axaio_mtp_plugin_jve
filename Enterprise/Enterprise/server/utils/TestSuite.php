@@ -1628,9 +1628,11 @@ class WW_Utils_TestSuite
 	 * @since 10.1.7
 	 * @param TestCase $testCase
 	 * @param string $serverJobName
+	 * @return bool
 	 */
 	public function callCreateServerJob( TestCase $testCase, $serverJobName )
 	{
+		$result = true;
 		try {
 			require_once 'Zend/Http/Client.php';
 			$url = LOCALURL_ROOT.INETROOT.'/jobindex.php';
@@ -1642,10 +1644,13 @@ class WW_Utils_TestSuite
 
 			if( !$response->isSuccessful() ) {
 				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$response->getHeadersAsString( true, '<br/>' ) );
+				$result = false;
 			}
 		} catch ( Zend_Http_Client_Exception $e ) {
 			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$e->getMessage() );
+			$result = false;
 		}
+		return $result;
 	}
 
 	/**
@@ -1655,9 +1660,11 @@ class WW_Utils_TestSuite
 	 * @param TestCase $testCase
 	 * @param int $maxExecTime The max execution time of jobindex.php in seconds.
 	 * @param int $maxJobProcesses The maximum number of jobs that the job processor is allowed to pick up at any one time.
+	 * @return bool
 	 */
 	public function callRunServerJobs( TestCase $testCase, $maxExecTime = 5, $maxJobProcesses = 3 )
 	{
+		$result = true;
 		try {
 			require_once 'Zend/Http/Client.php';
 			$url = LOCALURL_ROOT.INETROOT.'/jobindex.php';
@@ -1670,11 +1677,14 @@ class WW_Utils_TestSuite
 
 			if( !$response->isSuccessful() ) {
 				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$response->getHeadersAsString( true, '<br/>' ) );
+				$result = false;
 			}
 		} catch ( Zend_Http_Client_Exception $e ) {
 			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$e->getMessage() );
+			$result = false;
 		}
 
 		sleep( 10 ); // To make sure that the server job is really ended.
+		return $result;
 	}
 }
