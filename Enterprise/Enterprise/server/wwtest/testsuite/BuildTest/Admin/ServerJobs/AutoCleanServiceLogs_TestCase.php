@@ -44,28 +44,30 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 
 	public function runTest()
 	{
-		do {
+		try {
 			$this->setupTestData();
 			$this->populateDataInLogTable();
 			$this->preCheckBeforeRunningCleanUpJob();
 			$this->createAndRunAutoCleanServiceLogs();
 			$this->postCheckAfterRunningCleanUpJob();
-		} while ( false );
+		} catch ( BizException $e ) {
+
+		}
+		// nothing to tear down for this test case.
 	}
 
 	/**
 	 * Checks and prepares the data needed for this test.
-	 *
-	 * @since 10.1.7
 	 */
 	private function setupTestData()
 	{
-		// Checks if it is enabled.
+		// Checks if settings are correct.
+		$this->assertEquals( 1, LOGLEVEL, 'LOGLEVEL is not enabled. Please make sure LOGLEVEL is set to 1' );
+
 		require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
-		if( !BizServiceLogsCleanup::isServiceLogsCleanupEnabled() ) {
-			$this->setResult( 'ERROR', 'AutoCleanServiceLogs is not enabled.' .
-				'Please make sure LOGLEVEL and AUTOCLEAN_SERVICELOGS_DAYS are set to any value other than 0.');
-		}
+		$enabled = BizServiceLogsCleanup::isServiceLogsCleanupEnabled();
+		$message = 'AutoCleanServiceLogs is not enabled. Please make sure AUTOCLEAN_SERVICELOGS_DAYS is set to any value other than 0.';
+		$this->assertTrue( $enabled, $message );
 
 		// Initialization.
 		require_once BASEDIR.'/server/utils/TestSuite.php';
@@ -77,23 +79,16 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	 *
 	 * Function also manipulates the date field in smart_logs table to make sure the data is old enough
 	 * to be deleted by the cleanup Server Job.
-	 *
-	 * @since 10.1.7
 	 */
 	private function populateDataInLogTable()
 	{
-		try {
-			$this->doLogin();
-			$this->doLogOff();
-			$this->manipulateLogDateTime();
-		} catch( BizException $e ) {
-		}
+		$this->doLogin();
+		$this->doLogOff();
+		$this->manipulateLogDateTime();
 	}
 
 	/**
 	 * LogOn test user through workflow interface
-	 *
-	 * @since 10.1.7
 	 */
 	private function doLogin()
 	{
@@ -104,8 +99,6 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 
 	/**
 	 * LogOff test user through workflow interface
-	 *
-	 * @since 10.1.7
 	 */
 	private function doLogOff()
 	{
@@ -117,8 +110,6 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	 *
 	 * This is to make sure the entries in the smart_log table are old enough to be removed
 	 * when AutoCleanServiceLogs job is executed.
-	 *
-	 * @since 10.1.7
 	 */
 	private function manipulateLogDateTime()
 	{
@@ -132,38 +123,34 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	 *
 	 * This is to ensure that when the AutoCleanServiceLogs job is executed, there are records
 	 * to be deleted.
-	 *
-	 * @since 10.1.7
 	 */
 	private function preCheckBeforeRunningCleanUpJob()
 	{
 		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
-		$totalJobs = DBBase::countRecordsInTable( 'log', 'id' );
-		$this->assertGreaterThan( 0, $totalJobs );
+		$totalLogEntries = DBBase::countRecordsInTable( 'log', 'id' );
+		$this->assertGreaterThan( 0, $totalLogEntries );
 	}
 
 	/**
 	 * Creates AutoCleanServiceLogs Server Job and execute it.
-	 *
-	 * @since 10.1.7
 	 */
 	private function createAndRunAutoCleanServiceLogs()
 	{
-		$this->globalUtils->callCreateServerJob( $this, 'AutoCleanServiceLogs' );
-		$this->globalUtils->callRunServerJobs( $this );
+		$result = $this->globalUtils->callCreateServerJob( $this, 'AutoCleanServiceLogs' );
+		$this->assertTrue( $result, 'AutoCleanServiceLogs Server Job cannot be created.' );
+		$result = $this->globalUtils->callRunServerJobs( $this );
+		$this->assertTrue( $result, 'Server Job cannot be executed.' );
 	}
 
 	/**
 	 * Checks in smart_log table and make sure the table is empty.
 	 *
 	 * This is to ensure that the AutoCleanServiceLogs Server Job has really done its cleanup job.
-	 *
-	 * @since 10.1.7
 	 */
 	private function postCheckAfterRunningCleanUpJob()
 	{
 		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
-		$totalJobs = DBBase::countRecordsInTable( 'log', 'id' );
-		$this->assertEquals( 0, $totalJobs );
+		$totalLogEntries = DBBase::countRecordsInTable( 'log', 'id' );
+		$this->assertEquals( 0, $totalLogEntries );
 	}
 }

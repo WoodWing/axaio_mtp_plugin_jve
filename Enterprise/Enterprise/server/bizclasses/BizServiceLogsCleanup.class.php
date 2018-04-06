@@ -101,8 +101,7 @@ class BizServiceLogsCleanup extends BizServerJobHandler
 	{
 		$cleanupJobEnabled = false;
 		do {
-			if( LOGLEVEL <= 0 ||
-				AUTOCLEAN_SERVICELOGS_DAYS <= 0 ) {
+			if( AUTOCLEAN_SERVICELOGS_DAYS <= 0 ) {
 				break;
 			}
 
