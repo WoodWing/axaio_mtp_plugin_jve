@@ -1792,7 +1792,7 @@ class BizRelation
 	 */
 	protected static function getDpsObjectTypes()
 	{
-		return array('Article' => true, 'Image' => true, 'LayoutModule' => true, 'Audio' => true, 'Video' => true);
+		return array( 'Article' => true, 'Image' => true, 'LayoutModule' => true, 'Audio' => true, 'Video' => true, 'Spreadsheet' => true );
 	}
 
 	/**
