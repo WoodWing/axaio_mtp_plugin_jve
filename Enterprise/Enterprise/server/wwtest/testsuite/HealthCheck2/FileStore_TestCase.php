@@ -136,12 +136,13 @@ class WW_TestSuite_HealthCheck2_FileStore_TestCase extends TestCase
 	 */
 	private function validateParentDirectory( $directory, $define )
 	{
-		// Check existence and write access for parent(!) of $directory folder		
+		// Check existence and write access for parent(!) of $directory folder
+		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
+		$parentDir = FolderUtils::extractParentFolder( $directory );
+		$help = 'Make sure the '.$parentDir.' folder (parent of '.$define.') exists and is writable from the webserver.';
+
 		require_once BASEDIR . '/server/utils/TestSuite.php';
 		$utils = new WW_Utils_TestSuite();
-		$parentDir = $utils->extractParentFolder( $directory );
-		$help = 'Make sure the '.$parentDir.' folder (parent of '.$define.') exists and is writable from the webserver.';
-		
 		if( !$utils->validateFilePath( $this, $parentDir, $help ) ) {
 			return;
 		}
