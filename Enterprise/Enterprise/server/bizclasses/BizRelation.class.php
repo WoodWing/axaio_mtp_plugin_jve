@@ -1788,6 +1788,8 @@ class BizRelation
 	/**
 	 * Returns an array with all the "DPS Object Types" as keys. The values are always boolean true.
 	 *
+	 * EN-90441: Added Spreadsheet
+	 * .
 	 * @return array
 	 */
 	protected static function getDpsObjectTypes()
