@@ -606,7 +606,7 @@ class ActionPropertiesQueryAdminApp
 			$rows = array();
 			if( $this->mode == 'add' ) {
 				$rows = array();
-				$addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
+				$addDefaultDynamicFields = ( isset( $_REQUEST['addDefaultDynamic'] ) && strval( $_REQUEST['addDefaultDynamic'] ) == 'true' ) ? true : false;
 				if( $addDefaultDynamicFields == 'true' ) {
 					$this->composeAndInsertActionsProperty();
 					$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
@@ -729,16 +729,6 @@ class ActionPropertiesQueryAdminApp
 	 */
 	private function isConfigurableField( $prop )
 	{
-		$editable = true;
-		switch( $this->action ) {
-			case 'Query':
-				switch( $prop ) {
-					case 'Name':
-						$editable = false;
-						break;
-				}
-				break;
-		}
-		return $editable;
+		return !( $this->action == 'Query' && $prop == 'Name' );
 	}
 }
