@@ -4112,7 +4112,6 @@
 		<operation name="CreateObjectRelations">
 			<soap:operation soapAction="urn:SmartConnection#CreateObjectRelations"/>
 			<input>
-				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
 				<soap:body use="literal"/>
 			</input>
 			<output>
@@ -4122,7 +4121,6 @@
 		<operation name="UpdateObjectRelations">
 			<soap:operation soapAction="urn:SmartConnection#UpdateObjectRelations"/>
 			<input>
-				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
 				<soap:body use="literal"/>
 			</input>
 			<output>
@@ -4144,7 +4142,6 @@
 				<soap:body use="literal"/>
 			</input>
 			<output>
-				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
 				<soap:body use="literal"/>
 			</output>
 		</operation>

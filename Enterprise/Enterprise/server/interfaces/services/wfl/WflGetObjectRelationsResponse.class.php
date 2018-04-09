@@ -49,6 +49,6 @@ class WflGetObjectRelationsResponse
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.WflGetObjectRelationsResponse'; } // AMF object type mapping
 
-	public function mightHaveContent() { return true; }
+	public function mightHaveContent() { return false; }
 }
 

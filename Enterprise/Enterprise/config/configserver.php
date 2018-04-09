@@ -816,6 +816,14 @@ if( !defined('MTP_POSTPROCESS_LOC') ) {
 //      ContentStationInlineArticleCompare
 //          Enables the Inline Article Compare feature in Content Station 9.6 up to 9.x.
 //          When enabled, Track Changes are automatically disabled in Content Station.
+//      ContentStationCustomFlagField
+//          For Content Station 11.9 and higher.
+//          Define the name of a metadata field of type String. When this field holds any value the flag on a page
+//          thumbnail in the publication overview (previously only triggered by the planning interface) will turn yellow
+//          as an indication that the page needs attention. The content of the field will be shown as a tooltip on the
+//          flag icon. If the flag is already triggered by the planning interface, than that state will overrule the
+//          custom usage and turn the flag red.
+//          When using a custom metadata field the name of this field should be prefixed with ‘C_‘.
 if( !defined('SERVERFEATURES') ) {
 	define ('SERVERFEATURES', serialize(array(
 		new Feature( 'Messaging' ),
