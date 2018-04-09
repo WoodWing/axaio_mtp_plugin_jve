@@ -197,7 +197,6 @@ class TestMillionObjects
 		$relation->Placements = array( $placement );
 		$relation->ParentVersion = null;
 		$relation->ChildVersion = null;
-		$relation->Geometry = null;
 		$relation->Rating = null;
 		$relation->Targets = null;
 		$relations = array( $relation );

@@ -27,6 +27,11 @@
 				</restriction>
 			</simpleType>
 
+			<simpleType name="UnsignedInt">
+				<restriction base="unsignedInt">
+				</restriction>
+			</simpleType>
+
 			<!-- The type of workflow object. -->
 			<simpleType name="ObjectType">
 				<restriction base="string">
@@ -281,6 +286,14 @@
 					<element name="Publication"     type="tns:Publication"      nillable="true"/>   <!-- v6.0: Publication that ‘owns’ the object -->
 					<element name="Category"        type="tns:Category"         nillable="true"/>   <!-- v6.0: Category of the object, formerly named Section -->
 					<element name="ContentSource"   type="xsd:string"           nillable="true"/>   <!-- v6.0: Content provider, this is technical thing, for example DAM system ID -->
+					<element name="MasterId"        type="xsd:string"           nillable="true"/>
+						<!--
+							v10.4: ID of original. Tracks the original object that this one is a copy of.
+							When an object is a copy of another object, this indicates the object ID of
+							the object it was copied from. When the object being copied is itself already
+							a copy, it's MasterId will be used. That means all copies will share the same
+							MasterId which makes it easy to find all copies on a specific object.
+						-->
 				</all>
 			</complexType>
 			<complexType name="RightsMetaData">
@@ -461,7 +474,6 @@
 					<element name="Placements"      type="tns:ArrayOfPlacement" nillable="true"/>
 					<element name="ParentVersion"   type="xsd:string"           nillable="true"/>   <!-- The current version of the parent, nil when passed to server -->
 					<element name="ChildVersion"    type="xsd:string"           nillable="true"/>   <!-- The current version of the child, nil when passed to server -->
-					<element name="Geometry"        type="tns:Attachment"       nillable="true"/>
 					<element name="Rating"          type="xsd:unsignedInt"      nillable="true"/>   <!-- v6.0: Rating of the child object in relation to the parent context -->
 					<element name="Targets"         type="tns:ArrayOfTarget"    nillable="true"/>   <!-- v6.0: object targets within the parent context -->
 					<element name="ParentInfo"      type="tns:ObjectInfo"       nillable="true"/>   <!-- v8.2: Read-only info of parent to enable to user identify the object. Returned in GetObjects response. -->
@@ -1215,8 +1227,6 @@
 					<element name="PublishedVersion"  type="xsd:string"          nillable="true"/>
 				</all>
 			</complexType>
-
-			<!-- v6.0 -->
 			<complexType name="ArrayOfTarget">
 				<complexContent>
 					<restriction base="soap-enc:Array">
@@ -1232,8 +1242,6 @@
 					<element name="Targets"				type="tns:ArrayOfTarget"/>
 				</all>
 			</complexType>
-
-			<!-- v7.0 -->
 			<complexType name="ArrayOfObjectTargetsInfo">
 				<complexContent>
 					<restriction base="soap-enc:Array">
@@ -1249,6 +1257,16 @@
 					</restriction>
 				</complexContent>
 			</complexType>
+			
+			<!-- v10.4.0 -->
+			<complexType name="ArrayOfUnsignedInt">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:UnsignedInt[]"/>
+					</restriction>
+				</complexContent>
+			</complexType>
+			
 			<complexType name="Row">
 				<complexContent>
 					<restriction base="soap-enc:Array">
@@ -1275,8 +1293,6 @@
 					-->
 				</all>
 			</complexType>
-
-			<!-- v4.2 -->
 			<complexType name="ArrayOfChildRow">
 				<complexContent>
 					<restriction base="soap-enc:Array">
@@ -2927,52 +2943,6 @@
 			  </complexType>
 			</element>
 
-		<!-- v6.0: PubOverview start. -->
-
-			<!-- 
-				Retrieves page thumbs (or previews) to populate the Publication Overview.
-				(Typically called after GetPagesInfo.) In the response, file URLs are provided.
-				Each URL refers to a page thumb (or preview) as copied by the server to the 
-				Transfer Folder for the client to download. Thumbs can be downloaded in parallel
-				to gain better performance. Once all thumbs are shown, clients are responsible 
-				to remove those files from the Transfer Folder. In subsequent phase, the
-				GetPages service can be called again to retrieve the page previews.
-				v6.0: Introduced the GetPages service.
-				v8.3.3: Performance increased significantly.
-			-->
-			<element name="GetPages">
-			  <complexType>
-				<sequence>
-					<element name="Ticket"          type="xsd:string"/>                               <!-- Ticket retrieved through LogOn. Mandatory. -->
-					<!-- Filter objects -->
-					<element name="Params"          type="tns:ArrayOfQueryParam"
-					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Clients could call QueryObjects first to filter and find out layout ids. In GetPages, those can be provided through the IDs param. -->
-					<element name="IDs"             type="tns:ArrayOfString"        nillable="true"/> <!-- Layout object ids (mandatory). -->
-					<!-- Filter pages -->
-					<element name="PageOrders"      type="tns:ArrayOfString"
-					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Pass nil or leave out. -->
-					<element name="PageSequences"   type="tns:ArrayOfString"
-					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Pass nil or leave out. -->
-					<element name="Edition"         type="tns:Edition"              nillable="true"/> <!-- Filter pages for one edition. Always provide one Edition (or nil when there are no editions configured for the brand). -->
-					<!-- Extras to return in response -->
-					<element name="Renditions"      type="tns:ArrayOfRenditionType" nillable="true"/> <!-- Renditions to get file attachments per page (mandatory). Always provide one rendition. For two renditions, call another GetPages request. -->
-					<element name="RequestMetaData" type="xsd:boolean"
-					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Pass nil or leave out. Note: Always BasicMetaData is returned per object in response. -->
-					<element name="RequestFiles"    type="xsd:boolean" 
-					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Pass nil or leave out. Note: Always the files (attachments) are returned as requested in Renditions param. -->
-				</sequence>
-			  </complexType>
-			</element>
-
-			<!-- v6.0 -->
-			<element name="GetPagesResponse">
-			  <complexType>
-				<sequence>
-					<element name="ObjectPageInfos" type="tns:ArrayOfObjectPageInfo"/>
-				</sequence>
-			  </complexType>
-			</element>
-
 			<!--
 				Since 9.1 Autocomplete provider. For a DialogWidget there is a PropertyInfo and a corresponding PropertyUsage.
 				When the PropertyInfo has a TermEntity defined and the PropertyUsage has a AutocompleteProvider defined, this
@@ -3148,6 +3118,8 @@
 				</complexType>
 			</element>
 			
+		<!-- v6.0: PubOverview start. -->
+
 			<!--
 				Retrieves geometrical information for all pages produced for an issue.
 				This can be used to compose an outline (grid) for the Publication Overview.
@@ -3183,6 +3155,92 @@
 				</complexType>
 			</element>
 
+			<!-- 
+				Retrieves page thumbs (or previews) to populate the Publication Overview.
+				(Typically called after GetPagesInfo.) In the response, file URLs are provided.
+				Each URL refers to a page thumb (or preview) as copied by the server to the 
+				Transfer Folder for the client to download. Thumbs can be downloaded in parallel
+				to gain better performance. Once all thumbs are shown, clients are responsible 
+				to remove those files from the Transfer Folder. In subsequent phase, the
+				GetPages service can be called again to retrieve the page previews.
+				v6.0: Introduced the GetPages service.
+				v8.3.3: Performance increased significantly.
+			-->
+			<element name="GetPages">
+			  <complexType>
+				<sequence>
+					<element name="Ticket"          type="xsd:string"/>                               <!-- Ticket retrieved through LogOn. Mandatory. -->
+					<!-- Filter objects -->
+					<element name="Params"          type="tns:ArrayOfQueryParam"
+					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Clients could call QueryObjects first to filter and find out layout ids. In GetPages, those can be provided through the IDs param. -->
+					<element name="IDs"             type="tns:ArrayOfString"        nillable="true"/> <!-- Layout object ids (mandatory). -->
+					<!-- Filter pages -->
+					<element name="PageOrders"      type="tns:ArrayOfString"
+					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Pass nil or leave out. -->
+					<element name="PageSequences"   type="tns:ArrayOfString"
+					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Pass nil or leave out. -->
+					<element name="Edition"         type="tns:Edition"              nillable="true"/> <!-- Filter pages for one edition. Always provide one Edition (or nil when there are no editions configured for the brand). -->
+					<!-- Extras to return in response -->
+					<element name="Renditions"      type="tns:ArrayOfRenditionType" nillable="true"/> <!-- Renditions to get file attachments per page (mandatory). Always provide one rendition. For two renditions, call another GetPages request. -->
+					<element name="RequestMetaData" type="xsd:boolean"
+					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Pass nil or leave out. Note: Always BasicMetaData is returned per object in response. -->
+					<element name="RequestFiles"    type="xsd:boolean" 
+					                                minOccurs="0" maxOccurs="1"     nillable="true"/> <!-- DEPRECATED since 8.3.3. Pass nil or leave out. Note: Always the files (attachments) are returned as requested in Renditions param. -->
+				</sequence>
+			  </complexType>
+			</element>
+
+			<!-- v6.0 -->
+			<element name="GetPagesResponse">
+			  <complexType>
+				<sequence>
+					<element name="ObjectPageInfos" type="tns:ArrayOfObjectPageInfo"/>
+				</sequence>
+			  </complexType>
+			</element>
+
+			<!-- v10.4.0 -->
+			<element name="GetRelatedPagesInfo">
+				<complexType>
+					<sequence>
+						<element name="Ticket"          type="xsd:string"/>
+						<element name="LayoutId"        type="xsd:string"/>
+						<element name="PageSequences"   type="tns:ArrayOfUnsignedInt"/>
+					</sequence>
+				</complexType>
+			</element>
+			
+			<!-- v10.4.0 -->
+			<element name="GetRelatedPagesInfoResponse">
+				<complexType>
+					<sequence>
+						<element name="EditionsPages"   type="tns:ArrayOfEditionPages"/>
+						<element name="LayoutObjects"   type="tns:ArrayOfLayoutObject"/>
+					</sequence>
+				</complexType>
+			</element>
+
+			<!-- v10.4.0 -->
+			<element name="GetRelatedPages">
+				<complexType>
+					<sequence>
+						<element name="Ticket"          type="xsd:string"/>
+						<element name="LayoutId"        type="xsd:string"/>
+						<element name="PageSequences"   type="tns:ArrayOfUnsignedInt"/>
+						<element name="Rendition"       type="tns:RenditionType"/> <!-- The file rendition to retrieve for each page. -->
+					</sequence>
+				</complexType>
+			</element>
+
+			<!-- v10.4.0 -->
+			<element name="GetRelatedPagesResponse">
+				<complexType>
+					<sequence>
+						<element name="ObjectPageInfos" type="tns:ArrayOfObjectPageInfo"/>
+					</sequence>
+				</complexType>
+			</element>
+
 			<!-- v6.0 -->
 			<complexType name="ArrayOfEditionPages">
 				<complexContent>
@@ -3212,15 +3270,15 @@
 			<!-- v6.0 -->
 			<complexType name="PageObject">
 				<all>
-					<element name="IssuePagePosition"       type="xsd:unsignedInt"/> 	<!--  absolute page position wthin the Issue (numbers might be skipped if that page is not in that edition) -->
+					<element name="IssuePagePosition"       type="xsd:unsignedInt" nillable="true"/> <!--  absolute page position wthin the Issue (numbers might be skipped if that page is not in that edition) -->
 					<element name="PageOrder"   			type="xsd:unsignedInt"/>    <!-- Logical page number: i=>1, ii=>2, A=>1, B=>2, etc -->
 					<element name="PageNumber"   			type="xsd:string"/> 
 					<element name="PageSequence"   			type="xsd:unsignedInt"/>         
 					<element name="Height"      			type="xsd:double"/>                             <!-- Height in points (pt) -->              
 					<element name="Width"       			type="xsd:double"/>                             <!-- Width in points (pt) -->
 					<element name="ParentLayoutId"       	type="xsd:string"/>   
-					<element name="OutputRenditionAvailable"       type="xsd:boolean"/>   
-					<element name="PlacementInfos"				type="tns:ArrayOfPlacementInfo"/>
+					<element name="OutputRenditionAvailable" type="xsd:boolean"/>   
+					<element name="PlacementInfos"          type="tns:ArrayOfPlacementInfo" nillable="true"/>
 				</all>
 			</complexType>
 			
@@ -3261,8 +3319,10 @@
 					<element name="State"   	type="tns:State"/>
 					<element name="Version"   	type="xsd:string"/>
 					<element name="LockedBy"   	type="xsd:string"/>   <!-- v6.1 -->
-					<element name="Flag"        type="xsd:int"      nillable="true"   minOccurs="0"   maxOccurs="1" /> <!-- v10.1.3 Will be 0 when layout has no flag. -->
-					<element name="FlagMsg"     type="xsd:string"   nillable="true"   minOccurs="0"   maxOccurs="1" /> <!-- v10.1.3 Will be an empty string when layout has no flag message. -->
+					<element name="Flag"        type="xsd:int"         nillable="true"   minOccurs="0"   maxOccurs="1" /> <!-- v10.1.3 Will be 0 when layout has no flag. -->
+					<element name="FlagMsg"     type="xsd:string"      nillable="true"   minOccurs="0"   maxOccurs="1" /> <!-- v10.1.3 Will be an empty string when layout has no flag message. -->
+					<element name="Publication" type="tns:Publication" nillable="true"/> <!-- v10.4.0 The publication of the layout, resolved for GetRelatedPagesInfo services only. -->
+					<element name="Target"      type="tns:Target"       nillable="true"/> <!-- v10.4.0 The target of the layout, resolved for GetRelatedPagesInfo services only. -->
 				</all>
 			</complexType>
 			
@@ -3619,6 +3679,19 @@
 		<part name="parameters" element="tns:GetPagesInfoResponse"/>
 	</message>
 
+	<message name="GetRelatedPages">
+		<part name="parameters" element="tns:GetRelatedPages"/>
+	</message>
+	<message name="GetRelatedPagesResponse">
+		<part name="parameters" element="tns:GetRelatedPagesResponse"/>
+	</message>
+	<message name="GetRelatedPagesInfo">
+		<part name="parameters" element="tns:GetRelatedPagesInfo"/>
+	</message>
+	<message name="GetRelatedPagesInfoResponse">
+		<part name="parameters" element="tns:GetRelatedPagesInfoResponse"/>
+	</message>
+
 	<!-- 
 		- Object Labels -
 	-->
@@ -3848,6 +3921,14 @@
 			<input message="tns:GetPagesInfo"/>
 			<output message="tns:GetPagesInfoResponse"/>
 		</operation>
+		<operation name="GetRelatedPages">
+			<input message="tns:GetRelatedPages"/>
+			<output message="tns:GetRelatedPagesResponse"/>
+		</operation>
+		<operation name="GetRelatedPagesInfo">
+			<input message="tns:GetRelatedPagesInfo"/>
+			<output message="tns:GetRelatedPagesInfoResponse"/>
+		</operation>
 		<operation name="Autocomplete">
 			<input message="tns:Autocomplete"/>
 			<output message="tns:AutocompleteResponse"/>
@@ -4031,7 +4112,6 @@
 		<operation name="CreateObjectRelations">
 			<soap:operation soapAction="urn:SmartConnection#CreateObjectRelations"/>
 			<input>
-				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
 				<soap:body use="literal"/>
 			</input>
 			<output>
@@ -4041,7 +4121,6 @@
 		<operation name="UpdateObjectRelations">
 			<soap:operation soapAction="urn:SmartConnection#UpdateObjectRelations"/>
 			<input>
-				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
 				<soap:body use="literal"/>
 			</input>
 			<output>
@@ -4063,7 +4142,6 @@
 				<soap:body use="literal"/>
 			</input>
 			<output>
-				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
 				<soap:body use="literal"/>
 			</output>
 		</operation>
@@ -4323,6 +4401,25 @@
 		</operation>
 		<operation name="GetPages">
 			<soap:operation soapAction="urn:SmartConnection#GetPages"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
+			</output>
+		</operation>
+		<operation name="GetRelatedPagesInfo">
+			<soap:operation soapAction="urn:SmartConnection#GetRelatedPagesInfo"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetRelatedPages">
+			<soap:operation soapAction="urn:SmartConnection#GetRelatedPages"/>
 			<input>
 				<soap:body use="literal"/>
 			</input>

@@ -20,8 +20,6 @@ public class Relation  implements java.io.Serializable {
 
     private java.lang.String childVersion;
 
-    private com.woodwing.enterprise.interfaces.services.wfl.Attachment geometry;
-
     private org.apache.axis.types.UnsignedInt rating;
 
     private com.woodwing.enterprise.interfaces.services.wfl.Target[] targets;
@@ -42,7 +40,6 @@ public class Relation  implements java.io.Serializable {
            com.woodwing.enterprise.interfaces.services.wfl.Placement[] placements,
            java.lang.String parentVersion,
            java.lang.String childVersion,
-           com.woodwing.enterprise.interfaces.services.wfl.Attachment geometry,
            org.apache.axis.types.UnsignedInt rating,
            com.woodwing.enterprise.interfaces.services.wfl.Target[] targets,
            com.woodwing.enterprise.interfaces.services.wfl.ObjectInfo parentInfo,
@@ -54,7 +51,6 @@ public class Relation  implements java.io.Serializable {
            this.placements = placements;
            this.parentVersion = parentVersion;
            this.childVersion = childVersion;
-           this.geometry = geometry;
            this.rating = rating;
            this.targets = targets;
            this.parentInfo = parentInfo;
@@ -180,26 +176,6 @@ public class Relation  implements java.io.Serializable {
      */
     public void setChildVersion(java.lang.String childVersion) {
         this.childVersion = childVersion;
-    }
-
-
-    /**
-     * Gets the geometry value for this Relation.
-     * 
-     * @return geometry
-     */
-    public com.woodwing.enterprise.interfaces.services.wfl.Attachment getGeometry() {
-        return geometry;
-    }
-
-
-    /**
-     * Sets the geometry value for this Relation.
-     * 
-     * @param geometry
-     */
-    public void setGeometry(com.woodwing.enterprise.interfaces.services.wfl.Attachment geometry) {
-        this.geometry = geometry;
     }
 
 
@@ -332,9 +308,6 @@ public class Relation  implements java.io.Serializable {
             ((this.childVersion==null && other.getChildVersion()==null) || 
              (this.childVersion!=null &&
               this.childVersion.equals(other.getChildVersion()))) &&
-            ((this.geometry==null && other.getGeometry()==null) || 
-             (this.geometry!=null &&
-              this.geometry.equals(other.getGeometry()))) &&
             ((this.rating==null && other.getRating()==null) || 
              (this.rating!=null &&
               this.rating.equals(other.getRating()))) &&
@@ -386,9 +359,6 @@ public class Relation  implements java.io.Serializable {
         }
         if (getChildVersion() != null) {
             _hashCode += getChildVersion().hashCode();
-        }
-        if (getGeometry() != null) {
-            _hashCode += getGeometry().hashCode();
         }
         if (getRating() != null) {
             _hashCode += getRating().hashCode();
@@ -466,12 +436,6 @@ public class Relation  implements java.io.Serializable {
         elemField.setFieldName("childVersion");
         elemField.setXmlName(new javax.xml.namespace.QName("", "ChildVersion"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        elemField.setNillable(true);
-        typeDesc.addFieldDesc(elemField);
-        elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("geometry");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "Geometry"));
-        elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "Attachment"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();

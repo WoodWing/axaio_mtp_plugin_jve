@@ -9,6 +9,8 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 {
 	import com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflCategory;
 	import com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflState;
+	import com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflPublication;
+	import com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflTarget;
 
 	[Bindable]
 	[RemoteClass(alias="com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflLayoutObject")]
@@ -23,6 +25,8 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _LockedBy:String;
 		private var _Flag:Number;
 		private var _FlagMsg:String;
+		private var _Publication:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflPublication;
+		private var _Target:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflTarget;
 
 		public function WflLayoutObject() {
 		}
@@ -81,6 +85,20 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set FlagMsg(FlagMsg:String):void {
 			this._FlagMsg = FlagMsg;
+		}
+
+		public function get Publication():com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflPublication {
+			return this._Publication;
+		}
+		public function set Publication(Publication:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflPublication):void {
+			this._Publication = Publication;
+		}
+
+		public function get Target():com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflTarget {
+			return this._Target;
+		}
+		public function set Target(Target:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflTarget):void {
+			this._Target = Target;
 		}
 
 	}

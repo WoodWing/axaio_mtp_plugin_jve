@@ -684,7 +684,6 @@ class MultiChannelPublishingUtils
 		$relation->Placements = $placements;
 		$relation->ParentVersion = null;
 		$relation->ChildVersion = null;
-		$relation->Geometry = null;
 		$relation->Rating = null;
 		$relation->Targets = null;
 		
@@ -744,7 +743,6 @@ class MultiChannelPublishingUtils
 		$relation->Type = 'Contained';
 		$relation->ParentVersion = null;
 		$relation->ChildVersion = null;
-		$relation->Geometry = null;
 		$relation->Rating = null;
 		$relation->Targets = null;
 
@@ -1062,7 +1060,6 @@ class MultiChannelPublishingUtils
 		$relation->Placements = null;
 		$relation->ParentVersion = null;
 		$relation->ChildVersion = null;
-		$relation->Geometry = null;
 		$relation->Rating = null;
 		$relation->Targets = $targets;
 		$relation->ParentInfo = null;

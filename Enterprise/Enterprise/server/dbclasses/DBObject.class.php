@@ -476,6 +476,7 @@ class DBObject extends DBBase
 			$md->BasicMetaData->Category->Id = $row['section'];
 			$md->BasicMetaData->Category->Name = $row['secname'];
 			$md->BasicMetaData->ContentSource = $row['contentsource'];
+			$md->BasicMetaData->MasterId = $row['masterid'];
 			$md->ContentMetaData->Format = $row['format'];
 			$md->WorkflowMetaData->State = new State();
 			$md->WorkflowMetaData->State->Id = $row['state'];
@@ -518,7 +519,7 @@ class DBObject extends DBBase
 		$lckTbl = $dbDriver->tablename( 'objectlocks' );
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
 
-		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
+		$sql = 'SELECT o.`id`, o.`documentid`, o.`masterid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
 			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
 			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
 			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", ' .
@@ -663,38 +664,52 @@ class DBObject extends DBBase
 	}
 
 	/**
-	 * Returns true when specified object name already exists in database.
-	 * Can be used for new and existing objects. Only objecttargets are taken
-	 * into account.
+	 * Returns a list of names retrieved from database when the names are the same as the
+	 * requested name ($name) where letter-case and accented characters are ignored (insensitive).
 	 *
+	 * This function can be used for new and existing objects. Only objecttargets are taken
+	 * into account.
+	 * When none is found, empty list will be returned.
+	 *
+	 * Example: Requested $name = Dossier123.
+	 * The objects with following names will be returned.
+	 * dossier123
+	 * Dossier123
+	 * dössier123
+	 * Dössier123
+	 *
+	 * @since 10.3.1 Renamed the function from objectNameExists to getObjectNamesIgnoringCaseAndAccentedCharacters.
 	 * @param array $issueIds List of issue ids to check for object name uniqueness
 	 * @param string $name Object name
 	 * @param string $type Object type
 	 * @param int $id Object id if object already exists
-	 * 
-	 * @return int object id if name exists
+	 * @return string[]
 	 */
-	static public function objectNameExists( $issueIds, $name, $type, $id=null )
+	static public function getObjectNamesIgnoringCaseAndAccentedCharacters( array $issueIds, string $name, string $type, $id=null ):array
 	{
 		$dbdriver = DBDriverFactory::gen();
 		$objectsTable = $dbdriver->tablename(self::TABLENAME);
 		$targetsTable = $dbdriver->tablename('targets');
 		$issueIdsStr = implode( ', ', $issueIds );
 
-		$sql  = "SELECT o.`id` FROM $objectsTable o ";
+		$sql  = "SELECT o.`name` FROM $objectsTable o ";
 		$sql .= "INNER JOIN $targetsTable tar ON (tar.`objectid` = o.`id`) ";
 		$sql .= 'WHERE o.`name` = ? ';
 		$sql .= 'AND o.`type` = ? ';
 		$sql .= "AND tar.`issueid` IN ( $issueIdsStr ) ";
-		$params = array( $name, $type );
+		$params = array( strval( $name ), strval( $type ));
 		if ($id){
 			$sql .= 'AND o.`id` != ? ';
-			$params[] = $id;
+			$params[] = intval( $id );
 		}
 
 		$sth = $dbdriver->query( $sql, $params );
-		$row = $dbdriver->fetch($sth);
-		return (bool)$row;
+		$rows = self::fetchResults( $sth );
+		$caseAndAccentInsensitiveNames = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$caseAndAccentInsensitiveNames[] = $row['name'];
+		}
+		return $caseAndAccentInsensitiveNames;
 	}
 
 	/**
@@ -2020,5 +2035,20 @@ class DBObject extends DBBase
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Resolve the object variants (ids) of a given object.
+	 *
+	 * @param integer $objectId The master id of an object. When zero, pass in the object id.
+	 * @return integer[] Object id of variants. Empty when none found.
+	 */
+	static public function getObjectIdsOfVariants( $objectId )
+	{
+		$fields = array( 'id' );
+		$where = '`id` = ? OR `masterid` = ?';
+		$params = array( intval( $objectId ), intval( $objectId ) );
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where, $fields, $params );
+		return array_map( 'intval', array_keys( $rows ) );
 	}
 }

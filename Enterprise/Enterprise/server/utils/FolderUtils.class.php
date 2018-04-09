@@ -342,8 +342,7 @@ class FolderUtils
 	{
 		return array(
 			BASEDIR.'/server/dgrid', 
-			BASEDIR.'/server/javachart', 
-			BASEDIR.'/server/jquery', 
+			BASEDIR.'/server/jquery',
 			BASEDIR.'/server/vendor',
 			BASEDIR.'/server/ZendFramework'
 		);

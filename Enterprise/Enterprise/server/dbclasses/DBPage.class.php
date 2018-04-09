@@ -301,6 +301,57 @@ class DBPage extends DBBase
 		}
 		return $pages;
 	}
+
+	/**
+	 * Resolve related pages information for the Parallel Editions feature of the Publication Overview.
+	 *
+	 * @param integer[] $layoutIds
+	 * @param integer[] $pageSequences
+	 * @return array 3-dim array of page fields, indexed by ids of publication, issue and edition and sorted by their 'order' and 'pagesequence'.
+	 * @since 10.4.0
+	 */
+	public static function listRelatedPagesRows( $layoutIds, $pageSequences )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$pagesTable = $dbDriver->tablename( self::TABLENAME );
+		$editionsTable = $dbDriver->tablename( 'editions' );
+		$channelsTable = $dbDriver->tablename( 'channels' );
+		$targetsTable = $dbDriver->tablename( 'targets' );
+		$issuesTable = $dbDriver->tablename( 'issues' );
+		$publicationsTable = $dbDriver->tablename( 'publications' );
+
+		$wheres = array(
+			DBBase::addIntArrayToWhereClause( 'pag.objid', $layoutIds, false ),
+			DBBase::addIntArrayToWhereClause( 'pag.pagesequence', $pageSequences, false ),
+			"pag.`instance` = 'Production'",
+		);
+		$params = array();
+
+		$sql =
+			"SELECT pag.*, edi.`id` as \"editionid\", edi.`name` as \"editionname\",  ".
+				"tar.`issueid` as \"issueid\", iss.`name` as \"issuename\", ".
+				"pub.`id` as \"publicationid\", pub.`publication` as \"publicationname\" ".
+			"FROM $pagesTable pag ".
+			"LEFT JOIN $editionsTable edi ON ( edi.`id` = pag.`edition` ) ". // could be no editions configured for the brand
+			"INNER JOIN $targetsTable tar ON ( tar.`objectid` = pag.`objid` ) ". // layouts always have 1 issue
+			"INNER JOIN $channelsTable cha ON ( cha.`id` = tar.`channelid` ) ".
+			"INNER JOIN $issuesTable iss ON ( iss.`id` = tar.`issueid` ) ".
+			"INNER JOIN $publicationsTable pub ON ( pub.`id` = cha.`publicationid` ) ".
+			"WHERE ".implode( ' AND ', $wheres )." ".
+			"ORDER BY ".
+				"pub.`code` ASC, pub.`id` ASC, ".
+				"cha.`code` ASC, cha.`id` ASC, ".
+				"iss.`code` ASC, iss.`id` ASC, ".
+				"edi.`code` ASC, edi.`id` ASC, ".
+				"pag.`pagesequence` ASC ";
+
+		$rows = array();
+		$sth = $dbDriver->query( $sql, $params );
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$rows[ $row['publicationid'] ][ $row['issueid'] ][ $row['editionid'] ][] = $row;
+		}
+		return $rows;
+	}
 	
 	public static function insertPage( $objid, $width, $height, $pagenumber, $pageorder, $pagesequence, 
 		$edition, $master, $instance, $nr, $types, $orientation )

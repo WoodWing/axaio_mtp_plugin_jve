@@ -37,7 +37,7 @@ class BizProperty
 	 */
 	public static function getDynamicPropIds()
 	{
-		return array('ID', 'Type', 'Keywords', 'Slugline', 'Format', 'Columns', 'Width', 'Height', 'Dimensions', 'Dpi',
+		return array('ID', 'Type', 'MasterId', 'Keywords', 'Slugline', 'Format', 'Columns', 'Width', 'Height', 'Dimensions', 'Dpi',
 			'LengthWords', 'LengthChars', 'LengthParas', 'LengthLines', 'PlainContent', 'FileSize', 'ColorSpace', 'Deadline',
 			'Modifier', 'Creator', 'Comment', 'RouteTo', 'LockedBy', 'Deletor', 'Deleted', 'Version', 'PlacedOn',
 			'PlacedOnPage', 'Flag', 'FlagMsg',	'PageRange', 'PlannedPageRange', 'ContentSource', 'Encoding',
@@ -63,7 +63,7 @@ class BizProperty
 	 */
 	public static function getSystemPropIds()
 	{
-		return array('ID', 'DocumentID', 'Type', 'Format', 'Columns', 'Width', 'Height', 'Dimensions', 'Dpi',
+		return array('ID', 'DocumentID', 'MasterId', 'Type', 'Format', 'Columns', 'Width', 'Height', 'Dimensions', 'Dpi',
 			'LengthWords', 'LengthChars', 'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Orientation',
 			'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted', 'Version', 'PlacedOn',
 			'Flag', 'FlagMsg', 'PageRange', 'PlannedPageRange', 'LockForOffline', 'DeadlineChanged', 'DeadlineSoft',
@@ -99,7 +99,8 @@ class BizProperty
 	 */
 	public static function getIdentifierPropIds()
 	{
-		return array( 'ID', 'PublicationId','CategoryId','IssueId','SectionId', 'PubChannelIds','IssueIds','EditionIds', 'StateId' );
+		return array( 'ID', 'MasterId', 'PublicationId', 'CategoryId', 'IssueId', 'SectionId',
+			'PubChannelIds', 'IssueIds', 'EditionIds', 'StateId' );
 	}
 
 	/**
@@ -533,6 +534,14 @@ class BizProperty
 		self::$SqlTProps['DocumentID']   = 'string';
 		self::$JoinProps['DocumentID']   = null;
 		self::$JFldProps['DocumentID']   = null;
+
+		self::$InfoProps['MasterId']     = new PropertyInfo( 'MasterId',  BizResources::localize( 'OBJ_ORIGINAL_ID' ), null, 'string' );
+		self::$InfoProps['MasterId']->MaxLength = 512;
+		self::$MetaProps['MasterId']     = 'BasicMetaData->MasterId';
+		self::$ObjFProps['MasterId']     = 'masterid';
+		self::$SqlTProps['MasterId']     = 'int';
+		self::$JoinProps['MasterId']     = null;
+		self::$JFldProps['MasterId']     = null;
 
 		self::$InfoProps['Name']         = new PropertyInfo( 'Name',        BizResources::localize( 'OBJ_NAME' ),       null,'string' );
 		self::$InfoProps['Name']->MaxLength = 63; // BZ#23267

@@ -19,7 +19,7 @@ class DBAdmPubChannel extends DBBase
 	 *
 	 * @since 6.0
 	 * @param integer $pubId Brand ID
-	 * @param array $pubChannels List of AdmPubChannel data objects to create
+	 * @param AdmPubChannel[] $pubChannels Publication Channels to create
 	 * @param array $typeMap Lookup table with custom property names as keys and types as values.
 	 * @throws BizException Throws BizException when error occurred during cration of pub channels object.
 	 * @return AdmPubChannel[] PubChannel data objects as stored in DB (read after creation).
@@ -42,11 +42,17 @@ class DBAdmPubChannel extends DBBase
 				throw new BizException( 'ERR_DUPLICATE_NAME', 'Client', $row['id'] );
 			}
 
-			// Auto set the Description when not provided.
+			// Auto set the defaults when not provided.
+			if( is_null( $pubChannel->Type ) ) {
+				$pubChannel->Type = 'print';
+			}
 			if( is_null( $pubChannel->Description ) ) {
 				$pubChannel->Description = '';
 			}
-			
+			if( is_null( $pubChannel->SortOrder ) ) {
+				$pubChannel->SortOrder = 0;
+			}
+
 			// Store standard pub channel properties in DB.
 			$pubChannelRow = self::objToRow( $pubChannel );
 			$pubChannelRow['publicationid'] = intval($pubId);
@@ -245,7 +251,7 @@ class DBAdmPubChannel extends DBBase
 	 *  @param array $row PubChannel DB row
 	 *  @return AdmPubChannel
 	 */
-	static private function rowToObj ( $row )
+	static private function rowToObj( $row )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$pubChannel = new AdmPubChannel();
@@ -268,7 +274,7 @@ class DBAdmPubChannel extends DBBase
 	 *  @param AdmPubChannel $obj PubChannel object
 	 *  @return array PubChannel DB row
 	 */
-	static private function objToRow ( $obj )
+	static private function objToRow( $obj )
 	{
 		$row = array();
 
@@ -278,22 +284,24 @@ class DBAdmPubChannel extends DBBase
 		if( !is_null( $obj->Name ) ) {
 			$row['name'] = strval( $obj->Name );
 		}
-		$row['type'] = ( !empty( $obj->Type ) ) ? strval( $obj->Type ) : 'print';
-		$row['description'] = ( !empty( $obj->Description ) ) ? strval( $obj->Description ) : '';
-		$row['code'] = ( !empty( $obj->SortOrder ) ) ? intval( $obj->SortOrder ) : 0;
-
+		if( !is_null( $obj->Type ) ) {
+			$row['type'] = strval( $obj->Type );
+		}
+		if( !is_null( $obj->Description ) ) {
+			$row['description'] = strval( $obj->Description );
+		}
+		if( !is_null( $obj->SortOrder ) ) {
+			$row['code'] = intval( $obj->SortOrder );
+		}
 		if( !is_null( $obj->PublishSystem ) ) {
 			$row['publishsystem'] = strval( $obj->PublishSystem );
 		}
-
 		if( !is_null( $obj->PublishSystemId ) ) {
 			$row['publishsystemid'] = intval( $obj->PublishSystemId );
 		}
-
 		if( !is_null( $obj->SuggestionProvider ) ) {
 			$row['suggestionprovider'] = strval( $obj->SuggestionProvider );
 		}
-
 		if( !is_null( $obj->CurrentIssueId ) ) {
 			$row['currentissueid'] = intval( $obj->CurrentIssueId );
 		}

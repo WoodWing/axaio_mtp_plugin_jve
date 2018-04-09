@@ -1342,7 +1342,6 @@ Oluptas pisinct eniatus doluptatiat aut occus molorem coressi nctaepr orrunt vol
 
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;

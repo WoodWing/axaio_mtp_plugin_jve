@@ -338,11 +338,10 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	{
 		// The updated Target after 'publishing' the Form. The Target is updated with PublishedVersion and Date.
 		$target = $this->template->Targets[0];
-		$formRelations = BizRelation::getObjectRelations( $this->form->MetaData->BasicMetaData->ID, false, true, 'both' );
+		$formRelations = BizRelation::getObjectRelations( $this->form->MetaData->BasicMetaData->ID, null, true, 'both' );
 
 		if( $formRelations ) {
 			foreach( $formRelations as &$relation ) {
-				$relation->Geometry = null; // To repair the Geometry ( This should not be needed, need to find out why Geometry is filled in with array but empty element).
 				$relation->Rating = null; // To repair the Rating ( This should not be needed. same as above).
 				$isPlacedOnForm = $relation->Parent == $this->form->MetaData->BasicMetaData->ID &&
 					( $relation->Child == $this->image->MetaData->BasicMetaData->ID ||
@@ -576,11 +575,10 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	{
 		// The updated Target after 'un-publishing' the Form. The Target is updated with PublishedVersion and Date (both cleared).
 		$target = $this->template->Targets[0];
-		$formRelations = BizRelation::getObjectRelations( $formToUnPublish->MetaData->BasicMetaData->ID, false, true, 'both' );
+		$formRelations = BizRelation::getObjectRelations( $formToUnPublish->MetaData->BasicMetaData->ID, null, true, 'both' );
 
 		if( $formRelations ) {
 			foreach( $formRelations as &$relation ) {
-				$relation->Geometry = null; // To repair the Geometry ( This should not be needed, need to find out why Geometry is filled in with array but empty element).
 				$relation->Rating = null; // To repair the Rating ( This should not be needed. same as above).
 				$isPlacedOnForm = $relation->Parent == $formToUnPublish->MetaData->BasicMetaData->ID &&
 					( $relation->Child == $this->image->MetaData->BasicMetaData->ID ||

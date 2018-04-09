@@ -77,6 +77,7 @@ class VersionHandler
 		require_once dirname( __FILE__ ).'/MetadataHandler.class.php';
 		$metadataHandler = new MetadataHandler();
 		$object = new Object();
+		$metadataHandler->setHandlerName( 'VersionHandler' );
 		$metadataHandler->read( $object, $hit->metadata );
 
 		$vi = new VersionInfo();

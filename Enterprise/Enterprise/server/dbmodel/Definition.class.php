@@ -34,7 +34,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 			'3.1', '3.2', '3.3', '3.4', '4.0', '4.1', '4.2',
 			'5.0', '6.0', '6.1', '7.0', '7.5', '7.6', '8.0',
 			'9.0', '9.1', '9.2', '9.4', '9.5', '9.6', '9.7', '9.8',
-			'10.0', '10.1', '10.2', '10.3'
+			'10.0', '10.1', '10.2', '10.3', '10.4'
 		);
 	}
 
@@ -190,6 +190,11 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 								'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true)) ),
 						array('v' => '6.1', 'name' => 'documentid',		'type' => 'varchar(512)',		'default' => "''",
 							'alters' => array('v' => '3.1', 'name' => 'documentid',		'type' => 'varchar(200)',		'default' => "''"), ),
+						array('v' => '10.4', 'name' => 'masterid',		'type' => 'bigint(11)',       'default' => "'0'",
+							'comment' => 'Original ID. Tracks the original object that this one is a copy of. When an object is a copy of '.
+								'another object, this indicates the object id of the object it was copied from. When the object '.
+								'being copied is itself already a copy, it\'s masterid will be used. That means all copies will '.
+								'share the same masterid which makes it easy to find all copies on a specific object.', ),
 						array('v' => '3.1', 'name' => 'type',			'type' => 'varchar(20)',		'default' => "''"),
 						array('v' => '3.1', 'name' => 'name',			'type' => 'varchar(255)',		'default' => "''"),
 						array('v' => '6.1', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
@@ -473,6 +478,11 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 						array('v' => '6.1', 'name' => 'documentid',		'type' => 'varchar(512)',		'default' => "''",
 							'comment' => 'Foreign key to remote database such as high-res file system',
 							'alters' => array('v' => '3.1', 'name' => 'documentid',		'type' => 'varchar(200)',		'default' => "''"), ),
+						array('v' => '10.4', 'name' => 'masterid',		'type' => 'bigint(11)',       'default' => "'0'",
+							'comment' => 'Original ID. Tracks the original object that this one is a copy of. When an object is a copy of '.
+											'another object, this indicates the object id of the object it was copied from. When the object '.
+											'being copied is itself already a copy, it\'s masterid will be used. That means all copies will '.
+											'share the same masterid which makes it easy to find all copies on a specific object.', ),
 						array('v' => '3.1', 'name' => 'type',				'type' => 'varchar(20)',		'default' => "''",
 							'comment' => 'Object type as defined in WSDL; Article, Layout, Image, etc' ),
 						array('v' => '3.1', 'name' => 'name',				'type' => 'varchar(255)',		'default' => "''",

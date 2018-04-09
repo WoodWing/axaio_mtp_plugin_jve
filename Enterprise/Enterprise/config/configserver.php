@@ -668,12 +668,6 @@ if( !defined('MTP_POSTPROCESS_LOC') ) {
 //       SuppressGeometryPreview
 //          (Server feature.) Suppresses the layout preview information that is carried by geometry files.
 //          This improves performance but prevents InCopy users from viewing the opened article in the layout.
-//       UseXMLGeometry
-//          (Server feature.) Lets InDesign save a tiny geometry file and geometry preview file so 
-//          that no large layout file needs to be loaded when the article is opened in InCopy. 
-//          Note 1: Currently the XML Geometry Update feature is not working with Editions and 
-//                  not fully working with Sticky Notes.
-//          Note 2: When UseXMLGeometry is enabled, UPDATE_GEOM_SAVE must be disabled and vice versa.
 // 		DateFormat
 //			Formatter used by ContentStation to format dates, for example DD/MM/YYYY or MM-DD-YYYY
 //			This format is also used for the date input components. The width of these components is fixed to 
@@ -822,6 +816,14 @@ if( !defined('MTP_POSTPROCESS_LOC') ) {
 //      ContentStationInlineArticleCompare
 //          Enables the Inline Article Compare feature in Content Station 9.6 up to 9.x.
 //          When enabled, Track Changes are automatically disabled in Content Station.
+//      ContentStationCustomFlagField
+//          For Content Station 11.9 and higher.
+//          Define the name of a metadata field of type String. When this field holds any value the flag on a page
+//          thumbnail in the publication overview (previously only triggered by the planning interface) will turn yellow
+//          as an indication that the page needs attention. The content of the field will be shown as a tooltip on the
+//          flag icon. If the flag is already triggered by the planning interface, than that state will overrule the
+//          custom usage and turn the flag red.
+//          When using a custom metadata field the name of this field should be prefixed with ‘C_‘.
 if( !defined('SERVERFEATURES') ) {
 	define ('SERVERFEATURES', serialize(array(
 		new Feature( 'Messaging' ),
@@ -1008,9 +1010,6 @@ if( !defined('LANGPATTIMEDIFF') ) {
 // UPDATE_GEOM_SAVE:
 //    Notifies an InDesign/InCopy user when a geometry update is available by displaying a dialog box.
 //    Possible options are ON/OFF. Default value: 'OFF'.
-//    Note: The UseXMLGeometry option of SERVERFEATURES setting is not compatible with the 
-//          UPDATE_GEOM_SAVE setting. (When UseXMLGeometry is enabled, UPDATE_GEOM_SAVE needs to be
-//          disabled and vice versa.) The Update will not be sent if UseXMLGeometry is enabled.
 //
 if( !defined('UPDATE_GEOM_SAVE') ) {
 	define( 'UPDATE_GEOM_SAVE', 'OFF' );

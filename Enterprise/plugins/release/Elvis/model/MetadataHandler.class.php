@@ -7,6 +7,8 @@ class MetadataHandler
 	private $fieldHandlersByElvisMetadata;
 	/** @var  string[] $metadataToReturn Elvis field names */
 	private $metadataToReturn;
+	/** @var string Can be used to set handler type name ( the context ) that is calling MetaData handler, e.g 'VersionHandler', 'UserFieldHandler' and etc. */
+	private $handlerName;
 
 	/**
 	 * Fills enterprise metadata object with metadata retrieved from $elvisMetadata,
@@ -202,6 +204,8 @@ class MetadataHandler
 		$this->fieldHandlers['CopyrightMarked'] = new CopyrightMarkedFieldHandler();   //"", false, "", "CopyrightMarked"
 
 		$this->fieldHandlers['Modifier'] = new UserFieldHandler( "assetFileModifier", false, "text", "Modifier" );
+		$this->fieldHandlers['Modifier']->replaceUnknownUserWithActingUser( $this->getHandlerName() );
+
 		$this->fieldHandlers['Modified'] = new ReadOnlyFieldHandler( "assetFileModified", false, "datetime", "Modified" );
 		$this->fieldHandlers['Creator'] = new UserFieldHandler( "assetCreator", false, "text", "Creator" );
 		$this->fieldHandlers['Created'] = new ReadOnlyFieldHandler( "assetCreated", false, "datetime", "Created" );
@@ -303,4 +307,26 @@ class MetadataHandler
 		}
 		return $meta;
 	}
+
+	/**
+	 * Set the handler name, the context when MetaDataHandler class is called.
+	 *
+	 * @param string $handlerName
+	 */
+	public function setHandlerName( $handlerName )
+	{
+		$this->handlerName = $handlerName;
+	}
+
+	/**
+	 * Get the handler name, the context when MetaDataHandler is called.
+	 *
+	 * @return string
+	 */
+	public function getHandlerName()
+	{
+		return $this->handlerName;
+	}
+
+
 }

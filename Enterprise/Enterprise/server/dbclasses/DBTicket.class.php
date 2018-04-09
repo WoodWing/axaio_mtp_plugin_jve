@@ -629,6 +629,7 @@ class DBTicket extends DBBase
 
 		// user touched server, so postpone expiration
 		if( $extend ) {
+			$expire = self::_expire( $row['appname'] );
 			$values = array( 'expire' => strval( $expire ) );
 			$where = '`ticketid` = ?';
 			$params = array( strval( $ticket ) );

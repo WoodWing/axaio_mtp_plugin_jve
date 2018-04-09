@@ -637,18 +637,7 @@ class SpeedTester
 		$this->uploadedFileSize = 0;
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflUpdateObjectRelationsRequest.class.php';
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflUpdateObjectRelationsResponse.class.php';
-		$geoAtt = new Attachment();
-		$geoAtt->Type = 'xml';
-		$geoAtt->Rendition = 'native';
-		$geoAtt->Content = 'test file xml';
-		$this->uploadFile( $geoAtt );
-		if( $this->uploadedFileSize > 0 ) {
-			$this->speedTestReport->addComment( 'Uploaded file size:'.
-					NumberUtils::getByteString( $this->uploadedFileSize ) );
-		}		
-		
 		$rel = new Relation( $this->layoutId, $this->articleId, 'Placed' );
-		$rel->Geometry = $geoAtt;
 		$req = new WflUpdateObjectRelationsRequest( $this->ticket, array($rel) );
 		$this->callSoapService( 'UpdateObjectRelations', $req );
 		$this->speedTestReport->stopTestCase();

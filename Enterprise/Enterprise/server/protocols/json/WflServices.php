@@ -383,13 +383,6 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		$req['__classname__'] = 'WflCreateObjectRelationsRequest';
 		$req = $this->arraysToObjects( $req );
 		$req = $this->restructureObjects( $req );
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Relations ) foreach( $req->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$transferServer->urlToFilePath( $relation->Geometry );
-				}
-			}
 		$service = new WflCreateObjectRelationsService();
 		$resp = $service->execute( $req );
 		$resp = $this->restructureObjects( $resp );
@@ -402,13 +395,6 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		$req['__classname__'] = 'WflUpdateObjectRelationsRequest';
 		$req = $this->arraysToObjects( $req );
 		$req = $this->restructureObjects( $req );
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Relations ) foreach( $req->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$transferServer->urlToFilePath( $relation->Geometry );
-				}
-			}
 		$service = new WflUpdateObjectRelationsService();
 		$resp = $service->execute( $req );
 		$resp = $this->restructureObjects( $resp );
@@ -436,15 +422,6 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		$service = new WflGetObjectRelationsService();
 		$resp = $service->execute( $req );
 		$resp = $this->restructureObjects( $resp );
-
-		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-		$transferServer = new BizTransferServer();
-		if( $resp->Relations ) foreach( $resp->Relations as $relation ) {
-			if ( $relation->Geometry ) {
-				$transferServer->filePathToURL( $relation->Geometry );
-			}
-		}
-
 		return $resp;
 	}
 
@@ -710,6 +687,41 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		$req = $this->arraysToObjects( $req );
 		$req = $this->restructureObjects( $req );
 		$service = new WflGetPagesInfoService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function GetRelatedPages( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesService.class.php';
+		$req['__classname__'] = 'WflGetRelatedPagesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new WflGetRelatedPagesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $resp->ObjectPageInfos ) foreach( $resp->ObjectPageInfos as $pageInfo ) {
+			if( $pageInfo->Pages ) foreach( $pageInfo->Pages as $page ) {
+				if( $page->Files ) foreach( $page->Files as $file ) {
+					$transferServer->filePathToURL( $file );
+				}
+			}
+		}
+
+		return $resp;
+	}
+
+	public function GetRelatedPagesInfo( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflGetRelatedPagesInfoService.class.php';
+		$req['__classname__'] = 'WflGetRelatedPagesInfoRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new WflGetRelatedPagesInfoService();
 		$resp = $service->execute( $req );
 		$resp = $this->restructureObjects( $resp );
 		return $resp;

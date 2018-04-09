@@ -180,7 +180,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->Targets[0] = new Target();
@@ -383,7 +382,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 
@@ -776,7 +774,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$request->Relations[0]->Placements[0]->Tiles = array();
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 
@@ -945,7 +942,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$request->Objects[0]->Relations[0]->Placements[1]->Tiles = array();
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Pages = array();
@@ -1260,7 +1256,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Pages = array();
@@ -1700,9 +1695,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 
 		// Test if the object(s) exist already.
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		$objId = BizObject::objectNameExists( array($this->issueInfo->Id), $this->articleName, 'Article');
-		if( $objId ) {
-			$message = 'Article does already exist with ID: ' . $objId;
+		$exists = BizObject::objectNameExists( array($this->issueInfo->Id), $this->articleName, 'Article');
+		if( $exists ) {
+			$message = 'Article does already exist with name: ' . $this->articleName;
 			$help = 'Please remove the Article and run the test again.';
 			LogHandler::Log(self::NAME, 'ERROR', $message );
 			$this->setResult( 'ERROR',  $message, $help );
@@ -1710,9 +1705,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		$objId = BizObject::objectNameExists( array($this->issueInfo->Id), $this->layoutName, 'Layout');
-		if( $objId ) {
-			$message = 'Layout does already exist with ID: ' . $objId;
+		$exists = BizObject::objectNameExists( array($this->issueInfo->Id), $this->layoutName, 'Layout');
+		if( $exists ) {
+			$message = 'Layout does already exist with name: ' . $this->layoutName;
 			$help = 'Please remove the Layout and run the test again.';
 			LogHandler::Log(self::NAME, 'ERROR', $message );
 			$this->setResult( 'ERROR',  $message, $help );

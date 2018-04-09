@@ -141,13 +141,6 @@ class BizTransferServer extends BizServerJobHandler
 				}
 			}
 		}
-		if ( $object->Relations ) {
-			foreach ( $object->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$this->filePathToURL( $relation->Geometry ); // Geometry is a attachment object
-				}
-			}
-		}
 	}
 
 	/**

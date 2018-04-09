@@ -765,6 +765,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Ins
 		$response->Objects[0]->MetaData->BasicMetaData->Publication = $this->composePublication();
 		$response->Objects[0]->MetaData->BasicMetaData->Category = $this->composeCategory();
 		$response->Objects[0]->MetaData->BasicMetaData->ContentSource = '';
+		$response->Objects[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->Objects[0]->MetaData->RightsMetaData = new RightsMetaData();
 		$response->Objects[0]->MetaData->RightsMetaData->CopyrightMarked = false;
 		$response->Objects[0]->MetaData->RightsMetaData->Copyright = '';
@@ -978,6 +979,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Ins
 		$response->Objects[0]->MetaData->BasicMetaData->Publication = $this->composePublication();
 		$response->Objects[0]->MetaData->BasicMetaData->Category = $this->composeCategory();
 		$response->Objects[0]->MetaData->BasicMetaData->ContentSource = '';
+		$response->Objects[0]->MetaData->BasicMetaData->MasterId = '0';
 		$response->Objects[0]->MetaData->RightsMetaData = new RightsMetaData();
 		$response->Objects[0]->MetaData->RightsMetaData->CopyrightMarked = false;
 		$response->Objects[0]->MetaData->RightsMetaData->Copyright = '';

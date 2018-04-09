@@ -56,7 +56,7 @@ class SolrSearchEngine extends BizQuery
 	 * Establish and test Solr connection and sets up the default search parameters shared by all search functions
 	 * supported by this engine (search, facetSearch and inboxSearch).
 	 *
-	 * @param array $searchParams
+	 * @param array $queryParams
 	 * @param int $firstEntry
 	 * @param int $maxEntries
 	 * @param null $queryMode
@@ -66,21 +66,21 @@ class SolrSearchEngine extends BizQuery
 	 * @param null $requestProps
 	 * @throws BizException when Solr connection can not be established.
 	 */
-	public function __construct( $searchParams = array(), $firstEntry = 0, $maxEntries = 0, $queryMode = null, $hierarchical = false, $order = array(), $minimalProps = null, $requestProps = null )
+	public function __construct( $queryParams = array(), $firstEntry = 0, $maxEntries = 0, $queryMode = null, $hierarchical = false, $order = array(), $minimalProps = null, $requestProps = null )
 	{
-		require_once BASEDIR .'/server/plugins/SolrSearch/SolariumClient.class.php';
+		require_once BASEDIR.'/server/plugins/SolrSearch/SolariumClient.class.php';
 
 		// Solarium client.
 		$this->index = new SolariumClient();
 
-		if ( !$this->index->pingSolrHost() ) {
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array('Error connecting to Solr'), 'ERROR' );
+		if( !$this->index->pingSolrHost() ) {
+			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array( 'Error connecting to Solr' ), 'ERROR' );
 		}
 		LogHandler::Log( 'Solr', 'DEBUG', 'Connected to Solr' );
 
 		$this->firstEntry = $firstEntry;
 		// 0 means all, in Solr 'rows' is set to an extreme value
-		if ($maxEntries == 0) {
+		if( $maxEntries == 0 ) {
 			$this->maxEntries = 999999;
 		} else {
 			$this->maxEntries = $maxEntries;
@@ -95,59 +95,96 @@ class SolrSearchEngine extends BizQuery
 		// So check if search is done on one single object type
 		$searchOneType = false;
 		$objectType = '';
-		if( !empty($searchParams) ) {
-			foreach( $searchParams as $key => $param ) {
-				if( $param->Property == 'Type' ) {
+		$extraQueryParams = array();
+		if( !empty( $queryParams ) ) {
+			foreach( $queryParams as $key => $queryParam ) {
+				if( $queryParam->Property == 'Type' ) {
 					if( $searchOneType ) {
 						// Oops, we already had a type in the param list. So not one single type
-						$searchOneType 	= false;
-						$objectType 	= '';
+						$searchOneType = false;
+						$objectType = '';
 						break;
 					} else {
 						$searchOneType = true;
-						$objectType 	= $param->Value;
+						$objectType = $queryParam->Value;
 					}
-					if ($param->Value == 'DossierItems') {
+					if( $queryParam->Value == 'DossierItems' ) {
 						// 'Fake' type used for facets for items within dossier.
 						// Must be removed from query params because this type is unknown within Solr.
-						unset($searchParams[$key]);
+						unset( $queryParams[ $key ] );
+					}
+				} elseif( $queryParam->Property == 'RouteTo' ) {
+					$extraQueryParam = $this->createExtraParamForRouteTo( $queryParam );
+					if( !is_null( $extraQueryParam) ) {
+						$extraQueryParams[] = $extraQueryParam;
 					}
 				}
 			}
 		}
-		$this->searchParams = $searchParams;
+		$this->searchParams = array_merge( $queryParams, $extraQueryParams );
 		if( $searchOneType ) {
 			switch( $objectType ) {
 				case 'Image':
-					$this->facetFields = unserialize(SOLR_IMAGE_FACETS);
+					$this->facetFields = unserialize( SOLR_IMAGE_FACETS );
 					break;
 				case 'Article':
-					$this->facetFields = unserialize(SOLR_ARTICLE_FACETS);
+					$this->facetFields = unserialize( SOLR_ARTICLE_FACETS );
 					break;
 				case 'Spreadsheet':
-					$this->facetFields = unserialize(SOLR_SPREADSHEET_FACETS);
+					$this->facetFields = unserialize( SOLR_SPREADSHEET_FACETS );
 					break;
 				case 'Video':
-					$this->facetFields = unserialize(SOLR_VIDEO_FACETS);
+					$this->facetFields = unserialize( SOLR_VIDEO_FACETS );
 					break;
 				case 'Audio':
-					$this->facetFields = unserialize(SOLR_AUDIO_FACETS);
+					$this->facetFields = unserialize( SOLR_AUDIO_FACETS );
 					break;
 				case 'Layout':
-					$this->facetFields = unserialize(SOLR_LAYOUT_FACETS);
+					$this->facetFields = unserialize( SOLR_LAYOUT_FACETS );
 					break;
 				case 'DossierItems':
-					$this->facetFields = unserialize(SOLR_DOSSIERITEMS_FACETS);
+					$this->facetFields = unserialize( SOLR_DOSSIERITEMS_FACETS );
 					break;
 			}
 		}
-		if ( empty($this->facetFields) && defined('SOLR_GENERAL_FACETS')) {
-			$this->facetFields = unserialize(SOLR_GENERAL_FACETS);
+		if( empty( $this->facetFields ) && defined( 'SOLR_GENERAL_FACETS' ) ) {
+			$this->facetFields = unserialize( SOLR_GENERAL_FACETS );
 		}
 
-		if (defined('SOLR_INDEX_FIELDS')) {
-			$this->fieldsToIndex = unserialize(SOLR_INDEX_FIELDS);
+		if( defined( 'SOLR_INDEX_FIELDS' ) ) {
+			$this->fieldsToIndex = unserialize( SOLR_INDEX_FIELDS );
 		}
+	}
+
+	/**
+	 * Creates a query parameter with either the fullname or the shortname of a RouteTo user.
+	 *
+	 * A query done for a route to user contains either the full name of the route to user or the short name. As the
+	 * indexed document in Solr can contain either the full name or the short name both must be send to Solr to make sure
+	 * that the search in Solr gives a hit. For more info see: EN-90013.
+	 * Note that both the short as the full name are mandatory fields so they cannot be empty. If the user cannot be
+	 * resolved this could mean that the search is done on a user group or that the entered name is invalid.
+	 *
+	 * @param QueryParam $routeToQueryParam
+	 * @return QueryParam|null New query parameter of null if the route to user could not be resolved.
+	 */
+	private function createExtraParamForRouteTo( QueryParam $routeToQueryParam )
+	{
+		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
+		$userRow = DBUser::getUser( trim( $routeToQueryParam->Value ) );
+		$secondRouteToParam = null;
+		if( $userRow ){
+			$secondRouteToParam = new QueryParam();
+			$secondRouteToParam->Property = 'RouteTo';
+			$secondRouteToParam->Operation = $routeToQueryParam->Operation;
+			if( $routeToQueryParam->Value == $userRow['user'] ) {
+				$secondRouteToParam->Value = $userRow['fullname'];
+			} else {
+				$secondRouteToParam->Value = $userRow['user'];
+			}
+		}
+
+		return $secondRouteToParam;
 	}
 
 	/**

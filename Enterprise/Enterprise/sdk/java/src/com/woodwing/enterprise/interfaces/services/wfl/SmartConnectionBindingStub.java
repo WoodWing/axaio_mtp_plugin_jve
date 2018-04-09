@@ -16,7 +16,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
     static org.apache.axis.description.OperationDesc [] _operations;
 
     static {
-        _operations = new org.apache.axis.description.OperationDesc[57];
+        _operations = new org.apache.axis.description.OperationDesc[59];
         _initOperationDesc1();
         _initOperationDesc2();
         _initOperationDesc3();
@@ -568,12 +568,12 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         _operations[48] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("GetPagesInfo");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "GetPagesInfo"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">GetPagesInfo"), com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfo.class, false, false);
+        oper.setName("GetRelatedPagesInfo");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "GetRelatedPagesInfo"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">GetRelatedPagesInfo"), com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfo.class, false, false);
         oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnection", ">GetPagesInfoResponse"));
-        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfoResponse.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetPagesInfoResponse"));
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnection", ">GetRelatedPagesInfoResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfoResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetRelatedPagesInfoResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[49] = oper;
@@ -584,6 +584,28 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         org.apache.axis.description.OperationDesc oper;
         org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("GetRelatedPages");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "GetRelatedPages"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">GetRelatedPages"), com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPages.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnection", ">GetRelatedPagesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetRelatedPagesResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[50] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("GetPagesInfo");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "GetPagesInfo"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">GetPagesInfo"), com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfo.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnection", ">GetPagesInfoResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfoResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetPagesInfoResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[51] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
         oper.setName("Autocomplete");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "Autocomplete"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">Autocomplete"), com.woodwing.enterprise.interfaces.services.wfl.Autocomplete.class, false, false);
         oper.addParameter(param);
@@ -592,7 +614,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "AutocompleteResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[50] = oper;
+        _operations[52] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("Suggestions");
@@ -603,7 +625,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "SuggestionsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[51] = oper;
+        _operations[53] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CreateObjectLabels");
@@ -614,7 +636,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CreateObjectLabelsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[52] = oper;
+        _operations[54] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("UpdateObjectLabels");
@@ -625,7 +647,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "UpdateObjectLabelsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[53] = oper;
+        _operations[55] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("DeleteObjectLabels");
@@ -634,7 +656,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[54] = oper;
+        _operations[56] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("AddObjectLabels");
@@ -643,7 +665,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[55] = oper;
+        _operations[57] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("RemoveObjectLabels");
@@ -652,7 +674,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[56] = oper;
+        _operations[58] = oper;
 
     }
 
@@ -1008,6 +1030,34 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             qName = new javax.xml.namespace.QName("urn:SmartConnection", ">GetPagesResponse");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.GetPagesResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", ">GetRelatedPages");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPages.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", ">GetRelatedPagesInfo");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfo.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", ">GetRelatedPagesInfoResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfoResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", ">GetRelatedPagesResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesResponse.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -1376,6 +1426,21 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+    }
+    private void addBindings1() {
+            java.lang.Class cls;
+            javax.xml.namespace.QName qName;
+            javax.xml.namespace.QName qName2;
+            java.lang.Class beansf = org.apache.axis.encoding.ser.BeanSerializerFactory.class;
+            java.lang.Class beandf = org.apache.axis.encoding.ser.BeanDeserializerFactory.class;
+            java.lang.Class enumsf = org.apache.axis.encoding.ser.EnumSerializerFactory.class;
+            java.lang.Class enumdf = org.apache.axis.encoding.ser.EnumDeserializerFactory.class;
+            java.lang.Class arraysf = org.apache.axis.encoding.ser.ArraySerializerFactory.class;
+            java.lang.Class arraydf = org.apache.axis.encoding.ser.ArrayDeserializerFactory.class;
+            java.lang.Class simplesf = org.apache.axis.encoding.ser.SimpleSerializerFactory.class;
+            java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
+            java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
+            java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
             qName = new javax.xml.namespace.QName("urn:SmartConnection", ">UpdateObjectRelationsResponse");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.UpdateObjectRelationsResponse.class;
@@ -1404,21 +1469,6 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(enumsf);
             cachedDeserFactories.add(enumdf);
 
-    }
-    private void addBindings1() {
-            java.lang.Class cls;
-            javax.xml.namespace.QName qName;
-            javax.xml.namespace.QName qName2;
-            java.lang.Class beansf = org.apache.axis.encoding.ser.BeanSerializerFactory.class;
-            java.lang.Class beandf = org.apache.axis.encoding.ser.BeanDeserializerFactory.class;
-            java.lang.Class enumsf = org.apache.axis.encoding.ser.EnumSerializerFactory.class;
-            java.lang.Class enumdf = org.apache.axis.encoding.ser.EnumDeserializerFactory.class;
-            java.lang.Class arraysf = org.apache.axis.encoding.ser.ArraySerializerFactory.class;
-            java.lang.Class arraydf = org.apache.axis.encoding.ser.ArrayDeserializerFactory.class;
-            java.lang.Class simplesf = org.apache.axis.encoding.ser.SimpleSerializerFactory.class;
-            java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
-            java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
-            java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "ActionProperty");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.ActionProperty.class;
@@ -2079,6 +2129,15 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
             cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "ArrayOfUnsignedInt");
+            cachedSerQNames.add(qName);
+            cls = org.apache.axis.types.UnsignedInt[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "UnsignedInt");
+            qName2 = new javax.xml.namespace.QName("", "UnsignedInt");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
+
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "ArrayOfUser");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.User[].class;
@@ -2232,6 +2291,21 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+    }
+    private void addBindings2() {
+            java.lang.Class cls;
+            javax.xml.namespace.QName qName;
+            javax.xml.namespace.QName qName2;
+            java.lang.Class beansf = org.apache.axis.encoding.ser.BeanSerializerFactory.class;
+            java.lang.Class beandf = org.apache.axis.encoding.ser.BeanDeserializerFactory.class;
+            java.lang.Class enumsf = org.apache.axis.encoding.ser.EnumSerializerFactory.class;
+            java.lang.Class enumdf = org.apache.axis.encoding.ser.EnumDeserializerFactory.class;
+            java.lang.Class arraysf = org.apache.axis.encoding.ser.ArraySerializerFactory.class;
+            java.lang.Class arraydf = org.apache.axis.encoding.ser.ArrayDeserializerFactory.class;
+            java.lang.Class simplesf = org.apache.axis.encoding.ser.SimpleSerializerFactory.class;
+            java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
+            java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
+            java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "EditionPages");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.EditionPages.class;
@@ -2267,21 +2341,6 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
-    }
-    private void addBindings2() {
-            java.lang.Class cls;
-            javax.xml.namespace.QName qName;
-            javax.xml.namespace.QName qName2;
-            java.lang.Class beansf = org.apache.axis.encoding.ser.BeanSerializerFactory.class;
-            java.lang.Class beandf = org.apache.axis.encoding.ser.BeanDeserializerFactory.class;
-            java.lang.Class enumsf = org.apache.axis.encoding.ser.EnumSerializerFactory.class;
-            java.lang.Class enumdf = org.apache.axis.encoding.ser.EnumDeserializerFactory.class;
-            java.lang.Class arraysf = org.apache.axis.encoding.ser.ArraySerializerFactory.class;
-            java.lang.Class arraydf = org.apache.axis.encoding.ser.ArrayDeserializerFactory.class;
-            java.lang.Class simplesf = org.apache.axis.encoding.ser.SimpleSerializerFactory.class;
-            java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
-            java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
-            java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "ErrorReport");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.ErrorReport.class;
@@ -2794,6 +2853,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "UnsignedInt");
+            cachedSerQNames.add(qName);
+            cls = org.apache.axis.types.UnsignedInt.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(org.apache.axis.encoding.ser.BaseSerializerFactory.createFactory(org.apache.axis.encoding.ser.SimpleSerializerFactory.class, cls, qName));
+            cachedDeserFactories.add(org.apache.axis.encoding.ser.BaseDeserializerFactory.createFactory(org.apache.axis.encoding.ser.SimpleDeserializerFactory.class, cls, qName));
 
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "User");
             cachedSerQNames.add(qName);
@@ -4485,12 +4551,80 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
 }
     }
 
-    public com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfoResponse getPagesInfo(com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfo parameters) throws java.rmi.RemoteException {
+    public com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfoResponse getRelatedPagesInfo(com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfo parameters) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
         _call.setOperation(_operations[49]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnection#GetRelatedPagesInfo");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "GetRelatedPagesInfo"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfoResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfoResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesInfoResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesResponse getRelatedPages(com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPages parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[50]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnection#GetRelatedPages");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "GetRelatedPages"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.wfl.GetRelatedPagesResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfoResponse getPagesInfo(com.woodwing.enterprise.interfaces.services.wfl.GetPagesInfo parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[51]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetPagesInfo");
         _call.setEncodingStyle(null);
@@ -4524,7 +4658,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[50]);
+        _call.setOperation(_operations[52]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#Autocomplete");
         _call.setEncodingStyle(null);
@@ -4558,7 +4692,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[51]);
+        _call.setOperation(_operations[53]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#Suggestions");
         _call.setEncodingStyle(null);
@@ -4592,7 +4726,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[52]);
+        _call.setOperation(_operations[54]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CreateObjectLabels");
         _call.setEncodingStyle(null);
@@ -4626,7 +4760,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[53]);
+        _call.setOperation(_operations[55]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#UpdateObjectLabels");
         _call.setEncodingStyle(null);
@@ -4660,7 +4794,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[54]);
+        _call.setOperation(_operations[56]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#DeleteObjectLabels");
         _call.setEncodingStyle(null);
@@ -4687,7 +4821,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[55]);
+        _call.setOperation(_operations[57]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#AddObjectLabels");
         _call.setEncodingStyle(null);
@@ -4714,7 +4848,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[56]);
+        _call.setOperation(_operations[58]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#RemoveObjectLabels");
         _call.setEncodingStyle(null);

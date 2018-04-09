@@ -737,7 +737,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_WidgetInWidgetIn
 
 		// Change the FormWidgetId of the object relation: Publish Form - 1st Image.
 		foreach( $changedForm->Relations as $iterRelation ) {
-			$iterRelation->Geometry = null; // TODO: Currently service validator is raising error on empty Geometry. Geometry should be null, to be investigated.
 			if( $iterRelation->Type == 'Placed' ) {
 				foreach( $this->placedObjIdsInSequence as $frameOrder => $placementObjId ) {
 					if( $placementObjId == $iterRelation->Child ) {

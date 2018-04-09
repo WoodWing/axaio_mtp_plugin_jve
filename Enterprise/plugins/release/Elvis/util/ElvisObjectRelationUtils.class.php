@@ -105,7 +105,7 @@ class ElvisObjectRelationUtils
 		// Find deleted Elvis assets. For each deleted asset, we need to collect the layouts.
 		$objRelations = array();
 		foreach( $shadowIds as $shadowId ) {
-			$objRelations = array_merge( $objRelations, BizRelation::getObjectRelations( $shadowId, false, false, null) );
+			$objRelations = array_merge( $objRelations, BizRelation::getObjectRelations( $shadowId, null, false, null) );
 		}
 
 		// Collect layout ids and send updates for each layout
