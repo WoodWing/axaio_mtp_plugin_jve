@@ -113,7 +113,7 @@ class LogHandler
 	private static $context = '';
 	private static $wroteContext = false;
 	private static $caller = null;    // Service (or PHP module) calling server.
-	private static $logFolder = null; // Directory used for (client specific) logging.
+	private static $logFolders = array(); // Directory used for (client specific) logging.
 	private static $logFile = null;   // Current log file used to write logging into.
 	private static $clientIP = null;  // Client machine (IP) calling the server.
 	private static $debugLevel = null;// Debug level configured for calling client.
@@ -130,15 +130,14 @@ class LogHandler
 	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
 	 * @param string $level Log level. Should be any value of self::$logLevels.
 	 * @param string $message Message to write to log file.
-	 * @param string $time Current time stamp of the logged message. Leave empty to auto calculate.
+	 * @param string $time Current time stamp of the logged message.
 	 * @param string $logFile File name of the current log file. Use to refer from error log to current log.
 	 * @return string Formatted log line.
 	 */
 	private static function composeHtmlLogLine( $level, $area, $message, &$time, $logFile )
 	{
 		if( $logFile ) {
-			$logFileRef = SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?act=logfile'.
-				'&file='.basename( $logFile ).'#'.$time;
+			$logFileRef = self::composeLogFileReference( 'logfile', self::$clientIP, $logFile, $time );
 			$reference = '<br/><a href="'.$logFileRef.'">Show full context</a>';
 		} else {
 			$reference = '';
@@ -291,55 +290,64 @@ class LogHandler
 	 * client IP address:
 	 *    OUTPUTDIRECTORY / <date> / <client ip> /
 	 *
-	 * @return string Path of log folder. NULL when logging is disabled or when folder creation failed.
+	 * Note:
+	 * The above happens only when $createDirAndFile is set to true which is the default.
+	 *
+	 * EN-89041: $clientIpFolder is typically passed in when the caller wants to retrieve an existing LogFolder
+	 * which has already been created. It can be the case where LogFolder has been built by user on IP-A
+	 * but user on IP-B would like to access this LogFolder; when this happens, caller has to passed in
+	 * IP-A in $clientIpFolder in order to get the correct LogFolder returned by this function.
+	 *
+	 * @param string $clientIpFolder Pass-in null to get the current acting user's IP based folder name, or specify a desired client IP folder.
+	 * @param bool $createDirAndFile True to allow function to also create the log folder and necessary files when not exists; False to only retrive the log folder name.
+	 * @return string|null Path of log folder. NULL when logging is disabled or when folder creation failed.
 	 */
-	public static function getLogFolder()
+	public static function getLogFolder( $clientIpFolder=null, $createDirAndFile=true )
 	{
 		if( OUTPUTDIRECTORY == '' ) {
 			return null; // logging disabled
+		} elseif( !is_dir( OUTPUTDIRECTORY ) ) { // BZ#23964
+			// When OUTPUTDIRECTORY doesnt exists, just bail out:
+			// It is an error as the OUTPUTDIRECTORY should exists and valid,
+			// when it is not, it will be detected by the HealthCheck, no point throwing
+			// BizException here as it will end up no valid folder to write the error.
+			return null;
 		}
 
-		if( is_null(self::$logFolder) ) {
+		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
+		// Remove dangerous characters of the log folder, that prohibited in file system
+		$newClientIP = ( is_null( $clientIpFolder )) ? FolderUtils::replaceDangerousChars( self::$clientIP ) :
+							FolderUtils::replaceDangerousChars( $clientIpFolder );
 
-			// Create YYMMDD subfolder (when missing)
-			if( !is_dir( OUTPUTDIRECTORY ) ) { // BZ#23964
-				// When OUTPUTDIRECTORY doesnt exists, just bail out:
-				// It is an error as the OUTPUTDIRECTORY should exists and valid,
-				// when it is not, it will be detected by the HealthCheck, no point throwing
-				// BizException here as it will end up no valid folder to write the error.
-				return null;
-			}
-	   		// Create client IP subfolder (when missing)
-			self::$logFolder = OUTPUTDIRECTORY.date('Ymd').'/';
-			$dayPhpInfoFile = self::$logFolder.'phpinfo.htm';
-			// Remove dangerous characters of the log folder, that prohibited in file system
-			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
-			$newClientIP = FolderUtils::replaceDangerousChars(self::$clientIP );
-			self::$logFolder .= $newClientIP.'/';
+		if( !isset( self::$logFolders[$newClientIP] )) {
+			self::$logFolders[$newClientIP] = OUTPUTDIRECTORY.date('Ymd').'/'; // Create YYMMDD subfolder (when missing)
+			$dayPhpInfoFile = self::$logFolders[$newClientIP].'phpinfo.htm';
+			self::$logFolders[$newClientIP] = self::$logFolders[$newClientIP].$newClientIP.'/';
 
-			if( !file_exists(self::$logFolder) ) {
-				require_once BASEDIR.'/server/utils/FolderUtils.class.php';
-				FolderUtils::mkFullDir( self::$logFolder );
-				// Quit when folder creation failed to avoid caller to continue with bad paths.
-				if( !file_exists(self::$logFolder) ) {
-					// => do not nullify self::$logFolder here to avoid error over and over again
-					return null; // folder creation failed
+			if( $createDirAndFile ) {
+				if( !file_exists(self::$logFolders[$newClientIP] )) {
+					FolderUtils::mkFullDir( self::$logFolders[$newClientIP] );
+					// Quit when folder creation failed to avoid caller to continue with bad paths.
+					if( !file_exists( self::$logFolders[$newClientIP] )) {
+						// => do not nullify self::$logFolders[$newClientIP] here to avoid error over and over again
+						return null; // folder creation failed
+					}
 				}
-			}
-			// Check whether phpinfo.htm file exists at the 'day' folder, when exist, copy to the client IP folder.
-			// When not exists, create a new one in the client IP folder and copy it to the parent 'day' folder.
-			$ipPhpInfoFile = self::$logFolder.'phpinfo.htm';
-			if( file_exists($dayPhpInfoFile) ) {
-				if( !file_exists($ipPhpInfoFile) ) {
-					copy( $dayPhpInfoFile, $ipPhpInfoFile );
+				// Check whether phpinfo.htm file exists at the 'day' folder, when exist, copy to the client IP folder.
+				// When not exists, create a new one in the client IP folder and copy it to the parent 'day' folder.
+				$ipPhpInfoFile = self::$logFolders[$newClientIP].'phpinfo.htm';
+				if( file_exists($dayPhpInfoFile) ) {
+					if( !file_exists($ipPhpInfoFile) ) {
+						copy( $dayPhpInfoFile, $ipPhpInfoFile );
+					}
+				} else {
+					require_once BASEDIR.'/server/utils/PhpInfo.php';
+					file_put_contents( $ipPhpInfoFile, WW_Utils_PhpInfo::getAllInfo() );
+					copy( $ipPhpInfoFile, $dayPhpInfoFile );
 				}
-			} else {
-				require_once BASEDIR.'/server/utils/PhpInfo.php';
-				file_put_contents( $ipPhpInfoFile, WW_Utils_PhpInfo::getAllInfo() );
-				copy( $ipPhpInfoFile, $dayPhpInfoFile );
 			}
 		}
-		return self::$logFolder;
+		return self::$logFolders[$newClientIP];
 	}
 
 	/**
@@ -765,7 +773,7 @@ class LogHandler
 	 *
 	 * @param string $logFile
 	 * @param integer $fileMode The type of access required to the file.
-	 * @return resource|boolean Log file handle or false in case of error.
+	 * @return resource|bool Log file handle or false in case of error.
 	 */
 	private static function openFile( $logFile, $fileMode )
 	{
@@ -1357,12 +1365,43 @@ class LogHandler
 				fclose( $file );
 				
 				// Log link to the created service log file.
-				$msg = '<a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?act=logfile'.
-						'&file='.basename($fileName).'">'.$methodName.' '.
-						($isRequest ? 'request' : 'response' ).'</a>';
+				$msg  = '<a href="' . self::composeLogFileReference( 'logfile', self::$clientIP, $fileName ).'">';
+				$msg .= $methodName.' '. ($isRequest ? 'request' : 'response' );
+				$msg .= '</a>';
+
 				self::logRaw( 'webservice', 'DEBUG',  $msg );
 			}
 		}
+	}
+
+	/**
+	 * Compose a URL reference in the error log to the dedicated area in the full log file.
+	 *
+	 * @since 10.1.7
+	 * @param string $action The URL parameter 'act' value.
+	 * @param string $clientIpFolder The URL parameter 'clientipfolder' value.
+	 * @param string $fileName The URL parameter 'file' value, the filename of the current log file. Use to refer from error log to the full log.
+	 * @param string|null $fileNameBookmarkAnchor Optional. When given, it will be added as bookmark after the paramter 'file'.
+	 * @return string
+	 */
+	private static function composeLogFileReference( $action, $clientIpFolder, $fileName, $fileNameBookmarkAnchor=null )
+	{
+		$parameters = array();
+		if( $action ) {
+			$parameters[] = 'act='.$action;
+		}
+		if( $clientIpFolder ) {
+			$parameters[] = 'clientipfolder='.$clientIpFolder;
+		}
+		if( $fileName ) {
+			$fileParameter = 'file='.basename( $fileName );
+			if( $fileNameBookmarkAnchor ) {
+				$fileParameter .= '#'.$fileNameBookmarkAnchor;
+			}
+			$parameters[] = $fileParameter;
+		}
+
+		return SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?'. implode( "&", $parameters );
 	}
 
 	/**

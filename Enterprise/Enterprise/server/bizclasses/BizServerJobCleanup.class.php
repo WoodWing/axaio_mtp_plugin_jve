@@ -120,20 +120,6 @@ class BizServerJobCleanup extends BizServerJobHandler
 	}
 
 	/**
-	 * It gets the Current date with the time 00:00:00
-	 * A new day starts from time 00:00:00, any server jobs that was created before
-	 * the returned DateTime by this function will be removed from the queue.
-	 *
-	 * @param int $deleteAfterNoOfDay Number of days older than the current Day
-	 * @return bool|string
-	 */
-	private static function getDateForDeletion( $deleteAfterNoOfDay=0 )
-	{
-		$timestampForDelete = mktime(0,0,0,date('n'),date('j')-$deleteAfterNoOfDay,date('Y'));
-		return date( 'Y-m-d\TH:i:s', $timestampForDelete ) . 0;
-	}
-
-	/**
 	 * Remove the jobs that are older than the configured days from the job queue.
 	 *
 	 * Function removes the following jobs that are:
@@ -152,6 +138,7 @@ class BizServerJobCleanup extends BizServerJobHandler
 	 */
 	private static function deleteOldServerJobs()
 	{
+		require_once BASEDIR .'/server/utils/ServerJobUtils.class.php';
 		$result = true;
 		$resDeleteCompleted = true;
 		$resDeleteUnfinished = true;
@@ -160,7 +147,7 @@ class BizServerJobCleanup extends BizServerJobHandler
 
 		// Removing old jobs that were successfully completed.
 		if( AUTOCLEAN_SERVERJOBS_COMPLETED > 0 ) {
-			$dateToDelete = self::getDateForDeletion( AUTOCLEAN_SERVERJOBS_COMPLETED );
+			$dateToDelete = ServerJobUtils::getDateForDeletion( AUTOCLEAN_SERVERJOBS_COMPLETED ) . 0;
 			$sql = 'DELETE FROM ' . $jdb. ' WHERE `queuetime` < ? AND `jobstatus` = ? ';
 			$params = array( $dateToDelete, ServerJobStatus::COMPLETED );
 			$resDeleteCompleted = $dbDriver->query( $sql, $params );
@@ -168,7 +155,7 @@ class BizServerJobCleanup extends BizServerJobHandler
 
 		// Removing old jobs that did not completed.
 		if( AUTOCLEAN_SERVERJOBS_UNFINISHED > 0 ) {
-			$dateToDelete = self::getDateForDeletion( AUTOCLEAN_SERVERJOBS_UNFINISHED );
+			$dateToDelete = ServerJobUtils::getDateForDeletion( AUTOCLEAN_SERVERJOBS_UNFINISHED ) . 0;
 			$sql = 'DELETE FROM ' .$jdb. ' WHERE `queuetime` < ? AND `jobstatus` != ? ';
 			$params = array( $dateToDelete, ServerJobStatus::COMPLETED ); // All excluding COMPLETED
 			$resDeleteUnfinished = $dbDriver->query( $sql, $params );
@@ -202,7 +189,6 @@ class BizServerJobCleanup extends BizServerJobHandler
 			$registered = false; // Whether it is registered in the admin page.
 			$userAssigned = false;
 			$bizJobConfig = new BizServerJobConfig();
-			$jobConfig = $bizJobConfig->newJobConfig();
 			$dbConfigs  = $bizJobConfig->listJobConfigs();
 			if( $dbConfigs ) foreach( $dbConfigs as $jobConfigs ) {
 				foreach ( $jobConfigs as $name => $jobConfig ) {

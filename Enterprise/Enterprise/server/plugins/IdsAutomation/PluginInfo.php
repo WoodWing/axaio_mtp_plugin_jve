@@ -21,11 +21,11 @@ class IdsAutomation_EnterprisePlugin extends EnterprisePlugin
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'InDesign Server Automation';
-		$info->Version     = getProductVersion(__DIR__);
-		$info->Description = 'Creates a preview, PDF or EPS from layout (or Layout Module) pages '.
-			'using Adobe InDesign Server. This happens in the background after saving a layout or '.
-			'a placed article, image or spreadsheet or after changing a layout status. ';
-		$info->Copyright   = COPYRIGHT_WOODWING;
+		$info->Version = getProductVersion( __DIR__ );
+		$info->Description = 'Creates a preview, PDF or EPS from layout (-module) pages using Adobe InDesign Server. '.
+			'This happens in the background after saving a layout or a placed article, image or spreadsheet or after '.
+			'changing a layout status. The same applies to templates.';
+		$info->Copyright = COPYRIGHT_WOODWING;
 		return $info;
 	}
 
