@@ -351,36 +351,13 @@ class BizProperty
 		// Pre-insert static props (when missing) in the right order.
 		// Trick to insert key-value pairs on top: reverse the order, add them at end and reverse them again.
 		$staticProps = self::getStaticPropIds();
-
 		$staticProps = array_reverse( $staticProps, true );
-		if( $action == 'SendTo' ) { // BZ#20061 - Filter out those non Workflow properties, when action is SendTo
-			$wflProps = self::getWorkflowPropIds();
-			$tempUsages = array();
-			if( $usages ) foreach( $usages as $usage ) {
-				if( in_array( $usage->Name, $wflProps ) ||
-					in_array( $usage->Name, $staticProps )) { // 10.x.x: $usages can also be static properties that are retrieved from DB.
-					$tempUsages[$usage->Name] = $usage;
-				}
-			}
-			$usages = $tempUsages;
-		}
+		$usages = self::filterPropsWhenActionIsSendTo( $usages, $action, $staticProps );
 		$usages = array_reverse( $usages, true );
-		foreach( $staticProps as $staticProp ) {
-			$propUsage = array_key_exists( $staticProp, $usages ) ? $usages[$staticProp] : self::composePropUsage( $staticProp, $refreshProps );;
+		if( $staticProps ) foreach( $staticProps as $staticProp ) {
+			$propUsage = array_key_exists( $staticProp, $usages ) ? $usages[$staticProp] : self::composePropUsage( $staticProp, $refreshProps );
 			if ($action == 'SendTo') {
-				if ($staticProp == 'State') {
-					$propUsage->Editable = true;
-					$propUsage->Mandatory = true;
-				} else if( $staticProp == 'Name' || $staticProp == 'Publication' || $staticProp == 'Issue' ||
-					$staticProp == 'Editions' || $staticProp == 'Category' ) {
-					$propUsage->Editable = false;
-					// 10.x.x: 'Mandatory' setting should be set to true, however, in order not to break the current design, set it to false for now.
-					// The reason this setting is not causing problem so far, is due to client will always pre-filled this field in the Dialog and since
-					// it is a non-editable field, user can never modify it to make it empty.
-					$propUsage->Mandatory = false; // Should be set to true, read above.
-				} else {
-					$propUsage->Editable = false;
-				}
+				$propUsage = self::handleEditableAndMandatorySettingsForActionSendTo( $staticProp, $propUsage );
 			} else if( ($staticProp == 'Issue') || isset( $targetProps[$staticProp] ) ) { // BZ#16792
 				// nothing to do; use default
 			} else {
@@ -391,7 +368,6 @@ class BizProperty
 		$usages = array_reverse( $usages, true );
 		return $usages;
 	}
-
 
 	/**
 	 * Determines if the property can be used for multi-set properties dialog.
@@ -2953,5 +2929,68 @@ class BizProperty
 			}
 		}
 		BizProperty::deleteProperty( $propId );
+	}
+
+	/**
+	 * Adjust the Editable and Mandatory settings in Usage for properties used for action 'SendTo'.
+	 *
+	 * @since 10.x.x
+	 * @param string $staticProp
+	 * @param string[] $propUsage
+	 * @return string[]
+	 */
+	private static function handleEditableAndMandatorySettingsForActionSendTo( $staticProp, $propUsage )
+	{
+		switch( $staticProp ) {
+			case 'State':
+				$propUsage->Editable = true;
+				$propUsage->Mandatory = true;
+				break;
+			case 'Name':
+			case 'Publication':
+			case 'Issue':
+			case 'Editions':
+			case 'Category':
+				$propUsage->Editable = false;
+				// 10.x.x: 'Mandatory' setting should be set to true, however, in order not to break the current design, set it to false for now.
+				// The reason this setting is not causing problem so far, is due to client will always pre-filled this field in the Dialog and since
+				// it is a non-editable field, user can never modify it to make it empty.
+				$propUsage->Mandatory = false; // Should be set to true, read above.
+				break;
+			default:
+				$propUsage->Editable = false;
+				break;
+		}
+		return $propUsage;
+	}
+
+	/**
+	 * Filter out non-workflow properties ( mainly custom properties ) when action is 'SendTo'.
+	 *
+	 * See more in BZ#20061.
+	 * Since 10.x.x, static properties can also be included in the $usages list. This is due to
+	 * that the static properties can also now be stored in the database. Hence, when static
+	 * properties are found, they will not be removed/filtered-out.
+	 *
+	 * @since 10.x.x
+	 * @param string[] $usages
+	 * @param string $action
+	 * @param string[] $staticProps
+	 * @return string[] array
+	 */
+	private static function filterPropsWhenActionIsSendTo( $usages, $action, $staticProps )
+	{
+		if( $action == 'SendTo' ) {
+			$wflProps = self::getWorkflowPropIds();
+			$tempUsages = array();
+			if( $usages ) foreach( $usages as $usage ) {
+				if( in_array( $usage->Name, $wflProps ) || // BZ#20061
+					in_array( $usage->Name, $staticProps )) { // 10.x.x: $usages can also be static properties that are retrieved from DB
+					$tempUsages[$usage->Name] = $usage;
+				}
+			}
+			$usages = $tempUsages;
+		}
+		return $usages;
 	}
 }

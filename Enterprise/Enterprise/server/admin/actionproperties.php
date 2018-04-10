@@ -651,7 +651,7 @@ class ActionPropertiesAdminApp
 				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
 			   }
 
-			   if( $this->action != '' ) { // When action is general, don't fix anything as some action needs 'Dossier' and some don't.
+			   if( $this->action != '' ) { // When action is <All>, don't fix anything as some action needs 'Dossier' and some don't.
 				   require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
 				   BizWorkflow::fixDossierPropertyUsage( $this->action, $this->objType, '', $usages );
 			   }
