@@ -116,7 +116,6 @@ class DBFeature extends DBBase
 	 *
 	 * @since 10.1.7
 	 * @param integer[] $profileIds
-	 * @param int[] $profileIds
 	 * @return array Features per profileId
 	 */
 	private static function getEnabledFeaturesByProfile( $profileIds )
