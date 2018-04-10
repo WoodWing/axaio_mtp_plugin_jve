@@ -29,7 +29,6 @@ class Elvis_RestProxyIndex
 	public function handle()
 	{
 		$this->includeEnterpriseServerConfig();
-		$this->preparePhpForStreaming();
 
 		$httpMethod = $_SERVER['REQUEST_METHOD'];
 		LogHandler::Log( 'ElvisRestProxyIndex', 'CONTEXT', "Incoming HTTP {$httpMethod} request." );
@@ -39,8 +38,7 @@ class Elvis_RestProxyIndex
 			try {
 				$this->allowCrossHeaders();
 				$this->parseHttpParams();
-				$this->validateTicketAndStartSession();
-				$this->dispatchRequestToElvisServer( $httpMethod );
+				$this->dispatchRequest( $httpMethod );
 			} catch( BizException $e ) {
 				throw Elvis_RestProxyIndex_HttpException::createFromBizException( $e );
 			}
@@ -68,23 +66,6 @@ class Elvis_RestProxyIndex
 	}
 
 	/**
-	 * Set global options for the PHP environment to allow streaming without interference.
-	 */
-	private function preparePhpForStreaming()
-	{
-		// Abort after one hour download without streaming activity.
-		set_time_limit( 3600 );
-
-		// The following option could corrupt archive files, so disable it
-		// -> http://nl3.php.net/manual/en/function.fpassthru.php#49671
-		ini_set( "zlib.output_compression", "Off" );
-
-		// This lets a user download a file while still being able to browse your site.
-		// -> http://nl3.php.net/manual/en/function.fpassthru.php#48244
-		session_write_close();
-	}
-
-	/**
 	 * Add Cross Origin headers needed by Javascript applications
 	 */
 	private function allowCrossHeaders()
@@ -108,7 +89,7 @@ class Elvis_RestProxyIndex
 			'service' => null
 		);
 
-		// Check the mandatory ticket param.
+		// Accept the ticket param.
 		if( isset( $requestParams['ticket'] ) ) {
 			$this->httpParams['ticket'] = $requestParams['ticket'];
 		} else {
@@ -117,17 +98,10 @@ class Elvis_RestProxyIndex
 			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
 			$this->httpParams['ticket'] = BizSession::getTicketForClientIdentifier();
 		}
-		if( !$this->httpParams['ticket'] ) {
-			$message = 'Please specify "ticket" param at URL, or provide it as a web cookie and set the "ww-app" param.';
-			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
-		}
 
+		// Accept the service param.
 		if( isset( $requestParams['service'] ) ) {
 			$this->httpParams['service'] = $requestParams['service'];
-		}
-		if( !$this->httpParams['service'] ) {
-			$message = 'Please specify "service" param at URL.';
-			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
 
 		// Log the incoming parameters for debugging purposes.
@@ -141,12 +115,61 @@ class Elvis_RestProxyIndex
 	}
 
 	/**
+	 * Dispatch (proxy) the incoming REST service request to Elvis Server.
+	 *
+	 * @param string $httpMethod
+	 * @throws Elvis_RestProxyIndex_HttpException
+	 * @throws BizException
+	 */
+	private function dispatchRequest( $httpMethod )
+	{
+		// The OPTIONS call is send by a web browser as a pre-flight for a CORS request.
+		// This request doesn't send or receive any information. There is no need to validate the ticket,
+		// and when the OPTIONS calls returns an error the error can't be validated within an application.
+		// This is a restriction by web browsers.
+		switch( $httpMethod ) {
+			case 'OPTIONS':
+				throw new Elvis_RestProxyIndex_HttpException( '', 200 );
+			case 'GET':
+			case 'POST':
+				$this->preparePhpForStreaming();
+				$this->validateTicketAndStartSession();
+				$this->proxyRequestToElvisServer();
+				break;
+			default:
+				$message = 'Unknown HTTP method "'.$_SERVER['REQUEST_METHOD'].'" is used which is not supported.';
+				throw new Elvis_RestProxyIndex_HttpException( $message, 405 );
+		}
+	}
+
+	/**
+	 * Set global options for the PHP environment to allow streaming without interference.
+	 */
+	private function preparePhpForStreaming()
+	{
+		// Abort after one hour download without streaming activity.
+		set_time_limit( 3600 );
+
+		// The following option could corrupt archive files, so disable it
+		// -> http://nl3.php.net/manual/en/function.fpassthru.php#49671
+		ini_set( "zlib.output_compression", "Off" );
+
+		// This lets a user download a file while still being able to browse your site.
+		// -> http://nl3.php.net/manual/en/function.fpassthru.php#48244
+		session_write_close();
+	}
+
+	/**
 	 * Check if the ticket (provided by client) is valid and starts an Enterprise Server session.
 	 *
 	 * @throws BizException
 	 */
 	private function validateTicketAndStartSession()
 	{
+		if( !$this->httpParams['ticket'] ) {
+			$message = 'Please specify "ticket" param at URL, or provide it as a web cookie and set the "ww-app" param.';
+			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
+		}
 		// Explicitly request NOT to update ticket expiration date to save time (since DB updates are expensive).
 		// We assume this is settled through regular web services which are called anyway such as GetObjects.
 		$user = BizSession::checkTicket( $this->httpParams['ticket'], 'ElvisRestProxyIndex', false );
@@ -158,29 +181,17 @@ class Elvis_RestProxyIndex
 	/**
 	 * Dispatch (proxy) the incoming REST service request to Elvis Server.
 	 *
-	 * @param string $httpMethod
-	 * @throws Elvis_RestProxyIndex_HttpException
 	 * @throws BizException
 	 */
-	private function dispatchRequestToElvisServer( $httpMethod )
+	private function proxyRequestToElvisServer()
 	{
-		// The OPTIONS call is send by a web browser as a pre-flight for a CORS request.
-		// This request doesn't send or receive any information. There is no need to validate the ticket,
-		// and when the OPTIONS calls returns an error the error can't be validated within an application.
-		// This is a restriction by web browsers.
-		switch( $httpMethod ) {
-			case 'OPTIONS':
-				throw new Elvis_RestProxyIndex_HttpException( '', 200 );
-			case 'GET':
-			case 'POST':
-				require_once __DIR__.'/logic/ElvisRESTClient.php';
-				$client = new ElvisRESTClient();
-				$client->proxy( $this->httpParams['service'] );
-				break;
-			default:
-				$message = 'Unknown HTTP method "'.$_SERVER['REQUEST_METHOD'].'" is used which is not supported.';
-				throw new Elvis_RestProxyIndex_HttpException( $message, 405 );
+		if( !$this->httpParams['service'] ) {
+			$message = 'Please specify "service" param at URL.';
+			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
+		require_once __DIR__.'/logic/ElvisRESTClient.php';
+		$client = new ElvisRESTClient();
+		$client->proxy( $this->httpParams['service'] );
 	}
 }
 
