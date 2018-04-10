@@ -8,6 +8,10 @@ class ElvisRESTClient extends ElvisClient
 	 * @var null|string Type of Load Balancer used with connection to Elvis. e.g: classic load balancer (AWSELB)
 	 */
 	private $loadBalancerType = null;
+
+	/** @var bool Whether or not this client is a proxy. */
+	private $isProxyMode = false;
+
 	/**
 	 * Calls an Elvis web service over the REST JSON interface.
 	 *
@@ -17,9 +21,9 @@ class ElvisRESTClient extends ElvisClient
 	 * @return mixed Decoded JSON data on success. Object with 'errorcode' attribute on error.
 	 * @throws BizException
 	 */
-	private static function send( $service, $post = null, $file = null )
+	private function send( $service, $post = null, $file = null )
 	{
-		$response = self::callElvisRestServiceAndHandleCookies( $service, $post, $file );
+		$response = $this->callElvisRestServiceAndHandleCookies( $service, $post, $file );
 		$isError = isset( $response->errorcode ) && $response->errorcode != 200;
 
 		// This function is called for all kind of services, but never for a logon (since that runs through the AMF client).
@@ -31,7 +35,7 @@ class ElvisRESTClient extends ElvisClient
 		if( $isError && $service != 'services/logout' ) {
 			require_once __DIR__.'/ElvisAMFClient.php';
 			ElvisAMFClient::login();
-			$response = self::callElvisRestServiceAndHandleCookies( $service, $post, $file );
+			$response = $this->callElvisRestServiceAndHandleCookies( $service, $post, $file );
 			$isError = isset( $response->errorcode ) && $response->errorcode != 200;
 			if( $isError ) {
 				$detail = 'Calling Elvis web service '.$service.' failed (REST API). '.
@@ -51,15 +55,17 @@ class ElvisRESTClient extends ElvisClient
 	 * @param Attachment|null $file
 	 * @return mixed Decoded JSON data on success. Object with 'errorcode' attribute on error.
 	 */
-	private static function callElvisRestServiceAndHandleCookies( $service, $post = null, $file = null )
+	private function callElvisRestServiceAndHandleCookies( $service, $post, $file )
 	{
 		$url = self::getElvisBaseUrl().'/'.$service;
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		$cookies = ElvisSessionUtil::getSessionCookies();
 		self::logService( $service, $url, $post, $cookies, true );
-		$response = self::callElvisService( $service, $url, $post, $cookies, $file );
+		$response = $this->callElvisService( $service, $url, $post, $cookies, $file );
 		$isError = isset( $response->errorcode ) && $response->errorcode != 200;
-		self::logService( $service, $url, $response, $cookies, $isError ? null : false );
+		if( !$this->isProxyMode || $isError ) { // avoid logging downloaded files (proxy mode)
+			self::logService( $service, $url, $response, $cookies, $isError ? null : false );
+		}
 		ElvisSessionUtil::updateSessionCookies( $cookies );
 		return $response;
 	}
@@ -95,9 +101,9 @@ class ElvisRESTClient extends ElvisClient
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
 	 * @param array $cookies HTTP cookies to sent with request. After call, this is replaced with cookies returned by response.
 	 * @param Attachment|null $file
-	 * @return mixed Decoded JSON data on success. Object with 'errorcode' attribute on error.
+	 * @return mixed On success, decoded JSON data in non-proxy mode or NULL in proxy mode. On error, an object with 'errorcode' attribute.
 	 */
-	private static function callElvisService( $service, $url, $post, &$cookies, $file = null )
+	private function callElvisService( $service, $url, $post, &$cookies, $file )
 	{
 		$ch = curl_init();
 		if( !$ch ) {
@@ -108,12 +114,20 @@ class ElvisRESTClient extends ElvisClient
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		curl_setopt( $ch, CURLOPT_FAILONERROR, 1 ); // Fail verbosely if the HTTP code returned is >= 400.
 		curl_setopt( $ch, CURLOPT_POST, 1 );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		if( $this->isProxyMode ) { // Stream all data to output while calling curl_exec().
+			curl_setopt( $ch, CURLOPT_WRITEFUNCTION, function( $curl, $data ) {
+				set_time_limit( 3600 ); // postpone timeout
+				echo $data;
+				return strlen( $data );
+			} );
+		} else { // Retrieve all data in memory through return value of curl_exec().
+			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		}
 		curl_setopt( $ch, CURLOPT_HEADER, 0 );
 		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, ELVIS_CONNECTION_TIMEOUT );
 		curl_setopt( $ch, CURLOPT_TIMEOUT, 3600 ); // Using the Enterprise default
 
-		// Enable this to print the Header sent out ( After calling curl_exec )
+		// Enable this to retrieve the HTTP headers sent out (after calling curl_exec)
 		if( LogHandler::debugMode() ) {
 			curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 		}
@@ -167,6 +181,9 @@ class ElvisRESTClient extends ElvisClient
 					$cookies = array_merge( $cookies, $returnedCookie );
 				}
 			}
+			if( $this->isProxyMode ) {
+				header( $headerLine );
+			}
 			return strlen( $headerLine ); // Needed by CURLOPT_HEADERFUNCTION
 		};
 		curl_setopt($ch, CURLOPT_HEADERFUNCTION, $curlResponseHeaderCallback );
@@ -182,11 +199,15 @@ class ElvisRESTClient extends ElvisClient
 
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		if( $httpStatusCode == 200 ) {
-			$response = json_decode( $result );
+			if( $this->isProxyMode ) {
+				$response = null;
+			} else {
+				$response = json_decode( $result );
+			}
 		} else {
-			$detail = 'Elvis '.$service.' failed with HTTP status code:' . $httpStatusCode . '.' .PHP_EOL;
-			if( curl_errno( $ch ) ){
-				$detail .= 'CURL failed with error code "'.curl_errno( $ch ).'" for url: '.$url . '.' . PHP_EOL . curl_error( $ch );
+			$detail = 'Elvis '.$service.' failed with HTTP status code:'.$httpStatusCode.'.'.PHP_EOL;
+			if( curl_errno( $ch ) ) {
+				$detail .= 'CURL failed with error code "'.curl_errno( $ch ).'" for url: '.$url.'.'.PHP_EOL.curl_error( $ch );
 			}
 			$response = new stdClass();
 			$response->errorcode = $httpStatusCode;
@@ -213,8 +234,8 @@ class ElvisRESTClient extends ElvisClient
 		if( !empty( $metadata ) ) {
 			$post['metadata'] = json_encode( $metadata );
 		}
-
-		self::send( 'services/update', $post, $file );
+		$client = new ElvisRESTClient();
+		$client->send( 'services/update', $post, $file );
 	}
 
 	/**
@@ -242,8 +263,8 @@ class ElvisRESTClient extends ElvisClient
 		if( !empty( $metadata ) ) {
 			$post['metadata'] = json_encode( $metadata );
 		}
-
-		self::send( 'services/updatebulk', $post );
+		$client = new ElvisRESTClient();
+		$client->send( 'services/updatebulk', $post );
 	}
 
 	/**
@@ -266,7 +287,8 @@ class ElvisRESTClient extends ElvisClient
 	 */
 	private static function logoutSession()
 	{
-		self::send( 'services/logout' );
+		$client = new ElvisRESTClient();
+		$client->send( 'services/logout' );
 	}
 
 	/**
@@ -277,7 +299,24 @@ class ElvisRESTClient extends ElvisClient
 	 */
 	public static function fieldInfo()
 	{
-		return self::send( 'services/fieldinfo' );
+		$client = new ElvisRESTClient();
+		return $client->send( 'services/fieldinfo' );
+	}
+
+	/**
+	 * Calls a given web service over the Elvis JSON REST interface.
+	 *
+	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
+	 *
+	 * @since 10.5.0
+	 * @param string $service
+	 * @return mixed
+	 * @throws BizException
+	 */
+	public function proxy( $service )
+	{
+		$this->isProxyMode = true;
+		return $this->send( $service, null, null );
 	}
 
 	/**
@@ -293,7 +332,8 @@ class ElvisRESTClient extends ElvisClient
 	{
 		// The Elvis ping service returns a JSON structure like this:
 		//     {"state":"running","version":"5.15.2.9","available":true,"server":"Elvis"}
-		return self::send( 'services/ping' );
+		$client = new ElvisRESTClient();
+		return $client->send( 'services/ping' );
 	}
 
 	/**
