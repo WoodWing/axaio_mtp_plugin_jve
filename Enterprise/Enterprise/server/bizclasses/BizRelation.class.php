@@ -1387,6 +1387,7 @@ class BizRelation
 	{
 		$handled = array();
 		foreach ( $deletedRelations as $relation ) {
+			require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 			if ( $relation->Targets && !BizTarget::hasTarget( $relation->Child ) && !isset( $handled[$relation->Child] ) ) {
 				require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 				try {
