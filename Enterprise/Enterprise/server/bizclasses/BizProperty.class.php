@@ -352,7 +352,9 @@ class BizProperty
 		// Trick to insert key-value pairs on top: reverse the order, add them at end and reverse them again.
 		$staticProps = self::getStaticPropIds();
 		$staticProps = array_reverse( $staticProps, true );
-		$usages = self::filterPropsWhenActionIsSendTo( $usages, $action, $staticProps );
+		if( $action == 'SendTo' ) {
+			$usages = self::filterPropsForActionSendTo( $usages, $staticProps );
+		}
 		$usages = array_reverse( $usages, true );
 		if( $staticProps ) foreach( $staticProps as $staticProp ) {
 			$propUsage = array_key_exists( $staticProp, $usages ) ? $usages[$staticProp] : self::composePropUsage( $staticProp, $refreshProps );
@@ -2974,23 +2976,19 @@ class BizProperty
 	 *
 	 * @since 10.x.x
 	 * @param string[] $usages
-	 * @param string $action
 	 * @param string[] $staticProps
 	 * @return string[] array
 	 */
-	private static function filterPropsWhenActionIsSendTo( $usages, $action, $staticProps )
+	private static function filterPropsForActionSendTo( $usages, $staticProps )
 	{
-		if( $action == 'SendTo' ) {
-			$wflProps = self::getWorkflowPropIds();
-			$tempUsages = array();
-			if( $usages ) foreach( $usages as $usage ) {
-				if( in_array( $usage->Name, $wflProps ) || // BZ#20061
-					in_array( $usage->Name, $staticProps )) { // 10.x.x: $usages can also be static properties that are retrieved from DB
-					$tempUsages[$usage->Name] = $usage;
-				}
+		$filteredUsages = array();
+		$wflProps = self::getWorkflowPropIds();
+		if( $usages ) foreach( $usages as $usage ) {
+			if( in_array( $usage->Name, $wflProps ) || // BZ#20061
+				in_array( $usage->Name, $staticProps )) { // 10.x.x: $usages can also be static properties that are retrieved from DB
+				$filteredUsages[$usage->Name] = $usage;
 			}
-			$usages = $tempUsages;
 		}
-		return $usages;
+		return $filteredUsages;
 	}
 }
