@@ -1370,8 +1370,8 @@ class BizRelation
 	static private function preventTargetLossAfterDeleteRelation( $deletedRelations )
 	{
 		$handled = array();
+		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		foreach ( $deletedRelations as $relation ) {
-			require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 			if ( $relation->Targets && !BizTarget::hasTarget( $relation->Child ) && !isset( $handled[$relation->Child] ) ) {
 				try {
 					BizTarget::createTargets( BizSession::getShortUserName(), $relation->Child, $relation->Targets, true );
