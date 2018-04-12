@@ -1373,7 +1373,6 @@ class BizRelation
 		foreach ( $deletedRelations as $relation ) {
 			require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 			if ( $relation->Targets && !BizTarget::hasTarget( $relation->Child ) && !isset( $handled[$relation->Child] ) ) {
-				require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 				try {
 					BizTarget::createTargets( BizSession::getShortUserName(), $relation->Child, $relation->Targets, true );
 					$handled[$relation->Child] = true;
