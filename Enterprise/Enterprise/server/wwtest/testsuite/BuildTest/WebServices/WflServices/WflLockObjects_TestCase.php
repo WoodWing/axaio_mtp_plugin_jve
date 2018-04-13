@@ -204,7 +204,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 	 */
 	private function teardownTest()
 	{
-		if( !$this->workflowUser ) {
+		if( !$this->workflowTicket ) {
 			$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "John %timestamp%" );
 			$this->doLogOn();
 		}

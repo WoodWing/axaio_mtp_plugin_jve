@@ -3575,12 +3575,10 @@ class BizObject
 	 *
 	 * The version of objects should be provided. When mismatches, the S1140 error
 	 * is thrown to let caller get latest object and try again.
+	 * If the user has no right to lock one of the objects a S1002 error is thrown.
 	 *
 	 * The function return the object ids of successfully locked objects only.
 	 * Caller should enable the reporting feature to catch errors.
-	 *
-	 * It does not check for read/write access rights; Those are covered by
-	 * GetObjects and SaveObjects services, which are needed to edit content.
 	 *
 	 * @param string $user
 	 * @param ObjectVersion[] $haveVersions
@@ -3594,9 +3592,10 @@ class BizObject
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Invalid params provided for '.__METHOD__.'().' );
 		}
 
+		$haveObjectIds = array_map( function( $hv ) { return $hv->ID; }, $haveVersions );
+		$checkedObjects = self::checkAccessRightOnObjectLock( $user, $haveObjectIds );
 		// Lock the objects, so that the version can no longer change by others in the meantime.
 		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-		$haveObjectIds = array_map( function( $hv ) { return $hv->ID; }, $haveVersions );
 		$lockedObjectIds = DBObjectLock::lockObjects( $haveObjectIds, $user ); // TODO Add to BizObjectLock
 
 		// Grab the latest object versions from DB (for those object that could be locked).
@@ -3617,7 +3616,7 @@ class BizObject
 		foreach( $haveVersions as $haveVersion ) {
 			try {
 				if( !isset( $lockedObjectIds[$haveVersion->ID] ) ) {
-					if( self::objectExists( $haveVersion->ID, 'Workflow' ) ) {
+					if( in_array( $haveVersion->ID, $checkedObjects ) ) {
 						throw new BizException( 'ERR_LOCKED', 'Client', $haveVersion->ID );
 					} else {
 						throw new BizException( 'ERR_NOTFOUND', 'Client', $haveVersion->ID );
@@ -6222,5 +6221,31 @@ class BizObject
 		$object->Files = array(); // The files are moved to the Filestore so they aren't needed anymore.
 
 		return $object;
+	}
+
+	/**
+	 * Checks the if user is entitled to lock the objects.
+	 *
+	 * @param string $user
+	 * @param integer[] $objectIds
+	 * @return integer[] $checkedObjects Objects found and checked.
+	 * @throws BizException
+	 */
+	private static function checkAccessRightOnObjectLock( $user, $objectIds ): array
+	{
+		$checkedObjects = array();
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+		$dbObjectRows = DBObject::getMultipleObjectDBRows( $objectIds );
+		foreach( $dbObjectRows as $objectId => $dbObjectRow ) {
+			$checkedObjects[] = $objectId;
+			$objectProperties = BizProperty::objRowToPropValues( $dbObjectRow );
+			try {
+				self::checkAccessRights( true, $user, $objectProperties );
+			} catch( BizException $e ) {
+				throw new BizException( 'ERR_AUTHORIZATION', 'Client', $objectId );
+			}
+		}
+		return $checkedObjects;
 	}
 }
