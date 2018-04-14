@@ -10,7 +10,7 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase extends TestCase
 {
-	/** @var WW_TestSuite_BuildTest_WebServices_WflServices_Utils $wflServicesUtils */
+	/** @var WW_Utils_TestSuite $utils */
 	private $testSuiteUtils = null;
 
 	/** @var string workflowTicket */
