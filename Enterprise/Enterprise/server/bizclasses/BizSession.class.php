@@ -671,9 +671,8 @@ class BizSession
 	 */
 	public static function checkTicket( $ticket, $service='', $extend = true )
 	{
-		// All web applications validate their ticket before they start operating,
-		// but most of them do not start a session. Here we do a lazy start to avoid
-		// connectors being called through ticketExpirationReset() without valid session.
+		// All web applications validate their ticket before they start operating, but most of them do not start a session.
+		// Here we do a lazy start to avoid validation without having a valid session.
 		if( !self::isStarted() ) {
 			self::startSession( $ticket );
 		}
@@ -688,39 +687,6 @@ class BizSession
 		// Language was not correctly loaded when called from soap-client, so making sure 
 		// language is correctly loaded here.
 		self::loadUserLanguage(self::$userName);
-
-		if( $service && !self::isFeatherLightService( $service ) ) {
-			// Ask connectors if they have a valid ticket for their integrated system as well.
-			$connectorTicketsValid = true;
-			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
-			$connRetVals = array();
-			BizServerPlugin::runDefaultConnectors( 'Session', null,
-				'ticketExpirationReset', array( $ticket, self::$userName ), $connRetVals );
-			if( $connRetVals ) foreach( $connRetVals as $connName => $connRetVal ) {
-				if( $connRetVal === false ) {
-					LogHandler::Log( 'BizSession', 'INFO', 'Server Plug-in connector '.$connName.' indicates '.
-						'through ticketExpirationReset() that the integrated system has no valid '.
-						'ticket for the current user. Therefore the Enterprise ticket will be made '.
-						'invalid as well to let the user (re)logon to obtain ticket for both systems.' );
-					$connectorTicketsValid = false;
-					break;
-				}
-			}
-
-			// When integrated system has no ticket, make Enterprise ticket invalid as well.
-			// That forces clients to (re)login and obtain a seat for both Enterprise and
-			// the remote system again.
-			if( !$connectorTicketsValid ) {
-				try {
-					require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
-					$bizTicket = new BizTicket();
-					$bizTicket->deleteTicketAndAffiliatedStructures( $ticket );
-				} catch( BizException $e ) {
-					// Do nothing, error is already added to the log, no need to stop.
-				}
-				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
-			}
-		}
 
 		return self::$userName;
 	}
@@ -1351,7 +1317,6 @@ class BizSession
 				'PubOperationProgress'     => true, // real
 				'Autocomplete'             => true, // raw
 				'WflAutocomplete'          => true, // real
-				'ElvisRestProxyIndex'      => true, // config/plugins/Elvis/restproxyindex.php
 			);
 		}
 		return array_key_exists( $serviceName, $services );

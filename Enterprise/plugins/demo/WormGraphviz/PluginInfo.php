@@ -207,7 +207,6 @@ class WormGraphviz_EnterprisePlugin extends EnterprisePlugin
 			// 'PubPublishing_EnterpriseConnector',
 			// 'Search_EnterpriseConnector',
 			// 'ServerJob_EnterpriseConnector',
-			// 'Session_EnterpriseConnector',
 			// 'Spelling_EnterpriseConnector',
 			// 'SuggestionProvider_EnterpriseConnector',
 			// 'Version_EnterpriseConnector',
