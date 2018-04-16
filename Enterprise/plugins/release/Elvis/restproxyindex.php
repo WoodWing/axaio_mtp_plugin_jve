@@ -242,7 +242,7 @@ class Elvis_RestProxyIndex
 		// Check if user has Read access to the object.
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
 		if( !BizAccess::checkRightsForMetaDataAndTargets( BizSession::getShortUserName(), 'R',
-			BizAccess::DONT_THROW_ON_DENIED, $this->objectMetaData, array() ) ) { // TODO: resolve targets
+			BizAccess::DONT_THROW_ON_DENIED, $this->objectMetaData, array() ) ) { // TODO: resolve $targets for overrule-issue [PD-25]
 			$message = 'The user has no Read access to the object.';
 			throw new Elvis_RestProxyIndex_HttpException( $message, 403 );
 		}
