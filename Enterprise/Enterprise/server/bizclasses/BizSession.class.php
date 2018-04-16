@@ -1351,6 +1351,7 @@ class BizSession
 				'PubOperationProgress'     => true, // real
 				'Autocomplete'             => true, // raw
 				'WflAutocomplete'          => true, // real
+				'ElvisRestProxyIndex'      => true, // config/plugins/Elvis/restproxyindex.php
 			);
 		}
 		return array_key_exists( $serviceName, $services );
