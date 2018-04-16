@@ -193,8 +193,9 @@ class ElvisRESTClient extends ElvisClient
 		if( LogHandler::debugMode() ) {
 			// Require curl_setopt($ch, CURLINFO_HEADER_OUT, 1); as set above.
 			$headersSent = curl_getinfo( $ch, CURLINFO_HEADER_OUT );
-			LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling '.$service . ' using PHP cURL.' . PHP_EOL .
-				'Headers Sent:<pre>'. print_r( $headersSent,true ).'</pre>');
+			$logMessage = 'RESTClient calling '.$service . ' using PHP cURL.'.PHP_EOL.'Headers Sent:'.PHP_EOL;
+			LogHandler::logRaw( 'ELVIS', 'DEBUG',
+				LogHandler::encodeLogMessage( $logMessage ).LogHandler::composeCodeBlock( $headersSent ) );
 		}
 
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
