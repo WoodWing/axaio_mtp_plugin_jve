@@ -29,6 +29,7 @@ define ('ADOBE_VERSIONS',		serialize( array( // used to detect if installed IDS 
 	'CC2014' => '10.0',
 	'CC2015' => '11.0',
 	'CC2017' => '12.0',
+	'CC2018' => '13.0',
 )));
 define ('ADOBE_VERSIONS_ALL',		serialize( array( // used to detect documents versions, including older versions
 	// Major/minor version, oldest version first, latest as last one.
@@ -39,6 +40,7 @@ define ('ADOBE_VERSIONS_ALL',		serialize( array( // used to detect documents ver
 	'CC2014' => '10.0',
 	'CC2015' => '11.0',
 	'CC2017' => '12.0',
+	'CC2018' => '13.0',
 )));
 
 // For online-help articles:
