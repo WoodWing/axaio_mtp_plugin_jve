@@ -13,6 +13,28 @@
  * the Elvis authorization. The response body and headers are streamed back to the waiting Enterprise client application.
  *
  * The proxy is introduced to support image cropping in Content Station with help of the Elvis REST API.
+ *
+ * The restproxyindex.php supports the following URL parameters:
+ * - ticket:    A valid session ticket that was obtained through a LogOn service call (e.g. see SCEnterprise.wsdl).
+ * - ww-app:    The client application name that was provided in the LogOn service request. This parameter could used
+ *              instead of ticket to have stable URLs and so use the web browser's cache. When using this parameter and
+ *              the client does not run in a web browser it should round-trip web cookies by itself.
+ * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
+ * - service:   The Elvis REST API call e.g. to do download a native, preview or crop file from Elvis. The URL must be
+ *              URL encoded and relative (the Elvis host/ip must be excluded). The Elvis asset id should be indicated
+ *              with a placeholder %assetid% which is resolved by the proxy from the object id.
+ *
+ * Example request:
+ *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&service=preview%2F%25assetid%&objectid=123
+ *
+ * The following HTTP codes may be returned:
+ * - HTTP 200: The file is found and is streamed back to caller.
+ * - HTTP 400: Bad HTTP parameters provided by caller. See above for required parameters.
+ * - HTTP 401: When ticket is no longer valid. This should be detected by the client to do a re-login.
+ * - HTTP 403: The user has no Read access to the invoked object in Enterprise or Elvis.
+ * - HTTP 404: The object could not be found in Enterprise or Elvis.
+ * - HTTP 405: Bad HTTP method requested by caller. Only GET, POST and OPTIONS are supported.
+ * - HTTP 500: Unexpected server error.*
  */
 
 $index = new Elvis_RestProxyIndex();
@@ -22,6 +44,12 @@ class Elvis_RestProxyIndex
 {
 	/** @var array $httpParams HTTP input parameters (taken from URL or Cookie). */
 	private $httpParams;
+
+	/** @var MetaData $objectMetaData Some essential properties resolved for the invoked Enterprise object. */
+	private $objectMetaData;
+
+	/** @var string $elvisAssetId The DocumentID of the invoked shadow object, which equals the Elvis asset id. */
+	private $elvisAssetId;
 
 	/**
 	 * Dispatch the incoming HTTP request.
@@ -92,7 +120,7 @@ class Elvis_RestProxyIndex
 		// Accept the ticket param.
 		if( isset( $requestParams['ticket'] ) ) {
 			$this->httpParams['ticket'] = $requestParams['ticket'];
-		} else {
+		} elseif( isset( $requestParams['ww-app'] ) ) {
 			// Support cookie enabled sessions. When the client has no ticket provided in the URL params, try to grab the ticket
 			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
 			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
@@ -104,11 +132,16 @@ class Elvis_RestProxyIndex
 			$this->httpParams['service'] = $requestParams['service'];
 		}
 
+		// Accept the objectid param.
+		if( isset( $requestParams['objectid'] ) ) {
+			$this->httpParams['objectid'] = intval( $requestParams['objectid'] );
+		}
+
 		// Log the incoming parameters for debugging purposes.
 		if( LogHandler::debugMode() ) {
-			$msg = 'Incoming HTTP params: ';
+			$msg = 'Incoming HTTP params:'.PHP_EOL;
 			foreach( $this->httpParams as $key => $value ) {
-				$msg .= "- {$key} = '{$value}' ".PHP_EOL;
+				$msg .= "- {$key} = '{$value}'".PHP_EOL;
 			}
 			LogHandler::Log( 'ElvisRestProxyIndex', 'DEBUG', $msg );
 		}
@@ -134,6 +167,8 @@ class Elvis_RestProxyIndex
 			case 'POST':
 				$this->preparePhpForStreaming();
 				$this->validateTicketAndStartSession();
+				$this->checkObjectReadAccess();
+				$this->resolveElvisAssetId();
 				$this->proxyRequestToElvisServer();
 				break;
 			default:
@@ -166,16 +201,70 @@ class Elvis_RestProxyIndex
 	 */
 	private function validateTicketAndStartSession()
 	{
-		if( !$this->httpParams['ticket'] ) {
-			$message = 'Please specify "ticket" param at URL, or provide it as a web cookie and set the "ww-app" param.';
+		if( !array_key_exists( 'ticket', $this->httpParams ) ) {
+			$message = 'Please specify a "ticket" param at the URL, or provide web cookies and set the "ww-app" param.';
 			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
+
 		// Explicitly request NOT to update ticket expiration date to save time (since DB updates are expensive).
 		// We assume this is settled through regular web services which are called anyway such as GetObjects.
 		$user = BizSession::checkTicket( $this->httpParams['ticket'], 'ElvisRestProxyIndex', false );
 		BizSession::setServiceName( 'ElvisRestProxyIndex' );
 		BizSession::startSession( $this->httpParams['ticket'] );
 		BizSession::setTicketCookieForClientIdentifier( $this->httpParams['ticket'] );
+	}
+
+	/**
+	 * Check if the session user has Read access to the invoked object.
+	 *
+	 * @throws Elvis_RestProxyIndex_HttpException
+	 */
+	private function checkObjectReadAccess()
+	{
+		// Validate the objectid param.
+		if( !isset($this->httpParams['objectid']) || !$this->httpParams['objectid'] ) {
+			$message = 'Please specify a "objectid" param at the URL.';
+			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
+		}
+		$objectId = $this->httpParams['objectid'];
+
+		// Get some object properties required by BizAccess::checkRightsForObjectProps().
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$metaDatasPerObject = DBObject::getMultipleObjectsProperties( array( $objectId ) );
+
+		// Bail out when object does not exist in DB.
+		if( !array_key_exists( $objectId, $metaDatasPerObject ) ) {
+			$message = 'The object could not be found.';
+			throw new Elvis_RestProxyIndex_HttpException( $message, 404 );
+		}
+		$this->objectMetaData = $metaDatasPerObject[ $objectId ];
+
+		// Check if user has Read access to the object.
+		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
+		if( !BizAccess::checkRightsForMetaDataAndTargets( BizSession::getShortUserName(), 'R',
+			BizAccess::DONT_THROW_ON_DENIED, $this->objectMetaData, array() ) ) { // TODO: resolve targets
+			$message = 'The user has no Read access to the object.';
+			throw new Elvis_RestProxyIndex_HttpException( $message, 403 );
+		}
+	}
+
+	/**
+	 * Resolve the Elvis asset id from the invoked Enterprise object id.
+	 *
+	 * @throws Elvis_RestProxyIndex_HttpException
+	 */
+	private function resolveElvisAssetId()
+	{
+		require_once __DIR__.'/config.php'; // ELVIS_CONTENTSOURCEID
+
+		$contentSource = $this->objectMetaData->BasicMetaData->ContentSource;
+		$documentId = $this->objectMetaData->BasicMetaData->DocumentID;
+		if( !$contentSource || !$documentId || $contentSource != ELVIS_CONTENTSOURCEID ||
+			!BizContentSource::isShadowObjectBasedOnProps( $contentSource, $documentId ) ) {
+			$message = 'The object is not an Elvis shadow object.';
+			throw new Elvis_RestProxyIndex_HttpException( $message, 404 );
+		}
+		$this->elvisAssetId = $documentId;
 	}
 
 	/**
@@ -189,9 +278,10 @@ class Elvis_RestProxyIndex
 			$message = 'Please specify "service" param at URL.';
 			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
+		$service = str_replace( '%assetid%', $this->elvisAssetId, $this->httpParams['service'] );
 		require_once __DIR__.'/logic/ElvisRESTClient.php';
 		$client = new ElvisRESTClient();
-		$client->proxy( $this->httpParams['service'] );
+		$client->proxy( $service );
 	}
 }
 
