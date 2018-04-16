@@ -42,7 +42,8 @@ class ServerJob
 	public $ActingUser; // The user short name (used to run async/background job) for who access rights are gained
 	
 	// Job status:
-	public $JobStatus; // ServerJobStatus
+	/** @var ServerJobStatus $jobStatus */
+	public $JobStatus;
 	public $Attempts; // The number of attempts job has been picked up before for processing. When the job is created, it is set to 0, it increases each time after calling runJob.
 
 	// Job data:

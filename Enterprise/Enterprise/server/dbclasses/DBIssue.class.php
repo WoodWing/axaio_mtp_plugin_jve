@@ -667,21 +667,6 @@ class DBIssue extends DBBase
 	}
 	
 	/**
-	 * This function checks whether the given issue id
-	 * is in active or inactive status.
-	 *
-	 * @param int $issuedId Database of the issue ID.
-	 * @return  boolean True when active, False otherwise.
-	 */
-	static public function isIssueActive( $issuedId )
-	{
-		$where = " `id` = ? AND `active` = ? ";
-		$params = array( intval( $issuedId ), 'on' );
-		$result = self::getRow( 'issues', $where, array( 'id' ), $params );
-		return $result ? true : false;
-	}
-
-	/**
 	 * Get overrule publication info fields by their object ids.
 	 *
 	 * This function returns an array in the following format:

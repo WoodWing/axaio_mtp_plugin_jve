@@ -168,16 +168,20 @@ class WW_Utils_TestSuite
 				return false;
 			}
 		}
-		$endsWithSlash = (strrpos($filePath,'/') === (strlen($filePath)-1));
-		if( ($validateOpts & self::VALIDATE_PATH_NO_SLASH) == self::VALIDATE_PATH_NO_SLASH ) {
-			if( $endsWithSlash ) {
-				$testCase->setResult( $errorLevel, "The file path $filePath should not end with a slash.", $help );
-				return false;
-			}
-		} else {
-			if( !$endsWithSlash ) {
-				$testCase->setResult( $errorLevel, "The file path $filePath should end with a slash.", $help );
-				return false;
+		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
+		$isLocalRootFolder = FolderUtils::isLocalRootFolder( $filePath );
+		if( !$isLocalRootFolder ) { // Root folder per definition has an end slash.
+			$endsWithSlash = (strrpos($filePath,'/') === (strlen($filePath)-1));
+			if( ( $validateOpts & self::VALIDATE_PATH_NO_SLASH ) == self::VALIDATE_PATH_NO_SLASH ) {
+				if( $endsWithSlash ) {
+					$testCase->setResult( $errorLevel, "The file path $filePath should not end with a slash.", $help );
+					return false;
+				}
+			} else {
+				if( !$endsWithSlash ) {
+					$testCase->setResult( $errorLevel, "The file path $filePath should end with a slash.", $help );
+					return false;
+				}
 			}
 		}
 		$endsWithSpace = (strrpos($filePath,' ') === (strlen($filePath)-1));
@@ -189,8 +193,8 @@ class WW_Utils_TestSuite
 		}
 		if( ($validateOpts & self::VALIDATE_PATH_FILE_EXISTS) == self::VALIDATE_PATH_FILE_EXISTS ) {
 			if( $isDirPath ) {
-				if( strrpos($filePath, '/' ) == strlen($filePath) - 1 ) {
-					$filePath = substr( $filePath, 0, strrpos( $filePath, '/' ) ); // Remove end slash
+				if( !$isLocalRootFolder && strrpos($filePath, '/' ) == strlen($filePath) - 1 ) {
+					$filePath = substr( $filePath, 0, strrpos( $filePath, '/' ) ); // Remove end slash but not for root folder.
 				}
 				if( !$this->dirPathExists( $filePath ) ) {
 					$testCase->setResult( $errorLevel, "The $filePath folder does not exist.", $help );
@@ -2112,5 +2116,73 @@ class WW_Utils_TestSuite
 				return $editionA->Id < $editionB->Id ? -1 : 1; // assumed that ids are never equal
 			} );
 		}
+	}
+
+	/**
+	 * Creates a new Server Job via jobindex.php.
+	 *
+	 * Typically needed for recurring Server Job.
+	 *
+	 * @since 10.1.7
+	 * @param TestCase $testCase
+	 * @param string $serverJobName
+	 * @return bool
+	 */
+	public function callCreateServerJob( TestCase $testCase, $serverJobName )
+	{
+		$result = true;
+		try {
+			require_once 'Zend/Http/Client.php';
+			$url = LOCALURL_ROOT.INETROOT.'/jobindex.php';
+			$client = new Zend_Http_Client();
+			$client->setUri( $url );
+			$client->setParameterGet( 'createrecurringjob', $serverJobName );
+			$client->setConfig( array( 'timeout' => 5 ) );
+			$response = $client->request( Zend_Http_Client::GET );
+
+			if( !$response->isSuccessful() ) {
+				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$response->getHeadersAsString( true, '<br/>' ) );
+				$result = false;
+			}
+		} catch ( Zend_Http_Client_Exception $e ) {
+			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$e->getMessage() );
+			$result = false;
+		}
+		return $result;
+	}
+
+	/**
+	 * Run the job scheduler by calling the jobindex.php.
+	 *
+	 * @since 10.1.7
+	 * @param TestCase $testCase
+	 * @param int $maxExecTime The max execution time of jobindex.php in seconds.
+	 * @param int $maxJobProcesses The maximum number of jobs that the job processor is allowed to pick up at any one time.
+	 * @return bool
+	 */
+	public function callRunServerJobs( TestCase $testCase, $maxExecTime = 5, $maxJobProcesses = 3 )
+	{
+		$result = true;
+		try {
+			require_once 'Zend/Http/Client.php';
+			$url = LOCALURL_ROOT.INETROOT.'/jobindex.php';
+			$client = new Zend_Http_Client();
+			$client->setUri( $url );
+			$client->setParameterGet( 'maxexectime', $maxExecTime );
+			$client->setParameterGet( 'maxjobprocesses', $maxJobProcesses );
+			$client->setConfig( array( 'timeout' => $maxExecTime + 30 ) ); // before breaking connection, let's give the job processor 30s more to complete
+			$response = $client->request( Zend_Http_Client::GET );
+
+			if( !$response->isSuccessful() ) {
+				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$response->getHeadersAsString( true, '<br/>' ) );
+				$result = false;
+			}
+		} catch ( Zend_Http_Client_Exception $e ) {
+			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$e->getMessage() );
+			$result = false;
+		}
+
+		sleep( 10 ); // To make sure that the server job is really ended.
+		return $result;
 	}
 }

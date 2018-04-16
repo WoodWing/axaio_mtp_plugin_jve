@@ -52,20 +52,6 @@ class BizAutoPurge extends BizServerJobHandler
 	}
 	
 	/**
-	 * It gets the Current date with the time 00:00:00
-	 * A new day starts from time 00:00:00, any deleted objects that has older DateTime
-	 * than the returned DateTime by this function will be selected for purging.
-	 *
-	 * @param int $purgeAfterNoOfDay Number of days older than the current Day
-	 * @return string
-	 */
-	public static function getDateForPurging( $purgeAfterNoOfDay=0 )
-	{
-		$timestampForPurge = mktime(0,0,0,date('n'),date('j')-$purgeAfterNoOfDay,date('Y'));
-		return date('Y-m-d\TH:i:s', $timestampForPurge);
-	}
-	
-	/**
 	 * Calling deleteObjects service to permanently purge selected deletedObjects(normally older than specified days).
 	 * The day is specified in each brand; i.e each deletedobject is bound to their own brand's 'older than' value.
 	 *
@@ -75,6 +61,7 @@ class BizAutoPurge extends BizServerJobHandler
 		// Start Calling DeleteObjects server for purging
 		require_once BASEDIR . '/server/services/wfl/WflDeleteObjectsService.class.php';
 		require_once BASEDIR . '/server/interfaces/services/wfl/WflDeleteObjectsRequest.class.php';
+		require_once BASEDIR .'/server/utils/ServerJobUtils.class.php';
 		
 		// before purging, get the 'daysAfter' per brand
 		// deletedObjs having deleted date older than 'daysAfter' will get purged.
@@ -84,7 +71,7 @@ class BizAutoPurge extends BizServerJobHandler
 		foreach ( $autoPurgePubs as $pubId => $afterDayForPurging ){
 			if( $afterDayForPurging > 0 ){ // only auto purge if it is configured to be more than 1day
 				$params = array();
-				$params[] = new QueryParam('Deleted','<', self::getDateForPurging($afterDayForPurging));
+				$params[] = new QueryParam('Deleted','<', ServerJobUtils::getDateForDeletion( $afterDayForPurging ) );
 				$params[] = new Queryparam('PublicationId','=', $pubId);
 				
 				$service = new WflDeleteObjectsService();
