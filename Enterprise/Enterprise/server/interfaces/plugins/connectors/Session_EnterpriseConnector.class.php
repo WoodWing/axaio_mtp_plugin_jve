@@ -46,6 +46,7 @@ abstract class Session_EnterpriseConnector extends DefaultConnector
 	 * @param string $ticket     Enterprise ticket that was sucessfully reset.
 	 * @param string $userShort  Short name of the user taking the seat.
 	 * @return boolean TRUE to continue normally, or FALSE to raise ticket expiration error.
+	 * @deprecated since 10.4.1
 	 */
 	public function ticketExpirationReset( $ticket, $userShort )
 	{
