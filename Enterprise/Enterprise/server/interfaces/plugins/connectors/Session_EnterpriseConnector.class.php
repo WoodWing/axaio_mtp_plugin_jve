@@ -4,6 +4,7 @@
  * @subpackage 	ServerPlugins
  * @since 		v8.2
  * @copyright	WoodWing Software bv. All Rights Reserved.
+ * @deprecated 10.4.1
  *
  * Gives a server plug-in (connector) the ability to manage seats on its integrated system
  * (at the same time this is done by the core server for the Enterprise system).
@@ -46,7 +47,7 @@ abstract class Session_EnterpriseConnector extends DefaultConnector
 	 * @param string $ticket     Enterprise ticket that was sucessfully reset.
 	 * @param string $userShort  Short name of the user taking the seat.
 	 * @return boolean TRUE to continue normally, or FALSE to raise ticket expiration error.
-	 * @deprecated since 10.4.1
+	 * @deprecated 10.4.1
 	 */
 	public function ticketExpirationReset( $ticket, $userShort )
 	{
