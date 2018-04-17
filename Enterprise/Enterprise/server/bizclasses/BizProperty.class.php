@@ -59,6 +59,10 @@ class BizProperty
 	/**
 	 * List of properties of which their values are determined or calculated by the Enterprise system.
 	 *
+	 * The 'MasterId' can be set/updated by by the SetObjectProperties service. By adding it to this method it is ensured
+	 * that the property cannot be made editable in the Dialog Setup. This prevents updates from end users but third party
+	 * integrations like Journal Designer can access the property, see also EN-90577.
+	 *
 	 * @return array of string  Internal property names (ids) as used in workflow WSDL.
 	 */
 	public static function getSystemPropIds()

@@ -1581,10 +1581,6 @@ class BizObject
 			}
 		}
 
-		// Protect the MasterId from accidentally being updated in context of SetObjectProperties.
-		// This is a readonly field that can only be set through CreateObjects and CopyObjects.
-		unset( $newRow['masterid'] );
-
 		// Save properties to DB:
 		$sth = DBObject::updateObject( $id, null, $newRow, '' );
 		if (!$sth) {
@@ -1804,13 +1800,6 @@ class BizObject
 			foreach( $metaDataValues as $index => $metaDataValue ) {
 				if( $metaDataValue->PropertyValues ) {
 					// Normalize the property values.
-
-					// Protect the MasterId from accidentally being updated in context of MultiSetObjectProperties.
-					// This is a readonly field that can only be set through CreateObjects and CopyObjects.
-					if( $metaDataValue->Property == 'MasterId' ) {
-						unset( $metaDataValues[$index] );
-						continue;
-					}
 
 					$propValues = array();
 					foreach( $metaDataValue->PropertyValues as $propValue ) {
