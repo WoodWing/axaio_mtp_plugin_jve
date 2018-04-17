@@ -221,6 +221,7 @@ class DBInDesignArticlePlacement extends DBBase
 		// - SC v10.3.1 DAILY build 1402 (Adobe CC 2014)
 		// - SC v11.2.1 DAILY build 668 (Adobe CC 2015)
 		// - SC v12.1.0 DAILY build 105 (Adobe CC 2017)
+		// - etc. See also server/serverinfo.php
 
 		$dbDriver = DBDriverFactory::gen();
 		$iapTable = $dbDriver->tablename( self::TABLENAME );
