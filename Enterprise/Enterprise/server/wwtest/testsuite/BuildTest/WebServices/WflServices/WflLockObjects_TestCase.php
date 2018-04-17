@@ -2,7 +2,7 @@
 /**
  * @package   Enterprise
  * @subpackage   TestSuite
- * @since      v10.4
+ * @since      v10.4.1
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */
 
@@ -33,6 +33,12 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 
 	/** @var Attachment[] Layout files copied to the transfer server folder. */
 	private $transferServerFiles = array();
+
+	/** @var BizTransferServer $transferServer */
+	private $transferServer;
+
+	/** @var array $vars Placeholder for the session variables. */
+	private $vars;
 
 	// Step#01: Fill in the TestGoals, TestMethods and Prio...
 	public function getDisplayName()
@@ -124,7 +130,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 	/**
 	 * Lock the object and unlock it afterwards.
 	 *
-	 * In case no error is expectd pass in null, else the expected S-code.
+	 * In case no error is expected for the LockObject call, pass in null, else the expected S-code.
 	 *
 	 * @param string|null $expectedError
 	 */
@@ -212,6 +218,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 			$errorReport = '';
 			$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $this->testLayout->MetaData->BasicMetaData->ID,
 				'Deleting layout for Lock Objects BuildTest.', $errorReport );
+			$this->testLayout = null;
 		}
 		$this->doLogOff();
 		if( $this->transferServerFiles ) {
