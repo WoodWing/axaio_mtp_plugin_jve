@@ -3575,7 +3575,8 @@ class BizObject
 	 *
 	 * The version of objects should be provided. When mismatches, the S1140 error
 	 * is thrown to let caller get latest object and try again.
-	 * If the user has no right to lock one of the objects a S1002 error is thrown.
+	 * If the user has no right to lock one of the objects a S1002 (Access Denied) error is thrown. As the access right
+	 * is checked before the actual locking none of the objects will get locked.
 	 *
 	 * The function return the object ids of successfully locked objects only.
 	 * Caller should enable the reporting feature to catch errors.
@@ -6226,25 +6227,28 @@ class BizObject
 	/**
 	 * Checks the if user is entitled to lock the objects.
 	 *
+	 * If the user is not entitled to one of the objects all oobjects will fail.
+	 *
+	 * @since 10.4.1
 	 * @param string $user
 	 * @param integer[] $objectIds
-	 * @return integer[] $checkedObjects Objects found and checked.
+	 * @return integer[] List of object ids which can be locked by the user.
 	 * @throws BizException
 	 */
-	private static function checkAccessRightOnObjectLock( $user, $objectIds ): array
+	private static function checkAccessRightOnObjectLock( string $user, array $objectIds ): array
 	{
 		$checkedObjects = array();
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 		$dbObjectRows = DBObject::getMultipleObjectDBRows( $objectIds );
 		foreach( $dbObjectRows as $objectId => $dbObjectRow ) {
-			$checkedObjects[] = $objectId;
 			$objectProperties = BizProperty::objRowToPropValues( $dbObjectRow );
 			try {
 				self::checkAccessRights( true, $user, $objectProperties );
 			} catch( BizException $e ) {
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', $objectId );
 			}
+			$checkedObjects[] = $objectId;
 		}
 		return $checkedObjects;
 	}
