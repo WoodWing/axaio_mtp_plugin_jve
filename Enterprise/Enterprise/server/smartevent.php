@@ -47,6 +47,9 @@ define ('EVENT_DELETE_OBJECT_LABELS',                 36);	// since v9.1.0
 define ('EVENT_ADD_OBJECT_LABELS',                    37);	// since v9.1.0
 define ('EVENT_REMOVE_OBJECT_LABELS',                 38);	// since v9.1.0
 define ('EVENT_SET_PROPERTIES_FOR_MULTIPLE_OBJECTS',  39);  // since v9.2.0
+define ('EVENT_CREATE_ISSUE',                         40);  // since v10.4.1
+define ('EVENT_MODIFY_ISSUE',                         41);  // since v10.4.1
+define ('EVENT_DELETE_ISSUE',                         42);  // since v10.4.1
 
 define ('EVENT_DEBUG',                               255);
 
