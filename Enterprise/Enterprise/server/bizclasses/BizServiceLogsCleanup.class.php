@@ -35,7 +35,7 @@ class BizServiceLogsCleanup extends BizServerJobHandler
 	}
 
 	/**
-	 * Server jobs that are older than the configured days will be removed from the job queue.
+	 * Server logs that are older than the configured days will be removed from the smart_log table.
 	 *
 	 * Jobs will be removed only when the criteria in {@link: isServiceLogsCleanupEnabled()} are met.
 	 * Refer to {@link: deleteOldServiceLogsEntries()} for more information.
@@ -91,8 +91,7 @@ class BizServiceLogsCleanup extends BizServerJobHandler
 	/**
 	 * Checks whether the ServiceLogsCleanup job is enabled.
 	 *
-	 * ServiceLogsCleanup job is enabled when LOGLEVEL and
-	 * AUTOCLEAN_SERVICELOGS_DAYS are both set to a value more than 0.
+	 * ServiceLogsCleanup job is enabled when AUTOCLEAN_SERVICELOGS_DAYS is set to a value more than 0.
 	 *
 	 * @since 10.1.7
 	 * @return bool
