@@ -25,7 +25,7 @@
  *              with a placeholder %assetid% which is resolved by the proxy from the object id.
  *
  * Example request:
- *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&service=preview%2F%25assetid%&objectid=123
+ *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&service=preview%2F%25assetid%25&objectid=123
  *
  * The following HTTP codes may be returned:
  * - HTTP 200: The file is found and is streamed back to caller.
@@ -239,10 +239,15 @@ class Elvis_RestProxyIndex
 		}
 		$this->objectMetaData = $metaDatasPerObject[ $objectId ];
 
+		// Resolve the overrule issue the object is assigned to. For normal issues, leave it zero.
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		$overruleIssue = DBIssue::getOverruleIssueIdsFromObjectIds( array( $objectId ) );
+		$issueId = isset( $overruleIssue[$objectId] ) ? $overruleIssue[$objectId] : 0;
+
 		// Check if user has Read access to the object.
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
-		if( !BizAccess::checkRightsForMetaDataAndTargets( BizSession::getShortUserName(), 'R',
-			BizAccess::DONT_THROW_ON_DENIED, $this->objectMetaData, array() ) ) { // TODO: resolve $targets for overrule-issue [PD-25]
+		if( !BizAccess::checkRightsForMetaDataAndIssue( BizSession::getShortUserName(), 'R',
+			BizAccess::DONT_THROW_ON_DENIED, $this->objectMetaData, $issueId ) ) {
 			$message = 'The user has no Read access to the object.';
 			throw new Elvis_RestProxyIndex_HttpException( $message, 403 );
 		}
