@@ -51,6 +51,8 @@ abstract class Session_EnterpriseConnector extends DefaultConnector
 	 */
 	public function ticketExpirationReset( $ticket, $userShort )
 	{
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'This function and this class will be removed in the upcoming versions.' );
 		return true;
 	}
 
