@@ -62,8 +62,8 @@ class authorizationmodule
 
 			if( $uniqueProfiles ) {
 				require_once BASEDIR . '/server/dbclasses/DBFeature.class.php';
-				$featuresByProfiles = DBFeature::getFeaturesByProfiles( array_keys( $uniqueProfiles ) );
-				$rightsByProfiles = $this->addFeatureFlagToProfiles( $featuresByProfiles, $uniqueProfiles );
+				$workflowFeaturesByProfiles = DBFeature::getEnabledWorkflowFeaturesByProfiles( array_keys( $uniqueProfiles ) );
+				$rightsByProfiles = $this->addFeatureFlagToProfiles( $workflowFeaturesByProfiles, $uniqueProfiles );
 				$rightsByUser = $this->addRightsToAuthorizationRows( $authorizationRows, $rightsByProfiles );
 			}
 			$cachedRightsByUsers[$user] = $rightsByUser;
