@@ -33,6 +33,7 @@ class BizServerJobConfig
 		'EnterpriseEvent' => true,
 		'AutoCleanServerJobs' => true,
 		'AutoCleanServiceLogs' => true,
+		'AutoCleanWebEditFolder' => true,
 	);
 
 	public function __construct()
@@ -346,6 +347,11 @@ class BizServerJobConfig
 				case 'AutoCleanServiceLogs':
 					require_once BASEDIR.'/server/bizclasses/BizServiceLogsCleanup.class.php';
 					$bizServiceLogsCleanup = new BizServiceLogsCleanup();
+					$bizServiceLogsCleanup->getJobConfig( $jobConfig );
+					break;
+				case 'AutoCleanWebEditFolder':
+					require_once BASEDIR.'/server/bizclasses/BizWebeditDirCleanup.class.php';
+					$bizServiceLogsCleanup = new BizWebeditDirCleanup();
 					$bizServiceLogsCleanup->getJobConfig( $jobConfig );
 					break;
 				default:
