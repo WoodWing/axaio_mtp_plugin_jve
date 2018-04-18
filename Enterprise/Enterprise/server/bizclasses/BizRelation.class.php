@@ -193,6 +193,7 @@ class BizRelation
 							$childId,
 							null,// null =  Object Target is not interesting here.
 							array( $relation ));
+						require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 						$dossierTargets = BizTarget::getTargets( $user, $parentId );
 						self::validateDossierContainsForms( $parentId,  $dossierTargets, array( $relation ));
 					} else {
@@ -964,6 +965,7 @@ class BizRelation
 		require_once BASEDIR.'/server/smartevent.php';
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 
 		// $updateParentJob = new WW_BizClasses_ObjectJob();  // v8.0: Uncomment when serverJob 'UpdateParentModifierAndModified' is supported again.
 		$relationsUpdated = array();
@@ -1056,7 +1058,6 @@ class BizRelation
 				if( self::canRelationHaveTargets( $parentRow['type'], $relation->Type )) {
 					require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 					require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-					require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 					// don't do anything with targets if Targets xsi:nil=true
 					if( !is_null( $relation->Targets ) ) {
 						// Find for the corresponding Target
