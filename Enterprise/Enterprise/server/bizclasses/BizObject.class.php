@@ -5015,6 +5015,7 @@ class BizObject
 					$srcRelation['pagerange'], $srcRelation['rating'], $srcRelation['parenttype'] );
 				if ( is_null( $objRelId ) ) { throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() ); }
 				if ( $trgtParentTargets ) {
+					require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 					BizTarget::createObjectRelationTargets( $user, $objRelId, $trgtParentTargets );
 				}
 				if ( !DBPlacements::copyPlacements( $srcRelation['parent'], $srcRelation['child'], $newCopiedParentId ) ) {
@@ -5272,6 +5273,7 @@ class BizObject
 					$newRelTarget->PublishedVersion = null;
 					$newRelTarget->ExternalId = null;
 				}
+				require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 				BizTarget::createObjectRelationTargets( $user, $objRelId, $newRelTargets );
 			}
 		}
@@ -5320,7 +5322,7 @@ class BizObject
 	private static function getObjectTargetsModified( $user, $srcid, $targets, &$objTargetsRemoved, &$objTargetsAdded )
 	{
 		// >>> BZ#20917 Determine which object targets are removed and which are added
-
+		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		$orgObjTargets = BizTarget::getTargets( $user, $srcid );
 		foreach( $orgObjTargets as $orgObjTarget ) {
 			$targetFound = false;
