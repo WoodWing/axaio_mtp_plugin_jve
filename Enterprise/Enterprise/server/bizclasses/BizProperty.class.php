@@ -324,10 +324,8 @@ class BizProperty
 				($prop == 'Issue') || isset($targetProps[$prop]) || // BZ#16792
 				($prop == 'Dossier') ) { // BZ#17831
 				// nothing to do; use default
-			} elseif( $action == 'SendTo' ) { //BZ#8836 Static props except for State are not editable when $action is SendTo
-				if( $prop != 'State' ) {
-					$propUsage->Editable = false;
-				}
+			} elseif( $action == 'SendTo' ) {
+				$propUsage = self::handleEditableAndMandatorySettingsForActionSendTo( $prop, $propUsage );
 			} else {
 				$propUsage->Mandatory = true;
 			}
@@ -2935,6 +2933,8 @@ class BizProperty
 
 	/**
 	 * Adjust the Editable and Mandatory settings in Usage for properties used for action 'SendTo'.
+	 *
+	 * Also refer to BZ#8836 for more information.
 	 *
 	 * @since 10.x.x
 	 * @param string $staticProp
