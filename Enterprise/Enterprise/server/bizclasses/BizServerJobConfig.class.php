@@ -397,4 +397,36 @@ class BizServerJobConfig
 		
 		return $jobConfigs;
 	}
+
+	/**
+	 * Checks if a server job is registered and has a user assigned to it.
+	 *
+	 * @since 10.4.1
+	 * @param string $jobName
+	 * @return bool
+	 */
+	public function isJobRegisteredAndAssigned( string $jobName ): bool
+	{
+		$registered = false;
+		$userAssigned = false;
+		$result = true;
+		$dbConfigs = $this->listJobConfigs();
+		if( $dbConfigs ) foreach( $dbConfigs as $jobConfigs ) {
+			foreach ( $jobConfigs as $name => $jobConfig ) {
+				if( $name == $jobName ) {
+					$registered = true;
+					if( $jobConfig->UserId ) {
+						$userAssigned = true;
+					}
+					break 2;
+				}
+			}
+		}
+
+		if( !$registered || !$userAssigned ) {
+			$result = false;
+		}
+
+		return $result;
+	}
 }
