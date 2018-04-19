@@ -104,29 +104,14 @@ class BizServiceLogsCleanup extends BizServerJobHandler
 				break;
 			}
 
-			require_once BASEDIR . '/server/bizclasses/BizServerJobConfig.class.php';
-			$registered = false; // Whether it is registered in the admin page.
-			$userAssigned = false;
+			require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
 			$bizJobConfig = new BizServerJobConfig();
-			$dbConfigs  = $bizJobConfig->listJobConfigs();
-			if( $dbConfigs ) foreach( $dbConfigs as $jobConfigs ) {
-				foreach ( $jobConfigs as $name => $jobConfig ) {
-					if( $name == 'AutoCleanServiceLogs' ) {
-						$registered = true;
-						if( $jobConfig->UserId ) {
-							$userAssigned = true;
-						}
-						break 2; // Quit two foreach loop.
-					}
-				}
-			}
-
-			if( !$registered || !$userAssigned ) {
+			if( !$bizJobConfig->isJobRegisteredAndAssigned( 'AutoCleanServiceLogs' ) ) {
 				break;
 			}
 
 			$cleanupJobEnabled = true;
-		} while ( false );
+		} while( false );
 
 		return $cleanupJobEnabled;
 	}
