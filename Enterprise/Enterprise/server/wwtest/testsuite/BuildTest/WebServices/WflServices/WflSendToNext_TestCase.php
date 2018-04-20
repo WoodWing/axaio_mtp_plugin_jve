@@ -262,8 +262,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 		require_once BASEDIR . '/server/services/adm/AdmCreateUserGroupsService.class.php';
 		$name = 'Non-admin-StN '.date("Y-m-d H:i:s");
 		$descr = 'Group to test SendToNext.';
-		$admin = '';
-		$routing = 'on';
+		$admin = false;
+		$routing = true;
 		$groupObjs = array( new AdmUserGroup( null, $name, $descr, $admin, $routing, null) );
 		$service = new AdmCreateUserGroupsService();
 		$request = new AdmCreateUserGroupsRequest($this->ticket, array(), $groupObjs);
