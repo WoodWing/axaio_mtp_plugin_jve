@@ -162,6 +162,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectVariants_TestCase 
 		$this->assertEquals( $masterId, $article->MetaData->BasicMetaData->MasterId );
 		$article = $this->getArticle( $articleId, false );
 		$this->assertEquals( $masterId, $article->MetaData->BasicMetaData->MasterId );
+		$this->unlockArticle( $article->MetaData->BasicMetaData->ID );
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - SERVICE CALLS - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
