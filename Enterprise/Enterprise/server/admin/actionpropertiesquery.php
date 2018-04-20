@@ -496,6 +496,7 @@ class ActionPropertiesQueryAdminApp
 	 */
 	public function buildCurrentActionProperties( $txt )
 	{
+		require_once BASEDIR .'/server/bizclasses/BizQueryBase.class.php';
 		$staticProps   = BizProperty::getStaticPropIds();
 		$dynamicProps  = BizProperty::getDynamicPropIds();
 		$xmpProps      = BizProperty::getXmpPropIds();
@@ -527,16 +528,12 @@ class ActionPropertiesQueryAdminApp
 			case 'QueryOutPlanning':
 				$allProps = array_merge($staticProps, $dynamicProps, $xmpProps, $readonlyProps);
 				$limitPub = false;
-				$already[] = 'ID';
-				$already[] = 'Type';
-				$already[] = 'Name';
+				$already = array_merge( $already, BizQueryBase::getMandatoryQueryResultColumnFields() );
 				$already[] = 'Issue'; // BZ#27830 In the query result only 'Issues' are of interest.
 				break;
 			default:
 				$allProps = array_merge($dynamicProps, $xmpProps);
-				$already[] = 'ID';
-				$already[] = 'Type';
-				$already[] = 'Name';
+				$already = array_merge( $already, BizQueryBase::getMandatoryQueryResultColumnFields() );
 				break;
 		}
 
@@ -729,6 +726,31 @@ class ActionPropertiesQueryAdminApp
 	 */
 	private function isConfigurableField( $prop )
 	{
-		return !( $this->action == 'Query' && $prop == 'Name' );
+		require_once BASEDIR .'/server/bizclasses/BizQueryBase.class.php';
+		$editable = true;
+		switch( $this->action ) {
+			case 'Query':
+				switch( $prop ) {
+					case 'Name':
+						$editable = false;
+						break;
+				}
+				break;
+			case 'QueryOut':
+			case 'QueryOutInDesign':
+			case 'QueryOutInCopy':
+			case 'QueryOutContentStation':
+			case 'QueryOutPlanning':
+				$nonEditableFields = array_merge( BizQueryBase::getMandatoryQueryResultColumnFields(), array( 'Issue' ) );
+				if( in_array( $prop, $nonEditableFields )) {
+					$editable = false;
+				}
+				break;
+			default:
+				$nonEditableFields = BizQueryBase::getMandatoryQueryResultColumnFields();
+					$editable = false;
+				break;
+		}
+		return $editable;
 	}
 }

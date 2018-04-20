@@ -132,7 +132,7 @@ class BizQueryBase
 		$dbDriver = DBDriverFactory::gen();
 
 		// These are always needed (clients are depending on it!)
-		$needs = array( 'ID', 'Type', 'Name' );
+		$needs = self::getMandatoryQueryResultColumnFields();
 		$orgNeedsCount = count( $needs );
 		$action = self::getQueryAction( $mode );
 
@@ -159,6 +159,17 @@ class BizQueryBase
 			}
 		}
 		return $needs;
+	}
+
+	/**
+	 * Returns a list of mandatory properties for query column results.
+	 *
+	 * @since 10.x.x
+	 * @return string[]
+	 */
+	public static function getMandatoryQueryResultColumnFields()
+	{
+		return array( 'ID', 'Type', 'Name' );
 	}
 
 	public static function queryorder2SQL($queryorder, $nq_orderby)
@@ -307,7 +318,7 @@ class BizQueryBase
 			}
 			$properties[] = new Property( $col, $displayName, $propType );
 		}
-		return $properties;		
+		return $properties;
 	}
 
     static protected function getColumns( $rows )          { return self::doGetColumns( $rows ); }
@@ -1003,44 +1014,6 @@ class BizQueryBase
 		}
 
 		return $params;
-	}
-
-	static protected function getPropNames($mode, $minimalProps, $requestProps, $areas)
-	{
-		// If $requestProps set, this is the complete list of properties, so if no empty return this
-		if( !empty( $requestProps ) ) {
-			return $requestProps;
-		}
-
-		//All these props require each other, let us make sure they are allways both selected when the other is selected.
-		$reqprops = array();
-		$reqprops['Publication'] = 'PublicationId';
-		$reqprops['PublicationId'] = 'Publication';
-		$reqprops['Category'] 	 = 'CategoryId';
-		$reqprops['CategoryId']  = 'Category';
-		$reqprops['Section'] 	 = 'SectionId';
-		$reqprops['SectionId'] 	 = 'Section';
-		$reqprops['Issue'] 	 	 = 'IssueId';
-		$reqprops['IssueId'] 	 = 'Issue';
-		$reqprops['State']	 	 = 'StateId';
-		$reqprops['StateId'] 	 = 'State';
-
-		$propnames = self::getQueryProperties($mode, $areas);
-
-		$reqpropnames = array();
-		foreach ($propnames as $propname) {
-			$reqpropnames[] = $propname;
-			if (isset($reqprops[$propname])) {
-				$reqpropnames[] = $reqprops[$propname];
-			}
-		}
-
-		// Merge required props into configured list:
-		if( !empty($minimalProps) ) {
-			$reqpropnames = array_merge( $reqpropnames, $minimalProps );
-		}
-
-		return array_unique($reqpropnames);
 	}
 
 	/**
