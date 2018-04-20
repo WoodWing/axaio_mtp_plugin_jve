@@ -199,9 +199,12 @@ class ActionPropertiesAdminApp
 	private function updateActionProperties( $numberOfRecords )
 	{
 		for( $i=0; $i < $numberOfRecords; $i++ ) {
+			$prop = $_REQUEST["prop$i"];            // Name of action property. Always set.
+			if( !$this->isConfigurableField( $prop )) {
+				continue; // Don't bother to update fields that are not configurable by the end-user.
+			}
 			$id = intval($_REQUEST["id$i"]);        // Record id. Used in POST and GET requests.
 			$order = intval($_REQUEST["order$i"]);  // Sorting order field. Zero when not filled.
-			$prop = $_REQUEST["prop$i"];            // Name of action property. Always set.
 			$edit = isset($_REQUEST["edit$i"]) ? $_REQUEST["edit$i"] : '';
 			$mandatory = isset($_REQUEST["mandatory$i"]) ? $_REQUEST["mandatory$i"] : '';
 			$restricted = isset($_REQUEST["restricted$i"]) ? $_REQUEST["restricted$i"] : '';
