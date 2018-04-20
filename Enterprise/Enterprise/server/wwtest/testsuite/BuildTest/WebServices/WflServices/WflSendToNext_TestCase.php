@@ -282,6 +282,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 		$service = new AdmModifyUserGroupsService();
 		$request = new AdmModifyUserGroupsRequest();
 		$request->Ticket = $this->ticket;
+		$request->RequestModes = array();
 		$this->userGroup->Admin = true;
 		$request->UserGroups = array( $this->userGroup );
 		$response = $this->utils->callService( $this, $request, 'Modify User Group');
