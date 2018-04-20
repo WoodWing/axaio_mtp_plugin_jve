@@ -89,21 +89,14 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 
 		try {
 			$this->setupTestData();
-
-			// Scenario 1
-			$this->testRouteObjectsToUser1();
-
-			// Scenario 2
-			$this->testRouteObjectsToUser2();
-
-			// Scenario 3
-			$this->testRouteObjectsHavingPersonalState();
-		} 
+			$this->runTestScenarios();
+			$this->modifyUserGroup();
+			$this->runTestScenarios();
+		}
 		catch( BizException $e ) {
 		}
 
 		$this->tearDownTestData();
-
 		$this->setSessionVariables( $this->vars );
 	}
 
@@ -121,6 +114,19 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 		$this->setupAdmIssues();
 		$this->setupAdmEditions();
 		$this->setupAdmAuthorization();
+	}
+
+	/**
+	 * Run the actual scenarios.
+	 */
+	private function runTestScenarios()
+	{
+		// Scenario 1
+		$this->testRouteObjectsToUser1();
+		// Scenario 2
+		$this->testRouteObjectsToUser2();
+		// Scenario 3
+		$this->testRouteObjectsHavingPersonalState();
 	}
 
 	/**
@@ -247,39 +253,54 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	}
 
 	/**
-	 * Finds user group for testing.
+	 * Creates user group for testing.
 	 *
 	 * @throws BizException on failure
 	 */
 	private function setupAdmGroups()
 	{
-		$userGroup = $this->vars['BuildTest_WebServices_WflServices']['userGroup'];
+		require_once BASEDIR . '/server/services/adm/AdmCreateUserGroupsService.class.php';
+		$name = 'Non-admin-StN '.date("Y-m-d H:i:s");
+		$descr = 'Group to test SendToNext.';
+		$admin = '';
+		$routing = 'on';
+		$groupObjs = array( new AdmUserGroup( null, $name, $descr, $admin, $routing, null) );
+		$service = new AdmCreateUserGroupsService();
+		$request = new AdmCreateUserGroupsRequest($this->ticket, array(), $groupObjs);
+		$response = $this->utils->callService( $this, $request, 'Create User Group');
+		$this->userGroup = $response->UserGroups[0];
 
-		// Get our user group
-		require_once BASEDIR.'/server/services/adm/AdmGetUserGroupsService.class.php';
-		$request = new AdmGetUserGroupsRequest();
-		$request->Ticket = $this->ticket;
-		$request->RequestModes = array();
-		$stepInfo = 'Getting test suite user group';
-		$response = $this->utils->callService( $this, $request, $stepInfo, null, null, true );
-
-		$this->userGroup = null;
-		foreach( $response->UserGroups as $userGroupObj ) {
-			if( $userGroupObj->Name == $userGroup->Name ) {
-				$this->userGroup = $userGroupObj;
-				break;
-			}
-		}
-		$this->assertNotNull( $this->userGroup,
-				'Could not find the test user group "'.$userGroup->Name.'". '.
-				'Please check the TESTSUITE setting in configserver.php and the user groups.' );
+		$this->assertNotNull( $this->userGroup, 'Could not create the test user group '.$name.'.' );
 	}
-	
+
 	/**
-	 * Forgets the user group that was used for testing.
+	 * Make the group an admin group.
+	 */
+	private function modifyUserGroup()
+	{
+		require_once BASEDIR . '/server/services/adm/AdmModifyUserGroupsService.class.php';
+		$service = new AdmModifyUserGroupsService();
+		$request = new AdmModifyUserGroupsRequest();
+		$request->Ticket = $this->ticket;
+		$this->userGroup->Admin = true;
+		$request->UserGroups = array( $this->userGroup );
+		$response = $this->utils->callService( $this, $request, 'Modify User Group');
+		$this->assertNotNull( $response->UserGroups[0], 'Could not modfy the test user group '.$this->userGroup->Name.'.' );
+	}
+
+
+	/**
+	 * Delete the user group that was created for testing.
+	 *
 	 */
 	private function cleanupAdmGroups()
 	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteUserGroupsService.class.php';
+		$service = new AdmDeleteUserGroupsService();
+		$request = new AdmDeleteUserGroupsRequest();
+		$request->Ticket = $this->ticket;
+		$request->GroupIds = array( $this->userGroup->Id );
+		$response = $this->utils->callService( $this, $request, 'Delete User Group');
 		$this->userGroup = null;
 	}
 

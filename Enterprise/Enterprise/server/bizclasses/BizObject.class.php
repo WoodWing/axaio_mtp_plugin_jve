@@ -1845,7 +1845,7 @@ class BizObject
 			// Retrieve the statuses that are defined for this publication / overrule issue.
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 			$statuses = array();
-			$gotStatuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType );
+			$gotStatuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType, null, 'wfl' );
 			// $gotStatuses has index [0...N-1] but we need $statuses with status ids as index.
 			if( $gotStatuses ) foreach( $gotStatuses as $status ) {
 				$statuses[$status->Id] = $status;
