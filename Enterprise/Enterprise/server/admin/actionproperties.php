@@ -779,20 +779,8 @@ class ActionPropertiesAdminApp
 	 */
 	private function isConfigurableField( $prop )
 	{
-		$editable = true;
-		switch( $prop ) {
-			case 'Name':
-			case 'Publication':
-			case 'PubChannels':
-			case 'Targets':
-			case 'Issues':
-			case 'Issue':
-			case 'Editions':
-			case 'Category':
-			case 'State':
-				$editable = false;
-				break;
-		}
-		return $editable;
+		require_once BASEDIR .'/server/bizclasses/BizProperty.class.php';
+		$nonConfigurableFields = BizProperty::getStaticPropIds();
+		return !in_array( $prop, $nonConfigurableFields );
 	}
 }
