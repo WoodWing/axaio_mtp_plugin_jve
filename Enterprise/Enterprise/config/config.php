@@ -213,9 +213,9 @@ if( !defined('SERVERURL_SCRIPT') ) {
 		define ('SERVERURL_SCRIPT', SERVERURL_ROOT.$_SERVER['REQUEST_URI'] );
 	} else {
 		if(isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING']>' ') {
-			define ('SERVERURL_SCRIPT', SERVERURL_ROOT.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'] );
+			define ('SERVERURL_SCRIPT', SERVERURL_ROOT.INETROOT.'/config/config.php'.'?'.$_SERVER['QUERY_STRING'] );
 		} else {
-			define ('SERVERURL_SCRIPT',SERVERURL_ROOT.$_SERVER['PHP_SELF'] );
+			define ('SERVERURL_SCRIPT',SERVERURL_ROOT.INETROOT.'/config/config.php' );
 		}
 	}
 }
