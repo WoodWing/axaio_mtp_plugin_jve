@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 3.1.1 - 2017-11-24
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#247](https://github.com/zendframework/zend-mvc/pull/247) fixes bug in
+  controller plugin Forward, introduced in 2.1.0, where problem listeners were
+  not detached for forwarded controller dispatch
+
 ## 3.1.0 - 2017-05-01
 
 ### Added

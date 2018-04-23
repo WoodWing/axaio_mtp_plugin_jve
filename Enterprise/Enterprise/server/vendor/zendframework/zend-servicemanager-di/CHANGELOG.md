@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 1.1.1 - 2017-09-28
+
+### Added
+
+- [#12](https://github.com/zendframework/zend-servicemanager-di/pull/12) adds
+  support for PHP 7.1 and 7.2.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#3](https://github.com/zendframework/zend-servicemanager-di/pull/3) fixes a
+  number of import statements, removing several unused statements, adding
+  missing statements, and fixing those refering to container-interop interfaces.
+
 ## 1.1.0 - 2016-06-13
 
 ### Added
