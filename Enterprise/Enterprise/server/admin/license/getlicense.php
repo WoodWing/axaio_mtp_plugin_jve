@@ -43,7 +43,7 @@
 		}
 	}
 
-	$localURL = SERVERURL_ROOT.$_SERVER['PHP_SELF'];
+    $localURL = SERVERURL_ROOT.INETROOT.'/server/admin/license/getlicense.php';
 	$clientname = $lic->getServerNameOrAddr();
 	
 	$allFields = Array( 'installationcode', 
