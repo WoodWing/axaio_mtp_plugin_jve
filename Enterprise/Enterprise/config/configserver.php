@@ -469,6 +469,7 @@ if( !defined('INDESIGNSERV_JOBQUEUES') ) {
 //       Mac OS:   'www user'
 //       Linux:    'nobody'
 //       Windows:  'IUSR_<machine>'
+//    To automatic clean-up the directory please have a look at 'AUTOCLEAN_WEBEDITDIR_DAYS'.
 //
 if( !defined('WEBEDITDIR') ) {
 	define( 'WEBEDITDIR', WOODWINGSYSTEMDIRECTORY.'/WebEdit/' );
