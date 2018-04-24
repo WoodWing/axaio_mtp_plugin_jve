@@ -5018,6 +5018,7 @@ class BizObject
 					require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 					BizTarget::createObjectRelationTargets( $user, $objRelId, $trgtParentTargets );
 				}
+				require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 				if ( !DBPlacements::copyPlacements( $srcRelation['parent'], $srcRelation['child'], $newCopiedParentId ) ) {
 					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 				}
