@@ -90,7 +90,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 		try {
 			$this->setupTestData();
 			$this->runTestScenarios();
-			$this->modifyUserGroup();
+			$this->modifyAdmGroup();
 			$this->runTestScenarios();
 		}
 		catch( BizException $e ) {
@@ -253,20 +253,20 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	}
 
 	/**
-	 * Creates user group for testing.
+	 * Creates non-admin user group for testing.
 	 *
 	 * @throws BizException on failure
 	 */
 	private function setupAdmGroups()
 	{
 		require_once BASEDIR . '/server/services/adm/AdmCreateUserGroupsService.class.php';
-		$name = 'Non-admin-StN '.date("Y-m-d H:i:s");
-		$descr = 'Group to test SendToNext.';
-		$admin = false;
-		$routing = true;
-		$groupObjs = array( new AdmUserGroup( null, $name, $descr, $admin, $routing, null) );
+		$groupObj = new AdmUserGroup();
+		$groupObj->Name = 'Group-StN '.date("Y-m-d H:i:s");
+		$groupObj->Description = 'Group to test SendToNext.';
+		$groupObj->Admin = false;
+		$groupObj->Routing = true;
 		$service = new AdmCreateUserGroupsService();
-		$request = new AdmCreateUserGroupsRequest($this->ticket, array(), $groupObjs);
+		$request = new AdmCreateUserGroupsRequest($this->ticket, array(), array( $groupObj ) );
 		$response = $this->utils->callService( $this, $request, 'Create User Group');
 		$this->userGroup = $response->UserGroups[0];
 
@@ -274,9 +274,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	}
 
 	/**
-	 * Make the group an admin group.
+	 * Change the test group from non-admin to amin group.
 	 */
-	private function modifyUserGroup()
+	private function modifyAdmGroup()
 	{
 		require_once BASEDIR . '/server/services/adm/AdmModifyUserGroupsService.class.php';
 		$service = new AdmModifyUserGroupsService();
