@@ -147,7 +147,7 @@ class BizWebeditDirCleanup extends BizServerJobHandler
 	{
 		$status = stat( $filePath );
 		$time = time();
-		if( $status['ctime'] < ( time() - ( AUTOCLEAN_WEBEDITDIR_DAYS * 24 * 3600 ) ) ) {
+		if( $status['atime'] < ( time() - ( AUTOCLEAN_WEBEDITDIR_DAYS * 24 * 3600 ) ) ) {
 			$this->deleteFile( $filePath );
 		}
 	}
