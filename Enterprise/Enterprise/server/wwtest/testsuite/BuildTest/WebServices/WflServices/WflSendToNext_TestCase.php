@@ -266,7 +266,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 		$groupObj->Admin = false;
 		$groupObj->Routing = true;
 		$service = new AdmCreateUserGroupsService();
-		$request = new AdmCreateUserGroupsRequest($this->ticket, array(), array( $groupObj ) );
+		$request = new AdmCreateUserGroupsRequest();
+		$request->Ticket = $this->ticket;
+		$request->RequestModes = array();
+		$request->UserGroups = array( $groupObj );
 		$response = $this->utils->callService( $this, $request, 'Create User Group');
 		$this->userGroup = $response->UserGroups[0];
 
