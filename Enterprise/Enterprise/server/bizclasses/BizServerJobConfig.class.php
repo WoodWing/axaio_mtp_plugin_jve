@@ -351,8 +351,8 @@ class BizServerJobConfig
 					break;
 				case 'AutoCleanWebEditFolder':
 					require_once BASEDIR.'/server/bizclasses/BizWebeditDirCleanup.class.php';
-					$bizServiceLogsCleanup = new BizWebeditDirCleanup();
-					$bizServiceLogsCleanup->getJobConfig( $jobConfig );
+					$bizWebEditDirCleanup = new BizWebeditDirCleanup();
+					$bizWebEditDirCleanup->getJobConfig( $jobConfig );
 					break;
 				default:
 					throw new BizException( 'ERR_ARGUMENT', 'Server', 
