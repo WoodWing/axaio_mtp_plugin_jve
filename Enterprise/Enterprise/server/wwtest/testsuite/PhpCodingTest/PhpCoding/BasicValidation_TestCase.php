@@ -432,7 +432,7 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 	 * The php files used by the ionCube wizard as loaded before any other files. These files can be seen as third-party
 	 * files and are excluded from the validation.
 	 *
-	 * @param $file
+	 * @param string $file
 	 * @return bool
 	 */
 	private function isIoncubeWizardFile( $file )
