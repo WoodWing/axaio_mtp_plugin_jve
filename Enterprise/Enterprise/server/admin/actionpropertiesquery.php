@@ -165,7 +165,7 @@ class ActionPropertiesQueryAdminApp
 	private function composeAndInsertActionsProperty()
 	{
 		$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
-		$order = 0;
+		$order = 5;
 		$listOfValues = array();
 		if( $usages ) foreach( $usages as $usage ) {
 			$values = array();
