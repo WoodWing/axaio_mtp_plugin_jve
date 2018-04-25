@@ -150,7 +150,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates categories for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmCategories()
 	{
@@ -180,7 +179,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates statuses for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmStates()
 	{
@@ -216,7 +214,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates users for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmUsers()
 	{
@@ -255,7 +252,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates non-admin user group for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmGroups()
 	{
@@ -273,7 +269,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 		$response = $this->utils->callService( $this, $request, 'Create User Group');
 		$this->userGroup = $response->UserGroups[0];
 
-		$this->assertNotNull( $this->userGroup, 'Could not create the test user group '.$name.'.' );
+		$this->assertNotNull( $this->userGroup, 'Could not create the test user group '.$groupObj->Name.'.' );
 	}
 
 	/**
@@ -311,7 +307,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Finds a brand for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmPublication()
 	{
@@ -330,7 +325,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	 * Creates routing profiles for testing.
 	 *
 	 * @param string $scenario
-	 * @throws BizException on failure
 	 */
 	private function setupAdmRouting( $scenario )
 	{
@@ -414,7 +408,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	 * @param Category $category
 	 * @param string $routeTo
 	 * @return Object
-	 * @throws BizException on failure
 	 */
 	private function createDossier( $dossierName, $issue, $editions, $admState, $category, $routeTo )
 	{
@@ -490,7 +483,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Tests the SendToNext service.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function testRouteObjectsToUser1()
 	{
@@ -539,7 +531,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Tests the SendToNext service.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function testRouteObjectsToUser2()
 	{
@@ -588,7 +579,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Tests the SendToNext service.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function testRouteObjectsHavingPersonalState()
 	{
@@ -648,7 +638,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates authorizations for each combination of statuses and categories.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmAuthorization()
 	{
@@ -681,7 +670,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates an issue for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmIssues()
 	{
@@ -726,7 +714,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates four editions for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmEditions()
 	{
@@ -758,7 +745,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates publication channel for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmPubChannel()
 	{
