@@ -56,7 +56,6 @@ class ActionPropertiesQueryAdminApp
 	private $publ = null;
 	private $objType = null;
 	private $action = null;
-//	private $onlyQuery = null;
 	private $onlyAllObjectType = null;
 	private $mode = null;
 	private $sAll = null;
@@ -114,9 +113,6 @@ class ActionPropertiesQueryAdminApp
 		$edit = isset($_REQUEST['edit']) ? $_REQUEST['edit'] : '';
 		$mandatory = isset($_REQUEST['mandatory']) ? $_REQUEST['mandatory'] : '';
 		$restricted = isset($_REQUEST['restricted']) ? $_REQUEST['restricted'] : '';
-		// $refreshonchange = isset($_REQUEST['refreshonchange']) ? $_REQUEST['refreshonchange'] : ''; // EN-2164, Marked for future use
-		$multipleObjects = isset($_REQUEST['multipleobjects']) ? $_REQUEST['multipleobjects'] : '';
-		//echo 'DEBUG: order=['. $order .'] prop=['. $prop .'] edit=['. $edit .'] mandatory=['. $mandatory .'] restricted=['. $restricted .']</br>';
 		// Validate data retrieved from form (XSS attacks)
 		if( in_array($prop, $this->sysProps) ) {
 			$edit = '';
@@ -124,13 +120,9 @@ class ActionPropertiesQueryAdminApp
 		$edit = $edit ? 'on' : '';
 		$mandatory = $mandatory ? 'on' : '';
 		$restricted = $restricted ? 'on' : '';
-		// $refreshonchange = $refreshonchange ? 'on' : ''; // EN-2164, Marked for future use
-		$multipleObjects = $multipleObjects ? 'on' : '';
 		if( $prop ) {
 			$values = array('publication' => $this->publ, 'action' => $this->action, 'type' => $this->objType, 'orderid' => $order, 'property' => $prop,
-				'edit' => $edit, 'mandatory' => $mandatory, 'restricted' => $restricted,
-				// 'refreshonchange' => $refreshonchange, // EN-2164, Marked for future use
-				'multipleobjects' => $multipleObjects );
+				'edit' => $edit, 'mandatory' => $mandatory, 'restricted' => $restricted );
 			$this->insertActionProperty( $values );
 		}
 	}
@@ -201,8 +193,6 @@ class ActionPropertiesQueryAdminApp
 			$edit = isset($_REQUEST["edit$i"]) ? $_REQUEST["edit$i"] : '';
 			$mandatory = isset($_REQUEST["mandatory$i"]) ? $_REQUEST["mandatory$i"] : '';
 			$restricted = isset($_REQUEST["restricted$i"]) ? $_REQUEST["restricted$i"] : '';
-			// $refreshonchange = isset($_REQUEST["refreshonchange$i"]) ? $_REQUEST["refreshonchange$i"] : ''; // EN-2164, Marked for future use
-			$multipleObjects = isset($_REQUEST["multipleobjects$i"]) ? $_REQUEST["multipleobjects$i"] : '';
 			// Validate data retrieved from form (XSS attacks)
 			if( in_array($prop, $this->sysProps) ) {
 				$edit = '';
@@ -210,19 +200,14 @@ class ActionPropertiesQueryAdminApp
 			$edit = $edit ? 'on' : '';
 			$mandatory = $mandatory ? 'on' : '';
 			$restricted = $restricted ? 'on' : '';
-			// $refreshonchange = $refreshonchange ? 'on' : ''; // EN-2164, Marked for future use
-			$multipleObjects = $multipleObjects ? 'on' : '';
-			//echo 'DEBUG: order=['. $order .'] prop=['. $prop .'] edit=['. $edit .'] mandatory=['. $mandatory .'] restricted=['. $restricted .']</br>';
 			$values = array('publication' => $this->publ, 'orderid' => $order, 'property' => $prop, 'edit' => $edit,
-				'mandatory' => $mandatory,	'restricted' => $restricted,
-				// 'refreshonchange' => $refreshonchange, // EN-2164, Marked for future use
-				'multipleobjects' => $multipleObjects );
+				'mandatory' => $mandatory,	'restricted' => $restricted );
 			DBActionproperty::updateActionproperty( $id, $values );
 		}
 	}
 
 	/**
-	 * Delete action propert(ies) selected on the Form.
+	 * Delete action property(ies) selected on the Form.
 	 *
 	 * @param int $numberOfRecords
 	 */
@@ -295,14 +280,13 @@ class ActionPropertiesQueryAdminApp
 	 * If exact brand is found from 1st left join query result, only get the custom property display name from the 2nd left join.
 	 * If exact brand is not found, then continue to get custom displayname from the 2nd left join query result.
 	 *
-	 * @param boolean $showMultiObj When True to show multiple objects|False not to show
 	 * @param array $locals Array of property infos
 	 * @param array $rows Array of action properties database records
 	 * @param string $detailTxt HTML strings
 	 * @param int $numberOfRecords [In/Out] Total number of action properties listed.
 	 * @return string $detailTxt HTML strings of the table list
 	 */
-	private function listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt, &$numberOfRecords )
+	private function listCurrentActionProperties( $locals, $rows, $detailTxt, &$numberOfRecords )
 	{
 		$i = 0;
 		$color = array (" bgcolor='#eeeeee'", '');
@@ -357,36 +341,18 @@ class ActionPropertiesQueryAdminApp
 	 * If exact brand is found from 1st left join query result, only get the custom property display name from the 2nd left join.
 	 * If exact brand is not found, then continue to get custom displayname from the 2nd left join query result.
 	 *
-	 * @param boolean $showMultiObj When True to show multiple objects|False not to show
 	 * @param array $props Array of properties
 	 * @param array $rows Array of action properties database records
 	 * @param string $detailTxt HTML strings
 	 * @return string $detailTxt HTML strings of the table list
 	 */
-	private function listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt )
+	private function listNewAndCurrentActionProperties( $props, $rows, $detailTxt )
 	{
-		// 1 row to enter new record
-//		if( $this->onlyQuery ) {
-			$detailTxt .= '<tr>';
-			$detailTxt .= '<td>'.inputvar('order', '', 'small').'</td>';
-			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
-			$detailTxt .= '</tr>';
-			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
-//		} else {
-//			$detailTxt .= '<tr><td></td><td>'.inputvar('order', '', 'small').'</td>';
-//			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
-//			$detailTxt .= '<td align="center">'.inputvar('edit','', 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
-//			$detailTxt .= '<td align="center">'.inputvar('mandatory','', 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
-//			$detailTxt .= '<td align="center">'.inputvar('restricted','', 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
-//			// $detailTxt .= '<td align="center">'.inputvar('refreshonchange','', 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
-//			if( $showMultiObj ) {
-//				$detailTxt .= '<td align="center">'.inputvar('multipleobjects','', 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
-//			} else {
-//				$detailTxt .= '<td style="display:none"></td>';
-//			}
-//			$detailTxt .= '<td style="display:none"></td></tr>';
-//			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
-//		}
+		$detailTxt .= '<tr>';
+		$detailTxt .= '<td>'.inputvar('order', '', 'small').'</td>';
+		$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
+		$detailTxt .= '</tr>';
+		$detailTxt .= inputvar( 'insert', '1', 'hidden' );
 		// show other states as info
 		$color = array (" bgcolor='#eeeeee'", '');
 		$flip = 0;
@@ -418,28 +384,7 @@ class ActionPropertiesQueryAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-//			if( $this->onlyQuery ) {
-				$detailTxt .= "<tr$clr><td>".$row['orderid'].'</td><td>'.formvar($prop).'</td>';
-				//$detailTxt .= '<td style="display:none"></td><td style="display:none"></td></tr>';
-//			} else {
-//				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
-//				$detailTxt .= '<td>'.formvar($prop).'</td>';
-//				if( in_array($row['property'], $this->sysProps) ){
-//					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:LOCKIMAGE).'</td>';
-//				} else {
-//					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:'').'</td>';
-//				}
-//				$detailTxt .= '<td align="center">'.(trim($row['mandatory'])?CHECKIMAGE:'').'</td>';
-//				$detailTxt .= '<td align="center">'.(trim($row['restricted'])?CHECKIMAGE:'').'</td>';
-//				// $detailTxt .= '<td align="center">'.(trim($row['refreshonchange'])?CHECKIMAGE:'').'</td>'; // EN-2164, Marked for future use
-//
-//				if( $showMultiObj ) {
-//					$detailTxt .= '<td align="center">'.(trim($row['multipleobjects'])?CHECKIMAGE:'').'</td>';
-//				} else {
-//					$detailTxt .= '<td style="display:none"></td>';
-//				}
-//				$detailTxt .= '<td style="display:none"></td></tr>';
-//			}
+			$detailTxt .= "<tr$clr><td>".$row['orderid'].'</td><td>'.formvar($prop).'</td>';
 		}
 		return $detailTxt;
 	}
@@ -511,15 +456,13 @@ class ActionPropertiesQueryAdminApp
 			null,
 			$wiwiwUsages, // $wiwiwUsages = null when it is not for Template and PublishForm.
 			false );
-		if( $usages ) foreach( $usages as $usage ) { // $onlyMultiSetProperties = false: Returns all properties regardless of single/multi-set properties support.
+		if( $usages ) foreach( $usages as $usage ) {
 			$already[] = $usage->Name;
 		}
 
-		$limitPub = true;
 		switch( $this->action ) {
 			case 'Query': // 'Query Parameters'
 				$allProps = array_merge( $dynamicProps, $xmpProps, $readonlyProps);
-				$limitPub = false;
 				break;
 			case 'QueryOut': // 'Query Result Columns'
 			case 'QueryOutInDesign':
@@ -527,7 +470,6 @@ class ActionPropertiesQueryAdminApp
 			case 'QueryOutContentStation':
 			case 'QueryOutPlanning':
 				$allProps = array_merge($staticProps, $dynamicProps, $xmpProps, $readonlyProps);
-				$limitPub = false;
 				$already = array_merge( $already, BizQueryBase::getMandatoryQueryResultColumnFields() );
 				$already[] = 'Issue'; // BZ#27830 In the query result only 'Issues' are of interest.
 				break;
@@ -540,7 +482,6 @@ class ActionPropertiesQueryAdminApp
 		// get customfields
 		$cust = array();
 		$trans = array();
-//		$publication = $limitPub ? $this->publ : 0;
 		$propObjs = BizProperty::getProperties( $this->publ, $this->objType, null, null, false, false, $this->onlyAllObjectType );
 
 		require_once BASEDIR.'/server/bizclasses/BizCustomField.class.php';
@@ -594,9 +535,6 @@ class ActionPropertiesQueryAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		$multiObjAllowedActions = array( '', 'SetProperties', 'SendTo' ); // Action that supports multiple-objects
-		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
-
 		if( $usages ) {
 			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
 		} else {
@@ -617,17 +555,16 @@ class ActionPropertiesQueryAdminApp
 			case 'delete':
 			case 'reset':
 				$numberOfRecords = 0;
-				$detailTxt = $this->listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt, $numberOfRecords );
+				$detailTxt = $this->listCurrentActionProperties( $locals, $rows, $detailTxt, $numberOfRecords );
 				break;
 			case 'add':
 				$numberOfRecords = count( $rows );
-				$detailTxt = $this->listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt );
+				$detailTxt = $this->listNewAndCurrentActionProperties( $props, $rows, $detailTxt );
 				break;
 		}
 
 		$txt = $this->showOrHideButtons( $txt, $numberOfRecords );
 		$txt = str_replace("<!--DELETE_COLUMN-->", ( $this->mode == 'add' ) ? 'display:none' : (( $numberOfRecords > 0 ) ? '' : 'display:none'), $txt );
-		$txt = str_replace("<!--MULTIPLE_OBJECTS_CELL-->", $showMultiObj ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
 		$txt = str_replace("<!--IMG_LOCKIMG-->", LOCKIMAGE, $txt);
 		return $txt;
@@ -638,8 +575,6 @@ class ActionPropertiesQueryAdminApp
 	 */
 	public function processRequestData()
 	{
-//		$this->onlyQuery = false;
-//		$this->onlyAllObjectType = true;
 		switch( $this->action )
 		{
 			case 'QueryOut': // 'Query Result Columns'
@@ -648,15 +583,9 @@ class ActionPropertiesQueryAdminApp
 			case 'QueryOutContentStation':
 			case 'QueryOutPlanning':
 				$this->onlyAllObjectType = false; // Set to false, to include also specific object type
-//				$this->onlyQuery = true;
-//				$this->publ = -1;
-//				$this->objType = '';
 				break;
 			case 'Query': // 'Query Parameters'
 				$this->onlyAllObjectType = true;
-//				$this->onlyQuery = true;
-//				$this->publ = -1;
-//				$this->objType = '';
 				break;
 		}
 

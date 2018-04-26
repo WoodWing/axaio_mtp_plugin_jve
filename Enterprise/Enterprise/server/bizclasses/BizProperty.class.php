@@ -171,6 +171,7 @@ class BizProperty
 	 * Returns list of properties that can be partially customized (renamed only) that are used in workflow dialogs
 	 * when no customizations are done.
 	 *
+	 * @since 10.x.x
 	 * @return string[]
 	 */
 	public static function getDefaultDialogDynamicPropIds()
@@ -269,6 +270,7 @@ class BizProperty
 	/**
 	 * Compose PropertyUsage object.
 	 *
+	 * @since 10.x.x
 	 * @param string $property
 	 * @param string[] $refreshProps
 	 * @return PropertyUsage
@@ -315,9 +317,6 @@ class BizProperty
 				break;
 		}
 		if( $props ) foreach( $props as $prop ) {
-			// TODO: Re-visit this part when DialogSetup improvements is implemented for Multiset properties.
-			// For other non-static default dialog props, it is safe to put false here since
-			// the admin did not configure them to have MultipleObjects set to be True in the Dialog Setup.		
 			$propUsage = self::composePropUsage( $prop, $refreshProps );
 
 			if (($prop == 'RouteTo') || ($prop == 'Comment') || //'Route to' and 'Comment'are not mandatory
@@ -376,6 +375,7 @@ class BizProperty
 	 * However, there's an exception, 'State' and 'Category' are allowed to be edited, including for
 	 * multi-set-properties.
 	 *
+	 * @since 10.x.x
 	 * @param string $property
 	 * @return bool
 	 */

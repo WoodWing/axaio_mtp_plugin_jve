@@ -444,7 +444,7 @@ class BizWorkflow
 					$prefix . 'object IDs ('.implode(',', $objIds ).') provided should be more than 1, '.
 					'or use the \'ID\' parameter instead.' );
 			}
-			if( $action != 'SetProperties' && $action != 'SendTo' ) {
+			if( !in_array( $action, self::getMultiObjectsAllowedActions() )){
 				throw new BizException( 'ERR_INVALID_OPERATION', 'Client',
 					$prefix . 'the Action parameter should be set to \'SetProperties\' or \'SendTo\'.' );
 			}
@@ -3582,4 +3582,14 @@ class BizWorkflow
         return in_array( $action, $createActions) ?  true : false;
     }
 
+	/**
+	 * Returns a list of actions that support Multiple objects
+	 *
+	 * @since 10.x.x
+	 * @return string[]
+	 */
+	public static function getMultiObjectsAllowedActions()
+	{
+		return array( 'SetProperties', 'SendTo' );
+	}
 }

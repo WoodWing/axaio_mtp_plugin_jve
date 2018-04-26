@@ -375,7 +375,7 @@ class ActionPropertiesAdminApp
 				$detailTxt .= '<td align="center">'.inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED"), !$isConfigurable ).'</td>';
 				// $detailTxt .= '<td align="center">'.inputvar("refreshonchange$i", $row['refreshonchange'], 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
 				if( $showMultiObj ) {
-					$detailTxt .= '<td align="center">'.inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
+					$detailTxt .= '<td align="center">'.inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS"), !$isConfigurable ).'</td>';
 				} else { // Don't fill in the multiple objects column.
 					$detailTxt .= '<td style="display:none"></td>'; // No checkbox.
 				}
@@ -533,6 +533,7 @@ class ActionPropertiesAdminApp
 	 */
 	public function buildCurrentActionProperties( $txt )
 	{
+		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
 		$staticProps   = BizProperty::getStaticPropIds();
 		$dynamicProps  = BizProperty::getDynamicPropIds();
 		$xmpProps      = BizProperty::getXmpPropIds();
@@ -639,7 +640,7 @@ class ActionPropertiesAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		$multiObjAllowedActions = array( '', 'SetProperties', 'SendTo' ); // Action that supports multiple-objects
+		$multiObjAllowedActions = $multiObjAllowedActions = array_merge( array( '' ), BizWorkflow::getMultiObjectsAllowedActions() ); // Action that supports multiple-objects
 		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
 
  		if( $usages ) {
@@ -655,7 +656,6 @@ class ActionPropertiesAdminApp
 			   }
 
 			   if( $this->action != '' ) { // When action is <All>, don't fix anything as some action needs 'Dossier' and some don't.
-				   require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
 				   BizWorkflow::fixDossierPropertyUsage( $this->action, $this->objType, '', $usages );
 			   }
 			   // TODO: Mark asterisk on the fields that might be removed when Client doesn't support the field(s).
