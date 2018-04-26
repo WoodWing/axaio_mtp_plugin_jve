@@ -187,7 +187,7 @@ class BizServerJob
 						$job = $bizServiceLogsCleanup->createJob( $pushIntoQueue );
 					}
 				break;
-				case 'AutoCleanWebEditFolder':
+				case 'AutoCleanWebEditDir':
 					require_once BASEDIR . '/server/bizclasses/BizWebeditDirCleanup.class.php';
 					if( BizWebeditDirCleanup::isWebEditDirCleanupEnabled() ) {
 						$bizWebeditDirCleanup = new BizWebeditDirCleanup();
@@ -654,7 +654,7 @@ class BizServerJob
 				require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
 				$bizClass = new BizServiceLogsCleanup();
 				break;
-			case 'AutoCleanWebEditFolder':
+			case 'AutoCleanWebEditDir':
 				require_once BASEDIR . '/server/bizclasses/BizWebeditDirCleanup.class.php';
 				$bizClass = new BizWebeditDirCleanup();
 				break;
