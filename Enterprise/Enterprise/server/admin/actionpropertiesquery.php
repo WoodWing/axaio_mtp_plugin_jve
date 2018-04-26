@@ -566,7 +566,6 @@ class ActionPropertiesQueryAdminApp
 		$txt = $this->showOrHideButtons( $txt, $numberOfRecords );
 		$txt = str_replace("<!--DELETE_COLUMN-->", ( $this->mode == 'add' ) ? 'display:none' : (( $numberOfRecords > 0 ) ? '' : 'display:none'), $txt );
 		$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
-		$txt = str_replace("<!--IMG_LOCKIMG-->", LOCKIMAGE, $txt);
 		return $txt;
 	}
 

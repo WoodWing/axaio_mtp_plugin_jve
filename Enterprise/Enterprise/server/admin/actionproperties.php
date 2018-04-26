@@ -366,7 +366,7 @@ class ActionPropertiesAdminApp
 				$detailTxt .= "<td>".$row['category'].'</td>';
 				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
 				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				if( in_array($row['property'], $this->sysProps) ) {
+				if( $row['edit'] == '' ) {
 					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
 				} else {
 					$detailTxt .= '<td align="center">'.inputvar("edit$i", $row['edit'], 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE"), !$isConfigurable ).'</td>';
@@ -461,7 +461,7 @@ class ActionPropertiesAdminApp
 			} else {
 				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
 				$detailTxt .= '<td>'.formvar($prop).'</td>';
-				if( in_array($row['property'], $this->sysProps) ){
+				if( $row['edit'] == '' ) {
 					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:LOCKIMAGE).'</td>';
 				} else {
 					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:'').'</td>';
