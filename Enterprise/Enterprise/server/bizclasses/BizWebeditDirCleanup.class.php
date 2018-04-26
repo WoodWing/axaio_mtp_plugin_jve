@@ -29,9 +29,9 @@ class BizWebeditDirCleanup extends BizServerJobHandler
 	}
 
 	/**
-	 * Checks whether the AutoCleanWebEditFolder job is enabled.
+	 * Checks whether the AutoCleanWebEditDir job is enabled.
 	 *
-	 * AutoCleanWebEditFolder job is enabled when AUTOCLEAN_WEBEDITDIR_DAYS is set to a value more than 0.
+	 * AutoCleanWebEditDir job is enabled when AUTOCLEAN_WEBEDITDIR_DAYS is set to a value more than 0.
 	 *
 	 * @return bool
 	 */
@@ -45,7 +45,7 @@ class BizWebeditDirCleanup extends BizServerJobHandler
 
 			require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
 			$bizJobConfig = new BizServerJobConfig();
-			if( !$bizJobConfig->isJobRegisteredAndAssigned( 'AutoCleanWebEditFolder' ) ) {
+			if( !$bizJobConfig->isJobRegisteredAndAssigned( 'AutoCleanWebEditDir' ) ) {
 				break;
 			}
 
@@ -66,7 +66,7 @@ class BizWebeditDirCleanup extends BizServerJobHandler
 		require_once BASEDIR.'/server/dataclasses/ServerJob.class.php';
 		$job = new ServerJob();
 		// No objectid and object version since cleanup is not bound to one object.
-		$job->JobType = 'AutoCleanWebEditFolder';
+		$job->JobType = 'AutoCleanWebEditDir';
 		self::serializeJobFieldsValue( $job );
 
 		if( $putIntoQueue ) {
