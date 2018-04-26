@@ -51,23 +51,7 @@ if( !isset($_REQUEST['ID']) || empty($_REQUEST['ID']) ||
 	require_once BASEDIR.'/server/admin/global_inc.php';
 	require_once BASEDIR.'/server/secure.php';
 
-	// before v5.2.1 the sys_get_temp_dir is not defined
-	if ( !function_exists('sys_get_temp_dir')) {
-		function sys_get_temp_dir() 
-		{ 
-			if (!empty($_ENV['TMP'])) { return realpath($_ENV['TMP']); }
-			if (!empty($_ENV['TMPDIR'])) { return realpath( $_ENV['TMPDIR']); }
-			if (!empty($_ENV['TEMP'])) { return realpath( $_ENV['TEMP']); }
-			$tempfile = tempnam(uniqid(rand(),TRUE),'');
-			if (file_exists($tempfile)) {
-				unlink($tempfile);
-				return realpath(dirname($tempfile));
-			}
-			return null;
-		}
-	}
-
-	// check user access	
+	// check user access
 	$ticket = checkSecure();
 	global $globUser;  // set by checkSecure()
 
