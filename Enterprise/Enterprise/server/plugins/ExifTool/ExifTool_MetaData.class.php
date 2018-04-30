@@ -306,16 +306,9 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		}
 
 		// Determine the DPI:
-		// Let's assume the user has downloaded a photo from a web site. The photo was taken by someone else with high res camera.
-		// When the photographer uploaded the photo to that web site the photo was scaled down by a tool that is not aware of EXIF.
-		// In this example, the tool has updated the XResolution/YResolution for JFIF, but not for EXIF. It is a challenge to
-		// find out which information is most reliable. For that we take the width and height. So in the example, when the
-		// ExifImageHeight and ExifImageWidth are not matching with the width and height resolved from the image format ('File' tag)
-		// then we assume EXIF is -not- updated and so we also do -not- use its XResolution to determine the DPI value.
-
 		// EXIF
 		if( !isset($this->entMetaData[ 'Dpi' ]) ) {
-			if( $exifImageHeight == $this->entMetaData['Height'] && $exifImageWidth == $this->entMetaData['Width'] ) { // EXIF reliable?
+			if( $this->canUseDpiOfEmbededMetaData( $exifImageHeight, $exifImageWidth ) ) {
 				$exifXResolution = $this->mapFieldValue( 'EXIF', 'XResolution', null, array( $this, 'castToFloatWhenPositive' ) );
 				if( $exifXResolution ) {
 					// EXIF: Unit of XResolution/YResolution: '1' = no-unit, '2' = inches, '3' = centimeters.
@@ -331,7 +324,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 
 		// PNG
 		if( !isset( $this->entMetaData[ 'Dpi' ] ) ) {
-			if( $pngImageHeight == $this->entMetaData['Height'] && $pngImageWidth == $this->entMetaData['Width'] ) { // PNG reliable?
+			if( $this->canUseDpiOfEmbededMetaData( $pngImageHeight, $pngImageWidth ) ) {
 				$pngXResolution = $this->mapFieldValue( 'PNG', 'PixelsPerUnitX', null, array( $this, 'castToIntegerWhenPositive' ) );
 				if( $pngXResolution ) {
 					// PNG: Unit of PixelUnits: '0' = no-unit, '1' = meters
@@ -347,7 +340,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 
 		// Photoshop
 		if( !isset( $this->entMetaData[ 'Dpi' ] ) ) {
-			if( $psImageHeight == $this->entMetaData['Height'] && $psImageWidth == $this->entMetaData['Width'] ) { // Photoshop reliable?
+			if( $this->canUseDpiOfEmbededMetaData( $psImageHeight, $psImageWidth ) ) {
 				$psXResolution = $this->mapFieldValue( 'Photoshop', 'XResolution', null, array( $this, 'castToFloatWhenPositive' ) );
 				if( $psXResolution ) {
 					// Photoshop: Unit of DisplayedUnitsX: '0' = no-unit, '1' = inches, '2' = centimeters.
@@ -363,7 +356,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 
 		// XMP
 		if( !isset($this->entMetaData[ 'Dpi' ]) ) {
-			if( $xmpImageHeight == $this->entMetaData['Height'] && $xmpImageWidth == $this->entMetaData['Width'] ) { // XMP reliable?
+			if( $this->canUseDpiOfEmbededMetaData( $xmpImageHeight, $xmpImageWidth ) ) {
 				$xmpXResolution = $this->mapFieldValue( 'XMP', 'XResolution', null, array( $this, 'castToFloatWhenPositive' ) );
 				if( $xmpXResolution ) {
 					// XMP: Unit of XResolution/YResolution: '1' = no-unit, '2' = inches, '3' = centimeters.
@@ -390,6 +383,53 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 				}
 			}
 		}
+	}
+
+	/**
+	 * Checks if the DPI as set in the embedded metadata can be regarded as reliable.
+	 *
+	 * Let's assume the user has downloaded a photo from a web site. The photo was taken by someone else with high res camera.
+	 * When the photographer uploaded the photo to that web site the photo was scaled down by a tool that is not aware of EXIF.
+	 * In this example, the tool has updated the XResolution/YResolution for JFIF, but not for EXIF. It is a challenge to
+	 * find out which information is most reliable. For that we take the width and height. So in the example, when the
+	 * ExifImageHeight and ExifImageWidth are not matching with the width and height resolved from the image format ('File' tag)
+	 * then we assume EXIF is -not- updated and so we also do -not- use its XResolution to determine the DPI value.
+	 * If on the other hand ExifImageHeight and ExifImageWidth are not set, but the XResolution for EXIF is set this value is
+	 * used.
+	 *
+	 * @param integer|null $metadataHeight
+	 * @param integer|null $metadataWidth
+	 * @return bool
+	 */
+	private function canUseDpiOfEmbededMetaData( $metadataHeight, $metadataWidth )
+	{
+		return $this->areDimensionsReliable( $metadataHeight, $metadataWidth ) ||
+			$this->noDimensionsSet( $metadataHeight, $metadataWidth );
+	}
+
+	/**
+	 * Checks if the embedded metadata dimensions are reliable.
+	 *
+	 * @link canUseDpiOfEmbededMetaData()
+	 * @param integer|null $metadataHeight
+	 * @param integer|null $metadataWidth
+	 * @return bool
+	 */
+	private function areDimensionsReliable( $metadataHeight, $metadataWidth )
+	{
+		return $this->entMetaData['Height'] == $metadataHeight && $this->entMetaData['Width'] == $metadataWidth;
+	}
+
+	/**
+	 * Checks if the embedded metadata dimensions are set.
+	 *
+	 * @param integer|null  $metadataHeight
+	 * @param integer|null $metadataWidth
+	 * @return bool
+	 */
+	private function noDimensionsSet( $metadataHeight, $metadataWidth )
+	{
+		return is_null( $metadataHeight ) && is_null( $metadataWidth );
 	}
 
 	/**
