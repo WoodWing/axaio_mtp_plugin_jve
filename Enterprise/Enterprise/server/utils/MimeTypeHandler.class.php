@@ -90,7 +90,7 @@ class MimeTypeHandler
 			//find last dot in filename
 			$strpos = strrpos( $filename, '.' );
 			if ( $strpos !== FALSE ){
-				$filename = substr( $filename, 0, $strpos-1 );
+				$filename = substr( $filename, 0, $strpos );
 			}
 		}
 		return $filename;
