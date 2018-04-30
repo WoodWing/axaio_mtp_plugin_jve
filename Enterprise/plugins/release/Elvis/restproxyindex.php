@@ -284,8 +284,8 @@ class Elvis_RestProxyIndex
 			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
 		$service = str_replace( '%assetid%', $this->elvisAssetId, $this->httpParams['service'] );
-		require_once __DIR__.'/logic/ElvisRESTClient.php';
-		$client = new ElvisRESTClient();
+		require_once __DIR__.'/logic/ElvisProxyClient.php';
+		$client = new ElvisProxyClient();
 		$client->proxy( $service );
 	}
 }

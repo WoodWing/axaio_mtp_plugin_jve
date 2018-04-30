@@ -151,6 +151,26 @@ class ElvisSessionUtil
 	}
 
 	/**
+	 * Retrieve the Elvis access token from the Enterprise session.
+	 *
+	 * @return string|null access token. NULL when no access token available.
+	 */
+	public static function getAccessToken()
+	{
+		return self::getSessionVar( 'accessToken' );
+	}
+
+	/**
+	 * Save the Elvis access token into the Enterprise session.
+	 *
+	 * @param string $accessToken
+	 */
+	public static function saveAccessToken( $accessToken )
+	{
+		self::setSessionVar( 'accessToken', $accessToken );
+	}
+
+	/**
 	 * Merge the passed in cookies with the session cookies and store it back to the session.
 	 *
 	 * @param array $cookies List of key-value pair of cookies

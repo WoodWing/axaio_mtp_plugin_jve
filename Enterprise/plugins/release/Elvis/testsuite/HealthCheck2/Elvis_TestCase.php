@@ -49,9 +49,6 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if ( !$this->checkVersionCompatibility() ) {
 			return;
 		}
-		if( !$this->checkIsLoadBalancerSupported() ) {
-			return;
-		}
 		if ( !$this->checkFeatureCompatibility() ) {
 			return;
 		}

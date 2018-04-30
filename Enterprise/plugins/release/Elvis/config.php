@@ -110,6 +110,13 @@ if( !defined('ELVIS_NAMEDQUERY') ) {
 	define( 'ELVIS_NAMEDQUERY', 'Elvis Search' );
 }
 
+if( !defined('ELVIS_CLIENT_ID') ) {
+	define( 'ELVIS_CLIENT_ID', '' );
+}
+if( !defined('ELVIS_CLIENT_SECRET') ) {
+	define( 'ELVIS_CLIENT_SECRET', '' );
+}
+
 /**
  * Elvis SUPER_USER username and password, needed for creating PDF previews with InDesign Server.
  * This user is also used to give Enterprise users without Elvis credentials access to the Elvis server.
