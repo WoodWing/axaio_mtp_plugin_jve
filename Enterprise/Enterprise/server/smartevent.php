@@ -50,7 +50,7 @@ define ('EVENT_SET_PROPERTIES_FOR_MULTIPLE_OBJECTS',  39);  // since v9.2.0
 define ('EVENT_CREATE_ISSUE',                         40);  // since v10.4.1
 define ('EVENT_MODIFY_ISSUE',                         41);  // since v10.4.1
 define ('EVENT_DELETE_ISSUE',                         42);  // since v10.4.1
-define ('EVENT_UPDATE_ISSUE_ORDER',                   43);  // since v10.4.1
+define ('EVENT_UPDATE_ISSUES_ORDER',                  43);  // since v10.4.1 for Issues reordering in pub channel page.
 define ('EVENT_UPDATE_PUB_CHANNEL',                   44);  // since v10.4.1
 
 define ('EVENT_DEBUG',                               255);
