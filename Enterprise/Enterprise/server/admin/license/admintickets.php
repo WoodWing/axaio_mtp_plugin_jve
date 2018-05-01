@@ -11,7 +11,7 @@ $lic = new License();
 $hasLicense = $lic->hasLicense();
 if( !$hasLicense ) {
 	print BizResources::localize( "LIC_NO_SCENT_LICENSE_INSTALLED" );
-	admintickets_buildDoc();
+	buildLicensePage();
 	exit;
 }
 
@@ -22,7 +22,7 @@ $user = isset( $requestParams['adminUser'] ) ? $requestParams['adminUser'] : '';
 
 //Admin user should always logon AFTER the max usage limit has been reached.
 //If necessary he should first logoff.
-//By logging on, the _install_ user will be removed from the tickets table, and his lastlogon timestamp will be set.
+//By logging on, the _install_ user will be removed from the tickets table, and the lastlogon timestamp will be set.
 if( $user ) {
 	$sessionName = 'ww_userlimit_admin_session';
 	session_name( $sessionName );
@@ -38,14 +38,14 @@ if( $user ) {
 
 if( !$ok ) {
 	print BizResources::localize( "LIC_ACCESS_DENIED" );
-	admintickets_buildDoc();
+	buildLicensePage();
 	exit;
 }
 
 require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 $rows = DBBase::listRows( 'users', '', null, '', array( 'fullname', 'user' ) );
 if( is_null( $rows ) ) { // Error occurred
-	admintickets_buildDoc();
+	buildLicensePage();
 	exit;
 }
 $users = array();
@@ -71,7 +71,7 @@ if( $id ) {
     $params = array( intval( $id ));
     $result = DBBase::deleteRows( 'tickets', $where, $params  );
 	if( is_null( $result ) ) { // Error occurred
-		admintickets_buildDoc();
+		buildLicensePage();
 		exit;
 	}
 }
@@ -82,25 +82,20 @@ if( $time ) {
 	$params = array( strval( $time ));
 	$result = DBBase::deleteRows( 'tickets', $where, $params  );
 	if( is_null( $result ) ) { // Error occurred
-		admintickets_buildDoc();
+		buildLicensePage();
 		exit;
 	}
 }
 
-function timeConverter( $val )
-{
-	$val_array = preg_split( '/[T]/', $val );
-	$date_array = preg_split( '/[-]/', $val_array['0'] );
-	$date_formated = $date_array[2]."-".$date_array[1]."-".$date_array[0];
-	return $date_formated." ".$val_array['1'];
-}
+// Show the license status overview.
+$lic->showStatusInHTML( true );
 
 //1 delete based on usr
 $fields = array('usr', 'clientname', 'clientip', 'appname', 'appversion', 'expire', 'logon');
 $orderBy = array( 'usr' => true );
 $rows = DBBase::listRows( 'tickets', '', null, '', $fields, array(), $orderBy );
 if( is_null( $rows ) ) {
-	admintickets_buildDoc();
+	buildLicensePage();
 	exit;
 }
 $user2NumTickets = array();
@@ -155,12 +150,11 @@ print "</form>";
 
 <?php
 
-$numToShow = 20;
 $fields = array('id', 'usr', 'clientname', 'clientip', 'appname', 'appproductcode', 'appversion', 'expire', 'logon');
 $orderBy = array( 'logon' => true );
 $rows = DBBase::listRows( 'tickets', '', null, '', $fields, array(), $orderBy );
 if( is_null( $rows ) ) {
-	admintickets_buildDoc();
+	buildLicensePage();
 	exit;
 }
 
@@ -222,25 +216,27 @@ if( $rows ) foreach( $rows as $row ) {
 		$txt .= '&nbsp;';
 	$txt .= "</td>";
 	$txt .= "</tr>";
-
-	if( $n >= $numToShow )
-		break;
 }
 
 print "<table>";
 print $txt;
 print "</table>";
-
-$lic->showStatusInHTML( true );
-
 print "<a href='../../apps/login.php?logout=true'>".BizResources::localize( "LIC_RELOGON" )."</a>";
+buildLicensePage();
 
-admintickets_buildDoc();
-function admintickets_buildDoc()
+function buildLicensePage()
 {
 	$txt = ob_get_contents();
 	ob_end_clean();
 	require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 	$txt = HtmlDocument::buildDocument( $txt, true, null, false, true );
 	print $txt;
+}
+
+function timeConverter( $val )
+{
+    $val_array = preg_split( '/[T]/', $val );
+	$date_array = preg_split( '/[-]/', $val_array['0'] );
+	$date_formated = $date_array[2]."-".$date_array[1]."-".$date_array[0];
+	return $date_formated." ".$val_array['1'];
 }
