@@ -25,7 +25,7 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 	/** @var integer[] createdImageIds */
 	private $createdImageIds = array();
 
-	/** @var string[] $transferFiles */
+	/** @var Attachment[] $transferFiles */
 	private $transferFiles = array();
 
 	public function getDisplayName()
