@@ -53,7 +53,7 @@ class BizAdmPublicationAdminAuthorization
 			throw new BizException( 'ERR_ARGUMENT', 'Client', 'The user group id should be positive.' );
 		}
 		$params = array( intval( $userGroupId ) );
-		if( !DBBase::getRow( 'groups', '`id` = ?', 'id', $params ) ) {
+		if( !DBBase::getRow( 'groups', '`id` = ?', array( 'id' ), $params ) ) {
 			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', 'The given user group does not exist.',
 				null, array( '{GRP_GROUP}', $userGroupId ) );
 		}

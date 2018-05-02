@@ -61,7 +61,8 @@ class DBEdition extends DBBase
 	 */
 	public static function insertIssueEdition( $issueId, $editionId, $editionRow, $updateIfExists )
 	{
-		$curEditionRow = self::getRow( 'issueeditions', " `issue` = '$issueId' AND `edition` = '$editionId' ", null );
+		$where = " `issue` = '$issueId' AND `edition` = '$editionId' ";
+		$curEditionRow = self::getRow( 'issueeditions', $where, array( 'id' ) );
 		if( $curEditionRow ) {
 			if( $updateIfExists ) {
 				self::updateRow( 'issueeditions', $editionRow, "`id` = ?" ,array( intval( $curEditionRow['id'] ) ));
