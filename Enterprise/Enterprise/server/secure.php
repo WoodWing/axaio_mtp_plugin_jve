@@ -175,7 +175,11 @@ function hasRights($dbdr, $user, $app=null)
 function publRights($dbdr, $user)
 {
 	global $adminforpubl;
-	$isadmin = hasRights( $dbdr, $user);
+	global $isadmin;
+
+	if( is_null($isadmin) ) {
+		$isadmin = hasRights( $dbdr, $user );
+	}
 	if ($isadmin) return true;			// check only if user is not global admin
 
 	$db1 = $dbdr->tablename("users");
