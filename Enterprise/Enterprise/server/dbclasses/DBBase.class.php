@@ -88,7 +88,6 @@ class DBBase
 	 * Raises a DB error.
 	 *
 	 * @param string $error
-	 * @throws BizException Throws BizException when the flag to throw BizException is set to true.
 	 */
 	static protected function setError( $error )
 	{
