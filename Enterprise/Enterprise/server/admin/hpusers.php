@@ -8,8 +8,8 @@ require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-$ticket = checkSecure('admin');
-$sessionUser = DBTicket::checkTicket( $ticket );
+
+checkSecure('admin');
 
 // get param's
 $id          = isset($_REQUEST['id'])       ? intval($_REQUEST['id']) : 0;
@@ -62,8 +62,6 @@ $startDate = $app->getStartDate( $inpStartDate, $startYear, $startMonth, $startD
 $endDate = $app->getEndDate( $inpEndDate, $endYear, $endMonth, $endDay );
 $mode = $app->validateStartEndDate( $inpStartDate, $startDate, $inpEndDate, $endDate, $mode, $errors );
 
-BizSession::startSession( $ticket );
-
 // handle request
 try {
 	switch( $mode ) {
@@ -75,7 +73,7 @@ try {
 			 					    substr($userColor,1), $organization, $location, null));
 			$service = new AdmCreateUsersService();
 			$request = new AdmCreateUsersRequest();
-			$request->Ticket = $ticket;
+			$request->Ticket = BizSession::getTicket();
 			$request->RequestModes = array();
 			$request->Users  = $userObjs;
 			$response = $service->execute($request);
@@ -89,7 +87,7 @@ try {
 			 					    substr($userColor,1), $organization, $location, null));
 			$service = new AdmModifyUsersService();
 			$request = new AdmModifyUsersRequest();
-			$request->Ticket = $ticket;
+			$request->Ticket = BizSession::getTicket();
 			$request->RequestModes = array();
 			$request->Users  = $userObjs;
 			$response = $service->execute($request);
@@ -107,7 +105,7 @@ try {
 			require_once BASEDIR.'/server/services/adm/AdmDeleteUsersService.class.php';
 			$service = new AdmDeleteUsersService();
 			$request = new AdmDeleteUsersRequest();
-			$request->Ticket = $ticket;
+			$request->Ticket = BizSession::getTicket();
 			$request->UserIds= array( $id );
 			$response = $service->execute($request);
 			break;
@@ -116,7 +114,7 @@ try {
 			$userGroups = array($groupId);
 			$service = new AdmRemoveGroupsFromUserService();
 			$request = new AdmRemoveGroupsFromUserRequest();
-			$request->Ticket  = $ticket;
+			$request->Ticket  = BizSession::getTicket();
 			$request->GroupIds= array( $groupId );
 			$request->UserId  = $id;
 			$response = $service->execute($request);
@@ -194,7 +192,7 @@ $txt = $app->replaceErrorMessages( $txt, $errors );
 $txt = $app->buildUserForm( $id, $row, $txt );
 
 // Build lower part user groups table
-$txt = $app->buildUserGroupsTable( $id, $mode, $sessionUser, $txt );
+$txt = $app->buildUserGroupsTable( $id, $mode, BizSession::getShortUserName(), $txt );
 
 // Set focus to the first field
 $txt .= '<script language="javascript">document.forms[0].user.focus();</script>';

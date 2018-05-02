@@ -164,7 +164,7 @@ class TransferEntry
 		// The new ticket obtained should be set to the upload/download URL to try again.
 		if( $validateTicket ) {
 			require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-			$user = DBTicket::checkTicket( $ticket, 'FileTransfer' );
+			$user = DBTicket::checkTicket( $ticket );
 			if( !$user ) {
 				$message = 'Ticket expired. Please relogin. (SCEntError_InvalidTicket)';
 				header('HTTP/1.1 403 Forbidden');
