@@ -20,20 +20,7 @@ function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=nul
 	global $isadmin;
 	global $globUser;
 
-
-	try {
-		$dbDriver = DBDriverFactory::gen();
-		// The admin user might have prepared a clean database with an empty table space.
-		// In that case, we detect and redirect to the dbadmin.php module to setup the DB.
-		if( !$dbDriver->tableExists( 'config' ) ) { // Just pick the smart_config table.
-			throw new BizException( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE', 'Server', '' );
-		}
-	} catch( BizException $e ) {
-		echo $e->getMessage() . '<br/>';
-		echo 'Please check if your database is running.<br/>';
-		echo 'Or, click <a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/dbadmin.php'.'">here</a> to check your database setup.<br/>';
-		exit();
-	}
+	$dbDriver = DBDriverFactory::gen();
 
 	if( empty($userPwdExpir) ) {
 		$ticket = $ticket != null ? $ticket : getLogCookie('ticket',$redir);
@@ -41,6 +28,19 @@ function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=nul
 			$user = BizSession::checkTicket( $ticket );
 		} catch( BizException $e ) {
 			$user = '';
+
+			// The admin user might have prepared a clean database with an empty table space.
+			// In that case, we detect and redirect to the dbadmin.php module to setup the DB.
+			try {
+				if( !$dbDriver->tableExists( 'config' ) ) { // Just pick the smart_config table.
+					throw new BizException( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE', 'Server', '' );
+				}
+			} catch( BizException $e ) {
+				echo $e->getMessage() . '<br/>';
+				echo 'Please check if your database is running.<br/>';
+				echo 'Or, click <a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/dbadmin.php'.'">here</a> to check your database setup.<br/>';
+				exit();
+			}
 		}
 	} else {
 		$user = $userPwdExpir;
