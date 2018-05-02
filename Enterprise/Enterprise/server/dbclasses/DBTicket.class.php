@@ -578,20 +578,22 @@ class DBTicket extends DBBase
 		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return $row ? $row['usr'] : false;
 	}
-	
+
 	/**
 	 * Check if ticket exists in database and is not expired yet.
-	 * Since function must be called whenever user 'touched' the server.
-	 * When not expired, it postpones the current expiration time with new (configured) time interval. <br>
+	 *
+	 * This function must be called whenever the server is requested for this user to avoid the ticket from expiring.
+	 * When the ticket is not expired, it postpones the current expiration time with a new (configured) time interval.
+	 * When the ticket is expired, the user has lost his/her seat and has to re-logon to Enterprise to obtain a new one.
 	 *
 	 * @param string $ticket   Unique ticket; gives user access to the system with given client application
-	 * @param string $service  Not used
+	 * @param array|null $ticketRow  The DB row from the smart_tickets table having the following fields resolved: usr, appname, appversion, expire, and masterticketid
 	 * @param bool $extend     Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
 	 *                         Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
-	 * @return string|bool     Short user name or FALSE when ticket not exists or expired.
+	 * @return string|bool     Short user name, or FALSE when the ticket does not exist or has been expired.
 	 * @throws BizException In case of database connection error.
 	 */
-	public static function checkTicket( $ticket, $service = '', $extend = true )
+	public static function checkTicket( $ticket, $ticketRow = null, $extend = true )
 	{
 		// Special treatment for background/async server job processing, for which no seat must be taken.
 		if( self::$ServerJob && self::$ServerJob->TicketSeal == $ticket ) {
@@ -603,42 +605,44 @@ class DBTicket extends DBBase
 			return self::$ticketCache[ $ticket ][ 'usr' ];
 		}
 
-		// check ticket existence
-		$fields = array( 'usr', 'appname', 'appversion', 'expire', 'masterticketid' );
-		$where = '`ticketid` = ?';
-		$params = array( strval( $ticket ) );
-		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
-		if( !$row ) {
-			return false;
+		if( !$ticketRow || !is_array( $ticketRow ) ) { // check for array type because before 10.5.0 the 2nd function param used to be $service of type string
+			// check ticket existence
+			$fields = array( 'usr', 'appname', 'appversion', 'expire', 'masterticketid' );
+			$where = '`ticketid` = ?';
+			$params = array( strval( $ticket ) );
+			$ticketRow = self::getRow( self::TABLENAME, $where, $fields, $params );
+			if( !$ticketRow ) {
+				return false;
+			}
 		}
 
 		// check expiration
 		$now = date( 'Y-m-d\TH:i:s' );
-		$expire = trim( $row['expire'] );
+		$expire = trim( $ticketRow['expire'] );
 		if( !empty( $expire ) && strncmp( $expire, $now, 19 ) < 0 ) {
 			return false; // ticket expired
 		}
 
 		// cache ticket data
 		self::$ticketCache[ $ticket ] = array(
-			'usr' => $row['usr'],
-			'appname' => $row['appname'],
-			'appversion' => $row['appversion'],
-			'masterticketid' => $row['masterticketid']
+			'usr' => $ticketRow['usr'],
+			'appname' => $ticketRow['appname'],
+			'appversion' => $ticketRow['appversion'],
+			'masterticketid' => $ticketRow['masterticketid']
 		);
 
 		// user touched server, so postpone expiration
 		if( $extend ) {
-			$expire = self::_expire( $row['appname'] );
+			$expire = self::_expire( $ticketRow['appname'] );
 			$values = array( 'expire' => strval( $expire ) );
 			$where = '`ticketid` = ?';
 			$params = array( strval( $ticket ) );
 			self::updateRow( self::TABLENAME, $values, $where, $params );
 		}
 
-		return trim( $row['usr'] );
+		return trim( $ticketRow['usr'] );
 	}
-	
+
 	/**
 	 * Remove ticket from database.
 	 *
