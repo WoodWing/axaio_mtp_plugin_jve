@@ -934,95 +934,90 @@ class DBUser extends DBBase
 		return $modifyusergroups;
 	}
 
-	/*
-     * Add Users to Group
-     *
-     * Returns nothing
-     *
-     * @param array $usrId user id that added to group
-     * @param array $grpId group id that user will be added to
-     *
-     */
+	/**
+	 * Make a user member of a user group.
+	 *
+	 * @deprecated 10.5.0 Please use addUserToGroup() instead.
+	 * @param integer $grpId
+	 * @param integer $usrId
+	 */
 	public static function addUsersToGroup( $usrId, $grpId )
 	{
-		$usrId = intval($usrId); //Convert to integer
-		$grpId = intval($grpId); //Convert ot integer
-
-		$where = '`usrid` = ? AND `grpid` = ?';
-		$params = array($usrId, $grpId);
-		$usergrpvalue = array();
-
-		$usergrpvalue['usrid'] = $usrId;
-		$usergrpvalue['grpid'] = $grpId;
-
-		// Checking whether it is an existing usergrp 
-		$existingusergroup = self::getRow('usrgrp', $where, 'Id', $params );
-		if($existingusergroup){}
-		else {
-			self::insertRow('usrgrp', $usergrpvalue);
-		}
+		self::addUserToGroup( $usrId, $grpId );
 	}
 
-	/*
-	 * Remove Users from Group
+	/**
+	 * Remove a user from a user group.
 	 *
-	 * Returns nothing
-	 *
-	 * @param array $usrId user id that remove from group
-	 * @param array $grpId group id that user will be remove from
-	 *
+	 * @deprecated 10.5.0 Please use removeUserFromGroup() instead.
+	 * @param integer $usrId
+	 * @param integer $grpId
 	 */
 	public static function removeUsersFromGroup( $usrId, $grpId )
 	{
-		$where = 'usrid = ? AND grpid = ?';
-		self::deleteRows('usrgrp', $where, array( intval( $usrId), intval( $grpId) ) );
+		self::removeUserFromGroup( $usrId, $grpId );
 	}
 
-	/*
-     * Add Groups to User
-     *
-     * Returns nothing
-     *
-     * @param array $grpId group id that added to user
-     * @param array $usrId user id that group will be added to
-     *
-     */
+	/**
+	 * Make a user member of a user group.
+	 *
+	 * @deprecated 10.5.0 Please use addUserToGroup() instead.
+	 * @param integer $grpId
+	 * @param integer $usrId
+	 */
 	public static function addGroupsToUser( $grpId, $usrId )
 	{
-		$grpId = intval($grpId); //Convert to integer
-		$usrId = intval($usrId); //Convert to integer
-
-		$where = '`usrid` = ? AND `grpid` = ? ';
-		$params = array($usrId, $grpId);
-		$usergrpvalue = array();
-
-		$usergrpvalue['usrid'] = $usrId;
-		$usergrpvalue['grpid'] = $grpId;
-
-		// Checking whether it is an existing usergrp 
-		$existingusergroup = self::getRow('usrgrp', $where, 'Id', $params);
-		if($existingusergroup){}
-		else {
-			self::insertRow('usrgrp', $usergrpvalue);
-		}
+		self::addUserToGroup( $usrId, $grpId );
 	}
 
-	/*
-	 * Remove Groups from User
+	/**
+	 * Remove a user from a user group.
 	 *
-	 * Returns nothing
-	 *
-	 * @param array $grpId group id that remove from user
-	 * @param array $usrId user id that group will be remove from
-	 *
+	 * @deprecated 10.5.0 Please use removeUserFromGroup() instead.
+	 * @param integer $grpId
+	 * @param integer $usrId
 	 */
 	public static function removeGroupsFromUser( $grpId, $usrId )
 	{
-		$where = 'usrid = ? AND grpid = ? ';
-
-		self::deleteRows('usrgrp', $where, array( intval( $usrId), intval( $grpId) ) );
+		self::removeUserFromGroup( $usrId, $grpId );
 	}
 
+	/**
+	 * Make a user member of a user group.
+	 *
+	 * @param integer $usrId
+	 * @param integer $grpId
+	 */
+	public static function addUserToGroup( $usrId, $grpId )
+	{
+		$grpId = intval( $grpId );
+		$usrId = intval( $usrId );
+
+		$where = '`usrid` = ? AND `grpid` = ? ';
+		$params = array( $usrId, $grpId );
+		$membershipExists = (bool)self::getRow( 'usrgrp', $where, array( 'id' ), $params );
+
+		if( !$membershipExists ) {
+			$row = array(
+				'usrid' => $usrId,
+				'grpid' => $grpId
+			);
+			self::insertRow( 'usrgrp', $row );
+		}
+	}
+
+	/**
+	 * Remove a user from a user group.
+	 *
+	 * @param integer $usrId
+	 * @param integer $grpId
+	 */
+	public static function removeUserFromGroup( $usrId, $grpId )
+	{
+		$where = 'usrid = ? AND grpid = ? ';
+		$params = array( intval( $usrId ), intval( $grpId ) );
+		self::deleteRows( 'usrgrp', $where, $params );
+	}
 
 	/**
 	 *  Converts user object value to an array

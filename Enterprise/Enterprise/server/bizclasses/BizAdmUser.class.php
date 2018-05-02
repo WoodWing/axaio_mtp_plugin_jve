@@ -607,7 +607,7 @@ class BizAdmUser
 			if( is_null( $user ) ) {
 				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrId ) );
 			}
-			DBUser::addGroupsToUser( $grpid, $usrId );
+			DBUser::addUserToGroup( $usrId, $grpid );
 			if( DBUser::hasError() ) {
 				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 			}
@@ -644,7 +644,7 @@ class BizAdmUser
 				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpId ) );
 			}
 
-			DBUser::addUsersToGroup( $usrid, $grpId );
+			DBUser::addUserToGroup( $usrid, $grpId );
 			if( DBUser::hasError() ) {
 				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 			}
@@ -681,7 +681,7 @@ class BizAdmUser
 				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{USR_USER}', $usrId ) );
 			}
 
-			DBUser::removeGroupsFromUser( $grpid, $usrId );
+			DBUser::removeUserFromGroup( $usrId, $grpid );
 			if( DBUser::hasError() ) {
 				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 			}
@@ -718,7 +718,7 @@ class BizAdmUser
 				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{GRP_GROUP}', $grpId ) );
 			}
 
-			DBUser::removeUsersFromGroup( $usrid, $grpId );
+			DBUser::removeUserFromGroup( $usrid, $grpId );
 			if( DBUser::hasError() ) {
 				throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 			}
