@@ -208,7 +208,7 @@ class Elvis_RestProxyIndex
 
 		// Explicitly request NOT to update ticket expiration date to save time (since DB updates are expensive).
 		// We assume this is settled through regular web services which are called anyway such as GetObjects.
-		$user = BizSession::checkTicket( $this->httpParams['ticket'], 'ElvisRestProxyIndex', false );
+		$user = BizSession::checkTicket( $this->httpParams['ticket'] );
 		BizSession::setServiceName( 'ElvisRestProxyIndex' );
 		BizSession::startSession( $this->httpParams['ticket'] );
 		BizSession::setTicketCookieForClientIdentifier( $this->httpParams['ticket'] );

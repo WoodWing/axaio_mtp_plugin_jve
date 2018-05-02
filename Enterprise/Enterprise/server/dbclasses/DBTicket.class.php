@@ -588,12 +588,10 @@ class DBTicket extends DBBase
 	 *
 	 * @param string $ticket   Unique ticket; gives user access to the system with given client application
 	 * @param array|null $ticketRow  The DB row from the smart_tickets table having the following fields resolved: usr, appname, appversion, expire, and masterticketid
-	 * @param bool $extend     Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
-	 *                         Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
 	 * @return string|bool     Short user name, or FALSE when the ticket does not exist or has been expired.
 	 * @throws BizException In case of database connection error.
 	 */
-	public static function checkTicket( $ticket, $ticketRow = null, $extend = true )
+	public static function checkTicket( $ticket, $ticketRow = null )
 	{
 		// Special treatment for background/async server job processing, for which no seat must be taken.
 		if( self::$ServerJob && self::$ServerJob->TicketSeal == $ticket ) {
@@ -631,8 +629,8 @@ class DBTicket extends DBBase
 			'masterticketid' => $ticketRow['masterticketid']
 		);
 
-		// user touched server, so postpone expiration
-		if( $extend ) {
+		// postpone expiration when needed
+		if( self::doesTicketNeedToExtend( $ticketRow['appname'], $expire ) ) {
 			$expire = self::_expire( $ticketRow['appname'] );
 			$values = array( 'expire' => strval( $expire ) );
 			$where = '`ticketid` = ?';
@@ -641,6 +639,46 @@ class DBTicket extends DBBase
 		}
 
 		return trim( $ticketRow['usr'] );
+	}
+
+	/**
+	 * Determines whether or not it is time to recalculate and update the ticket expiration time.
+	 *
+	 * To avoid an expensive SQL UPDATE statement for each web service request, this function tells NOT to postpone
+	 * the ticket expiration if it was less than 15 minutes ago it has postponed the ticket expiration the last time.
+	 *
+	 * This optimization comes with a little behaviour change, which seems acceptable. Assume the ticket expiration
+	 * is configured to 1 hour, and the last service request (for which the ticket expiration was postponed) was handled
+	 * at 12:00, now the succeeding request arrives:
+	 * - 16 minutes after the last request? => the expiration is postponed 1 hour to 13:16
+	 * - 14 minutes after the last request? => the expiration is not postponed and still set to 13:00
+	 *
+	 * In the exceptional scenario that the user is very active for the first 14 minutes, then stops for 46 minutes,
+	 * then continues again, the ticket will just have been expired at 13:00 which comes only 46 minutes after the last
+	 * activity. (In the former solution it would have been valid until 13:14, exactly 1 hour after the last request.)
+	 * This change is acceptable because in practice it won't be noticed sometimes the re-logon dialog comes a bit earlier.
+	 *
+	 * @since 10.5.0
+	 * @param string $appName Client application name
+	 * @param string $expire Last calculated ticket expiration time (ISO-formatted datetime string)
+	 * @return bool
+	 */
+	private static function doesTicketNeedToExtend( $appName, $expire )
+	{
+		require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
+
+		$extend = true; // Default true because in case of parse/calculation error it is safer to extend then never to extend.
+		$expireTime = DateTimeFunctions::iso2time( $expire ); // When this ticket should expire (in Unix Epoch time).
+		if( $expireTime !== false ) {
+			$expireDuration = self::getExpireTime( $appName ); // Configured relative expiration time in seconds.
+			$lastPostponeTime = $expireTime - $expireDuration; // When the user has sent the last request for which
+			                                                 // the expiration was recalculated (in Unix Epoch time).
+			$now = time();
+			$leeway = 900; // 15 minutes x 60 sec/min = 900 seconds
+			$lastPostponedSecondsAgo = $now - $lastPostponeTime;
+			$extend = $lastPostponedSecondsAgo > $leeway;
+		}
+		return $extend;
 	}
 
 	/**

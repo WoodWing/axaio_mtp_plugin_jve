@@ -196,7 +196,7 @@ class WW_FileIndex
 		// are expensive). We assume this is settled through regular web services anyway, such as GetObject which are
 		// needed anyway to find out which files are there to download.
 		try {
-			$user = BizSession::checkTicket( $this->httpParams['ticket'], 'FileStore', false );
+			$user = BizSession::checkTicket( $this->httpParams['ticket'] );
 			BizSession::setServiceName( 'FileStore' );
 			BizSession::startSession( $this->httpParams['ticket'] );
 		} catch( BizException $e ) {

@@ -618,7 +618,7 @@ class BizSession
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 
 		// check ticket (and get user)
-		$shortUserName = self::checkTicket( $ticket, 'LogOff' );
+		$shortUserName = self::checkTicket( $ticket );
 
 		// Handle messages read/deleted by user.
 		if( $messageList ) {
@@ -682,14 +682,19 @@ class BizSession
 	 * Throws an exception in case ticket is invalid, with detail set to 'SCEntError_InvalidTicket'.
 	 *
 	 * @param string $ticket Ticket to validate
-	 * @param string $service Not used.
-	 * @param bool $extend Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
-	 *                     Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
+	 * @param string $service Not used. Deprecated since 10.5.0.
+	 * @param bool $extend Not used. Deprecated since 10.5.0.
 	 * @return string Short user name of the active user of the session.
 	 * @throws BizException When ticket not valid.
 	 */
-	public static function checkTicket( $ticket, $service='', $extend = true )
+	public static function checkTicket( $ticket, $service = null, $extend = null )
 	{
+		// Report deprecated way of calling this function.
+		if( !is_null( $service ) || !is_null( $extend ) ) {
+			LogHandler::Log( __METHOD__, 'DEPRECATED',
+				'The $service and $extend parameters should no longer be provided since 10.5.0.' );
+		}
+
 		// All web applications validate their ticket before they start operating, but most of them do not start a session.
 		// Here we do a lazy start to avoid validation without having a valid session.
 		if( !self::isStarted() ) {
@@ -701,7 +706,7 @@ class BizSession
 
 		// Throw error when ticket is not (or no longer) valid.
 		require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-		$userName = DBTicket::checkTicket( $ticket, $dbSession->getSessionTicketRow(), $extend );
+		$userName = DBTicket::checkTicket( $ticket, $dbSession->getSessionTicketRow() );
 		if( !$userName ) {
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 		}

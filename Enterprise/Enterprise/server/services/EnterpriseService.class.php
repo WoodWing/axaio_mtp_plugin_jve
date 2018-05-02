@@ -134,7 +134,7 @@ class EnterpriseService
 				BizSession::startTransaction();
 			}
 			if( $checkTicket ) {
-				$this->User = BizSession::checkTicket( $ticket, $serviceName );
+				$this->User = BizSession::checkTicket( $ticket );
 			}
 
 			// Log request
