@@ -985,6 +985,7 @@ class DBUser extends DBBase
 	/**
 	 * Make a user member of a user group.
 	 *
+	 * @since 10.5.0
 	 * @param integer $usrId
 	 * @param integer $grpId
 	 */
@@ -1009,6 +1010,7 @@ class DBUser extends DBBase
 	/**
 	 * Remove a user from a user group.
 	 *
+	 * @since 10.5.0
 	 * @param integer $usrId
 	 * @param integer $grpId
 	 */
