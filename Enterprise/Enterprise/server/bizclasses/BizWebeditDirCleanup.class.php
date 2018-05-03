@@ -92,7 +92,8 @@ class BizWebeditDirCleanup extends BizServerJobHandler
 	{
 		self::unserializeJobFieldsValue( $job );
 		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
-		FolderUtils::scanDirForFiles( $this, substr( WEBEDITDIR, 0, -1 ) ); // Remove trailing slash.
+		$olderThan = time() - ( AUTOCLEAN_WEBEDITDIR_DAYS * 24 * 3600 );
+		FolderUtils::cleanDirRecursive( substr( WEBEDITDIR, 0, -1 ), false, $olderThan );
 		require_once BASEDIR.'/server/dataclasses/ServerJobStatus.class.php';
 		$job->JobStatus->setStatus( ServerJobStatus::COMPLETED );
 		// Uncomment to pick up same job again and again (for heavy debugging only)
@@ -132,67 +133,5 @@ class BizWebeditDirCleanup extends BizServerJobHandler
 		if( !is_null( $job->JobData ) ) {
 			$job->JobData = serialize( $job->JobData );
 		}
-	}
-
-	/**
-	 * Called by the FolderUtils class, which iterates through the subfolder and calls this function.
-	 * When the given file ($filePath) is older than the clean-up setting, this function
-	 * deletes it. See deleteFile() function for more details.
-	 *
-	 * @param string $filePath Full file path of the file.
-	 * @param integer $level Current ply in folder structure of recursion search.
-	 */
-	public function iterFile( $filePath, /** @noinspection PhpUnusedParameterInspection */
-	                          $level )
-	{
-		$status = stat( $filePath );
-		$time = time();
-		if( $status['atime'] < ( time() - ( AUTOCLEAN_WEBEDITDIR_DAYS * 24 * 3600 ) ) ) {
-			$this->deleteFile( $filePath );
-		}
-	}
-
-	/**
-	 * Deletes a given file from the WEBEDIT folder.
-	 *
-	 * When it cannot be deleted due to any problem (e.g. a file access problem), an ERROR entry is created in server
-	 * logging. When the file does not exists, assumed is that the file was deleted before (e.g. by a server job that
-	 * does auto cleaning or by a client after file handling) and so just an INFO entry is logged.
-	 *
-	 * @param string $filePath File to delete.
-	 * @return bool TRUE when the file could be deleted (or was deleted before).
-	 */
-	public function deleteFile( $filePath )
-	{
-		$deleted = true;
-		if( file_exists( $filePath ) ) {
-			if( !unlink( $filePath ) ) {
-				LogHandler::Log( 'WEBEDIT folder clean-up', 'ERROR',
-					'The file "'.$filePath.'" cannot be deleted. '.
-					'Please ensure there is enough access rights to the file and folder.' );
-				$deleted = false;
-			}
-		} else {
-			// Assumed is that cleaning the same file twice is ok.
-			LogHandler::Log( 'WEBEDIT folder clean-up', 'INFO',
-				'Attempt to delete file "'.$filePath.'" which seems to be removed already.' );
-		}
-		return $deleted;
-	}
-
-	// These three functions are called by parent class, but have no meaning here.
-	public function skipFile( $filePath, $level )
-	{
-		// Nothing to do.
-	}
-
-	public function iterFolder( $folderPath, $level )
-	{
-		// Nothing to do.
-	}
-
-	public function skipFolder( $folderPath, $level )
-	{
-		// Nothing to do.
 	}
 }
