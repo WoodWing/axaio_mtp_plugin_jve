@@ -701,12 +701,15 @@ class BizSession
 			self::startSession( $ticket );
 		}
 
+		require_once( BASEDIR.'/server/dbclasses/DBTicket.class.php' );
+		$serverJob = DBTicket::getContextualServerJob();
+
 		require_once( BASEDIR.'/server/dbclasses/DBSession.class.php' );
-		$dbSession = WW_DbClasses_Session::getInstance( $ticket );
+		$dbSession = WW_DbClasses_Session::getInstance( $ticket, $serverJob );
+
+		$userName = DBTicket::checkTicket( $ticket, $dbSession->getSessionTicketRow() );
 
 		// Throw error when ticket is not (or no longer) valid.
-		require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-		$userName = DBTicket::checkTicket( $ticket, $dbSession->getSessionTicketRow() );
 		if( !$userName ) {
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 		}

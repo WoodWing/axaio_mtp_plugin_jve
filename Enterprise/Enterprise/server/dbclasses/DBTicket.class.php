@@ -642,6 +642,17 @@ class DBTicket extends DBBase
 	}
 
 	/**
+	 * Return the Server Job that is running this session. For regular web services return NULL.
+	 *
+	 * @since 10.5.0
+	 * @return ServerJob|null
+	 */
+	public static function getContextualServerJob()
+	{
+		return self::$ServerJob;
+	}
+
+	/**
 	 * Determines whether or not it is time to recalculate and update the ticket expiration time.
 	 *
 	 * To avoid an expensive SQL UPDATE statement for each web service request, this function tells NOT to postpone

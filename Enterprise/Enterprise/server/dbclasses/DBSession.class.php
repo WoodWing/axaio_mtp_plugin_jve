@@ -24,30 +24,48 @@ class WW_DbClasses_Session extends DBBase
 	 * Setup the memory cache with session info. See module header for details.
 	 *
 	 * @param string $ticket
+	 * @param ServerJob $serverJob
 	 * @return bool Whether or not initialized.
 	 */
-	private function init( $ticket )
+	private function init( $ticket, $serverJob )
 	{
-		// Get values from multiple tables with the following SQL statement (in MySQL notation):
-		//    SELECT t.`usr`, t.`appname`, t.`appversion`, t.`expire`, t.`masterticketid`,
-		//       c.`value` AS 'enterprise_system_id', u.*
-		//    FROM `smart_tickets` t, `smart_config` c, `smart_users` u
-		//    WHERE t.`ticketid` = '...' AND c.`name` = 'enterprise_system_id' AND t.`usr` = u.`user`
+		if( $serverJob && $serverJob->TicketSeal == $ticket ) {
+			$tables = array( 'c' => 'config', 'u' => 'users' );
+			$fields = array(
+				'c' => array( 'enterprise_system_id' => 'value' ),
+				'u' => array( '*' )
+			);
+			$where = 'c.`name` = ? AND u.`user` = ?';
+			$params = array( 'enterprise_system_id', strval( $serverJob->ActingUser ) );
+			$row = self::getRow( $tables, $where, $fields, $params );
+			if( $row ) {
+				$excludeFieldsFromUserRow = array( 'enterprise_system_id' );
+				$this->sessionUserRow = array_diff_key( $row, array_flip( $excludeFieldsFromUserRow ) );
+				$this->sessionTicketRow = null;
+				$this->enterpriseSystemId = $row['enterprise_system_id'];
+			}
+		} else {
+			// Get values from multiple tables with the following SQL statement (in MySQL notation):
+			//    SELECT t.`usr`, t.`appname`, t.`appversion`, t.`expire`, t.`masterticketid`,
+			//       c.`value` AS 'enterprise_system_id', u.*
+			//    FROM `smart_tickets` t, `smart_config` c, `smart_users` u
+			//    WHERE t.`ticketid` = '...' AND c.`name` = 'enterprise_system_id' AND t.`usr` = u.`user`
 
-		$tables = array( 't' => 'tickets', 'c' => 'config', 'u' => 'users' );
-		$fields = array(
-			't' => array( 'usr', 'appname', 'appversion', 'expire', 'masterticketid' ),
-			'c' => array( 'enterprise_system_id' => 'value' ),
-			'u' => array( '*' )
-		);
-		$where = 't.`ticketid` = ? AND c.`name` = ? AND t.`usr` = u.`user`';
-		$params = array( strval( $ticket ), 'enterprise_system_id' );
-		$row = self::getRow( $tables, $where, $fields, $params );
-		if( $row ) {
-			$excludeFieldsFromUserRow = array_merge( $fields['t'], array( 'enterprise_system_id' ) );
-			$this->sessionUserRow = array_diff_key( $row, array_flip( $excludeFieldsFromUserRow ) );
-			$this->sessionTicketRow = array_intersect_key( $row, array_flip( $fields['t'] ) );
-			$this->enterpriseSystemId = $row['enterprise_system_id'];
+			$tables = array( 't' => 'tickets', 'c' => 'config', 'u' => 'users' );
+			$fields = array(
+				't' => array( 'usr', 'appname', 'appversion', 'expire', 'masterticketid' ),
+				'c' => array( 'enterprise_system_id' => 'value' ),
+				'u' => array( '*' )
+			);
+			$where = 't.`ticketid` = ? AND c.`name` = ? AND t.`usr` = u.`user`';
+			$params = array( strval( $ticket ), 'enterprise_system_id' );
+			$row = self::getRow( $tables, $where, $fields, $params );
+			if( $row ) {
+				$excludeFieldsFromUserRow = array_merge( $fields['t'], array( 'enterprise_system_id' ) );
+				$this->sessionUserRow = array_diff_key( $row, array_flip( $excludeFieldsFromUserRow ) );
+				$this->sessionTicketRow = array_intersect_key( $row, array_flip( $fields['t'] ) );
+				$this->enterpriseSystemId = $row['enterprise_system_id'];
+			}
 		}
 		return (bool)$row;
 	}
@@ -61,7 +79,9 @@ class WW_DbClasses_Session extends DBBase
 	}
 
 	/**
-	 * @return array DB record from the smart_tickets table containing fields: 'usr', 'appname', 'appversion', 'expire', 'masterticketid'
+	 * Return the ticket info for regular web services. For server jobs, return NULL.
+	 *
+	 * @return array|null DB record from the smart_tickets table containing fields: 'usr', 'appname', 'appversion', 'expire', 'masterticketid'
 	 */
 	public function getSessionTicketRow()
 	{
@@ -95,16 +115,17 @@ class WW_DbClasses_Session extends DBBase
 	 * Return the singleton instance of this class.
 	 *
 	 * @param string $ticket
+	 * @param ServerJob $serverJob
 	 * @return WW_DbClasses_Session
 	 */
-	public static function getInstance( $ticket )
+	public static function getInstance( $ticket, $serverJob )
 	{
 		if( null === self::$instance ) {
 			self::$instance = new self();
 		}
 		if( $ticket ) {
 			if( self::$ticket !== $ticket ) {
-				if( self::$instance->init( $ticket ) ) {
+				if( self::$instance->init( $ticket, $serverJob ) ) {
 					self::$ticket = $ticket;
 				}
 			}
