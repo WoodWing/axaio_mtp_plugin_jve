@@ -397,6 +397,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 	 * If on the other hand ExifImageHeight and ExifImageWidth are not set, but the XResolution for EXIF is set this value is
 	 * used.
 	 *
+	 * @since 10.4.1
 	 * @param integer|null $metadataHeight
 	 * @param integer|null $metadataWidth
 	 * @return bool
@@ -410,6 +411,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 	/**
 	 * Checks if the embedded metadata dimensions are reliable.
 	 *
+	 * @since 10.4.1
 	 * @link canUseDpiOfEmbededMetaData()
 	 * @param integer|null $metadataHeight
 	 * @param integer|null $metadataWidth
@@ -423,6 +425,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 	/**
 	 * Checks if the embedded metadata dimensions are set.
 	 *
+	 * @since 10.4.1
 	 * @param integer|null  $metadataHeight
 	 * @param integer|null $metadataWidth
 	 * @return bool
