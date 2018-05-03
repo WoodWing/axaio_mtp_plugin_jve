@@ -65,32 +65,48 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 		$this->teardownTest();
 	}
 
-	/**
-	 * Do a logon to contain a ticket and retrieve some general data from the log on response.
-	 */
 	final public function setupTest()
+	{
+		$this->initTest();
+		$this->enablePlugin();
+		$response = $this->doLogOn();
+		$suiteOpts = unserialize( TESTSUITE );
+		$this->lookupPublicationInfo( $response, $suiteOpts['Brand'] );
+	}
+
+	private function initTest()
 	{
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
 		$this->utils->initTest( 'JSON' );
-		$this->enablePlugin();
-		$response = $this->utils->wflLogOn( $this );
-		$this->ticket = isset( $response->Ticket ) ? $response->Ticket : null;
-		$this->assertNotNull( $this->ticket );
-		$suiteOpts = unserialize( TESTSUITE );
-		$this->publicationInfo = $this->lookupPublicationInfo( $response, $suiteOpts['Brand'] );
-		$this->assertInstanceOf( 'PublicationInfo', $this->publicationInfo );
 	}
 
-	/**
-	 * Enable the ExifTool plug-in (if needed).
-	 */
 	private function enablePlugin()
 	{
 		$this->activatedPlugin = $this->utils->activatePluginByName( $this, 'ExifTool' );
-		if( is_null( $this->activatedPlugin ) ) {
-			$this->setResult( 'ERROR', 'Could not activate the ExifTool Metadata plug-in.' );
+		$this->assertNotNull( $this->activatedPlugin, 'Please make sure ExifTool plug-in is installed.' );
+	}
+
+	private function doLogOn()
+	{
+		$response = $this->utils->wflLogOn( $this );
+		$this->assertNotNull( $response );
+		$this->ticket = isset( $response->Ticket ) ? $response->Ticket : null;
+		$this->assertNotNull( $this->ticket );
+		return $response;
+	}
+
+	private function lookupPublicationInfo( WflLogOnResponse $response, $brandName )
+	{
+		$foundInfo = null;
+		if( $response->Publications ) foreach( $response->Publications as $publicationInfo ) {
+			if( $publicationInfo->Name == $brandName ) {
+				$foundInfo = $publicationInfo;
+				break;
+			}
 		}
+		$this->assertInstanceOf( 'PublicationInfo', $foundInfo );
+		$this->publicationInfo = $foundInfo;
 	}
 
 	/**
@@ -103,7 +119,6 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 		$fileExtensions = array( 'jpg', 'jpeg', 'tif', 'psd', 'gif', 'png' );
 		$filePath = __DIR__.'/testdata';
 		FolderUtils::scanDirForFiles( $this, $filePath, $fileExtensions );
-
 	}
 
 	/**
@@ -112,11 +127,10 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 	 * @param string $filePath Full file path of the file.
 	 * @param integer $level Current ply in folder structure of recursion search.
 	 */
-	public function iterFile( $filePath, /** @noinspection PhpUnusedParameterInspection */
-	                          $level )
+	public function iterFile( string $filePath, /** @noinspection PhpUnusedParameterInspection */
+	                          int $level )
 	{
 		$image = $this->createImage( $filePath );
-		$this->createdImageIds[] = $image->MetaData->BasicMetaData->ID;
 		$this->checkDimensions( $image, basename( $filePath ) );
 	}
 
@@ -126,9 +140,9 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 	 * See also 'testdata/readme.txt'.
 	 *
 	 * @param Object $image
-	 * @param $fileName
+	 * @param string $fileName
 	 */
-	public function checkDimensions( Object $image, $fileName )
+	public function checkDimensions( Object $image, string $fileName )
 	{
 		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 		$fileNameWithoutExt = MimeTypeHandler::native2DBname( $fileName, '' );
@@ -160,11 +174,10 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 	 * @param string $imageFilePath Location of the native file.
 	 * @return Object image object
 	 */
-	private function createImage( $imageFilePath )
+	private function createImage( string $imageFilePath )
 	{
 		// Compose a test image workflow object in memory.
 		$imageObject = $this->composeImageObject( $this->publicationInfo, $imageFilePath );
-		$imageObject->MetaData->BasicMetaData->Name = self::composeObjectName( 'Image' );
 
 		// Upload a local image file to the transfer folder.
 		require_once BASEDIR.'/server/utils/TransferClient.class.php';
@@ -176,6 +189,7 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 		// Create the image workflow object in DB (and let core server move the image file to the FileStore).
 		$response = $this->utils->callCreateObjectService( $this, $this->ticket, array( $imageObject ) );
 		$this->assertNotNull( $response );
+		$this->createdImageIds[] = $response->Objects[0]->MetaData->BasicMetaData->ID;
 
 		return $response->Objects[0];
 	}
@@ -187,6 +201,7 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 	{
 		if( $this->activatedPlugin ) {
 			$this->utils->deactivatePluginByName( $this, 'ExifTool' );
+			$this->activatedPlugin = null;
 		}
 		$this->deleteImages();
 		$this->cleanUpTransferServer();
@@ -224,36 +239,13 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 	}
 
 	/**
-	 * Lookup a brand by name that is returned by the LogOn response.
-	 *
-	 * @param WflLogOnResponse $response
-	 * @param string $brandName
-	 * @return PublicationInfo|null
-	 */
-	private function lookupPublicationInfo( WflLogOnResponse $response, $brandName )
-	{
-		$foundInfo = null;
-		if( $response->Publications ) foreach( $response->Publications as $publicationInfo ) {
-			if( $publicationInfo->Name == $brandName ) {
-				$foundInfo = $publicationInfo;
-				break;
-			}
-		}
-		if( !$foundInfo ) {
-			$this->setResult( 'ERROR', 'Could not find the test Brand "'.$brandName.'".',
-				'Please check the TESTSUITE setting in configserver.php.' );
-		}
-		return $foundInfo;
-	}
-
-	/**
-	 * Created the database images.
+	 * Compose the image object. Object can be used in the request for the WflCreateObjects service.
 	 *
 	 * @param PublicationInfo $pubInfo
 	 * @param string $imageFilePath
 	 * @return Object The image object
 	 */
-	private function composeImageObject( PublicationInfo $pubInfo, $imageFilePath )
+	private function composeImageObject( PublicationInfo $pubInfo, string $imageFilePath )
 	{
 		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 
@@ -270,6 +262,8 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 		$object->MetaData->BasicMetaData->Name = $this->composeObjectName( 'Image' );
 		$object->MetaData->BasicMetaData->Publication = new Publication( $pubInfo->Id, $pubInfo->Name );
 		$object->MetaData->BasicMetaData->Category = new Category( $category->Id, $category->Name );
+		$object->MetaData->WorkflowMetaData = new WorkflowMetaData();
+		$object->MetaData->WorkflowMetaData->State = $imageStatus;
 
 		$object->Files = array();
 		$object->Files[0] = new Attachment();
@@ -290,7 +284,7 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 	 * @param string $objType
 	 * @return State|null Picked status, or NULL when none found.
 	 */
-	private function pickObjectTypeStatus( PublicationInfo $pubInfo, $objType )
+	private function pickObjectTypeStatus( PublicationInfo $pubInfo, string $objType )
 	{
 		$objStatus = null;
 		if( $pubInfo->States ) foreach( $pubInfo->States as $status ) {
@@ -332,7 +326,7 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 	 * @param string $objectType
 	 * @return string The object name
 	 */
-	private function composeObjectName( $objectType )
+	private function composeObjectName( string $objectType )
 	{
 		$microTime = explode( ' ', microtime() );
 		$miliSec = sprintf( '%03d', round( $microTime[0] * 1000 ) );
