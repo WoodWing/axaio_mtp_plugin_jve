@@ -96,20 +96,19 @@ class WW_DbClasses_Session extends DBBase
 	 *
 	 * @param string $ticket
 	 * @return WW_DbClasses_Session
-	 * @throws BizException when a different $ticket is provided than a session is already started for.
 	 */
 	public static function getInstance( $ticket )
 	{
 		if( null === self::$instance ) {
 			self::$instance = new self();
-			if( self::$instance->init( $ticket ) ) {
-				self::$ticket = $ticket;
+		}
+		if( $ticket ) {
+			if( self::$ticket !== $ticket ) {
+				if( self::$instance->init( $ticket ) ) {
+					self::$ticket = $ticket;
+				}
 			}
-		} elseif( self::$ticket !== $ticket ) {
-			throw new BizException( 'ERR_ARGUMENT', 'Server',
-				'Invalid params provided for '.__METHOD__.'(). '.
-				'Please provide the same value for $ticket once a session is started.' );
-		} 
+		}
 		return self::$instance;
 	}
 
