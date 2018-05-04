@@ -74,6 +74,9 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 		$this->lookupPublicationInfo( $response, $suiteOpts['Brand'] );
 	}
 
+	/**
+	 * Initialize the utils class.
+	 */
 	private function initTest()
 	{
 		require_once BASEDIR.'/server/utils/TestSuite.php';
@@ -81,12 +84,20 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 		$this->utils->initTest( 'JSON' );
 	}
 
+	/**
+	 * Enable the ExifTool plug-in.
+	 */
 	private function enablePlugin()
 	{
 		$this->activatedPlugin = $this->utils->activatePluginByName( $this, 'ExifTool' );
 		$this->assertNotNull( $this->activatedPlugin, 'Please make sure ExifTool plug-in is installed.' );
 	}
 
+	/**
+	 * Do a log on request to acquire a ticket and publication information.
+	 *
+	 * @return null|WflLogOnResponse
+	 */
 	private function doLogOn()
 	{
 		$response = $this->utils->wflLogOn( $this );
@@ -96,7 +107,13 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 		return $response;
 	}
 
-	private function lookupPublicationInfo( WflLogOnResponse $response, $brandName )
+	/**
+	 * Retrieve the publication info from the LogOn response for the specified brand.
+	 *
+	 * @param WflLogOnResponse $response
+	 * @param string $brandName
+	 */
+	private function lookupPublicationInfo( WflLogOnResponse $response, string $brandName )
 	{
 		$foundInfo = null;
 		if( $response->Publications ) foreach( $response->Publications as $publicationInfo ) {
@@ -205,7 +222,9 @@ class WW_TestSuite_BuildTest_Exiftool_Exiftool_TestCase extends TestCase
 		}
 		$this->deleteImages();
 		$this->cleanUpTransferServer();
-		$this->utils->wflLogOff( $this, $this->ticket );
+		if( $this->ticket ) {
+			$this->utils->wflLogOff( $this, $this->ticket );
+		}
 	}
 
 	/**
