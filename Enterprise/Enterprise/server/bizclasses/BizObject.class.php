@@ -4635,6 +4635,7 @@ class BizObject
 				//If user has not 'Open for Edit' rights, they could still have 'Open for Edit (Unplaced)' rights.
 				if( !BizAccess::checkRightsForObjectProps( $user, 'E', BizAccess::DONT_THROW_ON_DENIED, $objectProps ) ) {
 
+					require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 					// Check if the user has access to unplaced files only. If not, it means the user does not have any edit rights.
 					if( BizAccess::checkRightsForObjectProps( $user, 'O', BizAccess::THROW_ON_DENIED, $objectProps )
 						 && BizRelation::hasRelationOfType( $objectProps['ID'], 'Placed', 'parents' ) ) {
