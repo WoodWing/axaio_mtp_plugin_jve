@@ -619,14 +619,12 @@ class WW_Utils_TestSuite
 	 */
 	public function wflLogOff( TestCase $testCase, $ticket )
 	{
-		if( $ticket ) {
-			require_once BASEDIR.'/server/services/wfl/WflLogOffService.class.php';
-			$request = new WflLogOffRequest();
-			$request->Ticket = $ticket;
-			$request->SaveSettings = false;
-			$stepInfo = 'LogOff TESTSUITE user.';
-			/*$response =*/ $this->callService( $testCase, $request, $stepInfo );
-		}
+		require_once BASEDIR.'/server/services/wfl/WflLogOffService.class.php';
+		$request = new WflLogOffRequest();
+		$request->Ticket = $ticket;
+		$request->SaveSettings = false;
+		$stepInfo = 'LogOff TESTSUITE user.';
+		/*$response =*/ $this->callService( $testCase, $request, $stepInfo );
 	}
 
 	/**
