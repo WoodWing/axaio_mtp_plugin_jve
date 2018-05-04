@@ -316,12 +316,14 @@ class BizAdmPublication
 		self::updateRecalcIssuesDeadlines( $pubId, $newIssues, array() );
 
 		// Notification / Messaging
-		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
-		require_once BASEDIR.'/server/smartevent.php';
-		if( $newIssues ) foreach( $newIssues as $newIssue ) {
-			BizEnterpriseEvent::createIssueEvent( $newIssue->Id, 'create' );
-			if( !$newIssue->OverrulePublication ) { // EN-89582
-				new smartevent_createIssueEx( BizSession::getTicket(), $pubId, $pubChannelId, $newIssue );
+		if( $newIssues ) {
+			require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
+			require_once BASEDIR.'/server/smartevent.php';
+			foreach( $newIssues as $newIssue ) {
+				BizEnterpriseEvent::createIssueEvent( $newIssue->Id, 'create' );
+				if( !$newIssue->OverrulePublication ) { // EN-89582
+					new smartevent_createIssueEx( BizSession::getTicket(), $pubId, $pubChannelId, $newIssue );
+				}
 			}
 		}
 
@@ -464,11 +466,13 @@ class BizAdmPublication
 		self::updateRecalcIssuesDeadlines( $pubId, $modifyIssues, $orgDeadlines );
 
 		// Notification / Messaging
-		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
-		require_once BASEDIR.'/server/smartevent.php';
-		if( $modifyIssues ) foreach( $modifyIssues as $modIssue ) {
-			BizEnterpriseEvent::createIssueEvent( $modIssue->Id, 'update' );
-			new smartevent_modifyissueEx( BizSession::getTicket(), $pubId, $pubChannelId, $modIssue );
+		if( $modifyIssues ) {
+			require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
+			require_once BASEDIR.'/server/smartevent.php';
+			foreach( $modifyIssues as $modIssue ) {
+				BizEnterpriseEvent::createIssueEvent( $modIssue->Id, 'update' );
+				new smartevent_modifyissueEx( BizSession::getTicket(), $pubId, $pubChannelId, $modIssue );
+			}
 		}
 
 		return $modifyIssues;
@@ -1052,9 +1056,8 @@ class BizAdmPublication
 	 * @param integer $pubId
 	 * @param AdmPubChannel[] $pubChannels
 	 */
-	private static function sendEventForPubChannels( $pubId, $pubChannels )
+	private static function sendEventForPubChannels( integer $pubId, $pubChannels ):void
 	{
-		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/smartevent.php';
 		if( $pubChannels ) foreach( $pubChannels as $pubChannel ) {
 			new smartevent_updatepubchannel( BizSession::getTicket(), $pubId, $pubChannel );
