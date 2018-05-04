@@ -247,7 +247,7 @@ class smartevent
 	 * @param integer $pubId
 	 * @param AdmPubChannel $pubChannel
 	 */
-	protected function addPubChannelFields( $pubId, $pubChannel )
+	protected function addPubChannelFields( integer $pubId, AdmPubChannel $pubChannel ):void
 	{
 		$this->addfield( 'PublicationId',      $pubId );
 		$this->addfield( 'Id',                 $pubChannel->Id );
@@ -267,7 +267,7 @@ class smartevent
 	 * @param integer $pubChannelId
 	 * @param AdmIssue $issue
 	 */
-	protected function addIssueFields( $pubId, $pubChannelId, $issue )
+	protected function addIssueFields( integer $pubId, integer $pubChannelId, AdmIssue $issue ):void
 	{
 		$this->addfield( 'PublicationId', $pubId );
 		$this->addfield( 'PubChannelId', $pubChannelId );
@@ -881,7 +881,7 @@ class smartevent
 	 * @since 10.4.1
 	 * @param integer $pubId
 	 */
-	protected function composeExchangeNameForPubChannel( $pubId )
+	protected function composeExchangeNameForPubChannel( integer $pubId )
 	{
 		// When message queue integration is disabled, there is no need to resolved the exchange name.
 		require_once BASEDIR . '/server/bizclasses/BizMessageQueue.class.php';
@@ -912,7 +912,7 @@ class smartevent
 	 *
 	 * For $pubId, when leave it to null(default), this function will resolve it.
 	 * For some events however, such as Issue deletion(smartevent_deleteissueEx), function cannot resolve Issue's
-	 * Publication Id. This is due to that Issue would have alerady been deleted when it reaches this function.
+	 * Publication Id. This is due to that Issue would have already been deleted when it reaches this function.
 	 * This means function cannot retrieve the Issue's Channel Id to further resolve the Publication Id. In this case,
 	 * the caller has to provide the $pubId.
 	 *

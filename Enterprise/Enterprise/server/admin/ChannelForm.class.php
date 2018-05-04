@@ -641,7 +641,6 @@ class ChannelForm extends HtmlAnyForm
 	 */
 	private function sendEventForReorderedIssues( $pubId, $pubChannelId )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
 		require_once BASEDIR.'/server/smartevent.php';
 		$reorderedIssues = DBIssue::listChannelIssues( $pubChannelId );
