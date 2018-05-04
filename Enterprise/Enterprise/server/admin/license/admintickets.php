@@ -25,7 +25,7 @@ if( !$connectionMaintenanceApp->checkSessionVariables( $adminUser ) ) {
 
 $deleteByUser = isset( $requestParams['usr'] ) ? $requestParams['usr'] : '';
 if( $deleteByUser ) { // Delete by user.
-    require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+	require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 	if( is_null( DBTicket::DbPurgeTicketsByUser( $deleteByUser ) ) ) {
 		$connectionMaintenanceApp->buildLicensePage();
 		exit;
@@ -73,11 +73,11 @@ if( is_null( $ticketRowsSortedByLogon ) ) {
 }
 
 $user2NumTickets = $connectionMaintenanceApp->calculateTicketsByUser( $ticketRowsSortedByUser );
-$tempsessionid = session_id();
+$tempSessionId = session_id();
 $license->showStatusInHTML( true );
-$connectionMaintenanceApp->printHeaderDeleteSection( $adminUser, $tempsessionid );
+$connectionMaintenanceApp->printHeaderDeleteSection( $adminUser, $tempSessionId );
 $connectionMaintenanceApp->printDeleteByUserSection( $user2NumTickets );
-$connectionMaintenanceApp->printDeleteByLogOnTimeSection( $adminUser, $tempsessionid );
+$connectionMaintenanceApp->printDeleteByLogOnTimeSection( $adminUser, $tempSessionId );
 $connectionMaintenanceApp->addJsScripts();
 $connectionMaintenanceApp->printConnectionsByUserTable( $ticketRowsSortedByLogon, $users );
 $connectionMaintenanceApp->buildLicensePage();
@@ -85,12 +85,11 @@ $connectionMaintenanceApp->buildLicensePage();
 /**
  * @package Enterprise
  * @subpackage  License
- * @since 	10.4.1
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @since   10.4.1
+ * @copyright   WoodWing Software bv. All Rights Reserved.
  *
  * Helper class, strictly bound to above license application page.
  */
-
 class ConnectionMaintenanceApp
 {
 
@@ -107,14 +106,14 @@ class ConnectionMaintenanceApp
 	}
 
 	/**
-     * Checks if the user is the same as the one set in the session. Also the hash value set in the session is checked.
-     *
+	 * Checks if the user is the same as the one set in the session. Also the hash value set in the session is checked.
+	 *
 	 * @param string $user
 	 * @return bool
 	 */
 	public function checkSessionVariables( $user )
 	{
-	    $ok = false;
+		$ok = false;
 		if( $user ) {
 			$sessionName = 'ww_userlimit_admin_session';
 			session_name( $sessionName );
@@ -131,21 +130,21 @@ class ConnectionMaintenanceApp
 	}
 
 	/**
-     * Returns basic user information of all users.
-     *
+	 *  Returns user's fullname for all users.
+	 *
 	 * @return array
 	 */
 	public function getUsersInfo()
-    {
-	    require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-	    $rows = DBBase::listRows( 'users', '', null, '', array( 'fullname', 'user' ) );
-	    $users = array();
-	    if( $rows ) foreach( $rows as $row ) {
-		    $users[ $row['user'] ] = $row['fullname'];
-	    }
+	{
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+		$rows = DBBase::listRows( 'users', '', null, '', array( 'fullname', 'user' ) );
+		$users = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$users[ $row['user'] ] = $row['fullname'];
+		}
 
-	    return $users;
-    }
+		return $users;
+	}
 
 	/**
 	 * Returns ticket info sorted by $sortBy column.
@@ -153,15 +152,15 @@ class ConnectionMaintenanceApp
 	 * @param string $sortBy
 	 * @return array
 	 */
-    public function getTicketsSortBy( $sortBy )
-    {
-	    require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
-	    $fields = array( 'id', 'usr', 'clientname', 'clientip', 'appname', 'appproductcode', 'appversion', 'expire', 'logon' );
-	    $orderBy = array( $sortBy => true );
-	    $rows = DBBase::listRows( 'tickets', '', null, '', $fields, array(), $orderBy );
+	public function getTicketsSortBy( $sortBy )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+		$fields = array( 'id', 'usr', 'clientname', 'clientip', 'appname', 'appproductcode', 'appversion', 'expire', 'logon' );
+		$orderBy = array( $sortBy => true );
+		$rows = DBBase::listRows( 'tickets', '', null, '', $fields, array(), $orderBy );
 
-	    return $rows;
-    }
+		return $rows;
+	}
 
 	/**
 	 * Calculates the number of tickets per user.
@@ -169,49 +168,51 @@ class ConnectionMaintenanceApp
 	 * @param array $ticketRowsSortedByUser
 	 * @return mixed
 	 */
-    public function calculateTicketsByUser( $ticketRowsSortedByUser )
-    {
-	    if( $ticketRowsSortedByUser ) foreach( $ticketRowsSortedByUser as $row ) {
-		    $usr = $row['usr'];
-		    if( !isset( $user2NumTickets[ $usr ] ) ) {
-			    $user2NumTickets[ $usr ] = 1;
-		    } else {
-			    $user2NumTickets[ $usr ]++;
-		    }
-	    }
+	public function calculateTicketsByUser( $ticketRowsSortedByUser )
+	{
+		$user2NumTickets = array();
+		if( $ticketRowsSortedByUser ) foreach( $ticketRowsSortedByUser as $row ) {
+			$usr = $row['usr'];
+			if( !isset( $user2NumTickets[ $usr ] ) ) {
+				$user2NumTickets[ $usr ] = 1;
+			} else {
+				$user2NumTickets[ $usr ]++;
+			}
+		}
 
-	    return $user2NumTickets;
-    }
+		return $user2NumTickets;
+	}
 
 	/**
 	 * Generates the general part of the the delete section.
 	 *
 	 * @param string $adminUser
-	 * @param string $tempsessionid
+	 * @param string $tempSessionId
 	 */
-    public function printHeaderDeleteSection( $adminUser, $tempsessionid )
-    {
-	    print "<h2>".BizResources::localize( "LIC_USAGE_LIMIT_REACHED" )."</h2>";
-	    print BizResources::localize( "LIC_CHOOSE_DELETE_METHOD" );
-	    print "<form method='post' action='#'>";
-	    print "<input type='hidden' name='adminUser' value='$adminUser'>";
-	    print "<input type='hidden' name='ww_userlimit_admin_session' value='$tempsessionid'>";
-    }
+	public function printHeaderDeleteSection( $adminUser, $tempSessionId )
+	{
+		print "<h2>".BizResources::localize( "LIC_USAGE_LIMIT_REACHED" )."</h2>";
+		print BizResources::localize( "LIC_CHOOSE_DELETE_METHOD" );
+		print "<form method='post' action='#'>";
+		print "<input type='hidden' name='adminUser' value='$adminUser'>";
+		print "<input type='hidden' name='ww_userlimit_admin_session' value='$tempSessionId'>";
+	}
 
 	/**
 	 * Generates the section to select the user of whom the tickets can be deleted.\
 	 *
 	 * @param array $user2NumTickets
 	 */
-    public function printDeleteByUserSection( $user2NumTickets )
-    {
-	    print "<h3>".BizResources::localize( "LIC_1_DELETE_TICKETS_OF_USERS" )."</h3>";
-	    print BizResources::localize( "LIC_TICKETS_OF_USER" )."<select name='usr'>";
-	    print "<option value=''>".BizResources::localize( "LIC_PLEASE_CHOOSE" )."</option>";
-	    foreach( $user2NumTickets as $usr => $numTickets )
-		    print "<option value=\"".htmlspecialchars( $usr )."\">$usr ($numTickets)</option>\n";
-	    print "</select>"."<input type='submit' value='Delete'>"."</form>";
-    }
+	public function printDeleteByUserSection( $user2NumTickets )
+	{
+		print "<h3>".BizResources::localize( "LIC_1_DELETE_TICKETS_OF_USERS" )."</h3>";
+		print BizResources::localize( "LIC_TICKETS_OF_USER" )."<select name='usr'>";
+		print "<option value=''>".BizResources::localize( "LIC_PLEASE_CHOOSE" )."</option>";
+		foreach( $user2NumTickets as $usr => $numTickets ) {
+			print "<option value=\"".htmlspecialchars( $usr )."\">$usr ($numTickets)</option>\n";
+		}
+		print "</select>"."<input type='submit' value='Delete'>"."</form>";
+	}
 
 	/**
 	 * Generates the section to select the user of whom the tickets can be deleted.
@@ -219,19 +220,19 @@ class ConnectionMaintenanceApp
 	 * @param string $adminUser
 	 * @param string $tempSessionId
 	 */
-    public function printDeleteByLogOnTimeSection( $adminUser, $tempSessionId  )
-    {
-	    print "<h3>".BizResources::localize( "LIC_2_DELETE_LONGEST_TICKETS" )."</h3>";
-	    print "<form method='post' action='#' name='bytime'>";
-	    print "<input type='hidden' name='adminUser' value='$adminUser'>";
-	    print "<input type='hidden' name='ww_userlimit_admin_session' value='$tempSessionId'>";
-	    print "<input type='hidden' name='id' value=''>";
-	    print "<input type='hidden' name='time' value=''>";
-	    print "</form>";
-    }
+	public function printDeleteByLogOnTimeSection( $adminUser, $tempSessionId )
+	{
+		print "<h3>".BizResources::localize( "LIC_2_DELETE_LONGEST_TICKETS" )."</h3>";
+		print "<form method='post' action='#' name='bytime'>";
+		print "<input type='hidden' name='adminUser' value='$adminUser'>";
+		print "<input type='hidden' name='ww_userlimit_admin_session' value='$tempSessionId'>";
+		print "<input type='hidden' name='id' value=''>";
+		print "<input type='hidden' name='time' value=''>";
+		print "</form>";
+	}
 
 	/**
-	 * Generates the section to deleted tickets based on the log on time.
+	 * Generates the section to list the logged on user based on the log on time.
 	 *
 	 * @param string $ticketRowsSortedByLogon
 	 * @param array $users
@@ -289,10 +290,11 @@ class ConnectionMaintenanceApp
 			$txt .= "<a href='javascript:delById(".$row['id'].")'>".BizResources::localize( "ACT_DEL" )."</a>";
 			$txt .= "</td>";
 			$txt .= "<td class='text'>";
-			if( $numberOfConnections > 1 )
+			if( $numberOfConnections > 1 ) {
 				$txt .= "<a href='javascript:delBeforeTime( \"".$row['logon']."\");'>".BizResources::localize( "LIC_DELETE_ALL_TICKETS_1_TO" )." $numberOfConnections</a>";
-			else
+			} else {
 				$txt .= '&nbsp;';
+			}
 			$txt .= "</td>";
 			$txt .= "</tr>";
 		}
@@ -307,9 +309,9 @@ class ConnectionMaintenanceApp
 	 * Add some javascript functions to handle the selected delete option.
 	 */
 	public function addJsScripts()
-    {
-        $txt =
-	    "<script language='Javascript' type='text/Javascript'>
+	{
+		$txt =
+			"<script language='Javascript' type='text/Javascript'>
         //<![CDATA[
         function delById(id) {
 	        var f = document.forms.bytime;
@@ -325,6 +327,6 @@ class ConnectionMaintenanceApp
 
         //]]>
         </script>";
-        print $txt;
-    }
+		print $txt;
+	}
 }
