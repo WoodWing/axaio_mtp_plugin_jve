@@ -249,31 +249,34 @@ class DBObjectLock extends DBBase
 	 *
 	 * @param string $where Indicates the condition or conditions that rows must satisfy to be selected.
 	 * @param mixed $fieldnames. Either an array containing the fieldnames to get or '*' in which case all fields are returned.
-	 * @param array $params, containing parameters to be substituted for the placeholders
-	 *        of the where clause. 
+	 * @param array $params, containing parameters to be substituted for the placeholders of the where clause.
 	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
 	 *        Keys: DB fields. Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
 	 * @return array with values or null if no row found.
+	 * @deprecated 10.5.0 Please use DBObjectLock::getRow() instead.
 	 */
 	public static function selectRow( $where, $fieldnames = '*', $params = array(), $orderBy = null)
 	{
+		LogHandler::log( __METHOD__, 'DEPRECATED', 'Please use DBObjectLock::getRow() instead.' );
 		$result = self::getRow( self::TABLENAME, $where, $fieldnames, $params, $orderBy );
 		return $result;
-	}		
+	}
 
 	/**
-	 * Removes locks of childs objects if they are locked by user acting from the
-	 * ip-address.
+	 * Removes locks of childs objects if they are locked by user acting from the ip-address.
+	 *
 	 * @param string $ipAddress
 	 * @param string $user
 	 * @param int $parent
-	 * @return mixed null if failure else true. 
+	 * @return mixed null if failure else true.
+	 * @deprecated 10.5.0 No longer used/supported.
 	 */
 	public static function deleteLocksOfChildren($ipAddress, $user, $parent)
 	{
+		LogHandler::log( __METHOD__, 'DEPRECATED', 'No longer used/supported.' );
 		$dbDriver = DBDriverFactory::gen();
 		$placements = $dbDriver->tablename('placements');
-		$where = "`ip` = ? AND `usr` = ? AND object IN ( SELECT `child` FROM $placements WHERE `type` = 'Placed' AND `parent` = ? )"; 
+		$where = "`ip` = ? AND `usr` = ? AND `object` IN ( SELECT `child` FROM $placements WHERE `type` = 'Placed' AND `parent` = ? )";
 		$params = array( strval( $ipAddress ), strval( $user ), intval( $parent ) );
 		$result = self::deleteRows(self::TABLENAME, $where, $params);
 
