@@ -247,7 +247,7 @@ class smartevent
 	 * @param integer $pubId
 	 * @param AdmPubChannel $pubChannel
 	 */
-	protected function addPubChannelFields( integer $pubId, AdmPubChannel $pubChannel ):void
+	protected function addPubChannelFields( int $pubId, AdmPubChannel $pubChannel ):void
 	{
 		$this->addfield( 'PublicationId',      $pubId );
 		$this->addfield( 'Id',                 $pubChannel->Id );
@@ -267,7 +267,7 @@ class smartevent
 	 * @param integer $pubChannelId
 	 * @param AdmIssue $issue
 	 */
-	protected function addIssueFields( integer $pubId, integer $pubChannelId, AdmIssue $issue ):void
+	protected function addIssueFields( int $pubId, int $pubChannelId, AdmIssue $issue ):void
 	{
 		$this->addfield( 'PublicationId', $pubId );
 		$this->addfield( 'PubChannelId', $pubChannelId );
@@ -881,7 +881,7 @@ class smartevent
 	 * @since 10.4.1
 	 * @param integer $pubId
 	 */
-	protected function composeExchangeNameForPubChannel( integer $pubId )
+	protected function composeExchangeNameForPubChannel( int $pubId )
 	{
 		// When message queue integration is disabled, there is no need to resolved the exchange name.
 		require_once BASEDIR . '/server/bizclasses/BizMessageQueue.class.php';
