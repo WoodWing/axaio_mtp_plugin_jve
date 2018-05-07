@@ -14,6 +14,8 @@ class InternalError_EnterprisePlugin extends EnterprisePlugin
 
 class BizServerPlugin
 {
+	const LOCAL_CACHE_BUCKET = 'ServerPluginConnectors';
+
 	/**
 	 * Queries all server plug-in infos ($pluginInfos) from DB and instantiates plug-in
 	 * objects ($pluginObjs) from it. Since it reads all the PluginInfo.php files from
@@ -105,7 +107,24 @@ class BizServerPlugin
 	static private function getConnectorsFromDB( $interface, $type, &$connectors, &$connInfos, $activeOnly = true, $installedOnly = true )
 	{
 		// create connector info data instances
-		$connInfos = self::getConnectorInfosFromDB( $interface, $type, $activeOnly, $installedOnly );
+		$itemId = $interface.'_'.$type;
+		if( $activeOnly && $installedOnly && // let's optimize for the most obvious filters only
+			BizSession::getTicket() ) {       // without ticket there is no cache (e.g. exclude LogOn, GetServers, etc)
+			require_once BASEDIR.'/server/bizclasses/LocalCache.class.php';
+			$cache = WW_BizClasses_LocalCache::getInstance();
+			$connInfosData = $cache->readBucketItemData( self::LOCAL_CACHE_BUCKET, $itemId );
+		} else {
+			$cache = null;
+			$connInfosData = false;
+		}
+		if( $connInfosData === false ) {
+			$connInfos = self::getConnectorInfosFromDB( $interface, $type, $activeOnly, $installedOnly );
+			if( $cache ) {
+				$cache->writeBucketItemData( self::LOCAL_CACHE_BUCKET, $itemId, serialize( $connInfos ) );
+			}
+		} else {
+			$connInfos = unserialize( $connInfosData );
+		}
 
 		// create connector instances
 		if( $connInfos ) foreach( $connInfos as $connInfo ) {
@@ -1146,6 +1165,10 @@ class BizServerPlugin
 
 		// Save changed PluginInfoData to db
 		self::storePluginsAtDB( $pluginObjs, $pluginInfos, $connObjs, $connInfos );
+
+		// Change version of the bucket to invalidate all its items (connector info query results).
+		require_once BASEDIR.'/server/bizclasses/LocalCache.class.php';
+		WW_BizClasses_LocalCache::getInstance()->resetBucket( self::LOCAL_CACHE_BUCKET );
 	}
 	
 	/**

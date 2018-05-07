@@ -23,16 +23,10 @@ try {
 	$connInfos   = array(); // ConnectorInfoData
 	$pluginErrs  = array(); // plugins (messages) that are in error
 	
-	$registerPlugins = true; // temporary forced to always register => TODO: Remove once this optimization is tested well.
-	if( $registerPlugins ) {
-		// Scan plugins at config- and server- folders and save changed data in DB
-		$pluginObjs  = array(); // EnterprisePlugin
-		$connObjs    = array(); // EnterpriseConnector
-		BizServerPlugin::registerServerPlugins( $pluginObjs, $pluginInfos, $connObjs, $connInfos, $pluginErrs );
-	} else {
-		// Read plugins as registered in DB. (Ignore plugins stored in folders.)
-		BizServerPlugin::readPluginInfosFromDB( $pluginInfos, $connInfos );
-	}
+	// Scan plugins at config- and server- folders and save changed data in DB
+	$pluginObjs  = array(); // EnterprisePlugin
+	$connObjs    = array(); // EnterpriseConnector
+	BizServerPlugin::registerServerPlugins( $pluginObjs, $pluginInfos, $connObjs, $connInfos, $pluginErrs );
 
 	// Allow user to make changes too	
 	if( $toggledPluginId ) {
