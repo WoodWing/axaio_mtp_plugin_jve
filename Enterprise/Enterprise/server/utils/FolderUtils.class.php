@@ -189,16 +189,18 @@ class FolderUtils
 	}
 	
 	/**
-	 * Cleans up all files and subdirectories from a directory. Next the directory itself
-	 * is removed if choosen. A directory can only be removed if it is empty. So if cleaning up one
-	 * of the files or subdirectory fails the cleanup of the folder fails.
-	 * If the owner of the process has no access rights the clean up fails.
-	 * Optionaly a Unix timestamp can be passed in which case only files older than the passed time will be removed.
-	 * @param string $directory
-	 * @param boolean $removeTopFolder boolean whether the folder itself should be removed. Defaults to true.
-	 * @param int $olderThan if a file is last modified before the passed time, it will be removed (Unix timestamp). 
-	 * @return bool True if directory is removed else false.
+	 * Cleans up all files and subdirectories from a directory and optionally the directory itself.
+	 *
+	 * A directory can only be removed if it is empty. So if any file or subdirectory can not be removed, the
+	 * parental directories are not removed as well. This could happen because:
+	 * - the file is younger than the given $olderThan parameter
+	 * - the owner of the process has not enough access rights to remove the file or subdirectory
+	 *
 	 * @since 7.0.12
+	 * @param string $directory Full path of the directory to clean.
+	 * @param boolean $removeTopFolder Whether the folder itself should be removed.
+	 * @param int|null $olderThan Unix timestamp. Only remove files that are last modified before this timestamp. NULL to remove all.
+	 * @return bool TRUE if the entire directory is removed, else FALSE.
 	 */
 	public static function cleanDirRecursive( $directory, $removeTopFolder = true, $olderThan = null )
 	{

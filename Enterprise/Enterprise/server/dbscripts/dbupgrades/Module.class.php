@@ -1,18 +1,17 @@
 <?php
 /**
- * Base class used to implement DB update scripts. Once an update script has ran
- * successfully, this class can be called to flag the update with {@link setUpdated()}. 
- * Then {@Link isUpdated()} can be called to avoid expensive checksums on the DB to 
- * determine whether or not the script was run before.
+ * Base class used to implement DB upgrade scripts.
  *
- * IMPORTANT: DB upgrade modules should focus on -data- migration, rather than
- * trying to migrate the -model- itself. To change the model please use definitions
- * in the dbmodule.php instead.
+ * Once an upgrade script has ran successfully, this class can be called to flag the update with setUpdated().
+ * Then isUpdated() can be called to determine whether or not the script was run before.
  *
- * @package 	Enterprise
- * @subpackage 	BizClasses
- * @since 		v9.0.0
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * IMPORTANT: DB upgrade modules should focus on -data- migration, rather than trying to migrate the -model- itself.
+ *            To change the model please use definitions in the server/dbmodel/Definition.class.php module instead.
+ *
+ * @package    Enterprise
+ * @subpackage BizClasses
+ * @since      9.0.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
  
 abstract class WW_DbScripts_DbUpgrades_Module

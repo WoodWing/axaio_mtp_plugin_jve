@@ -1,9 +1,9 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	BizServices
- * @since 		v4.2
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage BizClasses
+ * @since      v4.2
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * There are PHP sessions and web service ‘sessions', which are quite different.
  * A PHP session is started to handle an incoming service request. However,
@@ -701,12 +701,9 @@ class BizSession
 			self::startSession( $ticket );
 		}
 
-		require_once( BASEDIR.'/server/dbclasses/DBTicket.class.php' );
-		$serverJob = DBTicket::getContextualServerJob();
+		$dbSession = self::getDbSession( $ticket );
 
-		require_once( BASEDIR.'/server/dbclasses/DBSession.class.php' );
-		$dbSession = WW_DbClasses_Session::getInstance( $ticket, $serverJob );
-
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$userName = DBTicket::checkTicket( $ticket, $dbSession->getSessionTicketRow() );
 
 		// Throw error when ticket is not (or no longer) valid.
@@ -720,6 +717,48 @@ class BizSession
 		self::loadUserLanguage( self::$userRow['user'] );
 
 		return self::$userRow['user'];
+	}
+
+	/**
+	 * Provide access entry point to some contextual session data read from DB.
+	 *
+	 * @since 10.5.0
+	 * @param string $ticket
+	 * @return WW_DbClasses_Session (singleton)
+	 */
+	private static function getDbSession( $ticket )
+	{
+		require_once( BASEDIR.'/server/dbclasses/DBTicket.class.php' );
+		$serverJob = DBTicket::getContextualServerJob();
+
+		require_once( BASEDIR.'/server/dbclasses/DBSession.class.php' );
+		return WW_DbClasses_Session::getInstance( self::getTicket(), $serverJob );
+	}
+
+	/**
+	 * Return list of buckets that contain data as cached in the local folder of the application server.
+	 *
+	 * @since 10.5.0
+	 * @return array Map of local cache ids (logical names) and versions (GUIDs)
+	 */
+	public static function getLocalCacheBuckets()
+	{
+		$dbSession = self::getDbSession( self::getTicket() );
+		return $dbSession->getLocalCacheBuckets();
+	}
+
+	/**
+	 * Return a bucket version. When the bucket is not present in local cache, create it.
+	 *
+	 * @since 10.5.0
+	 * @param string $bucketId
+	 * @param bool $forceNewVersion TRUE to always create a new bucket version, FALSE to only create a version when the bucket does not exist yet.
+	 * @return string The bucket version (GUID).
+	 */
+	public static function getOrCreateBucketVersionInLocalCache( $bucketId, $forceNewVersion )
+	{
+		$dbSession = self::getDbSession( self::getTicket() );
+		return $dbSession->getOrCreateBucketVersionInLocalCache( $bucketId, $forceNewVersion );
 	}
 
 	/**
