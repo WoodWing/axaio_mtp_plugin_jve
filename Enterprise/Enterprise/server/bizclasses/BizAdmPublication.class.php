@@ -1056,7 +1056,7 @@ class BizAdmPublication
 	 * @param integer $pubId
 	 * @param AdmPubChannel[] $pubChannels
 	 */
-	private static function sendEventForPubChannels( integer $pubId, $pubChannels ):void
+	private static function sendEventForPubChannels( int $pubId, array $pubChannels ):void
 	{
 		require_once BASEDIR.'/server/smartevent.php';
 		if( $pubChannels ) foreach( $pubChannels as $pubChannel ) {
