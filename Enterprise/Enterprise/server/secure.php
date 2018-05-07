@@ -176,7 +176,7 @@ function getauthorizations( $dbh, $userShort, $feature = 0 )
 function hasRights( $dbdr, $userShort, $app=null )
 {
 	require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
-	$select = array( 'u' => array( 'disable' ), 'g' => array( 'admin' ) );
+	$select = array( 'u' => array( 'id' ) );
 	$from = array( 'u' => 'users', 'x' => 'usrgrp', 'g' => 'groups' );
 	$where = 'u.`user` = ? AND u.`id` = x.`usrid` AND g.`id` = x.`grpid` AND u.`disable` = ? AND g.`admin` != ?';
 	$params = array( strval( $userShort ), '', '' );
