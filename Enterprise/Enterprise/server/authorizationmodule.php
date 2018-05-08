@@ -37,7 +37,7 @@ class authorizationmodule
 
 		// To resolve the full name of the user, prefer the session user cache since all info of that users is cached already
 		// while the DBUser keeps track of its own cache for any user, regardless the session user.
-		if( $user == BizSession::getShortUserName() ) {
+		if( $user === BizSession::getShortUserName() ) {
 			$this->userFullName = BizSession::getUserInfo( 'fullname' );
 		} else {
 			require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
