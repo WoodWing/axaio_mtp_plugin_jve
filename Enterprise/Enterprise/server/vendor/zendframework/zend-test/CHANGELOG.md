@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 3.2.0 - 2018-04-07
+
+### Added
+
+- [#60](https://github.com/zendframework/zend-test/pull/60) Added support for
+  PHPUnit 7
+- [#65](https://github.com/zendframework/zend-test/pull/65) Added support for
+  query parameters in DELETE request in AbstractControllerTestCase
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#63](https://github.com/zendframework/zend-test/pull/63) Fixed compatibility
+  with PHP 7.2
+
+## 3.1.1 - 2017-10-29
+
+### Added
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#55](https://github.com/zendframework/zend-test/pull/55) Fixes compatibility
+  with PHPUnit 5.7.23 where empty expected exception message no longer means
+  message is not checked.
+- [#49](https://github.com/zendframework/zend-test/pull/49) Fixes missing alias
+  for compatibility with PHPUnit <6.0
+
 ## 3.1.0 - 2017-05-01
 
 ### Added
