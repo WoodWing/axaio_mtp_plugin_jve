@@ -943,7 +943,7 @@ class DBUser extends DBBase
 	 */
 	public static function addUsersToGroup( $usrId, $grpId )
 	{
-		self::addUserToGroup( $usrId, $grpId );
+		self::addUserToGroup( $grpId, $usrId );
 	}
 
 	/**
@@ -955,7 +955,7 @@ class DBUser extends DBBase
 	 */
 	public static function removeUsersFromGroup( $usrId, $grpId )
 	{
-		self::removeUserFromGroup( $usrId, $grpId );
+		self::removeUserFromGroup( $grpId, $usrId );
 	}
 
 	/**
@@ -967,7 +967,7 @@ class DBUser extends DBBase
 	 */
 	public static function addGroupsToUser( $grpId, $usrId )
 	{
-		self::addUserToGroup( $usrId, $grpId );
+		self::addUserToGroup( $grpId, $usrId );
 	}
 
 	/**
@@ -979,17 +979,17 @@ class DBUser extends DBBase
 	 */
 	public static function removeGroupsFromUser( $grpId, $usrId )
 	{
-		self::removeUserFromGroup( $usrId, $grpId );
+		self::removeUserFromGroup( $grpId, $usrId );
 	}
 
 	/**
 	 * Make a user member of a user group.
 	 *
 	 * @since 10.5.0
-	 * @param integer $usrId
 	 * @param integer $grpId
+	 * @param integer $usrId
 	 */
-	public static function addUserToGroup( $usrId, $grpId )
+	public static function addUserToGroup( $grpId, $usrId )
 	{
 		$grpId = intval( $grpId );
 		$usrId = intval( $usrId );
@@ -1011,10 +1011,10 @@ class DBUser extends DBBase
 	 * Remove a user from a user group.
 	 *
 	 * @since 10.5.0
-	 * @param integer $usrId
 	 * @param integer $grpId
+	 * @param integer $usrId
 	 */
-	public static function removeUserFromGroup( $usrId, $grpId )
+	public static function removeUserFromGroup( $grpId, $usrId )
 	{
 		$where = 'usrid = ? AND grpid = ? ';
 		$params = array( intval( $usrId ), intval( $grpId ) );
