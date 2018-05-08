@@ -159,7 +159,6 @@ class ActionPropertiesAdminApp
 		$edit = isset($_REQUEST['edit']) ? $_REQUEST['edit'] : '';
 		$mandatory = isset($_REQUEST['mandatory']) ? $_REQUEST['mandatory'] : '';
 		$restricted = isset($_REQUEST['restricted']) ? $_REQUEST['restricted'] : '';
-		// $refreshonchange = isset($_REQUEST['refreshonchange']) ? $_REQUEST['refreshonchange'] : ''; // EN-2164, Marked for future use
 		$multipleObjects = isset($_REQUEST['multipleobjects']) ? $_REQUEST['multipleobjects'] : '';
 		//echo 'DEBUG: order=['. $order .'] prop=['. $prop .'] edit=['. $edit .'] mandatory=['. $mandatory .'] restricted=['. $restricted .']</br>';
 		// Validate data retrieved from form (XSS attacks)
@@ -169,12 +168,10 @@ class ActionPropertiesAdminApp
 		$edit = $edit ? 'on' : '';
 		$mandatory = $mandatory ? 'on' : '';
 		$restricted = $restricted ? 'on' : '';
-		// $refreshonchange = $refreshonchange ? 'on' : ''; // EN-2164, Marked for future use
 		$multipleObjects = $multipleObjects ? 'on' : '';
 		if( $prop ) {
 			$values = array('publication' => $this->publ, 'action' => $this->action, 'type' => $this->objType, 'orderid' => $order, 'property' => $prop,
 				'edit' => $edit, 'mandatory' => $mandatory, 'restricted' => $restricted,
-				// 'refreshonchange' => $refreshonchange, // EN-2164, Marked for future use
 				'multipleobjects' => $multipleObjects );
 			$this->insertActionProperty( $values );
 		}
@@ -208,7 +205,6 @@ class ActionPropertiesAdminApp
 			$edit = isset($_REQUEST["edit$i"]) ? $_REQUEST["edit$i"] : '';
 			$mandatory = isset($_REQUEST["mandatory$i"]) ? $_REQUEST["mandatory$i"] : '';
 			$restricted = isset($_REQUEST["restricted$i"]) ? $_REQUEST["restricted$i"] : '';
-			// $refreshonchange = isset($_REQUEST["refreshonchange$i"]) ? $_REQUEST["refreshonchange$i"] : ''; // EN-2164, Marked for future use
 			$multipleObjects = isset($_REQUEST["multipleobjects$i"]) ? $_REQUEST["multipleobjects$i"] : '';
 			// Validate data retrieved from form (XSS attacks)
 			if( in_array($prop, $this->sysProps) ) {
@@ -217,12 +213,10 @@ class ActionPropertiesAdminApp
 			$edit = $edit ? 'on' : '';
 			$mandatory = $mandatory ? 'on' : '';
 			$restricted = $restricted ? 'on' : '';
-			// $refreshonchange = $refreshonchange ? 'on' : ''; // EN-2164, Marked for future use
 			$multipleObjects = $multipleObjects ? 'on' : '';
 			//echo 'DEBUG: order=['. $order .'] prop=['. $prop .'] edit=['. $edit .'] mandatory=['. $mandatory .'] restricted=['. $restricted .']</br>';
 			$values = array('publication' => $this->publ, 'orderid' => $order, 'property' => $prop, 'edit' => $edit,
 				'mandatory' => $mandatory,	'restricted' => $restricted,
-				// 'refreshonchange' => $refreshonchange, // EN-2164, Marked for future use
 				'multipleobjects' => $multipleObjects );
 			DBActionproperty::updateActionproperty( $id, $values );
 		}
@@ -354,7 +348,7 @@ class ActionPropertiesAdminApp
 			$clr = $color[$flip];
 			$flip = 1- $flip;
 			$deltxt = inputvar( "multiDelete$i", '', 'checkbox', null, true, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS"), !$isConfigurable );
-			if( $this->onlyQuery ) {
+			if( $this->isActionOnlyForFieldsDisplay( $this->action ) ) {
 				$detailTxt .= "<tr$clr>";
 				$detailTxt .= "<td>$deltxt</td>";
 				$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
@@ -401,8 +395,7 @@ class ActionPropertiesAdminApp
 	 */
 	private function listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt )
 	{
-		// 1 row to enter new record
-		if( $this->onlyQuery ) {
+		if( $this->isActionOnlyForFieldsDisplay( $this->action )) {
 			$detailTxt .= '<tr>';
 			$detailTxt .= '<td>'.inputvar('order', '', 'small').'</td>';
 			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
@@ -414,7 +407,6 @@ class ActionPropertiesAdminApp
 			$detailTxt .= '<td align="center">'.inputvar('edit','', 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
 			$detailTxt .= '<td align="center">'.inputvar('mandatory','', 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
 			$detailTxt .= '<td align="center">'.inputvar('restricted','', 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
-			// $detailTxt .= '<td align="center">'.inputvar('refreshonchange','', 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
 			if( $showMultiObj ) {
 				$detailTxt .= '<td align="center">'.inputvar('multipleobjects','', 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
 			} else {
@@ -454,9 +446,8 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			if( $this->onlyQuery ) {
+			if( $this->isActionOnlyForFieldsDisplay( $this->action )) {
 				$detailTxt .= "<tr$clr><td>".$row['orderid'].'</td><td>'.formvar($prop).'</td>';
-				//$detailTxt .= '<td style="display:none"></td><td style="display:none"></td></tr>';
 			} else {
 				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
 				$detailTxt .= '<td>'.formvar($prop).'</td>';
@@ -467,8 +458,6 @@ class ActionPropertiesAdminApp
 				}
 				$detailTxt .= '<td align="center">'.(trim($row['mandatory'])?CHECKIMAGE:'').'</td>';
 				$detailTxt .= '<td align="center">'.(trim($row['restricted'])?CHECKIMAGE:'').'</td>';
-				// $detailTxt .= '<td align="center">'.(trim($row['refreshonchange'])?CHECKIMAGE:'').'</td>'; // EN-2164, Marked for future use
-
 				if( $showMultiObj ) {
 					$detailTxt .= '<td align="center">'.(trim($row['multipleobjects'])?CHECKIMAGE:'').'</td>';
 				} else {
@@ -670,7 +659,6 @@ class ActionPropertiesAdminApp
 				   $values['edit'] = $usage->Editable ? 'on' : '';
 				   $values['mandatory'] = $usage->Mandatory ? 'on' : '';
 				   $values['restricted'] = $usage->Restricted ? 'on' : '';
-				   $values['refreshonchange'] = $usage->RefreshOnChange ? 'on' : '';
 				   $values['multipleobjects'] = $usage->MultipleObjects ? 'on' : '';
 					$this->insertActionProperty( $values );
 				   $order += 5;
@@ -695,8 +683,8 @@ class ActionPropertiesAdminApp
 
 		$txt = $this->showOrHideButtons( $txt, $numberOfRecords );
 		$txt = str_replace("<!--DELETE_COLUMN-->", ( $this->mode == 'add' ) ? 'display:none' : (( $numberOfRecords > 0 ) ? '' : 'display:none'), $txt );
-		$txt = str_replace("<!--WORKFLOW_COLUMNS-->",$this->onlyQuery ? 'display:none' : '', $txt );
-		$txt = str_replace("<!--PREVIEW_COLUMNS-->",$this->onlyQuery ? '' : 'display:none', $txt );
+		$txt = str_replace("<!--WORKFLOW_COLUMNS-->",$this->isActionOnlyForFieldsDisplay( $this->action ) ? 'display:none' : '', $txt );
+		$txt = str_replace("<!--PREVIEW_COLUMNS-->",$this->isActionOnlyForFieldsDisplay( $this->action ) ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--MULTIPLE_OBJECTS_CELL-->", $showMultiObj ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
 		$txt = str_replace("<!--IMG_LOCKIMG-->", LOCKIMAGE, $txt);
@@ -708,13 +696,6 @@ class ActionPropertiesAdminApp
 	 */
 	public function processRequestData()
 	{
-		$this->onlyQuery = false;
-		switch( $this->action ) {
-			case 'Preview':
-				$this->onlyQuery = true;
-				break;
-		}
-
 		if( isset( $_REQUEST['update'] ) && $_REQUEST['update'] ) {
 			$this->mode = 'update';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
@@ -784,5 +765,18 @@ class ActionPropertiesAdminApp
 		require_once BASEDIR .'/server/bizclasses/BizProperty.class.php';
 		$nonConfigurableFields = BizProperty::getStaticPropIds();
 		return !in_array( $prop, $nonConfigurableFields );
+	}
+
+
+	/**
+	 * To check if the fields to be displayed for the action is only meant for displayed and not adjustable.
+	 *
+	 * @since 10.x.x
+	 * @param string $action
+	 * @return bool
+	 */
+	private function isActionOnlyForFieldsDisplay( $action )
+	{
+		return $action === 'Preview';
 	}
 }
