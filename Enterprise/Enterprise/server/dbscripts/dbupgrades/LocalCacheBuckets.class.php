@@ -35,7 +35,6 @@ class WW_DbScripts_DbUpgrades_LocalCacheBuckets extends WW_DbScripts_DbUpgrades_
 	public function isUpdated()
 	{
 		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
-		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
 		$flagValue = DBConfig::getValue( $this->getUpdateFlag(), true );
 		return !is_null( $flagValue );
 	}
@@ -49,19 +48,14 @@ class WW_DbScripts_DbUpgrades_LocalCacheBuckets extends WW_DbScripts_DbUpgrades_
 	 */
 	public function setUpdated()
 	{
-		$stored = false;
-		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
-		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
 		if( self::isUpdated() ) {
-			$stored = true;
+			return true;
 		}
+		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+		$stored = DBConfig::storeValue( $this->getUpdateFlag(), serialize( array() ) );
 		if( !$stored ) {
-			$stored = DBConfig::storeValue( $this->getUpdateFlag(), serialize( array() ) );
-			if( !$stored ) {
-				LogHandler::Log( __CLASS__, 'ERROR', 'Failed updating flag '.$this->getUpdateFlag() );
-			}
+			LogHandler::Log( __CLASS__, 'ERROR', 'Failed updating flag '.$this->getUpdateFlag() );
 		}
-
 		return $stored;
 	}
 
@@ -80,6 +74,6 @@ class WW_DbScripts_DbUpgrades_LocalCacheBuckets extends WW_DbScripts_DbUpgrades_
 	 */
 	public function introduced()
 	{
-		return '10.5';
+		return '10.5'; // since 10.5.0 (to be exact)
 	}
 }

@@ -732,7 +732,7 @@ class BizSession
 		$serverJob = DBTicket::getContextualServerJob();
 
 		require_once( BASEDIR.'/server/dbclasses/DBSession.class.php' );
-		return WW_DbClasses_Session::getInstance( self::getTicket(), $serverJob );
+		return WW_DbClasses_Session::getInstance( $ticket, $serverJob );
 	}
 
 	/**
@@ -748,17 +748,31 @@ class BizSession
 	}
 
 	/**
-	 * Return a bucket version. When the bucket is not present in local cache, create it.
+	 * Create and return a new bucket version (regardless whether the bucket already exists in the local cache).
 	 *
 	 * @since 10.5.0
 	 * @param string $bucketId
-	 * @param bool $forceNewVersion TRUE to always create a new bucket version, FALSE to only create a version when the bucket does not exist yet.
 	 * @return string The bucket version (GUID).
+	 * @throws BizException
 	 */
-	public static function getOrCreateBucketVersionInLocalCache( $bucketId, $forceNewVersion )
+	public static function forceCreateBucketVersionInLocalCache( string $bucketId )
 	{
 		$dbSession = self::getDbSession( self::getTicket() );
-		return $dbSession->getOrCreateBucketVersionInLocalCache( $bucketId, $forceNewVersion );
+		return $dbSession->forceCreateBucketVersionInLocalCache( $bucketId );
+	}
+
+	/**
+	 * Return a bucket version. When the bucket is not present in the local cache yet, create it.
+	 *
+	 * @since 10.5.0
+	 * @param string $bucketId
+	 * @return string The bucket version (GUID).
+	 * @throws BizException
+	 */
+	public static function getOrCreateBucketVersionInLocalCache( string $bucketId )
+	{
+		$dbSession = self::getDbSession( self::getTicket() );
+		return $dbSession->getOrCreateBucketVersionInLocalCache( $bucketId );
 	}
 
 	/**

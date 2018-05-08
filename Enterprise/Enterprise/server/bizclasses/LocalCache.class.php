@@ -44,12 +44,14 @@
  * happened to read/write cache files at the very moment the cache gets cleaned (which could cause file access issues).
  * The cleaning is automatically done in context of the first call on the new day (when it is about to create a new date
  * timestamp folder). It checks whether there are folders with a "date timestamp" older than 2 days and deletes those.
+ *
+ * Error handling - This class does not throw BizException because it is up to the caller to decide whether or not the
+ * local cache functionality is mandatory.
  */
 
 class WW_BizClasses_LocalCache
 {
 	const ACCESS_MODE = 0777;
-	const LOCAL_CACHE_BUCKET = 'LocalCacheMangement';
 
 	/**
 	 * Write data in a bucket item in the local cache.
@@ -58,13 +60,16 @@ class WW_BizClasses_LocalCache
 	 * @param string $itemId
 	 * @param string $data The data to write.
 	 * @return bool Whether or not it could be successfully written into the cache.
-	 * @throws BizException when illegal characters detected in given identifiers
 	 */
 	public function writeBucketItemData( string $bucketId, string $itemId, string $data ): bool
 	{
-		$this->validateBucketId( $bucketId );
-		$this->validateItemId( $itemId );
+		if( !$this->validateBucketId( $bucketId ) || !$this->validateItemId( $itemId ) ) {
+			return false;
+		}
 		$bucketPath = $this->composeBucketPath( $bucketId );
+		if( $bucketPath === false ){
+			return false;
+		}
 		$wroteBytes = $this->writeDataInFile( $bucketPath.'/'.$itemId, $data );
 		return $wroteBytes !== false;
 	}
@@ -79,12 +84,10 @@ class WW_BizClasses_LocalCache
 	private function writeDataInFile( string $fullPath, string $data )
 	{
 		$wroteBytes = false;
-		if( file_exists( $fullPath ) || FolderUtils::mkFullDir( dirname( $fullPath ) ) ) {
+		if( $this->createFolderIfNotExists( dirname( $fullPath ) ) ) {
 			$wroteBytes = file_put_contents( $fullPath, $data );
 			if( $wroteBytes !== false ) {
-				$originalMask = umask( 0 ); // Needed for mkdir, see http://www.php.net/umask
 				chmod( $fullPath, self::ACCESS_MODE );
-				umask( $originalMask );
 			}
 		}
 		return $wroteBytes;
@@ -96,13 +99,16 @@ class WW_BizClasses_LocalCache
 	 * @param string $bucketId
 	 * @param string $itemId
 	 * @return bool|string The data read, or FALSE when item was not present in cache.
-	 * @throws BizException when illegal characters detected in given identifiers
 	 */
 	public function readBucketItemData( string $bucketId, string $itemId )
 	{
-		$this->validateBucketId( $bucketId );
-		$this->validateItemId( $itemId );
+		if( !$this->validateBucketId( $bucketId ) || !$this->validateItemId( $itemId ) ) {
+			return false;
+		}
 		$bucketPath = $this->composeBucketPath( $bucketId );
+		if( $bucketPath === false ){
+			return false;
+		}
 		return $this->readDataFromFile( $bucketPath.'/'.$itemId );
 	}
 
@@ -129,8 +135,9 @@ class WW_BizClasses_LocalCache
 	 */
 	public function resetBucket( string $bucketId )
 	{
-		$this->validateBucketId( $bucketId );
-		BizSession::getOrCreateBucketVersionInLocalCache( $bucketId, true );
+		if( $this->validateBucketId( $bucketId ) ) {
+			BizSession::forceCreateBucketVersionInLocalCache( $bucketId );
+		}
 	}
 
 	/**
@@ -170,13 +177,17 @@ class WW_BizClasses_LocalCache
 	 * Return the full folder path of a bucket in the local cache.
 	 *
 	 * When the bucket does not exist yet, it gets registered in the DB.
+	 * When the cache base folder does not exist yet, it gets created.
 	 *
 	 * @param string $bucketId
-	 * @return string The full folder path. This folder may or may not exist.
+	 * @return string|bool The full folder path. This folder may or may not exist. FALSE when the cache base folder could not be created.
 	 */
 	private function composeBucketPath( string $bucketId )
 	{
-		$basePath = $this->getBasePath();
+		$basePath = $this->ensureBasePathExists();
+		if( $basePath === false ) {
+			return false;
+		}
 		$bucketVersion = $this->getBucketVersion( $bucketId );
 		return $basePath.'/'.$bucketId.'/'.$bucketVersion;
 	}
@@ -193,7 +204,7 @@ class WW_BizClasses_LocalCache
 		if( array_key_exists( $bucketId, $buckets ) ) {
 			$bucketVersion = $buckets[ $bucketId ];
 		} else {
-			$bucketVersion = BizSession::getOrCreateBucketVersionInLocalCache( $bucketId, false );
+			$bucketVersion = BizSession::getOrCreateBucketVersionInLocalCache( $bucketId );
 		}
 		return $bucketVersion;
 	}
@@ -202,22 +213,22 @@ class WW_BizClasses_LocalCache
 	 * Validate the given bucket item id. See validateSafeAlphaIdentifier() for validation rules.
 	 *
 	 * @param string $itemId
-	 * @throws BizException when given identifier is not valid.
+	 * @return bool Whether or not valid.
 	 */
 	private function validateItemId( string $itemId )
 	{
-		$this->validateSafeAlphanumericIdentifier( $itemId );
+		return $this->validateSafeAlphanumericIdentifier( $itemId );
 	}
 
 	/**
 	 * Validate the given bucket id. See validateSafeAlphaIdentifier() for validation rules.
 	 *
 	 * @param string $bucketId
-	 * @throws BizException when given identifier is not valid.
+	 * @return bool Whether or not valid.
 	 */
 	private function validateBucketId( string $bucketId )
 	{
-		$this->validateSafeAlphanumericIdentifier( $bucketId );
+		return $this->validateSafeAlphanumericIdentifier( $bucketId );
 	}
 
 	/**
@@ -228,24 +239,29 @@ class WW_BizClasses_LocalCache
 	 * - contains at least one character, but no more than 255 characters
 	 *
 	 * @param string $identifier
-	 * @throws BizException when given identifier is not valid.
+	 * @return bool Whether or not valid.
 	 */
 	private function validateSafeAlphanumericIdentifier( string $identifier )
 	{
 		$allowedSymbols = array( '-', '_' );
-		if( !$identifier || strlen( $identifier ) > 255 ||
-			!ctype_alnum( str_replace( $allowedSymbols, '', $identifier ) ) ) {
-			$detail = 'Bad identifier '.$identifier.' provided for method '.__METHOD__;
-			throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
+		$isValid = $identifier && strlen( $identifier ) <= 255 &&
+			ctype_alnum( str_replace( $allowedSymbols, '', $identifier ) );
+		if( !$isValid ) {
+			$message = 'Bad identifier "'.$identifier.'" provided.';
+			LogHandler::Log( __METHOD__, 'ERROR', $message );
 		}
+		return $isValid;
 	}
 
 	/**
 	 * Return the daily local cache base folder of this application server version.
 	 *
-	 * @return string Full file path of the folder.
+	 * When the cache base folder does not exist yet, it gets created.
+	 * When the new date timestamp folder does not exist yet, it gets created and old folders are auto cleaned.
+	 *
+	 * @return string|bool Full file path of the folder. FALSE when folder creation failed.
 	 */
-	private function getBasePath(): string
+	private function ensureBasePathExists(): string
 	{
 		// Note that the date timestamp needs to be consistent throughout the current session to keep using the same
 		// folder when this session happen to pass midnight (24:00h). In other words, $dateStamp has to be static.
@@ -264,7 +280,9 @@ class WW_BizClasses_LocalCache
 		// Compose the base path and create when not exists.
 		$esVersion = str_replace( array(' ', '.'), '_', SERVERVERSION );
 		$cacheDir = $dateStampDir.'/'.$esVersion;
-		$this->createFolderIfNotExists( $cacheDir );
+		if( !$this->createFolderIfNotExists( $cacheDir ) ) {
+			return false;
+		}
 		return $cacheDir;
 	}
 
@@ -293,17 +311,17 @@ class WW_BizClasses_LocalCache
 	 * Check whether the given folder exists and create the full path when it doesn't.
 	 *
 	 * @param string $folder
-	 * @throws BizException
+	 * @return bool Whether or not the folder could be created or already exists.
 	 */
 	private function createFolderIfNotExists( string $folder )
 	{
-		if( !file_exists( $folder ) ) {
-			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
-			if( !FolderUtils::mkFullDir( $folder, self::ACCESS_MODE ) ) {
-				$detail = "Failed to create folder '$folder' in local application cache.";
-				throw new BizException( 'ERR_ERROR', 'Server', $detail );
-			}
+		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
+		$createdOrExists = FolderUtils::ensureDirExists( $folder, self::ACCESS_MODE );
+		if( !$createdOrExists ) {
+			$message = 'Failed to create folder "'.$folder.'" in local application cache.';
+			LogHandler::Log( __METHOD__, 'ERROR', $message );
 		}
+		return $createdOrExists;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

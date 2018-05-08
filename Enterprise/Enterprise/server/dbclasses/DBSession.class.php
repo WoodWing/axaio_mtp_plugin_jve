@@ -126,19 +126,47 @@ class WW_DbClasses_Session extends DBBase
 	}
 
 	/**
-	 * Return a bucket version. When the bucket is not present in local cache, create it.
+	 * Create and return a new bucket version (regardless whether the bucket already exists in the local cache).
 	 *
 	 * @param string $bucketId
-	 * @param bool $forceNewVersion TRUE to always create a new bucket version, FALSE to only create a version when the bucket does not exist yet.
 	 * @return string The bucket version (GUID).
 	 * @throws BizException
 	 */
-	public function getOrCreateBucketVersionInLocalCache( $bucketId, $forceNewVersion )
+	public function forceCreateBucketVersionInLocalCache( string $bucketId )
 	{
-		if( $forceNewVersion ) {
-			unset( $this->localCacheBuckets[ $bucketId ] );
-		}
-		if( !array_key_exists( $bucketId, $this->localCacheBuckets ) ) {
+		$this->createBucketVersionInLocalCacheByCondition( $bucketId, true );
+		return $this->localCacheBuckets[ $bucketId ];
+	}
+
+	/**
+	 * Return a bucket version. When the bucket is not present in the local cache yet, create it.
+	 *
+	 * @param string $bucketId
+	 * @return string The bucket version (GUID).
+	 * @throws BizException
+	 */
+	public function getOrCreateBucketVersionInLocalCache( string $bucketId )
+	{
+		$this->createBucketVersionInLocalCacheByCondition( $bucketId, false );
+		return $this->localCacheBuckets[ $bucketId ];
+	}
+
+	/**
+	 * Create a new bucket version when needed.
+	 *
+	 * Note that creations are guarded by a semaphore. This is needed because there could be process A and B running
+	 * in parallel and e.g. both decide to introduce new bucket at the very same time. So process A creates bucket X
+	 * and process B creates bucket Y. Without semaphore, the last process performing the UPDATE operation in the DB
+	 * would overwrite the UPDATE of the first process. To avoid this, within the semaphore the 'local_cache_buckets'
+	 * option is read from DB, updated in memory and written back into the DB. Only then the semaphore is released.
+	 *
+	 * @param string $bucketId
+	 * @param bool $forceNewVersion TRUE to always create a new bucket version, FALSE to only create a version when the bucket does not exist yet.
+	 * @throws BizException
+	 */
+	private function createBucketVersionInLocalCacheByCondition( string $bucketId, bool $forceNewVersion )
+	{
+		if( $forceNewVersion || !array_key_exists( $bucketId, $this->localCacheBuckets ) ) {
 
 			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 			$bizSemaphore = new BizSemaphore();
@@ -160,7 +188,6 @@ class WW_DbClasses_Session extends DBBase
 
 			BizSemaphore::releaseSemaphore( $semaphoreId );
 		}
-		return $this->localCacheBuckets[ $bucketId ];
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

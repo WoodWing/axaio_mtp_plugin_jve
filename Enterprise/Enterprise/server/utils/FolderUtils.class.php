@@ -10,15 +10,33 @@
  
 class FolderUtils
 {
+	/**
+	 * Creates a directory path recursively when it does not exists yet.
+	 *
+	 * @since 10.5.0
+	 * @param string $dirName Full path name that needs to be created. Use forward slashes.
+	 * @param integer|null $mode The mask to apply to the created folder. Provide ordinal value, such as 0x775.
+	 *                           Provide NULL to take over access rights from parent folder.
+	 * @return bool TRUE when the directory already exists or when it could be created, else FALSE.
+	 */
+	static public function ensureDirExists( $dirName, $mode = null )
+	{
+		if( file_exists( $dirName ) ) {
+			return true;
+		}
+		return self::mkFullDir( $dirName, $mode );
+	}
+
 	/*
-	 * Creates a directory path for many levels, like mkdir does for one level only.
+	 * Creates a directory path recursively.
 	 *
 	 * Since 9.5 no longer 0770 is taken as default mode. Instead, the access rights are
 	 * taken over from the parental folder. That makes access easier for system admins
 	 * who typically are no member of the www group.
 	 *
 	 * @param string $dirName Full path name that needs to be created. Use forward slashes.
-	 * @param integer $mode The mask to apply to the created folder. Provide ordinal value, such as 0x775.
+	 * @param integer|null $mode The mask to apply to the created folder. Provide ordinal value, such as 0x775.
+	 *                           Provide NULL to take over access rights from parent folder.
 	 * @return boolean Whether or not the folder could be created.
 	 */
 	static public function mkFullDir( $dirName, $mode = null )
