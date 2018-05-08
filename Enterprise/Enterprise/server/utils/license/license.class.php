@@ -3534,9 +3534,6 @@ class License
 		if ( 0 && ($mainFlags & WW_LICENSE_REMOVE ))
 			print "<br/><a href='removelicense.php'>" . BizResources::localize("LIC_REMOVE_LICENSE") . "</a>";
 	
-//		if ( $mainFlags & WW_LICENSE_LOGON )
-//			print "<br><a href='../apps/index.php'>Logon</a> to the web application";
-			
 		print "<form name='license' method='POST'>\n";
 		print "<input type='hidden' name='productcode'>\n";
 		print "<input type='hidden' name='productname'>\n";

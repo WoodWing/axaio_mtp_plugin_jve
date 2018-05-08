@@ -45,16 +45,8 @@ class WW_WorkflowServiceEntry extends WW_Services_Entry
 		$server = new WW_SOAP_WflServer( BASEDIR . '/server/interfaces/SCEnterprise.wsdl', $options );
 		if (! $server->wsdlRequest()){
 			if (! $server->handle()){
-				require_once BASEDIR.'/server/secure.php'; // set $sLanguage_code
-				checkSecure();
-				global $globUser;  // set by checkSecure()
-				$isadmin = hasRights( DBDriverFactory::gen(), $globUser, 'Web' );
-				$ispubladmin = publRights( DBDriverFactory::gen(), $globUser );
-				if( $isadmin || $ispubladmin ) { // admin user
-					header( 'Location: '.INETROOT.'/server/admin/index.php' );
-				} else { // normal user
-					header( 'Location: '.INETROOT.'/server/apps/index.php' );
-				}
+				require_once BASEDIR.'/server/secure.php'; // define ADMIN_INDEX_PAGE
+				header( 'Location: '.ADMIN_INDEX_PAGE );
 			}
 		}
 	}

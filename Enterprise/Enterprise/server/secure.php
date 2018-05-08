@@ -13,8 +13,21 @@ $sLanguage_code = BizUser::validUserLanguage( getOptionalCookie('language') );
 define ('COOKIETIMEOUT', 86400); // =3600*24
 define ('LOGINPHP', SERVERURL_ROOT.INETROOT.'/server/apps/login.php');		// must be absolute (for apps in subdirs)
 define ('NORIGHT', SERVERURL_ROOT.INETROOT.'/server/apps/noright.php');
+define ('ADMIN_INDEX_PAGE', SERVERURL_ROOT.INETROOT.'/server/admin/index.php');
 
-function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=null)
+/**
+ * Retrieve and validate the session ticket.
+ *
+ * Redirect to the Login page if user has no ticket.
+ * Redirect to the Access Denied page when user has no $app rights.
+ *
+ * @param string|null $app 'admin' to check system admin rights, 'publadmin' to check brand admin rights, NULL to validate ticket only.
+ * @param string|null $userPwdExpir Provide user short name to skip ticket validation, or NULL to validate ticket.
+ * @param bool $redir Deprecated since 10.5.0
+ * @param string|null $ticket Provide the ticket to validate, or NULL to take ticket from the cookie jar.
+ * @return string The valid ticket.
+ */
+function checkSecure( $app = null, $userPwdExpir = null, $redir=true, $ticket=null )
 {
 	global $ispubladmin;
 	global $isadmin;
@@ -48,11 +61,7 @@ function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=nul
 
 	// no user means: invalid ticket (eg logged out) or expired ticket
 	if (!$user) {
-		if( $redir ) {
-			header( 'Location: '.LOGINPHP.'?redir=true' );
-		} else {
-			header( 'Location: '.LOGINPHP );
-		}
+		header( 'Location: '.LOGINPHP );
 		exit();
 	}
 
@@ -86,36 +95,49 @@ function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=nul
 	exit();
 }
 
-function getOptionalCookie( $key )
+/**
+ * Get cookie value from cookie jar.
+ *
+ * @param string $cookieName
+ * @return string|null The cookie value, or NULL when the cookie does not exist.
+ */
+function getOptionalCookie( $cookieName )
 {
-	if(array_key_exists($key, $_COOKIE)){
-		return $_COOKIE[$key]; // cookie may not exist
+	if( array_key_exists( $cookieName, $_COOKIE ) ) {
+		return $_COOKIE[ $cookieName ];
 	}
 	return null;
 }
 
-function getLogCookie( $cookie, $redir=true )
+/**
+ * Get cookie value and refresh the cookie. If not exists, redirect to the Login page.
+ *
+ * @param string $cookieName
+ * @param bool $redir Deprecated since 10.5.0
+ * @return null
+ */
+function getLogCookie( $cookieName, $redir=true )
 {
-	@$key = getOptionalCookie($cookie);
-	if (!$key) {
-		if( $redir ) {
-			header( 'Location: '.LOGINPHP.'?redir=true' );
-		} else {
-			header( 'Location: '.LOGINPHP );
-		}
+	$cookieValue = getOptionalCookie( $cookieName );
+	if( !$cookieValue ) {
+		header( 'Location: '.LOGINPHP );
 		exit();
 	}
-
-	// refresh cookie
-	setLogCookie($cookie, $key);
-
-	return $key;
+	setLogCookie( $cookieName, $cookieValue ); // refresh cookie
+	return $cookieValue;
 }
 
-function setLogCookie( $cookie, $key )
+/**
+ * Save a cookie in the cookie jar. Reset the cookie expiration to be valid for the next 24h.
+ *
+ * @param string $cookieName
+ * @param string $cookieValue
+ */
+function setLogCookie( $cookieName, $cookieValue )
 {
-	$tm = time()+COOKIETIMEOUT;
-	setcookie( $cookie, $key, $tm, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
+	$expire = time() + COOKIETIMEOUT;
+	setcookie( $cookieName, $cookieValue, $expire, INETROOT, null,
+		COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
 }
 
 function webauthorization($feature)
