@@ -373,7 +373,6 @@ class ActionPropertiesAdminApp
 				}
 				$detailTxt .= '<td align="center">'.inputvar("mandatory$i", $row['mandatory'], 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY"), !$isConfigurable ).'</td>';
 				$detailTxt .= '<td align="center">'.inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED"), !$isConfigurable ).'</td>';
-				// $detailTxt .= '<td align="center">'.inputvar("refreshonchange$i", $row['refreshonchange'], 'checkbox', null, true, BizResources::localize("OBJ_REFRESH_TITLE")).'</td>'; // EN-2164, Marked for future use
 				if( $showMultiObj ) {
 					$detailTxt .= '<td align="center">'.inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS"), !$isConfigurable ).'</td>';
 				} else { // Don't fill in the multiple objects column.
@@ -640,7 +639,7 @@ class ActionPropertiesAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		$multiObjAllowedActions = $multiObjAllowedActions = array_merge( array( '' ), BizWorkflow::getMultiObjectsAllowedActions() ); // Action that supports multiple-objects
+		$multiObjAllowedActions = $multiObjAllowedActions = array_merge( array( '' ), BizWorkflow::getMultiObjectsAllowedActions() );
 		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
 
  		if( $usages ) {
