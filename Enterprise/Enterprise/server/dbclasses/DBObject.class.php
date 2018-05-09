@@ -1186,7 +1186,7 @@ class DBObject extends DBBase
 	/**
 	 * Marks objects as indexed.
 	 *
-	 * @param array $objectIds: ids of objects. Null for all objects at once.
+	 * @param array $objectIds: ids of objects.
 	 * @param boolean $deletedObjects True for using smart_deletedobjects table. False for using smart_objects instead.
 	 * @return void
 	 */
@@ -1196,9 +1196,7 @@ class DBObject extends DBBase
 		$dbo = $dbdriver->tablename( $deletedObjects ? 'deletedobjects' : self::TABLENAME );
 		$ids = implode(',',$objectIds);
 		$sql = "UPDATE $dbo SET `indexed` = 'on' ";
-		if( count($objectIds) > 0 ) {
-			$sql .= "WHERE `id` IN ( $ids ) ";
-		}
+		$sql .= "WHERE `id` IN ( $ids ) ";
 		$dbdriver->query($sql);
 	}
 
@@ -1224,7 +1222,25 @@ class DBObject extends DBBase
 			
 			$dbdriver->query($sql);
 		}
-	}	
+	}
+
+	/**
+	 * Marks all objects as non-indexed.
+	 *
+	 * @since 10.4.1
+	 * @param string[] $areas Either 'Workflow' or 'Trash'.
+	 * @return void
+	 */
+	static public function setNonIndexOnAllObjects( $areas = array('Workflow'))
+	{
+		$dbdriver = DBDriverFactory::gen();
+
+		foreach ( $areas as $area ){
+			$dbo = ($area == 'Workflow') ? $dbdriver->tablename( self::TABLENAME ) : $dbdriver->tablename('deletedobjects');
+			$sql = "UPDATE $dbo SET `indexed` = '' ";
+			$dbdriver->query($sql);
+		}
+	}
 
 	/**
 	 * Get object rows that needs to be indexed, up to specified maximum amount.
