@@ -153,7 +153,8 @@ class BizServerPlugin
 	 * @param array $methodParams Method params to pass onto $methodName
 	 * @param boolean $activeOnly  Take only active connectors into account. 
 	 * @param boolean $installedOnly  Take only installed connectors into account. 
-	 * @param array  $returnVals   Collected return values of all connectors. Keys are connector class names.
+	 * @param array  $returnVals   Collected return values of all connectors. Keys are connector class names. Returns
+	 * empty array if no connector is installed.
 	 */
 	static public function runDefaultConnectors( $interface, $type, $methodName, $methodParams, &$returnVals, $activeOnly = true, $installedOnly = true )
 	{
