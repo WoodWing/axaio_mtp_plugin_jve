@@ -57,9 +57,7 @@ class BizSearch
 		} catch( BizException $e ) {
 			// Objects that are supposed to be (re)indexed did not get (re)indexed, so un-indexed them.
 			$unhandledObjectIds = self::filterUnhandledObjectIds( array(), $objects );
-			if( $unhandledObjectIds ) {
-				self::setUnindexFlag( $unhandledObjectIds, $areas );
-			}
+			self::setUnindexFlag( $unhandledObjectIds, $areas );
 			if( $suppressExceptions ) {
 				LogHandler::Log( 'Search', 'ERROR', 'Index error: '.$e->getMessage().' '.$e->getDetail() );
 			} else {
@@ -111,21 +109,19 @@ class BizSearch
 	 * @param string[] $areas Which area to search in: Workflow or Trash
 	 * @throws BizException
 	 */
-	public static function updateObjects( $objects, $suppressExceptions = true, $areas = array('Workflow') ) 
+	public static function updateObjects( $objects, $suppressExceptions = true, $areas = array('Workflow') )
 	{
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 			$connRetVals = array();
-			BizServerPlugin::runDefaultConnectors( 'Search', null, 'updateObjects', array($objects, $areas), $connRetVals );
+			BizServerPlugin::runDefaultConnectors( 'Search', null, 'updateObjects', array( $objects, $areas ), $connRetVals );
 			// All connectors did index at this point, so we flag them at Enterprise DB. See Note#001!
 
 			self::setIndexAndUnindexFlag( $objects, $connRetVals, $areas );
 		} catch( BizException $e ) {
 			// Objects that are supposed to be (re)indexed did not get (re)indexed, so un-indexed them.
 			$unhandledObjectIds = self::filterUnhandledObjectIds( array(), $objects );
-			if( $unhandledObjectIds ) {
-				self::setUnindexFlag( $unhandledObjectIds, $areas );
-			}
+			self::setUnindexFlag( $unhandledObjectIds, $areas );
 			if( $suppressExceptions ) {
 				LogHandler::Log( 'Search', 'ERROR', 'Index error: '.$e->getMessage().' '.$e->getDetail() );
 			} else {
@@ -219,11 +215,9 @@ class BizSearch
 			if( $connRetVals ) { // E.g. Solr is installed and running.
 				if( is_null( $objectsIds ) ) {
 					self::setUnindexFlagOnAllObjects( $areas );
-				} else{
+				} else {
 					$handledObjectIds = self::collectHandledObjectIds( $connRetVals );
-					if( $handledObjectIds ) {
-						self::setUnindexFlag( $handledObjectIds, $areas );
-					}
+					self::setUnindexFlag( $handledObjectIds, $areas );
 				}
 				self::setLastOptimized( '' );
 			}
