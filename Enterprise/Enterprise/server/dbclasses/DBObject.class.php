@@ -1201,7 +1201,7 @@ class DBObject extends DBBase
 	/**
 	 * Marks objects as indexed.
 	 *
-	 * @param array $objectIds: ids of objects.
+	 * @param integer[] $objectIds: ids of objects.
 	 * @param boolean $deletedObjects True for using smart_deletedobjects table. False for using smart_objects instead.
 	 * @return void
 	 */
@@ -1218,9 +1218,8 @@ class DBObject extends DBBase
 	/**
 	 * Marks objects as non-indexed.
 	 *
-	 * @param array $objectIds: ids of objects. Null for all objects at once.
-	 * @param string[] $areas Either 'Workflow' or 'Trash'.
-	 * @return void
+	 * @param integer[] $objectIds: ids of objects. Null for all objects at once.
+	 * @param string[] $areas Possible values 'Workflow', 'Trash', and it can be both.
 	 */
 	static public function setNonIndex( $objectIds, $areas = array('Workflow'))
 	{
@@ -1228,13 +1227,9 @@ class DBObject extends DBBase
 		
 		foreach ( $areas as $area ){
 			$dbo = ($area == 'Workflow') ? $dbdriver->tablename( self::TABLENAME ) : $dbdriver->tablename('deletedobjects');
-			
 			$sql = "UPDATE $dbo SET `indexed` = '' ";
-			if( count($objectIds) > 0 ) {
-				$ids = implode(',',$objectIds);
-				$sql .= "WHERE `id` IN ( $ids ) ";
-			}
-			
+			$ids = implode(',',$objectIds);
+			$sql .= "WHERE `id` IN ( $ids ) ";
 			$dbdriver->query($sql);
 		}
 	}
@@ -1243,8 +1238,7 @@ class DBObject extends DBBase
 	 * Marks all objects as non-indexed.
 	 *
 	 * @since 10.4.1
-	 * @param string[] $areas Either 'Workflow' or 'Trash'.
-	 * @return void
+	 * @param string[] $areas Possible values 'Workflow', 'Trash', and it can be both.
 	 */
 	static public function setNonIndexOnAllObjects( $areas = array('Workflow'))
 	{
