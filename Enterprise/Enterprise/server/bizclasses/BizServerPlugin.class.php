@@ -110,7 +110,6 @@ class BizServerPlugin
 		$itemId = $interface.'_'.$type;
 		if( $activeOnly && $installedOnly && // let's optimize for the most obvious filters only
 			BizSession::getTicket() ) {       // without ticket there is no cache (e.g. exclude LogOn, GetServers, etc)
-			require_once BASEDIR.'/server/bizclasses/LocalCache.class.php';
 			$cache = WW_BizClasses_LocalCache::getInstance();
 			$connInfosData = $cache->readBucketItemData( self::LOCAL_CACHE_BUCKET, $itemId );
 		} else {
@@ -1167,7 +1166,6 @@ class BizServerPlugin
 		self::storePluginsAtDB( $pluginObjs, $pluginInfos, $connObjs, $connInfos );
 
 		// Change version of the bucket to invalidate all its items (connector info query results).
-		require_once BASEDIR.'/server/bizclasses/LocalCache.class.php';
 		WW_BizClasses_LocalCache::getInstance()->resetBucket( self::LOCAL_CACHE_BUCKET );
 	}
 	

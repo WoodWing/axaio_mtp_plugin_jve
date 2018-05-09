@@ -729,8 +729,6 @@ class BizSession
 	{
 		require_once( BASEDIR.'/server/dbclasses/DBTicket.class.php' );
 		$serverJob = DBTicket::getContextualServerJob();
-
-		require_once( BASEDIR.'/server/dbclasses/DBSession.class.php' );
 		return WW_DbClasses_Session::getInstance( $ticket, $serverJob );
 	}
 
