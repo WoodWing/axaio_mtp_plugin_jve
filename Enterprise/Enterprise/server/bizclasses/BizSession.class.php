@@ -702,12 +702,11 @@ class BizSession
 		}
 
 		$dbSession = self::getDbSession( $ticket );
-
-		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		$userName = DBTicket::checkTicket( $ticket, $dbSession->getSessionTicketRow() );
+		$ticketRow = $dbSession->getSessionTicketRow();
 
 		// Throw error when ticket is not (or no longer) valid.
-		if( !$userName ) {
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+		if( !$ticketRow || !DBTicket::checkTicket( $ticket, $ticketRow ) ) {
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 		}
 		self::$userRow = $dbSession->getSessionUserRow();

@@ -41,10 +41,16 @@ class WW_DbClasses_Session extends DBBase
 		$this->localCacheBuckets = null;
 
 		if( $serverJob && $serverJob->TicketSeal == $ticket ) {
-			return $this->initForServerJobUser( $serverJob->ActingUser );
+			$retVal = $this->initForServerJobUser( $serverJob->ActingUser );
 		} else {
-			return $this->initForUserTicket( $ticket );
+			$retVal = $this->initForUserTicket( $ticket );
 		}
+		if( !$retVal ) {
+			if( $this->autoRepairConfigOptions() ) { // only retry when we have fixed the problem
+				$retVal = $this->init( $ticket, $serverJob );
+			}
+		}
+		return $retVal;
 	}
 
 	/**
@@ -107,6 +113,33 @@ class WW_DbClasses_Session extends DBBase
 			$this->localCacheBuckets = unserialize( $row['local_cache_buckets'] );
 		}
 		return (bool)$row;
+	}
+
+	/**
+	 * In case one of the config options are not installed, the user can not login because the initialization
+	 * functions defined above will fail since the options are invoked in the SQL (for performance reasons).
+	 * This may happen during an Enterprise Server installation or upgrade and is blocking the admin to logon.
+	 * So let's auto-repair this config option on-the-fly to break through this chicken-and-egg problem.
+	 *
+	 * @return bool TRUE when the options are installed by this function, or FALSE when installed before or when installation failed.
+	 */
+	private function autoRepairConfigOptions()
+	{
+		$autoRepaired = false;
+		require_once BASEDIR .'/server/dbscripts/dbupgrades/LocalCacheBuckets.class.php';
+		require_once BASEDIR .'/server/dbscripts/dbupgrades/EnterpriseSystemId.class.php';
+		$dbUpgrades = array(
+			new WW_DbScripts_DbUpgrades_LocalCacheBuckets(), // installer for the 'local_cache_buckets' config option
+			new WW_DbScripts_DbUpgrades_EnterpriseSystemId() // installer for the 'enterprise_system_id' config option
+		);
+		foreach( $dbUpgrades as $dbUpgrade ) {
+			if( !$dbUpgrade->isUpdated() ) {
+				if( $dbUpgrade->setUpdated() ) {
+					$autoRepaired = true;
+				}
+			}
+		}
+		return $autoRepaired;
 	}
 
 	/**
