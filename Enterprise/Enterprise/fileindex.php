@@ -134,11 +134,8 @@ class WW_FileIndex
 			header('Status: 400 Bad Request - '.$message );
 			LogHandler::Log( 'TransferServer', 'ERROR', $message );
 			exit( $message );
-		} else {
-			// Update the ticket cookie
-			BizSession::setTicketCookieForClientIdentifier($this->httpParams['ticket']);
 		}
-
+		BizSession::setTicketCookieForClientIdentifier( $this->httpParams['ticket'] );
 
 		$this->httpParams['rendition'] = isset($_GET['rendition']) ? $_GET['rendition'] : null;
 		$this->httpParams['objectid'] = isset($_GET['objectid']) ? intval($_GET['objectid']) : null;
@@ -194,9 +191,9 @@ class WW_FileIndex
 	{
 		// Setup an Enterprise Server session.
 		try {
-			$user = BizSession::checkTicket( $this->httpParams['ticket'] );
-			BizSession::setServiceName( 'FileStore' );
 			BizSession::startSession( $this->httpParams['ticket'] );
+			BizSession::setServiceName( 'FileStore' );
+			$user = BizSession::checkTicket( $this->httpParams['ticket'] );
 		} catch( BizException $e ) {
 			throw WW_FileIndex_HttpException::createFromBizException( $e );
 		}

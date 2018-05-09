@@ -126,9 +126,9 @@ class TransferEntry
 			LogHandler::Log( 'TransferServer', 'ERROR', $message );
 			exit( $message );
 		}
-
 		BizSession::setTicketCookieForClientIdentifier( $ticket );
-		session_id( $ticket );
+		BizSession::startSession( $ticket );
+		BizSession::setServiceName( 'FileTransfer' );
 
 		// The OPTIONS call is send by a web browser as a pre-flight for a CORS request.
 		// This request doesn't send or receive any information. There is no need to validate the ticket,
@@ -146,8 +146,7 @@ class TransferEntry
 		// (Clients should check for the SCEntError_InvalidTicket key since 403 is not unique.)
 		// The new ticket obtained should be set to the upload/download URL to try again.
 		if( $validateTicket ) {
-			require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-			$user = DBTicket::checkTicket( $ticket );
+			$user = BizSession::checkTicket( $ticket );
 			if( !$user ) {
 				$message = 'Ticket expired. Please relogin. (SCEntError_InvalidTicket)';
 				header('HTTP/1.1 403 Forbidden');
@@ -194,7 +193,6 @@ class TransferEntry
 			}
 		}
 		
-		BizSession::setServiceName( 'FileTransfer' );
 		PerformanceProfiler::startProfile( 'Entry point', 1 );
 		$msg = "Incoming HTTP {$httpMethod} request\r\nTicket=[{$ticket}] File GUID=[{$fileguid}]";
 		if( $format ) {
