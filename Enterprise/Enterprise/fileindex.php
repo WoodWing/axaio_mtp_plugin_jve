@@ -192,9 +192,7 @@ class WW_FileIndex
 	 */
 	private function handleGet()
 	{
-		// Validate ticket. Explicitly request NOT to update ticket expiration date to save time (since DB updates
-		// are expensive). We assume this is settled through regular web services anyway, such as GetObject which are
-		// needed anyway to find out which files are there to download.
+		// Setup an Enterprise Server session.
 		try {
 			$user = BizSession::checkTicket( $this->httpParams['ticket'] );
 			BizSession::setServiceName( 'FileStore' );

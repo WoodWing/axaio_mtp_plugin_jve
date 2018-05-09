@@ -205,9 +205,6 @@ class Elvis_RestProxyIndex
 			$message = 'Please specify a "ticket" param at the URL, or provide web cookies and set the "ww-app" param.';
 			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
-
-		// Explicitly request NOT to update ticket expiration date to save time (since DB updates are expensive).
-		// We assume this is settled through regular web services which are called anyway such as GetObjects.
 		$user = BizSession::checkTicket( $this->httpParams['ticket'] );
 		BizSession::setServiceName( 'ElvisRestProxyIndex' );
 		BizSession::startSession( $this->httpParams['ticket'] );
