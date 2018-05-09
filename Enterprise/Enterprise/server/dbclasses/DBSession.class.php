@@ -35,48 +35,76 @@ class WW_DbClasses_Session extends DBBase
 	 */
 	private function init( $ticket, $serverJob )
 	{
-		if( $serverJob && $serverJob->TicketSeal == $ticket ) {
-			$tables = array( 'c1' => 'config', 'c2' => 'config', 'u' => 'users' );
-			$fields = array(
-				'c1' => array( 'enterprise_system_id' => 'value' ),
-				'c2' => array( 'local_cache_buckets' => 'value' ),
-				'u' => array( '*' )
-			);
-			$where = 'c1.`name` = ? AND c2.`name` = ? AND u.`user` = ?';
-			$params = array( 'enterprise_system_id', 'local_cache_buckets', strval( $serverJob->ActingUser ) );
-			$row = self::getRow( $tables, $where, $fields, $params );
-			if( $row ) {
-				$excludeFieldsFromUserRow = array( 'enterprise_system_id', 'local_cache_buckets' );
-				$this->sessionUserRow = array_diff_key( $row, array_flip( $excludeFieldsFromUserRow ) );
-				$this->sessionTicketRow = null;
-				$this->enterpriseSystemId = $row['enterprise_system_id'];
-				$this->localCacheBuckets = unserialize( $row['local_cache_buckets'] );
-			}
-		} else {
-			// Get values from multiple tables with the following SQL statement (in MySQL notation):
-			//    SELECT t.`usr`, t.`appname`, t.`appversion`, t.`expire`, t.`masterticketid`,
-			//       c1.`value` AS 'enterprise_system_id', c2.`value` AS 'local_cache_buckets', u.*
-			//    FROM `smart_tickets` t, `smart_config` c1, `smart_config` c2, `smart_users` u
-			//    WHERE t.`ticketid` = '...' AND c1.`name` = 'enterprise_system_id' AND c2.`name` = 'local_cache_buckets'
-			//       AND t.`usr` = u.`user`
+		$this->sessionUserRow = null;
+		$this->sessionTicketRow = null;
+		$this->enterpriseSystemId = null;
+		$this->localCacheBuckets = null;
 
-			$tables = array( 't' => 'tickets', 'c1' => 'config', 'c2' => 'config', 'u' => 'users' );
-			$fields = array(
-				't' => array( 'usr', 'appname', 'appversion', 'expire', 'masterticketid' ),
-				'c1' => array( 'enterprise_system_id' => 'value' ),
-				'c2' => array( 'local_cache_buckets' => 'value' ),
-				'u' => array( '*' )
-			);
-			$where = 't.`ticketid` = ? AND c1.`name` = ? AND c2.`name` = ? AND t.`usr` = u.`user`';
-			$params = array( strval( $ticket ), 'enterprise_system_id', 'local_cache_buckets' );
-			$row = self::getRow( $tables, $where, $fields, $params );
-			if( $row ) {
-				$excludeFieldsFromUserRow = array_merge( $fields['t'], array( 'enterprise_system_id', 'local_cache_buckets' ) );
-				$this->sessionUserRow = array_diff_key( $row, array_flip( $excludeFieldsFromUserRow ) );
-				$this->sessionTicketRow = array_intersect_key( $row, array_flip( $fields['t'] ) );
-				$this->enterpriseSystemId = $row['enterprise_system_id'];
-				$this->localCacheBuckets = unserialize( $row['local_cache_buckets'] );
-			}
+		if( $serverJob && $serverJob->TicketSeal == $ticket ) {
+			return $this->initForServerJobUser( $serverJob->ActingUser );
+		} else {
+			return $this->initForUserTicket( $ticket );
+		}
+	}
+
+	/**
+	 * Setup the memory cache with session info for acting server job. See module header for details.
+	 *
+	 * @param string $user
+	 * @return bool
+	 */
+	private function initForServerJobUser( $user )
+	{
+		$tables = array( 'c1' => 'config', 'c2' => 'config', 'u' => 'users' );
+		$fields = array(
+			'c1' => array( 'enterprise_system_id' => 'value' ),
+			'c2' => array( 'local_cache_buckets' => 'value' ),
+			'u' => array( '*' )
+		);
+		$where = 'c1.`name` = ? AND c2.`name` = ? AND u.`user` = ?';
+		$params = array( 'enterprise_system_id', 'local_cache_buckets', strval( $user ) );
+		$row = self::getRow( $tables, $where, $fields, $params );
+		if( $row ) {
+			$excludeFieldsFromUserRow = array( 'enterprise_system_id', 'local_cache_buckets' );
+			$this->sessionUserRow = array_diff_key( $row, array_flip( $excludeFieldsFromUserRow ) );
+			$this->sessionTicketRow = null;
+			$this->enterpriseSystemId = $row['enterprise_system_id'];
+			$this->localCacheBuckets = unserialize( $row['local_cache_buckets'] );
+		}
+		return (bool)$row;
+	}
+
+	/**
+	 * Setup the memory cache with session info for acting user. See module header for details.
+	 *
+	 * @param string $ticket
+	 * @return bool
+	 */
+	private function initForUserTicket( $ticket )
+	{
+		// Get values from multiple tables with the following SQL statement (in MySQL notation):
+		//    SELECT t.`usr`, t.`appname`, t.`appversion`, t.`expire`, t.`masterticketid`,
+		//       c1.`value` AS 'enterprise_system_id', c2.`value` AS 'local_cache_buckets', u.*
+		//    FROM `smart_tickets` t, `smart_config` c1, `smart_config` c2, `smart_users` u
+		//    WHERE t.`ticketid` = '...' AND c1.`name` = 'enterprise_system_id' AND c2.`name` = 'local_cache_buckets'
+		//       AND t.`usr` = u.`user`
+
+		$tables = array( 't' => 'tickets', 'c1' => 'config', 'c2' => 'config', 'u' => 'users' );
+		$fields = array(
+			't' => array( 'usr', 'appname', 'appversion', 'expire', 'masterticketid' ),
+			'c1' => array( 'enterprise_system_id' => 'value' ),
+			'c2' => array( 'local_cache_buckets' => 'value' ),
+			'u' => array( '*' )
+		);
+		$where = 't.`ticketid` = ? AND c1.`name` = ? AND c2.`name` = ? AND t.`usr` = u.`user`';
+		$params = array( strval( $ticket ), 'enterprise_system_id', 'local_cache_buckets' );
+		$row = self::getRow( $tables, $where, $fields, $params );
+		if( $row ) {
+			$excludeFieldsFromUserRow = array_merge( $fields['t'], array( 'enterprise_system_id', 'local_cache_buckets' ) );
+			$this->sessionUserRow = array_diff_key( $row, array_flip( $excludeFieldsFromUserRow ) );
+			$this->sessionTicketRow = array_intersect_key( $row, array_flip( $fields['t'] ) );
+			$this->enterpriseSystemId = $row['enterprise_system_id'];
+			$this->localCacheBuckets = unserialize( $row['local_cache_buckets'] );
 		}
 		return (bool)$row;
 	}
