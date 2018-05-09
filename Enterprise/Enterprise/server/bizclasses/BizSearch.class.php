@@ -58,7 +58,9 @@ class BizSearch
 		} catch( BizException $e ) {
 			// Objects that are supposed to be (re)indexed did not get (re)indexed, so un-indexed them.
 			$unhandledObjectIds = self::filterUnhandledObjectIds( array(), $objects );
-			self::setUnindexFlag( $unhandledObjectIds, $areas );
+			if( $unhandledObjectIds ) {
+				self::setUnindexFlag( $unhandledObjectIds, $areas );
+			}
 			if( $suppressExceptions ) {
 				LogHandler::Log( 'Search', 'ERROR', 'Index error: '.$e->getMessage().' '.$e->getDetail() );
 			} else {
@@ -123,7 +125,9 @@ class BizSearch
 		} catch( BizException $e ) {
 			// Objects that are supposed to be (re)indexed did not get (re)indexed, so un-indexed them.
 			$unhandledObjectIds = self::filterUnhandledObjectIds( array(), $objects );
-			self::setUnindexFlag( $unhandledObjectIds, $areas );
+			if( $unhandledObjectIds ) {
+				self::setUnindexFlag( $unhandledObjectIds, $areas );
+			}
 			if( $suppressExceptions ) {
 				LogHandler::Log( 'Search', 'ERROR', 'Index error: '.$e->getMessage().' '.$e->getDetail() );
 			} else {
@@ -204,7 +208,7 @@ class BizSearch
 	 * See Search_EnterpriseConnector for comments
 	 * This is a facade hiding the details of calling the method from the right plug-in(s)
 	 * *
-	 * @param string[] $objectsIds List of object ids to unindex, null in case to unindex all objects.
+	 * @param integer[] $objectsIds List of object ids to unindex, null in case to unindex all objects.
 	 * @param string[] $areas Which area to search in: Workflow or Trash
 	 * @param boolean $suppressExceptions Whether or not to suppress throwing exceptions
 	 * @throws BizException
@@ -221,7 +225,9 @@ class BizSearch
 					self::setUnindexFlagOnAllObjects( $areas );
 				} else{
 					$handledObjectIds = self::collectHandledObjectIds( $connRetVals );
-					self::setUnindexFlag( $handledObjectIds, $areas );
+					if( $handledObjectIds ) {
+						self::setUnindexFlag( $handledObjectIds, $areas );
+					}
 				}
 				self::setLastOptimized( '' );
 			}
@@ -557,36 +563,32 @@ class BizSearch
 	 * Flag objects as indexed in the database.
 	 *
 	 * @param int[] $objectIds Object ids to be flagged as indexed.
-	 * @param array|null $areas
+	 * @param string[]|null $areas
 	 */
-	private static function setIndexFlag( $objectIds, array $areas=null )
+	private static function setIndexFlag( $objectIds, array $areas = null )
 	{
-		if( $objectIds ) {
-			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-			$deletedObjects = in_array( 'Trash', $areas ) ? true : false;
-			DBObject::setIndexed( $objectIds, $deletedObjects );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$deletedObjects = in_array( 'Trash', $areas ) ? true : false;
+		DBObject::setIndexed( $objectIds, $deletedObjects );
 	}
 
 	/**
 	 * Flag objects as not indexed in the database.
 	 *
 	 * @param int[] $objectIds Object ids to be flagged as not indexed.
-	 * @param array $areas
+	 * @param string[] $areas
 	 */
-	private static function setUnindexFlag( $objectIds, array $areas)
+	private static function setUnindexFlag( $objectIds, array $areas )
 	{
-		if( $objectIds ) {
-			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-			DBObject::setNonIndex( $objectIds, $areas );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		DBObject::setNonIndex( $objectIds, $areas );
 	}
 
 	/**
 	 * Flag all objects as not indexed in the database.
 	 *
 	 * @since 10.4.1
-	 * @param array $areas
+	 * @param string[] $areas
 	 */
 	private static function setUnindexFlagOnAllObjects( array $areas)
 	{
