@@ -116,7 +116,7 @@ class WW_DbClasses_Session extends DBBase
 	}
 
 	/**
-	 * In case one of the config options are not installed, the user can not login because the initialization
+	 * In case one of the config options hasn't been installed yet, the user can not login because the initialization
 	 * functions defined above will fail since the options are invoked in the SQL (for performance reasons).
 	 * This may happen during an Enterprise Server installation or upgrade and is blocking the admin to logon.
 	 * So let's auto-repair this config option on-the-fly to break through this chicken-and-egg problem.
