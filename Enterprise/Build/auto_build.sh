@@ -304,7 +304,7 @@ function updateResourceFiles {
 	fi
 
 	echo "${step}2: Retrieve timestamp of last update from local resource file for ${product} plugin."
-	resLastUpdate=$( cat "${SOURCE_BASE}{$dir}${product}/resources/_lastupdate.txt" )
+	resLastUpdate=$( cat "${SOURCE_BASE}${dir}${product}/resources/_lastupdate.txt" )
 	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
 		echo "${step}3: Repository and TMS are in sync. No update needed."
 	else
