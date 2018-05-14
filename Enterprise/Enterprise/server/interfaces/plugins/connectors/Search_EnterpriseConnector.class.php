@@ -91,7 +91,7 @@ abstract class Search_EnterpriseConnector extends DefaultConnector
 	 * Unlike for production applications, for system administration applications, thrown exceptions 
 	 * are displayed on screen to let admin user solve problems.
 	 *
-	 * @param integer[]|null $objectsIds Objects Ids of objects to unindex. Set to null to unindex all objects at once!
+	 * @param int[]|null $objectsIds Objects Ids of objects to unindex. Set to null to unindex all objects at once!
 	 * @param boolean $deletedObject True if the objects are deleted (so they reside at smart_deleteobjects table). 
 	 *                               False for normal objects (so they reside at smart_objects table). 
 	 * @return void
