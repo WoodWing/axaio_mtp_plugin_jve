@@ -88,12 +88,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		require_once dirname ( __FILE__ ).'/util/ElvisUtils.class.php';
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 		$hit = ElvisUtils::getHit( $elvisId );
-		$files = $this->getFiles( $hit, $rendition );
-		
+
 		$object = new Object();
 		$object->MetaData = new MetaData();
 		$object->Relations = array();
-		$object->Files = $files;
+		$object->Files = $this->getFiles( $hit, array( $rendition ) );
 		
 		$this->fillMetadata( $object, $hit );
 		
@@ -243,7 +242,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$hit = ElvisUtils::getHit( $elvisId, $lock );
 		
 		if( !$haveVersion || version_compare( $haveVersion, ElvisUtils::getEnterpriseVersionNumber($hit->metadata['versionNumber']), '<' ) ) {
-			$object->Files = $this->getFiles( $hit, $rendition );
+			$object->Files = $this->getFiles( $hit, array( $rendition ) );
 		}
 		$this->getMetadataHandler()->read( $object, $hit->metadata );
 
@@ -380,11 +379,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$destObject->MetaData->BasicMetaData->DocumentID = null;
 		$destObject->MetaData->BasicMetaData->ContentSource = null;
 		
-		$attachment = self::createAttachment( $fileUrl, $destObject->MetaData->ContentMetaData->Format );
-		$destObject->Files = array( $attachment );
-		$destObject->Files = array_merge( $destObject->Files,$this->getFiles($hit, 'preview') );
-		$destObject->Files = array_merge( $destObject->Files,$this->getFiles($hit, 'thumb') );
-		
+		$destObject->Files = array( self::createAttachment( $fileUrl, $destObject->MetaData->ContentMetaData->Format ) );
+		$destObject->Files = array_merge( $destObject->Files, $this->getFiles( $hit, array( 'preview', 'thumb' ) ) );
+
 		return $destObject;
 	}
 	
@@ -879,31 +876,25 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * Helper function to create an Attachment from an Elvis hit.
-	 * If an Attachment can be extracted based on the rendition, it will be returned in an array.
+	 * Compose Attachments from an Elvis hit based for given file renditions.
 	 *
-	 * @param ElvisEntHit $hit The Elvis hit from which an attachment will be created.
-	 * @param string $rendition Rendition of the file.
-	 * @param null $version
-	 * @return array A list of Attachments.
+	 * @param ElvisEntHit $hit
+	 * @param string[] $renditions
+	 * @return Attachment[]
 	 */
-	private function getFiles( $hit, $rendition, /** @noinspection PhpUnusedParameterInspection */$version = null )
+	private function getFiles( $hit, array $renditions )
 	{
-		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
-
+		require_once __DIR__.'/util/ElvisUtils.class.php';
 		$files = array();
-		//isContentSourceFileLinksRequested is only supported for Enterprise 9.7 and up.
-		//In order to remain backwards compatible with 9.6 and lower we need to check for the method here.
-		$fileLinksRequested = (method_exists( $this, 'isContentSourceFileLinksRequested' )) 
-			? $this->isContentSourceFileLinksRequested() : false;
-		$file = ElvisUtils::getAttachment( $hit, $rendition, $fileLinksRequested );
-		if( !is_null( $file ) ) {
-			$files[] = $file;
+		foreach( $renditions as $rendition ) {
+			$file = ElvisUtils::getAttachment( $hit, $rendition, $this->isContentSourceFileLinksRequested() );
+			if( $file ) {
+				$files[] = $file;
+			}
 		}
-
 		return $files;
 	}
-		
+
 	/**
 	 * @param Object $smartObject Object of MetaData that will filled
 	 * @param ElvisEntHit $hit returned from elvis server
