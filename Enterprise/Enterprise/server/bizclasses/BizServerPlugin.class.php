@@ -1339,6 +1339,8 @@ class BizServerPlugin
 				self::activatePlugin( $pluginObj, $pluginInfo );
 			}
 		}
+		// Change version of the bucket to invalidate all its items (connector info query results).
+		WW_BizClasses_LocalCache::getInstance()->resetBucket( self::LOCAL_CACHE_BUCKET );
 		return $pluginInfo;
 	}
 	
@@ -1358,6 +1360,8 @@ class BizServerPlugin
 				self::deactivatePlugin( $pluginObj, $pluginInfo );
 			}
 		}
+		// Change version of the bucket to invalidate all its items (connector info query results).
+		WW_BizClasses_LocalCache::getInstance()->resetBucket( self::LOCAL_CACHE_BUCKET );
 		return $pluginInfo;
 	}
 
@@ -1399,7 +1403,7 @@ class BizServerPlugin
 	 * @throws BizException $e On installation failure or DB error.
 	 * @throws null
 	 */
-	static public function activatePlugin( EnterprisePlugin &$pluginObj, PluginInfoData &$pluginInfo )
+	static private function activatePlugin( EnterprisePlugin &$pluginObj, PluginInfoData &$pluginInfo )
 	{
 		if( !$pluginInfo->IsInstalled || !$pluginInfo->IsActive ) {
 			$e = null;
@@ -1444,7 +1448,7 @@ class BizServerPlugin
 	 * @param PluginInfoData $pluginInfo
 	 * @throws BizException on DB error.
 	 */
-	static public function deactivatePlugin(
+	static private function deactivatePlugin(
 		/** @noinspection PhpUnusedParameterInspection */ EnterprisePlugin &$pluginObj,
 		PluginInfoData &$pluginInfo )
 	{
