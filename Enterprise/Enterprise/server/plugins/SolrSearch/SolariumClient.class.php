@@ -261,11 +261,10 @@ class SolariumClient
 	public function executeSelect( $query )
 	{
 		$resultSet = null;
+		$debugMode = LogHandler::debugMode();
+		$area = 'Solr'; // Service log name
 
 		try {
-			$debugMode = LogHandler::debugMode();
-			$area = 'Solr'; // Service log name
-
 			if( $debugMode ) {
 				// Log query as Solr request
 				$debugRequest = print_r( $query, true );
@@ -287,10 +286,12 @@ class SolariumClient
 				$debugResponse = print_r( $debugResponse, true );
 				LogHandler::logService( $area, $debugResponse, false, 'txt', 'txt' );
 			}
-		} catch ( Exception $e ) {
+		} catch( Exception $e ) {
+			if( $debugMode ) {
+				LogHandler::logService( $area, $e->getMessage(), null, 'txt', 'txt' );
+			}
 			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array( $e->getMessage() ), 'ERROR' );
 		}
-
 		return $resultSet;
 	}
 
@@ -307,10 +308,9 @@ class SolariumClient
 	{
 		$updateStatus = false;
 		$area = 'Solr'; // Service log name
+		$debugMode = LogHandler::debugMode();
 
 		try {
-			$debugMode = LogHandler::debugMode();
-
 			if( $debugMode ) {
 				// Log query as Solr request
 				$debugRequest = print_r( $update, true );
@@ -325,13 +325,12 @@ class SolariumClient
 				// Log Solr response
 				$debugResponse = json_decode( $resultSet->getResponse()->getBody(), true );
 				$debugResponse = print_r( $debugResponse, true );
-				LogHandler::logService( $area, $debugResponse, false, 'txt', 'txt' );
+				LogHandler::logService( $area, $debugResponse, $updateStatus ? false : null, 'txt', 'txt' );
 			}
-		} catch ( Solarium\Exception\HttpException $e ) {
-			$errorMessageJson = json_decode( $e->getBody() );
-			$errorMessage = $errorMessageJson->error->msg;
-			throw new BizException ( null, 'Server', '', '[Solr] ' . $errorMessage, null, 'ERROR' );
-		} catch (Exception $e ) {
+		} catch( Exception $e ) {
+			if( $debugMode ) {
+				LogHandler::logService( $area, $e->getMessage(), null, 'txt', 'txt' );
+			}
 			throw new BizException ( null, 'Server', '', $e->getMessage(), null, 'ERROR' );
 		}
 		return $updateStatus;
