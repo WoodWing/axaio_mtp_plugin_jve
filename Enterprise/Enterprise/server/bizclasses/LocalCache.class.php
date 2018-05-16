@@ -51,7 +51,8 @@
 
 class WW_BizClasses_LocalCache
 {
-	const ACCESS_MODE = 0777;
+	const FILE_ACCESS_MODE = 0644; // read+write access for PHP, readonly for the group and others
+	const DIRECTORY_ACCESS_MODE = 0755; // same as above, but now with execute (x) rights to allow 'cd' into a folder
 
 	/**
 	 * Write data in a bucket item in the local cache.
@@ -87,7 +88,7 @@ class WW_BizClasses_LocalCache
 		if( $this->createFolderIfNotExists( dirname( $fullPath ) ) ) {
 			$wroteBytes = file_put_contents( $fullPath, $data );
 			if( $wroteBytes !== false ) {
-				chmod( $fullPath, self::ACCESS_MODE );
+				chmod( $fullPath, self::FILE_ACCESS_MODE );
 			}
 		}
 		return $wroteBytes;
@@ -215,7 +216,7 @@ class WW_BizClasses_LocalCache
 	 * @param string $itemId
 	 * @return bool Whether or not valid.
 	 */
-	private function validateItemId( string $itemId )
+	private function validateItemId( string $itemId ) : bool
 	{
 		return $this->validateSafeAlphanumericIdentifier( $itemId );
 	}
@@ -226,7 +227,7 @@ class WW_BizClasses_LocalCache
 	 * @param string $bucketId
 	 * @return bool Whether or not valid.
 	 */
-	private function validateBucketId( string $bucketId )
+	private function validateBucketId( string $bucketId ) : bool
 	{
 		return $this->validateSafeAlphanumericIdentifier( $bucketId );
 	}
@@ -241,7 +242,7 @@ class WW_BizClasses_LocalCache
 	 * @param string $identifier
 	 * @return bool Whether or not valid.
 	 */
-	private function validateSafeAlphanumericIdentifier( string $identifier )
+	private function validateSafeAlphanumericIdentifier( string $identifier ) : bool
 	{
 		$allowedSymbols = array( '-', '_' );
 		$isValid = $identifier && strlen( $identifier ) <= 255 &&
@@ -273,7 +274,7 @@ class WW_BizClasses_LocalCache
 
 		// Trigger the auto cleaning procedure of the local cache when we are about to create a date timestamp folder.
 		$dateStampDir = $this->getEnterpriseSystemPath().'/'.$dateStamp;
-		if( !file_exists( $dateStampDir ) ) {
+		if( !is_dir( $dateStampDir ) ) {
 			$this->cleanOutdatedCacheFolders( $timeStamp );
 		}
 
@@ -313,10 +314,10 @@ class WW_BizClasses_LocalCache
 	 * @param string $folder
 	 * @return bool Whether or not the folder could be created or already exists.
 	 */
-	private function createFolderIfNotExists( string $folder )
+	private function createFolderIfNotExists( string $folder ) : bool
 	{
 		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
-		$createdOrExists = FolderUtils::ensureDirExists( $folder, self::ACCESS_MODE );
+		$createdOrExists = FolderUtils::ensureDirExists( $folder, self::DIRECTORY_ACCESS_MODE );
 		if( !$createdOrExists ) {
 			$message = 'Failed to create folder "'.$folder.'" in local application cache.';
 			LogHandler::Log( __METHOD__, 'ERROR', $message );

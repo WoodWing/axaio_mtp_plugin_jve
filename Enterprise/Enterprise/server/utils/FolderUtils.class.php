@@ -19,7 +19,7 @@ class FolderUtils
 	 *                           Provide NULL to take over access rights from parent folder.
 	 * @return bool TRUE when the directory already exists or when it could be created, else FALSE.
 	 */
-	static public function ensureDirExists( $dirName, $mode = null )
+	static public function ensureDirExists( $dirName, $mode = null ) : bool
 	{
 		if( file_exists( $dirName ) ) {
 			return true;
@@ -39,7 +39,7 @@ class FolderUtils
 	 *                           Provide NULL to take over access rights from parent folder.
 	 * @return boolean Whether or not the folder could be created.
 	 */
-	static public function mkFullDir( $dirName, $mode = null )
+	static public function mkFullDir( $dirName, $mode = null ) : bool
 	{
 		$result = true;
 		$newDir = '';
