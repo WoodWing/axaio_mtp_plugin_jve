@@ -308,11 +308,8 @@ class Elvis_RestProxyIndex
 				$message = 'The option provided for the"cmd" param is unsupported.';
 				throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
-		require_once __DIR__.'/logic/ElvisRESTClient.php';
-		$client = new ElvisRESTClient();
-// TODO
-//		require_once __DIR__.'/logic/ElvisProxyClient.php';
-//		$client = new ElvisProxyClient();
+		require_once __DIR__.'/logic/ElvisProxyClient.php';
+		$client = new ElvisProxyClient();
 		$client->proxy( $service );
 	}
 
