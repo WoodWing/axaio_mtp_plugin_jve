@@ -586,6 +586,9 @@ class BizSession
 		// Add the ContentSourceFileLinks feature to the FeatureSet.
 		self::addFeatureForContentSourceFileLinks( $serverInfo );
 
+		// Add the ContentSourceProxyLinks feature to the FeatureSet.
+		self::addFeatureForContentSourceProxyLinks( $serverInfo );
+
 		// Add Output Devices to the FeatureSet.
 		require_once BASEDIR.'/server/bizclasses/BizAdmOutputDevice.class.php';
 		$bizDevice = new BizAdmOutputDevice();
@@ -1039,8 +1042,7 @@ class BizSession
 	}
 
 	/**
-	 * Adds the ContentSourceFileLinks feature when any of the content source plugins
-	 * has enabled this feature.
+	 * Add the ContentSourceFileLinks feature when any of the Content Source plug-ins has enabled this feature.
 	 *
 	 * @since 9.7.0
 	 * @param ServerInfo $serverInfo Holds a FeatureSet to update.
@@ -1059,6 +1061,27 @@ class BizSession
 		}
 		if( count($contentSources) > 0 ) {
 			$serverInfo->FeatureSet[] = new Feature( 'ContentSourceFileLinks', implode($contentSources, ',') );
+		}
+	}
+
+	/**
+	 * Adds the ContentSourceProxyLinks_<ContentSource> features for each of the Content Source plug-ins that provides a proxy.
+	 *
+	 * @since 10.5.0
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to update.
+	 */
+	private static function addFeatureForContentSourceProxyLinks( ServerInfo $serverInfo )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+
+		/** @var ContentSource_EnterpriseConnector[] $connectors */
+		$connectors = BizServerPlugin::searchConnectors( 'ContentSource', null );
+		if( $connectors ) foreach( $connectors as $connectorClassName => $connector ) {
+			$baseUrl = BizServerPlugin::runConnector( $connector, 'getContentSourceProxyLinksBaseUrl', array() );
+			if( $baseUrl ) {
+				$contentSource = $connector->getContentSourceId();
+				$serverInfo->FeatureSet[] = new Feature( 'ContentSourceProxyLinks_'.$contentSource, $baseUrl );
+			}
 		}
 	}
 

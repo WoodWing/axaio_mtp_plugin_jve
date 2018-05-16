@@ -825,14 +825,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * This function is called by the core server in order to determine whether the plugin
-	 * supports requests for file links.
-	 *
-	 * By default any content source connector does not support requests for file links.
-	 * This can be overruled by the connector by implementing this function.
-	 *
-	 * @since 9.7
-	 * @return bool
+	 * @inheritdoc
 	 */
 	public function isContentSourceFileLinksSupported()
 	{
@@ -840,10 +833,19 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * Helper to make array filled with default Enterprise metadata 
+	 * @inheritdoc
+	 */
+	public function getContentSourceProxyLinksBaseUrl()
+	{
+		require_once __DIR__.'/config.php';
+		return ELVIS_CONTENTSOURCE_PROXYURL;
+	}
+
+	/**
+	 * Helper to make array filled with default Enterprise metadata
 	 * fields required for Elvis.
 	 * @param MetaData $metadata Enterprise metadata object
-	 * @return array $elvisMetaData Map containing Enterprise metadata properties which are always synchronized to Elvis  
+	 * @return array $elvisMetaData Map containing Enterprise metadata properties which are always synchronized to Elvis
 	 */
 	private function fillElvisEnterpriseMetadata( $metadata )
 	{
@@ -884,10 +886,18 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	private function getFiles( $hit, array $renditions )
 	{
+		if( $this->isContentSourceFileLinksRequested() ) {
+			$fileLinkType = 'FileUrl';
+		} elseif( $this->isContentSourceProxyLinksRequested() ) {
+			$fileLinkType = 'ContentSourceProxyLink';
+		} else {
+			$fileLinkType = 'TransferServerFileLink';
+		}
+
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		$files = array();
 		foreach( $renditions as $rendition ) {
-			$file = ElvisUtils::getAttachment( $hit, $rendition, $this->isContentSourceFileLinksRequested() );
+			$file = ElvisUtils::getAttachment( $hit, $rendition, $fileLinkType );
 			if( $file ) {
 				$files[] = $file;
 			}

@@ -106,52 +106,72 @@ class ElvisUtils {
 	 *
 	 * @param ElvisEntHit $hit Elvis search result (where the URL can be extracted from).
 	 * @param string $rendition File rendition to download.
-	 * @param bool $returnFileUrls TRUE to return a direct link (URL) to the content source, or FALSE to download the file to the transfer server folder and return the URL.
+	 * @param string $fileLinkType 'FileUrl', 'ContentSourceFileLink' or 'ContentSourceProxyLink'
 	 * @return Attachment|null The file attachment, or null when not found.
 	 * @throws BizException
 	 */
-	public static function getAttachment( $hit, $rendition, $returnFileUrls )
+	public static function getAttachment( $hit, $rendition, $fileLinkType )
 	{
 		$attachment = null;
 		$url = self::getUrlFromRendition( $hit, $rendition );
 		if( $url ) {
 			$type = self::getMimeType( $hit, $url, $rendition );
 			if( $type ) {
-				if( !$returnFileUrls ) {
-					require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-					$transferServer = new BizTransferServer();
-					$attachment = new Attachment();
-					$attachment->Rendition = $rendition;
-					$attachment->Type = $type;
-					$attempt = 0;
-					do {
-						$attempt += 1;
-						$httpStatus = $transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ); // $httpStatus can be a boolean when running with Server <= 10.1.3
-						$retry = self::retryCopyToFileTransferServer( $attempt, $httpStatus );
-						if( $retry ) {
-							require_once __DIR__.'/../logic/ElvisAMFClient.php';
-							ElvisAMFClient::login();
+				$attachment = new Attachment();
+				$attachment->Rendition = $rendition;
+				$attachment->Type = $type;
+				switch( $fileLinkType ) {
+					case 'FileUrl': // let client download from the File Transfer Server
+						require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+						$transferServer = new BizTransferServer();
+						$attempt = 0;
+						do {
+							$attempt += 1;
+							$httpStatus = $transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ); // $httpStatus can be a boolean when running with Server <= 10.1.3
+							$retry = self::retryCopyToFileTransferServer( $attempt, $httpStatus );
+							if( $retry ) {
+								require_once __DIR__.'/../logic/ElvisAMFClient.php';
+								ElvisAMFClient::login();
+							}
+						} while( $retry );
+						if( intval( $httpStatus ) >= 500 ) {
+							ElvisAMFClient::throwExceptionForElvisCommunicationFailure(
+								'Failed to copy '.$rendition.' file from Elvis server to Transfer Server folder.' );
 						}
-					} while( $retry );
-					if( intval($httpStatus) >= 500 ) {
-						ElvisAMFClient::throwExceptionForElvisCommunicationFailure(
-							'Failed to copy '.$rendition.' file from Elvis server to Transfer Server folder.' );
-					}
-					if( intval($httpStatus) >= 400 || $httpStatus === false ) { // false: simulate ES < 10.1.4 behaviour
-						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
-					}
-				} else {
-					// EN-88634: We no longer add our jsessionid to the ContentSourceFileLink URL; This URL is requested by
-					// SC which passes on the URL to the Elvis InDesign plugin. This plugin has its own session with Elvis
-					// and so it has its own authorization.
-					$attachment = new Attachment();
-					$attachment->Rendition = $rendition;
-					$attachment->Type = $type;
-					$attachment->ContentSourceFileLink = self::replaceUrlForClientsAccess( $url );
+						if( intval( $httpStatus ) >= 400 || $httpStatus === false ) { // false: simulate ES < 10.1.4 behaviour
+							throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
+						}
+						break;
+					case 'ContentSourceFileLink': // let client directly download from Elvis
+						// EN-88634: We no longer add our jsessionid to the ContentSourceFileLink URL; This URL is requested by
+						// SC which passes on the URL to the Elvis InDesign plugin. This plugin has its own session with Elvis
+						// and so it has its own authorization.
+						$attachment->ContentSourceFileLink = self::replaceUrlForClientsAccess( $url );
+						break;
+					case 'ContentSourceProxyLink': // let client download from our Elvis proxy server
+						$objectId = $hit->metadata['sceId'];
+						$attachment->ContentSourceProxyLink = self::composePublicProxyFileDownloadUrl( $objectId, $rendition );
+						break;
 				}
 			}
 		}
 		return $attachment;
+	}
+
+	/**
+	 * Compose an URL for client applications to perform a file download over the Elvis proxy server.
+	 *
+	 * @since 10.5.0
+	 * @param string $objectId
+	 * @param string $rendition File rendition to download.
+	 * @return string The proxy file download URL.
+	 */
+	private static function composePublicProxyFileDownloadUrl( $objectId, $rendition )
+	{
+		return ELVIS_CONTENTSOURCE_PROXYURL.
+			'?cmd=get-file'.
+			'&objectid='.urlencode( $objectId ).
+			'&rendition='.urlencode( $rendition );
 	}
 
 	/**

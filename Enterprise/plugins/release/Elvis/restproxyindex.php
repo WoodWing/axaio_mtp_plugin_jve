@@ -20,9 +20,10 @@
  *              instead of ticket to have stable URLs and so use the web browser's cache. When using this parameter and
  *              the client does not run in a web browser it should round-trip web cookies by itself.
  * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
- * - service:   The Elvis REST API call e.g. to do download a native, preview or crop file from Elvis. The URL must be
- *              URL encoded and relative (the Elvis host/ip must be excluded). The Elvis asset id should be indicated
- *              with a placeholder %assetid% which is resolved by the proxy from the object id.
+ * - cmd:       The service request to proxy to Elvis. The following commands are supported: 'get-file' and 'crop-image'.
+ * - rendition: The file rendition to download. Required for the 'get-file' command. Supported values: 'native', 'preview' or 'thumb'.
+ * - file-args: The cropping dimensions. Optional and only applies to the 'get-file' command. See Elvis REST API for details.
+ * - crop-args: The cropping dimensions. Optional and only applies to the 'crop-image' command. See Elvis REST API for details.
  *
  * Example request:
  *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&service=preview%2F%25assetid%25&objectid=123
@@ -114,7 +115,7 @@ class Elvis_RestProxyIndex
 
 		$this->httpParams = array(
 			'ticket' => null,
-			'service' => null
+			'cmd' => null
 		);
 
 		// Accept the ticket param.
@@ -127,14 +128,29 @@ class Elvis_RestProxyIndex
 			$this->httpParams['ticket'] = BizSession::getTicketForClientIdentifier();
 		}
 
-		// Accept the service param.
-		if( isset( $requestParams['service'] ) ) {
-			$this->httpParams['service'] = $requestParams['service'];
+		// Accept the cmd param (proxy command).
+		if( isset( $requestParams['cmd'] ) ) {
+			$this->httpParams['cmd'] = $requestParams['cmd'];
 		}
 
-		// Accept the objectid param.
+		// Accept the objectid param (Enterprise object id).
 		if( isset( $requestParams['objectid'] ) ) {
 			$this->httpParams['objectid'] = intval( $requestParams['objectid'] );
+		}
+
+		// Accept the rendition param (file rendition).
+		if( isset( $requestParams['rendition'] ) ) {
+			$this->httpParams['rendition'] = $requestParams['rendition'];
+		}
+
+		// Accept the crop-args param (image crop arguments).
+		if( isset( $requestParams['crop-args'] ) ) {
+			$this->httpParams['crop-args'] = $requestParams['crop-args'];
+		}
+
+		// Accept the file-args param (file arguments).
+		if( isset( $requestParams['file-args'] ) ) {
+			$this->httpParams['file-args'] = $requestParams['file-args'];
 		}
 
 		// Log the incoming parameters for debugging purposes.
@@ -273,17 +289,77 @@ class Elvis_RestProxyIndex
 	 * Dispatch (proxy) the incoming REST service request to Elvis Server.
 	 *
 	 * @throws BizException
+	 * @throws Elvis_RestProxyIndex_HttpException
 	 */
 	private function proxyRequestToElvisServer()
 	{
-		if( !$this->httpParams['service'] ) {
-			$message = 'Please specify "service" param at URL.';
+		if( !isset( $this->httpParams['cmd'] ) ) {
+			$message = 'Please specify "cmd" param at URL.';
 			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
-		$service = str_replace( '%assetid%', $this->elvisAssetId, $this->httpParams['service'] );
-		require_once __DIR__.'/logic/ElvisProxyClient.php';
-		$client = new ElvisProxyClient();
+		switch( $this->httpParams['cmd'] ) {
+			case 'get-file':
+				$service = $this->composeRestServiceForFileDownload();
+				break;
+			case 'crop-image':
+				$service = $this->composeRestServiceForImageCrop();
+				break;
+			default:
+				$message = 'The option provided for the"cmd" param is unsupported.';
+				throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
+		}
+		require_once __DIR__.'/logic/ElvisRESTClient.php';
+		$client = new ElvisRESTClient();
+// TODO
+//		require_once __DIR__.'/logic/ElvisProxyClient.php';
+//		$client = new ElvisProxyClient();
 		$client->proxy( $service );
+	}
+
+	/**
+	 * Compose the relative Elvis REST service URL for a file download operation.
+	 *
+	 * @return string The URL (without the absolute Elvis base path).
+	 * @throws Elvis_RestProxyIndex_HttpException
+	 */
+	private function composeRestServiceForFileDownload()
+	{
+		if( !isset( $this->httpParams['rendition'] ) ) {
+			$message = 'Please specify "rendition" param at URL.';
+			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
+		}
+		switch( $this->httpParams['rendition'] ) {
+			case 'thumb':
+				$service = 'thumbnail/'.urlencode( $this->elvisAssetId );
+				break;
+			case 'preview':
+				$service = 'preview/'.urlencode( $this->elvisAssetId );
+				break;
+			case 'native':
+				$service = 'file/'.urlencode( $this->elvisAssetId );
+				break;
+			default:
+				$message = 'The option provided for the"rendition" param is unsupported.';
+				throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
+		}
+		if( isset( $this->httpParams['file-args'] ) ) {
+			$service .= '/previews/'.urlencode( $this->httpParams['file-args'] );
+		}
+		return $service;
+	}
+
+	/**
+	 * Compose the relative Elvis REST service URL for an image crop operation.
+	 *
+	 * @return string The URL (without the absolute Elvis base path).
+	 */
+	private function composeRestServiceForImageCrop()
+	{
+		$service = 'preview/'.urlencode( $this->elvisAssetId );
+		if( isset( $this->httpParams['crop-args'] ) ) {
+			$service .= '/previews/'.urlencode( $this->httpParams['crop-args'] );
+		}
+		return $service;
 	}
 }
 

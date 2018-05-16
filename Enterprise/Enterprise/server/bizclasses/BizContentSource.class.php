@@ -467,15 +467,22 @@ class BizContentSource
 		$alienId = self::getAlienId( $contentSource, $documentId );
 		$connector = self::getContentSourceForAlienObject( $alienId );
 
-        // When ContentSourceFileLinks are requested, they need to be enabled for the Content Source plugin.
-        if( is_array( $requestInfo ) && in_array( 'ContentSourceFileLinks', $requestInfo )
+		// When ContentSourceFileLinks are requested, they need to be enabled for the Content Source plugin.
+		if( is_array( $requestInfo ) && in_array( 'ContentSourceFileLinks', $requestInfo )
 			&& is_array( $supportedContentSources ) && in_array( $contentSource, $supportedContentSources ) ) {
-            require_once BASEDIR . '/server/bizclasses/BizServerPlugin.class.php';
-            BizServerPlugin::runConnector( $connector, 'requestedContentSourceFileLinks', array() );
-        }
+			require_once BASEDIR . '/server/bizclasses/BizServerPlugin.class.php';
+			BizServerPlugin::runConnector( $connector, 'requestedContentSourceFileLinks', array() );
+		}
+
+		// When requested for ContentSourceProxyLinks_<ContentSource>, inform the corresponding Content Source plugin
+		// to use its proxy server for downloading files.
+		if( in_array( 'ContentSourceProxyLinks_'.$contentSource, $requestInfo ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+			BizServerPlugin::runConnector( $connector, 'requestedContentSourceProxyLinks', array() );
+		}
 
 		// EN-86558 Use the new getShadowObject api call that supports the haveVersion parameter
-		BizServerPlugin::runConnector( $connector, 'getShadowObject2', 
+		BizServerPlugin::runConnector( $connector, 'getShadowObject2',
 			array( $alienId, &$object, $objProps, $lock, $rendition, $haveVersion ) );
 	}
 
