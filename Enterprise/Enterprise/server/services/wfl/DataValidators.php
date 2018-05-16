@@ -2476,6 +2476,13 @@ class WflAttachmentValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'ContentSourceProxyLink' ) ) {
+			$validator->enterPath( 'ContentSourceProxyLink' );
+			if( !is_null( $datObj->ContentSourceProxyLink ) ) {
+				$validator->checkType( $datObj->ContentSourceProxyLink, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 

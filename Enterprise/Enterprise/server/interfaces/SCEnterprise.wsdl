@@ -1007,9 +1007,13 @@
 					     In that case, it should be read as: "for all editions/renditions". -->
 
 					<element name="ContentSourceFileLink" type="xsd:string" nillable="true" minOccurs="0" maxOccurs="1"/>
-					<!-- Since v9.7 the ContentSourceFileLink is added to enable returning references to files instead
-						 of the files themselves. The file link is a direct reference to the location of the file on
-						 the Content Source.
+					<!-- Since v9.7 the ContentSourceFileLink is added. The file link is a direct reference to the location 
+						 of the file on the Content Source. It requires the client/user to logon to that content source.
+					-->
+					
+					<element name="ContentSourceProxyLink" type="xsd:string" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<!-- Since v10.5.0 the ContentSourceProxyLink is added. The proxy link is an indirect reference to the 
+						 location of the file on the Content Source that travels over a proxy server.
 					-->
 				</all>
 			</complexType>
