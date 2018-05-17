@@ -57,7 +57,16 @@ class Elvis_RestProxyIndex
 	 */
 	public function handle()
 	{
-		$this->includeEnterpriseServerConfig();
+		// Note that the code fragment below that includes the config files can not be moved into a separate function
+		// because that would cause PHP calling the global destructor of PerformanceProfiler too early.
+		$beforeInclude = microtime( true );
+		if( file_exists( __DIR__.'/../../config.php' ) ) {
+			require_once '../../config.php';
+		} else { // fall back at symbolic link to VCS source location of server plug-in
+			require_once '../../../Enterprise/config/config.php';
+		}
+		$footprint = sprintf( '%03d', round( ( microtime( true ) - $beforeInclude ) * 1000 ) );
+		LogHandler::Log( 'ElvisRestProxyIndex', 'CONTEXT', 'Enterprise Server footprint: '.$footprint.'ms (= startup time).' );
 
 		$httpMethod = $_SERVER['REQUEST_METHOD'];
 		LogHandler::Log( 'ElvisRestProxyIndex', 'CONTEXT', "Incoming HTTP {$httpMethod} request." );
@@ -77,21 +86,6 @@ class Elvis_RestProxyIndex
 
 		PerformanceProfiler::stopProfile( 'ElvisRestProxyIndex', 1 );
 		LogHandler::Log( 'ElvisRestProxyIndex', 'CONTEXT', "Outgoing HTTP {$httpMethod} response." );
-	}
-
-	/**
-	 * Include core basics and log the footprint of Enterprise Server (= startup time).
-	 */
-	private function includeEnterpriseServerConfig()
-	{
-		$beforeInclude = microtime( true );
-		if( file_exists( __DIR__.'/../../config.php' ) ) {
-			require_once '../../config.php';
-		} else { // fall back at symbolic link to VCS source location of server plug-in
-			require_once '../../../Enterprise/config/config.php';
-		}
-		$footprint = sprintf( '%03d', round( ( microtime( true ) - $beforeInclude ) * 1000 ) );
-		LogHandler::Log( 'ElvisRestProxyIndex', 'CONTEXT', 'Enterprise Server footprint: '.$footprint.'ms (= startup time).' );
 	}
 
 	/**
