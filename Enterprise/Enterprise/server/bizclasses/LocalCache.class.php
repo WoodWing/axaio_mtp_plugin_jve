@@ -71,7 +71,9 @@ class WW_BizClasses_LocalCache
 		if( $bucketPath === false ){
 			return false;
 		}
+		PerformanceProfiler::startProfile( 'LocalCache - '.$bucketId, 4 );
 		$wroteBytes = $this->writeDataInFile( $bucketPath.'/'.$itemId, $data );
+		PerformanceProfiler::stopProfile( 'LocalCache - '.$bucketId, 4 );
 		return $wroteBytes !== false;
 	}
 
@@ -110,7 +112,10 @@ class WW_BizClasses_LocalCache
 		if( $bucketPath === false ){
 			return false;
 		}
-		return $this->readDataFromFile( $bucketPath.'/'.$itemId );
+		PerformanceProfiler::startProfile( 'LocalCache - '.$bucketId, 4 );
+		$readData = $this->readDataFromFile( $bucketPath.'/'.$itemId );
+		PerformanceProfiler::stopProfile( 'LocalCache - '.$bucketId, 4 );
+		return $readData;
 	}
 
 	/**
