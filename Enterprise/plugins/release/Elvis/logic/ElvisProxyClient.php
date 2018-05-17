@@ -1,15 +1,33 @@
 <?php
-
-require_once __DIR__.'/ElvisCurlClient.php';
+/**
+ * @package    Elvis
+ * @subpackage Logic
+ * @since      10.5
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 class ElvisProxyClient
 {
 	/**
-	 * @param $service
+	 * @var string
+	 */
+	private $shortUserName;
+	/**
+	 * @var string
+	 */
+	private $service;
+
+	public function __construct( $shortUserName, $service )
+	{
+		$this->shortUserName = $shortUserName;
+		$this->service = $service;
+	}
+
+	/**
 	 * @return ElvisClientResponse
 	 * @throws ElvisBizException
 	 */
-	private static function proxyGet( $service )
+	private function proxyGet()
 	{
 		$curlOptions = array(
 			CURLOPT_WRITEFUNCTION => function( $curl, $data ) {
@@ -21,7 +39,9 @@ class ElvisProxyClient
 				return strlen( $headerLine ); // Needed by CURLOPT_HEADERFUNCTION
 			}
 		);
-		return ElvisCurlClient::request( $service, $curlOptions );
+
+		require_once __DIR__.'/ElvisCurlClient.php';
+		return ElvisCurlClient::request( $this->shortUserName, $this->service, $curlOptions );
 	}
 
 	/**
@@ -29,18 +49,15 @@ class ElvisProxyClient
 	 *
 	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
 	 *
-	 * @since 10.5.0
-	 * @param string $service
 	 * @throws ElvisBizException
 	 */
-	public static function proxy( $service )
+	public function proxy()
 	{
 		set_time_limit( 3600 ); // postpone timeout
 		$httpMethod = $_SERVER['REQUEST_METHOD'];
-		// TODO handle POST
 		switch( $httpMethod ) {
 			case 'GET':
-				self::proxyGet( $service );
+				$this->proxyGet();
 				break;
 			default:
 				throw new ElvisBizException( 'HTTP method '.$httpMethod.' not supported' );

@@ -303,8 +303,8 @@ class Elvis_RestProxyIndex
 				throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
 		require_once __DIR__.'/logic/ElvisProxyClient.php';
-		$client = new ElvisProxyClient();
-		$client->proxy( $service );
+		$client = new ElvisProxyClient( BizSession::getShortUserName(), $service );
+		$client->proxy();
 	}
 
 	/**

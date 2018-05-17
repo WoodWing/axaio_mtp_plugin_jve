@@ -1,23 +1,27 @@
 <?php
+/**
+ * @package    Elvis
+ * @subpackage Logic
+ * @since      10.5
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once __DIR__.'/../config.php';
-require_once __DIR__.'/ElvisBizException.php';
-require_once __DIR__.'/ElvisClientResponse.php';
-require_once __DIR__.'/../util/ElvisSessionUtil.php';
 
 class ElvisCurlClient
 {
 	/**
 	 * Execute service request against Elvis server.
 	 *
+	 * @param string $shortUserName
 	 * @param string $service
 	 * @param array $curlOptions cURL options to override.
 	 * @return ElvisClientResponse
 	 * @throws ElvisBizException
 	 */
-	public static function request( $service, $curlOptions )
+	public static function request( $shortUserName, $service, $curlOptions )
 	{
-		$curlOptions[ CURLOPT_HTTPHEADER ] = array( 'Authorization: Bearer '.self::getAccessToken() );
+		$curlOptions[ CURLOPT_HTTPHEADER ] = array( 'Authorization: Bearer '.self::getAccessToken( $shortUserName ) );
 		$response = self::plainRequest( $service, $curlOptions );
 		if( $response->isAuthenticationError() ) {
 			$curlOptions[ CURLOPT_HTTPHEADER ] = array( 'Authorization: Bearer '.self::requestAndSaveAccessToken() );
@@ -39,6 +43,7 @@ class ElvisCurlClient
 		$responseHeaders = [];
 		$ch = curl_init();
 		if( !$ch ) {
+			require_once __DIR__.'/ElvisBizException.php';
 			throw new ElvisBizException( 'Failed to create a CURL handle' );
 		}
 		curl_setopt_array( $ch, self::getCurlOptions( $service, $curlOptions, $responseHeaders ) );
@@ -46,6 +51,7 @@ class ElvisCurlClient
 		$body = curl_exec( $ch );
 		$duration = microtime( true ) - $startTime;
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		require_once __DIR__.'/ElvisClientResponse.php';
 		$response = new ElvisClientResponse( $httpStatusCode, $body );
 
 		if( LogHandler::debugMode() ) {
@@ -129,46 +135,55 @@ class ElvisCurlClient
 	/**
 	 * Get access token to execute a request against an Elvis server.
 	 *
+	 * @param  string $shortUserName
 	 * @return string access token
 	 * @throws ElvisBizException
 	 */
-	private static function getAccessToken()
+	private static function getAccessToken( $shortUserName )
 	{
-		$accessToken = ElvisSessionUtil::getAccessToken();
+		require_once __DIR__.'/../dbclasses/Token.class.php';
+		$accessToken = Elvis_DbClasses_Token::get( $shortUserName );
 		if( is_null( $accessToken ) ) {
-			$accessToken = self::requestAndSaveAccessToken();
+			$accessToken = self::requestAndSaveAccessToken( $shortUserName );
 		}
 		return $accessToken;
 	}
 
 	/**
-	 * Request access token and save it in the current session.
+	 * Request access token and save it.
 	 *
+	 * @param  string $shortUserName
 	 * @return string access token
 	 * @throws ElvisBizException
 	 */
-	private static function requestAndSaveAccessToken()
+	private static function requestAndSaveAccessToken( $shortUserName )
 	{
-		$accessToken = self::requestAccessToken();
-		ElvisSessionUtil::saveAccessToken( $accessToken );
+		$accessToken = self::requestAccessToken( $shortUserName );
+		require_once __DIR__.'/../dbclasses/Token.class.php';
+		Elvis_DbClasses_Token::save( $shortUserName, $accessToken );
 		return $accessToken;
 	}
 
 	/**
 	 * Request access token from Elvis.
 	 *
+	 * @param  string $shortUserName
 	 * @return string access token
 	 * @throws ElvisBizException when access token can't be retrieved.
 	 */
-	private static function requestAccessToken()
+	private static function requestAccessToken( $shortUserName )
 	{
-		$post = array( 'grant_type' => 'client_credentials' );
+		$post = array(
+			'grant_type' => 'client_credentials',
+			'impersonator_id' => $shortUserName,
+		);
 		$curlOptions = self::postUrlEncodedOptions( $post, array(
 			CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
 			CURLOPT_USERPWD => ELVIS_CLIENT_ID.':'.ELVIS_CLIENT_SECRET
 		) );
 		$response = self::plainRequest( 'oauth/token', $curlOptions );
 		if( $response->isError() ) {
+			require_once __DIR__.'/ElvisBizException.php';
 			throw new ElvisBizException( 'Failed to retrieve access token' );
 		}
 		return $response->jsonBody()->access_token;

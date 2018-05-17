@@ -56,6 +56,7 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 			'PubPublishDossiers_EnterpriseConnector',
 			'PubUpdateDossiers_EnterpriseConnector',
 			'PubUnPublishDossiers_EnterpriseConnector',
+			'DbModel_EnterpriseConnector',
 		);
 
 		// Dynamically add connector interfaces introduced since specific Enterprise Server version.
