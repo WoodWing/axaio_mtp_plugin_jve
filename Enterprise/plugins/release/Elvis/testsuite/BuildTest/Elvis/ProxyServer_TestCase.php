@@ -153,7 +153,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	}
 
 	/**
-	 * Attempt download image preview via the Elvis proxy server with invalid ticket. Expect HTTP 403.
+	 * Attempt download image preview via the Elvis proxy server with invalid ticket. Expect HTTP 401.
 	 */
 	private function testInvalidTicket()
 	{
