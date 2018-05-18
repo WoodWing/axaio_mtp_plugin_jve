@@ -559,7 +559,7 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	 * download URL through the file Attachment->ContentSourceProxyLink instead.
 	 *
 	 * @since 10.5.0
-	 * @return string The proxy URL, or null when no proxy available.
+	 * @return string|null The proxy URL, or null when no proxy available.
 	 */
 	public function getContentSourceProxyLinksBaseUrl()
 	{

@@ -16,9 +16,9 @@
  *
  * The restproxyindex.php supports the following URL parameters:
  * - ticket:    A valid session ticket that was obtained through a LogOn service call (e.g. see SCEnterprise.wsdl).
- * - ww-app:    The client application name that was provided in the LogOn service request. This parameter could used
- *              instead of ticket to have stable URLs and so use the web browser's cache. When using this parameter and
- *              the client does not run in a web browser it should round-trip web cookies by itself.
+ * - ww-app:    The client application name that was provided in the LogOn service request. This parameter can be used
+ *              instead of the 'ticket' parameter to have stable URLs and take full advantage of the web browser's cache.
+ *              Note that when the client does not run in a web browser it should round-trip web cookies by itself.
  * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
  * - rendition: The file rendition to download. Supported values: 'native', 'preview' or 'thumb'.
  * - preview-args: The preview- or cropping dimensions. Optional. See Elvis REST API for details.
@@ -97,8 +97,6 @@ class Elvis_RestProxyIndex
 
 	/**
 	 * Validate the HTTP request params and populate $this->httpParams.
-	 *
-	 * @throws Elvis_RestProxyIndex_HttpException
 	 */
 	private function parseHttpParams()
 	{
@@ -193,6 +191,7 @@ class Elvis_RestProxyIndex
 	 * Check if the ticket (provided by client) is valid and starts an Enterprise Server session.
 	 *
 	 * @throws BizException
+	 * @throws Elvis_RestProxyIndex_HttpException
 	 */
 	private function validateTicketAndStartSession()
 	{
