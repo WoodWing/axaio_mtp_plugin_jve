@@ -22,11 +22,10 @@
  * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
  * - cmd:       The service request to proxy to Elvis. The following commands are supported: 'get-file' and 'crop-image'.
  * - rendition: The file rendition to download. Required for the 'get-file' command. Supported values: 'native', 'preview' or 'thumb'.
- * - file-args: The cropping dimensions. Optional and only applies to the 'get-file' command. See Elvis REST API for details.
- * - crop-args: The cropping dimensions. Optional and only applies to the 'crop-image' command. See Elvis REST API for details.
+ * - preview-args: The preview- or cropping dimensions. Optional. See Elvis REST API for details.
  *
  * Example request:
- *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&service=preview%2F%25assetid%25&objectid=123
+ *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&cmd=get-file&objectid=123&rendition=preview
  *
  * The following HTTP codes may be returned:
  * - HTTP 200: The file is found and is streamed back to caller.
@@ -137,14 +136,9 @@ class Elvis_RestProxyIndex
 			$this->httpParams['rendition'] = $requestParams['rendition'];
 		}
 
-		// Accept the crop-args param (image crop arguments).
-		if( isset( $requestParams['crop-args'] ) ) {
-			$this->httpParams['crop-args'] = $requestParams['crop-args'];
-		}
-
-		// Accept the file-args param (file arguments).
-		if( isset( $requestParams['file-args'] ) ) {
-			$this->httpParams['file-args'] = $requestParams['file-args'];
+		// Accept the preview-args param (preview arguments).
+		if( isset( $requestParams['preview-args'] ) ) {
+			$this->httpParams['preview-args'] = $requestParams['preview-args'];
 		}
 
 		// Log the incoming parameters for debugging purposes.
@@ -321,20 +315,17 @@ class Elvis_RestProxyIndex
 		}
 		switch( $this->httpParams['rendition'] ) {
 			case 'thumb':
-				$service = 'thumbnail/'.urlencode( $this->elvisAssetId );
+				$service = 'thumbnail/'.urlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
 				break;
 			case 'preview':
-				$service = 'preview/'.urlencode( $this->elvisAssetId );
+				$service = 'preview/'.urlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
 				break;
 			case 'native':
-				$service = 'file/'.urlencode( $this->elvisAssetId );
+				$service = 'file/'.urlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
 				break;
 			default:
 				$message = 'The option provided for the"rendition" param is unsupported.';
 				throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
-		}
-		if( isset( $this->httpParams['file-args'] ) ) {
-			$service .= '/previews/'.urlencode( $this->httpParams['file-args'] );
 		}
 		return $service;
 	}
@@ -346,11 +337,22 @@ class Elvis_RestProxyIndex
 	 */
 	private function composeRestServiceForImageCrop()
 	{
-		$service = 'preview/'.urlencode( $this->elvisAssetId );
-		if( isset( $this->httpParams['crop-args'] ) ) {
-			$service .= '/previews/'.urlencode( $this->httpParams['crop-args'] );
+		return 'preview/'.urlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
+	}
+
+	/**
+	 * Compose the preview arguments that can be optionally added to the preview download URL.
+	 *
+	 * @return string
+	 */
+	private function composePreviewUrlArguments()
+	{
+		if( isset( $this->httpParams['preview-args'] ) ) {
+			$arguments = '/previews/'.urlencode( $this->httpParams['preview-args'] );
+		} else {
+			$arguments = '';
 		}
-		return $service;
+		return $arguments;
 	}
 }
 

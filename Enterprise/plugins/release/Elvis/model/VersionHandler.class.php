@@ -86,7 +86,7 @@ class VersionHandler
 		$vi->Created = $object->MetaData->WorkflowMetaData->Modified;
 		$vi->Comment = $object->MetaData->WorkflowMetaData->Comment;
 		$vi->Object = $object->MetaData->BasicMetaData->Name;
-		$vi->File = ElvisUtils::getAttachment( $hit, $rendition, 'TransferServerFileLinks' );
+		$vi->File = ElvisUtils::getAttachment( $hit, $rendition, 'FileUrl' );
 
 		return $vi;
 	}

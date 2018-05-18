@@ -887,11 +887,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	private function getFiles( $hit, array $renditions )
 	{
 		if( $this->isContentSourceFileLinksRequested() ) {
-			$fileLinkType = 'FileUrl';
+			$fileLinkType = 'ContentSourceFileLink';
 		} elseif( $this->isContentSourceProxyLinksRequested() ) {
 			$fileLinkType = 'ContentSourceProxyLink';
 		} else {
-			$fileLinkType = 'TransferServerFileLink';
+			$fileLinkType = 'FileUrl';
 		}
 
 		require_once __DIR__.'/util/ElvisUtils.class.php';
