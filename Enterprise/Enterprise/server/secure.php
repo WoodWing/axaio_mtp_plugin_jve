@@ -114,7 +114,7 @@ function getOptionalCookie( $cookieName )
  *
  * @param string $cookieName
  * @param bool $redir Deprecated since 10.5.0
- * @return null
+ * @return string|null The cookie value, or NULL when the cookie does not exist.
  */
 function getLogCookie( $cookieName, $redir=true )
 {
