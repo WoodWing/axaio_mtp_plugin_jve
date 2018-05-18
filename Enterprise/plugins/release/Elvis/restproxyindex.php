@@ -20,12 +20,11 @@
  *              instead of ticket to have stable URLs and so use the web browser's cache. When using this parameter and
  *              the client does not run in a web browser it should round-trip web cookies by itself.
  * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
- * - cmd:       The service request to proxy to Elvis. The following commands are supported: 'get-file' and 'crop-image'.
- * - rendition: The file rendition to download. Required for the 'get-file' command. Supported values: 'native', 'preview' or 'thumb'.
+ * - rendition: The file rendition to download. Supported values: 'native', 'preview' or 'thumb'.
  * - preview-args: The preview- or cropping dimensions. Optional. See Elvis REST API for details.
  *
  * Example request:
- *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&cmd=get-file&objectid=123&rendition=preview
+ *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=123&rendition=preview
  *
  * The following HTTP codes may be returned:
  * - HTTP 200: The file is found and is streamed back to caller.
@@ -106,10 +105,7 @@ class Elvis_RestProxyIndex
 		require_once BASEDIR.'/server/utils/HttpRequest.class.php';
 		$requestParams = WW_Utils_HttpRequest::getHttpParams( 'GP' ); // GET and POST only, no cookies
 
-		$this->httpParams = array(
-			'ticket' => null,
-			'cmd' => null
-		);
+		$this->httpParams = array( 'ticket' => null );
 
 		// Accept the ticket param.
 		if( isset( $requestParams['ticket'] ) ) {
@@ -119,11 +115,6 @@ class Elvis_RestProxyIndex
 			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
 			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
 			$this->httpParams['ticket'] = BizSession::getTicketForClientIdentifier();
-		}
-
-		// Accept the cmd param (proxy command).
-		if( isset( $requestParams['cmd'] ) ) {
-			$this->httpParams['cmd'] = $requestParams['cmd'];
 		}
 
 		// Accept the objectid param (Enterprise object id).
@@ -281,21 +272,8 @@ class Elvis_RestProxyIndex
 	 */
 	private function proxyRequestToElvisServer()
 	{
-		if( !isset( $this->httpParams['cmd'] ) ) {
-			$message = 'Please specify "cmd" param at URL.';
-			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
-		}
-		switch( $this->httpParams['cmd'] ) {
-			case 'get-file':
-				$service = $this->composeRestServiceForFileDownload();
-				break;
-			case 'crop-image':
-				$service = $this->composeRestServiceForImageCrop();
-				break;
-			default:
-				$message = 'The option provided for the"cmd" param is unsupported.';
-				throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
-		}
+		$service = $this->composeRestServiceForFileDownload();
+
 		require_once __DIR__.'/logic/ElvisProxyClient.php';
 		$client = new ElvisProxyClient( BizSession::getShortUserName(), $service );
 		$client->proxy();
@@ -328,16 +306,6 @@ class Elvis_RestProxyIndex
 				throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
 		}
 		return $service;
-	}
-
-	/**
-	 * Compose the relative Elvis REST service URL for an image crop operation.
-	 *
-	 * @return string The URL (without the absolute Elvis base path).
-	 */
-	private function composeRestServiceForImageCrop()
-	{
-		return 'preview/'.urlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
 	}
 
 	/**

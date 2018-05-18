@@ -169,8 +169,7 @@ class ElvisUtils {
 	private static function composePublicProxyFileDownloadUrl( $objectId, $rendition )
 	{
 		return ELVIS_CONTENTSOURCE_PROXYURL.
-			'?cmd=get-file'.
-			'&objectid='.urlencode( $objectId ).
+			'?objectid='.urlencode( $objectId ).
 			'&rendition='.urlencode( $rendition );
 	}
 

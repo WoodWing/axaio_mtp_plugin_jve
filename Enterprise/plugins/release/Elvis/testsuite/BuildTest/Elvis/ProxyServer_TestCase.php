@@ -30,7 +30,6 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 			'<li>Attempt download image preview via the Elvis proxy server with invalid ticket. Expect HTTP 403.</li>'.
 			'<li>Attempt download image preview via the Elvis proxy server with non-existing object id. Expect HTTP 404.</li>'.
 			'<li>Attempt download image via the Elvis proxy server with unsupported file rendition. Expect HTTP 400.</li>'.
-			'<li>Attempt calling the Elvis proxy server with unsupported command. Expect HTTP 400.</li>'.
 			'</ul>';
 	}
 
@@ -67,7 +66,6 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 			$this->testInvalidTicket();
 			$this->testObjectNotFound();
 			$this->testUnsupportedFileRendition();
-			$this->testUnsupportedOperation();
 		} catch( BizException $e ) {
 		}
 		$this->tearDownTestData();
@@ -159,8 +157,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	{
 		require_once BASEDIR.'/config/plugins/Elvis/config.php';
 		$url = ELVIS_CONTENTSOURCE_PROXYURL.
-			'?cmd=get-file'.
-			'&objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
+			'?objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
 			'&rendition=native';
 		@file_get_contents( $url.'&ticket=123' );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
@@ -174,8 +171,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	{
 		require_once BASEDIR.'/config/plugins/Elvis/config.php';
 		$url = ELVIS_CONTENTSOURCE_PROXYURL.
-			'?cmd=get-file'.
-			'&objectid=9223372036854775807'. // take max int 64 for non-existing object id
+			'?objectid=9223372036854775807'. // take max int 64 for non-existing object id
 			'&rendition=preview';
 		@file_get_contents( $url.'&ticket='.$this->ticket );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
@@ -189,24 +185,8 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	{
 		require_once BASEDIR.'/config/plugins/Elvis/config.php';
 		$url = ELVIS_CONTENTSOURCE_PROXYURL.
-			'?cmd=get-file'.
-			'&objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
+			'?objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
 			'&rendition=foo';
-		@file_get_contents( $url.'&ticket='.$this->ticket );
-		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
-		$this->assertEquals( 400, $this->getHttpStatusCode( $http_response_header ) );
-	}
-
-	/**
-	 * Attempt calling the Elvis proxy server with unsupported command. Expect HTTP 400.
-	 */
-	private function testUnsupportedOperation()
-	{
-		require_once BASEDIR.'/config/plugins/Elvis/config.php';
-		$url = ELVIS_CONTENTSOURCE_PROXYURL.
-			'?cmd=foo'.
-			'&objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
-			'&rendition=preview';
 		@file_get_contents( $url.'&ticket='.$this->ticket );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
 		$this->assertEquals( 400, $this->getHttpStatusCode( $http_response_header ) );
