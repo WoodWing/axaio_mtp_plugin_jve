@@ -24,7 +24,7 @@ class ElvisCurlClient
 		$curlOptions[ CURLOPT_HTTPHEADER ] = array( 'Authorization: Bearer '.self::getAccessToken( $shortUserName ) );
 		$response = self::plainRequest( $service, $curlOptions );
 		if( $response->isAuthenticationError() ) {
-			$curlOptions[ CURLOPT_HTTPHEADER ] = array( 'Authorization: Bearer '.self::requestAndSaveAccessToken() );
+			$curlOptions[ CURLOPT_HTTPHEADER ] = array( 'Authorization: Bearer '.self::requestAndSaveAccessToken( $shortUserName ) );
 			$response = self::plainRequest( $service, $curlOptions );
 		}
 		return $response;
