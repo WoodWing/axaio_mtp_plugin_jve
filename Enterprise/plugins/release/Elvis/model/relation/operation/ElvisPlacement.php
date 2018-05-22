@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once __DIR__.'/../../AbstractRemoteObject.php';
 

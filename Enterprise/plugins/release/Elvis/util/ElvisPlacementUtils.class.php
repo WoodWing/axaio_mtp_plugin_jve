@@ -1,8 +1,6 @@
 <?php
 /**
- * @package    Elvis
- * @subpackage ServerPlugins
- * @since      v4.4
+ * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * Utility functions related to Elvis shadow object placements.

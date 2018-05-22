@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once dirname(__FILE__) . '/config.php';
 require_once dirname(__FILE__) . '/logic/ElvisContentSourceService.php';

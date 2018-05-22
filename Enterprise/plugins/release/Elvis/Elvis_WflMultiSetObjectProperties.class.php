@@ -1,8 +1,6 @@
 <?php
 /**
- * @package    Elvis
- * @subpackage ServerPlugins
- * @since      v4.4
+ * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * Hooks into the Mulitple Set Object Properties workflow web service.

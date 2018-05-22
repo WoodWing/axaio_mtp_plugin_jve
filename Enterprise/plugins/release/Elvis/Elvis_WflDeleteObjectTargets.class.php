@@ -1,16 +1,14 @@
 <?php
-
-require_once BASEDIR . '/server/interfaces/services/wfl/WflDeleteObjectTargets_EnterpriseConnector.class.php';
-
 /**
- * @package    Elvis
- * @subpackage ServerPlugins
- * @since      v4.4
+ * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * Hooks into the Delete Object Targets workflow web service.
  * Called when an end-user removes a target of an object contained by a dossier (typically using CS).
  */
+
+require_once BASEDIR . '/server/interfaces/services/wfl/WflDeleteObjectTargets_EnterpriseConnector.class.php';
+
 class Elvis_WflDeleteObjectTargets extends WflDeleteObjectTargets_EnterpriseConnector
 {
 	final public function getPrio()     { return self::PRIO_DEFAULT; }

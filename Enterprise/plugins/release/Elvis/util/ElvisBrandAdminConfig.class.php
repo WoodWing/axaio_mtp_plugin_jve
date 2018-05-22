@@ -1,8 +1,6 @@
 <?php
 /**
- * @package    Enterprise
- * @subpackage Elvis
- * @since      v10.1.1
+ * @since      10.1.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * Utility that provides the settings made by brand administrator.

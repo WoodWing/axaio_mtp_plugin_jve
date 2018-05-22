@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 // Example: Run for a maximum of 3 minutes with a wait time towards Elvis of 30 seconds
 // 		Cron settings (run every 3 minutes): */3 * * * *

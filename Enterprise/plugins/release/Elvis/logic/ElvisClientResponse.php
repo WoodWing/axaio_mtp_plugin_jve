@@ -1,4 +1,8 @@
 <?php
+/**
+ * @since      10.5.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 class ElvisClientResponse
 {
@@ -8,7 +12,7 @@ class ElvisClientResponse
 	/**
 	 * Response constructor.
 	 *
-	 * @param string $httpStatusCode
+	 * @param integer $httpStatusCode
 	 * @param string $body
 	 */
 	public function __construct( $httpStatusCode, $body )
@@ -17,25 +21,40 @@ class ElvisClientResponse
 		$this->body = $body;
 	}
 
+	/**
+	 * Whether the response is an error response or not.
+	 *
+	 * @return bool true when the response is an error response otherwise false.
+	 */
 	public function isError()
 	{
-		return $this->httpStatusCode < 200 || $this->httpStatusCode >= 300;
+		return $this->httpStatusCode >= 400;
 	}
 
+	/**
+	 * Whether the response is an authentication error response or not.
+	 *
+	 * @return bool true when the response is an authentication error response otherwise false.
+	 */
 	public function isAuthenticationError()
 	{
 		return $this->httpStatusCode === 401;
 	}
 
+	/**
+	 * String representation of the response body.
+	 *
+	 * @return string string representation of the response body.
+	 */
 	public function body()
 	{
-		if( $this->body === false ) return '';
-		if( $this->body === true ) return '';
-		return $this->body;
+		return is_bool( $this->body ) ? '' : $this->body;
 	}
 
 	/**
-	 * @return mixed
+	 * JSON decoded representation of the response body.
+	 *
+	 * @return mixed JSON decoded representation of the response body.
 	 * @throws ElvisBizException
 	 */
 	public function jsonBody()
@@ -43,6 +62,10 @@ class ElvisClientResponse
 		if( $this->body === false ) {
 			throw new ElvisBizException( 'Invalid response body' );
 		}
-		return json_decode( $this->body );
+		$decoded = json_decode( $this->body );
+		if( !$decoded ) {
+			throw new ElvisBizException( 'Invalid response body' );
+		}
+		return $decoded;
 	}
 }

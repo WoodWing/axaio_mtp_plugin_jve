@@ -1,7 +1,5 @@
 <?php
 /**
- * @package    Elvis
- * @subpackage Logic
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
@@ -67,6 +65,14 @@ class ElvisCurlClient
 		return $response;
 	}
 
+	/**
+	 * Get all request cURL options.
+	 *
+	 * @param string $service Elvis service to request.
+	 * @param array $curlOptions existing cURL options which will be added.
+	 * @param array $headers array to save response headers in.
+	 * @return array request cURL options.
+	 */
 	private static function getCurlOptions( $service, $curlOptions, &$headers )
 	{
 		$url = ELVIS_URL.'/'.$service;
@@ -78,9 +84,7 @@ class ElvisCurlClient
 			CURLOPT_FAILONERROR => false, // otherwise headers won't be parsed
 		);
 		// Enable this to retrieve the HTTP headers sent out (after calling curl_exec)
-		if( LogHandler::debugMode() ) {
-			$defaultCurlOptions[ CURLINFO_HEADER_OUT ] = 1;
-		}
+		$defaultCurlOptions[ CURLINFO_HEADER_OUT ] = 1;
 
 		// Hidden options, in case customer wants to overrule some settings.
 		if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
@@ -95,6 +99,12 @@ class ElvisCurlClient
 		return $allCurlOptions;
 	}
 
+	/**
+	 * Add cURL options to save response headers.
+	 *
+	 * @param array $options cURL option array.
+	 * @param array $headers array to save response headers in.
+	 */
 	private static function addSaveHeaderFunction( &$options, &$headers )
 	{
 		if( array_key_exists( CURLOPT_HEADERFUNCTION, $options ) ) {

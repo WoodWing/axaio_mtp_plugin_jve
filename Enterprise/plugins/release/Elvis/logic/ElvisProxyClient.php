@@ -1,7 +1,5 @@
 <?php
 /**
- * @package    Elvis
- * @subpackage Logic
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
@@ -17,6 +15,12 @@ class ElvisProxyClient
 	 */
 	private $service;
 
+	/**
+	 * ElvisProxyClient constructor.
+	 *
+	 * @param string $shortUserName
+	 * @param string $service
+	 */
 	public function __construct( $shortUserName, $service )
 	{
 		$this->shortUserName = $shortUserName;
@@ -24,6 +28,10 @@ class ElvisProxyClient
 	}
 
 	/**
+	 * Excute a GET request against an Elvis server.
+	 *
+	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
+	 *
 	 * @return ElvisClientResponse
 	 * @throws ElvisBizException
 	 */
@@ -36,7 +44,7 @@ class ElvisProxyClient
 			},
 			CURLOPT_HEADERFUNCTION => function( $ch, $headerLine ) {
 				header( $headerLine );
-				return strlen( $headerLine ); // Needed by CURLOPT_HEADERFUNCTION
+				return strlen( $headerLine );
 			}
 		);
 
@@ -60,6 +68,7 @@ class ElvisProxyClient
 				$this->proxyGet();
 				break;
 			default:
+				require_once __DIR__.'/ElvisBizException.php';
 				throw new ElvisBizException( 'HTTP method '.$httpMethod.' not supported' );
 		}
 	}

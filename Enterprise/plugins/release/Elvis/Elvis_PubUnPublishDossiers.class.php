@@ -1,8 +1,6 @@
 <?php
 /**
- * @package    Elvis
- * @subpackage ServerPlugins
- * @since      v10.1.1
+ * @since      10.1.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * Updates the Published Date property for image assets in Elvis when user has unpublished a Publish Form.

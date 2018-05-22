@@ -1,8 +1,6 @@
 <?php
 /**
- * @package    Elvis
- * @subpackage ServerPlugins
- * @since      v10.1
+ * @since      10.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
 
  * Converts Elvis resolutionX to Enterprise Dpi by using Elvis resolutionUnit.
