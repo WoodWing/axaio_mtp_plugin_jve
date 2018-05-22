@@ -308,43 +308,6 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	}
 
 	/**
-	 * Function checks on which Load Balancer is/are Elvis connected to.
-	 *
-	 * Currently, only AWS Elastic Load Balancer (ELB) is supported.
-	 * Application Load Balancer (ALB) is not supported.
-	 *
-	 * Function returns a false when an Application Load Balancer is used.
-	 * Returns true when Classic Load Balancer is used / no Load Balancer is used.
-	 *
-	 * @since 10.0.5 / 10.1.2
-	 * @return boolean See function header above.
-	 */
-	private function checkIsLoadBalancerSupported()
-	{
-		$result = true;
-		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
-		$client = new ElvisRESTClient();
-		$this->serverVersion = $client->getElvisServerVersion();
-
-		$loadBalancerType = $client->getLoadBalancerType();
-		if( $loadBalancerType == 'AWSALB' ) {
-			$link = 'https://aws.amazon.com/elasticloadbalancing/classicloadbalancer/';
-			$help = 'Use the Amazon AWS Classic Load Balancer. '.
-				'For more information, see the <a href="'.$link.'" target="_blank">Amazon documentation</a>.';
-			$message = 'The Amazon AWS Application Load Balancer that is currently configured is not supported.';
-			$this->setResult( 'ERROR', $message, $help );
-			$result = false;
-		} else if( $loadBalancerType == 'AWSELB' ) {
-			LogHandler::Log('Elvis','INFO','AWS Classic Load Balancer is configured / used.');
-		} else if( is_null( $loadBalancerType )) {
-			LogHandler::Log('Elvis','INFO','Either no load balancer is configured / used or ' .
-				'the type of Load Balancer is unknown.' );
-		}
-		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server Load Balancer checked.' );
-		return $result;
-	}
-
-	/**
 	 * Checks if Elvis Server version is supports the features that are enabled for the integration.
 	 *
 	 * @since 10.1.1
