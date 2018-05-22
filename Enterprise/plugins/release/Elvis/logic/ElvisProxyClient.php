@@ -2,6 +2,8 @@
 /**
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
+ *
+ * Class to proxy API requests to Elvis.
  */
 
 class ElvisProxyClient
