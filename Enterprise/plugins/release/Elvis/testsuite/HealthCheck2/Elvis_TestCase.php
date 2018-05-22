@@ -52,6 +52,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if ( !$this->checkFeatureCompatibility() ) {
 			return;
 		}
+		if( !$this->checkDbModelElvisPlugin() ) {
+			return;
+		}
 		if ( !$this->checkBrandSetup() ) {
 			return;
 		}
@@ -363,6 +366,60 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		}
 		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server feature compatibility checked.' );
 		return $result;
+	}
+
+	/**
+	 * Make sure that the DB model shipped with the Elvis plugin is installed.
+	 *
+	 * @since 10.5.0
+	 * @return bool
+	 */
+	private function checkDbModelElvisPlugin()
+	{
+		require_once BASEDIR.'/server/dbscripts/dbinstaller/ServerPlugin.class.php';
+		require_once BASEDIR.'/server/dbmodel/Factory.class.php';
+		$pluginDbModelOk = true;
+		$pluginName = 'Elvis';
+		$url = SERVERURL_ROOT.INETROOT.'/server/admin/dbadmin.php?plugin='.$pluginName;
+
+		// Check if the DB model for the server plugin is installed or upgraded to the wanted/current/latest DB model version.
+		$installer = new WW_DbScripts_DbInstaller_ServerPlugin( null, $pluginName );
+		$installedVersion = $installer->getInstalledDbVersion();
+		$definition = WW_DbModel_Factory::createModelForServerPlugin( $pluginName );
+		$requiredVersion = $definition->getVersion();
+		if( $installedVersion !== $requiredVersion ) {
+			$pluginInfo = BizServerPlugin::getInstalledPluginInfo( $pluginName );
+			if( $installedVersion == null ) {
+				$help = 'Please setup the database through this page: <a href="'.$url.'" target="_top">DB Admin</a>';
+				$this->setResult( 'ERROR', "Database is not initialized for {$pluginInfo->DisplayName} server plug-in.", $help );
+			} else {
+				$help = 'Please update the database through this page: <a href="'.$url.'" target="_top">DB Admin</a>';
+				$this->setResult( 'ERROR', "The actual database model version v{$installedVersion} ".
+					"for {$pluginInfo->DisplayName} server plug-in does not meet the required version v{$requiredVersion}.", $help );
+			}
+			$pluginDbModelOk = false; // flag as error, but continue checking the other plugins
+		} else {
+			LogHandler::Log( 'wwtest', 'INFO',
+				"Database model version v{$installedVersion} for server plugin {$pluginName} is correct." );
+
+			// Check if there are patches or data upgrades to be installed for of the server plugin.
+			$sqlPatchScripts = $installer->getDbModelScripts( $installedVersion, false, false ); // Look for patches only
+			if( count( $sqlPatchScripts ) > 0 || $installer->needsDataUpgrade() ) {
+				$pluginInfo = BizServerPlugin::getInstalledPluginInfo( $pluginName );
+				$help = 'Please update database through this page: <a href="'.$url.'" target="_top">DB Admin</a>';
+				$this->setResult( 'ERROR', "Database patches are available for {$pluginInfo->DisplayName} ".
+					"server plug-in which needs to be installed.", $help );
+				$pluginDbModelOk = false; // flag as error, but continue checking the other plugins
+			} else {
+				LogHandler::Log( 'wwtest', 'INFO',
+					"DB patches and data upgrades are installed for server plugin {$pluginName}." );
+			}
+		}
+		if( !$pluginDbModelOk ) {
+			return false;
+		}
+		LogHandler::Log( 'wwtest', 'INFO', "Checked the DB model provided by server plugin {$pluginName}." );
+		return true;
 	}
 
 	/**
