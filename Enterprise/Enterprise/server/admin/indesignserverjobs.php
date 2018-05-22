@@ -164,7 +164,7 @@ if ( $jobRows ) foreach ( $jobRows as $jobIndex => $jobRow ) {
 		$htmlRows .= "<td>&nbsp;</td>\r\n";  		
 	}
 	
-	if ( $jobRow["foreground"] == 0 ) {
+	if ( $jobRow["foreground"] == "" ) {
 		$htmlRows .= "<td><a href=\"indesignserverjobs.php?restart=".$jobRow['jobid']."\">".
 					"<img src=\"../../config/images/admin_16.gif\" title=\"". BizResources::localize('IDS_RESTARTJOB') ."\">".
 				"</a></td>\r\n";  
