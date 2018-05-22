@@ -2,7 +2,7 @@
 /**
  * @package    Elvis
  * @subpackage DbClasses
- * @since      10.5
+ * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
