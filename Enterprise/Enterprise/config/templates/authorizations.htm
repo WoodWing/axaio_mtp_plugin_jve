@@ -66,13 +66,49 @@
 		display: block;
 		padding:0.6em;
 	}
-	table.wwauth tr.editable div.btnbar button {
+	table.wwauth tr.editable div.btnbar {
 		display: block;
 	}
 	table.wwauth tr.readonly div.btnbar {
 		height: 100%;
 		overflow: visible;
 		padding-left: 1em;
+	}
+	table.wwauth .ui-button {
+		border: none;
+		font-weight: normal;
+		background: none;
+		color: #f60;
+		padding-left: .5em;
+		padding-right: .5em;
+		padding-top: .4em;
+		padding-bottom: .4em;
+	}
+	table.wwauth ui-button a.ui-button-text-icons {
+		display: inline-block;
+		position: relative;
+		padding: 0;
+		margin-right: .1em;
+		text-decoration: none !important;
+		cursor: pointer;
+		text-align: center;
+		zoom: 1;
+		overflow: visible;
+	}
+	table.wwauth .ui-button .ui-icon {
+		background-image: url("<!--INETROOT-->/config/jquery-ui/images/ui-icons_222222_256x240.png");
+		width: 16px;
+		height: 16px;
+	}
+	table.wwauth .ui-button span.ui-icon {
+		position: absolute;
+		top: 50%;
+		margin-top: -8px;
+	}
+	table.wwauth .ui-button span.ui-button-text {
+		padding-left: 2.1em;
+		padding-right: 2.1em;
+		line-height: 1.4;
 	}
 	table.wwauth tr div.chkbox {
 		border: 1px solid #C8C8C8;
@@ -142,7 +178,7 @@
 	}
 </style>
 
-<script language="javascript" type="text/javascript" src="<!--INETROOT-->/server/jquery/jstree-3.3.1.min.js" ></script>
+<script language="javascript" type="text/javascript" src="<!--INETROOT-->/server/jquery/jstree-3.3.5.min.js" ></script>
 
 <script language="javascript">
 	function addAuth()
