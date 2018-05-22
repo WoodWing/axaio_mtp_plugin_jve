@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once __DIR__.'/../config.php';
 require_once __DIR__.'/../SabreAMF/SabreAMF/Client.php';

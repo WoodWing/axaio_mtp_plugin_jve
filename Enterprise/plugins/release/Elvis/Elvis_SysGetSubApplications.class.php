@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR . '/server/interfaces/services/sys/SysGetSubApplications_EnterpriseConnector.class.php';
 

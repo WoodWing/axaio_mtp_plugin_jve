@@ -1,10 +1,12 @@
 <?php
+/**
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ *
+ * Simplified version of com.ds.acm.logic.xmlservice.search.model.EntHit
+ */
 
 require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
 
-/**
- * Simplified version of com.ds.acm.logic.xmlservice.search.model.EntHit
- */
 class ElvisEntHit extends AbstractRemoteObject
 {
 	/**

@@ -1,8 +1,6 @@
 <?php
 /**
- * @package    Enterprise
- * @subpackage Elvis content source plug-in
- * @since      v10.1.1
+ * @since      10.1.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * Provides Elvis/config.php options to the Config Overview page (wwinfo.php) page and the phpinfo.htm file

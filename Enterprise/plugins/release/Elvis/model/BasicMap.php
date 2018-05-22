@@ -1,11 +1,13 @@
 <?php
+/**
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ *
+ * Simplified version of org.granite.collections.BasicMap<K, V>
+ */
 
 require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
 require_once dirname(__FILE__) . '/../SabreAMF/SabreAMF/Externalized.php';
 
-/**
- * Simplified version of org.granite.collections.BasicMap<K, V>
- */
 class BasicMap extends AbstractRemoteObject implements SabreAMF_Externalized, IteratorAggregate, ArrayAccess, Countable
 {
 

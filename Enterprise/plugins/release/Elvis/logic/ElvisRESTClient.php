@@ -1,4 +1,8 @@
 <?php
+/**
+ * @since      10.5.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once __DIR__.'/ElvisClient.php';
 

@@ -1,16 +1,14 @@
 <?php
-
-require_once BASEDIR . '/server/interfaces/services/wfl/WflDeleteObjects_EnterpriseConnector.class.php';
-
 /**
- * @package    Elvis
- * @subpackage ServerPlugins
- * @since      v4.4
+ * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * Hooks into the Delete Objects workflow web service.
  * Called when an end-user moves a file into the Trash Can (typically using SC or CS).
  */
+
+require_once BASEDIR . '/server/interfaces/services/wfl/WflDeleteObjects_EnterpriseConnector.class.php';
+
 class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 {
 	final public function getPrio()     { return self::PRIO_DEFAULT; }

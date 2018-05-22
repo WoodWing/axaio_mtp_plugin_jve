@@ -1,4 +1,7 @@
 <?php
+/**
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 class AssetPermissionMask {
 	

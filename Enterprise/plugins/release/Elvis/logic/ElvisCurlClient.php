@@ -1,7 +1,5 @@
 <?php
 /**
- * @package    Elvis
- * @subpackage Logic
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
