@@ -13,9 +13,6 @@ class ElvisRESTClient extends ElvisClient
 	 */
 	private $loadBalancerType = null;
 
-	/** @var bool Whether or not this client is a proxy. */
-	private $isProxyMode = false;
-
 	/**
 	 * Calls an Elvis web service over the REST JSON interface.
 	 *
@@ -67,9 +64,7 @@ class ElvisRESTClient extends ElvisClient
 		self::logService( $service, $url, $post, $cookies, true );
 		$response = $this->callElvisService( $service, $url, $post, $cookies, $file );
 		$isError = isset( $response->errorcode ) && $response->errorcode != 200;
-		if( !$this->isProxyMode || $isError ) { // avoid logging downloaded files (proxy mode)
-			self::logService( $service, $url, $response, $cookies, $isError ? null : false );
-		}
+		self::logService( $service, $url, $response, $cookies, $isError ? null : false );
 		ElvisSessionUtil::updateSessionCookies( $cookies );
 		return $response;
 	}
@@ -118,15 +113,7 @@ class ElvisRESTClient extends ElvisClient
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		curl_setopt( $ch, CURLOPT_FAILONERROR, 1 ); // Fail verbosely if the HTTP code returned is >= 400.
 		curl_setopt( $ch, CURLOPT_POST, 1 );
-		if( $this->isProxyMode ) { // Stream all data to output while calling curl_exec().
-			curl_setopt( $ch, CURLOPT_WRITEFUNCTION, function( $curl, $data ) {
-				set_time_limit( 3600 ); // postpone timeout
-				echo $data;
-				return strlen( $data );
-			} );
-		} else { // Retrieve all data in memory through return value of curl_exec().
-			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		}
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_HEADER, 0 );
 		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, ELVIS_CONNECTION_TIMEOUT );
 		curl_setopt( $ch, CURLOPT_TIMEOUT, 3600 ); // Using the Enterprise default
@@ -185,9 +172,6 @@ class ElvisRESTClient extends ElvisClient
 					$cookies = array_merge( $cookies, $returnedCookie );
 				}
 			}
-			if( $this->isProxyMode ) {
-				header( $headerLine );
-			}
 			return strlen( $headerLine ); // Needed by CURLOPT_HEADERFUNCTION
 		};
 		curl_setopt($ch, CURLOPT_HEADERFUNCTION, $curlResponseHeaderCallback );
@@ -204,11 +188,7 @@ class ElvisRESTClient extends ElvisClient
 
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		if( $httpStatusCode == 200 ) {
-			if( $this->isProxyMode ) {
-				$response = null;
-			} else {
-				$response = json_decode( $result );
-			}
+			$response = json_decode( $result );
 		} else {
 			$detail = 'Elvis '.$service.' failed with HTTP status code:'.$httpStatusCode.'.'.PHP_EOL;
 			if( curl_errno( $ch ) ) {
@@ -308,22 +288,6 @@ class ElvisRESTClient extends ElvisClient
 	{
 		$client = new ElvisRESTClient();
 		return $client->send( 'services/fieldinfo' );
-	}
-
-	/**
-	 * Calls a given web service over the Elvis JSON REST interface.
-	 *
-	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
-	 *
-	 * @since 10.5.0
-	 * @param string $service
-	 * @return mixed
-	 * @throws BizException
-	 */
-	public function proxy( $service )
-	{
-		$this->isProxyMode = true;
-		return $this->send( $service, null, null );
 	}
 
 	/**
