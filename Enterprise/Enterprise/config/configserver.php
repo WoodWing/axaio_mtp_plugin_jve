@@ -113,7 +113,13 @@ if( !defined('FILE_TRANSFER_LOCAL_PATH') ) {
 //    High-level monitoring (audit trails). Possible values are:
 //       '0'   High-level logging not enabled. Default option.
 //       '1'   Logon and Logoff only.
-//       '2'   All SOAP calls (note that this creates a large number of rows in the smartlog table.) 
+//       '2'   All SOAP calls
+//
+//    Note: enabling this option may result in a large number of records in the smart_log table.
+//    When using this option, we advise to periodically clear the content of this table by removing
+//    all records that are older than a specified number of days.
+//    This can be done by using the AUTOCLEAN_SERVICELOGS_DAYS option in the
+//    'Enterprise Service Logs Auto Cleanup' section.
 //
 if( !defined('LOGLEVEL') ) {
 	define( 'LOGLEVEL', '0' );
