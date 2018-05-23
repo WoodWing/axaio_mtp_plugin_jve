@@ -30,7 +30,7 @@ class ElvisProxyClient
 	}
 
 	/**
-	 * Excute a GET request against an Elvis server.
+	 * Execute a GET request against an Elvis server.
 	 *
 	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
 	 *
