@@ -33,7 +33,7 @@ class Elvis_DbClasses_Token extends DBBase
 	/**
 	 * Returns Elvis OAuth access token for given user.
 	 *
-	 * @param $shortUserName short user name returned from BizSession::getShortUserName().
+	 * @param string $shortUserName short user name returned from BizSession::getShortUserName().
 	 * @return string|null Elvis OAuth access token or null when token isn't found.
 	 * @throws BizException
 	 */
