@@ -23,13 +23,32 @@ class ElvisCurlClient
 	 */
 	public static function request( $shortUserName, $service, $curlOptions )
 	{
-		$curlOptions[ CURLOPT_HTTPHEADER ] = array( 'Authorization: Bearer '.self::getAccessToken( $shortUserName ) );
+		$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::getAccessToken( $shortUserName ) );
 		$response = self::plainRequest( $service, $curlOptions );
 		if( $response->isAuthenticationError() ) {
-			$curlOptions[ CURLOPT_HTTPHEADER ] = array( 'Authorization: Bearer '.self::requestAndSaveAccessToken( $shortUserName ) );
+			$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::requestAndSaveAccessToken( $shortUserName ) );
 			$response = self::plainRequest( $service, $curlOptions );
 		}
 		return $response;
+	}
+
+	/**
+	 * Compose a list HTTP headers to send along with the request.
+	 *
+	 * @param string $accessToken
+	 * @return array HTTP headers
+	 */
+	private static function composeHttpHeaders( $accessToken )
+	{
+		$headerOptions = array();
+		// Elvis has support for 'ETag' and so it returns it in the file download response headers. When the web browser
+		// requests for 'If-None-Match', here we pass on that header to Elvis to let it decide if the client already has
+		// the latest file version. If so, it returns HTTP 304 without file, else HTTP 200 with file.
+		if( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
+			$headerOptions[] = 'If-None-Match: '.$_SERVER['HTTP_IF_NONE_MATCH'];
+		}
+		$headerOptions = array_merge( $headerOptions, array( 'Authorization: Bearer '.$accessToken ) );
+		return $headerOptions;
 	}
 
 	/**
@@ -40,7 +59,7 @@ class ElvisCurlClient
 	 * @return ElvisClientResponse
 	 * @throws ElvisBizException
 	 */
-	public static function plainRequest( $service, $curlOptions )
+	private static function plainRequest( $service, $curlOptions )
 	{
 		$responseHeaders = [];
 		$ch = curl_init();
