@@ -45,28 +45,6 @@ class ElvisContentSourceService
 		ElvisAMFClient::registerClass( ElvisCSAccessDeniedException::getName() );
 	}
 
-//	/**
-//	 * Search Elvis
-//	 *
-//	 * @param string $query
-//	 * @param array $metadataToReturn
-//	 * @param int $firstResult
-//	 * @param int $maxResultHits
-//	 * @return SearchResponse
-//	 */
-//	public function search($query, $metadataToReturn, $firstResult=null, $maxResultHits=null) {
-//		Code currently not used
-//		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSourceService::search - query:' . $query . '; metadataToReturn:' . print_r($metadataToReturn, true) . '; firstResult:' . $firstResult . '; maxResultHits:' . $maxResultHits);
-//
-//		ElvisAMFClient::registerClass(ElvisSearchResponse::getName());
-//		ElvisAMFClient::registerClass(HitElement::getName());
-//		ElvisAMFClient::registerClass(ElvisFormattedValue::getName());
-//		ElvisAMFClient::registerClass(BasicMap::getName());
-//		$params = array($query, $metadataToReturn, $firstResult, $maxResultHits);
-//		$searchResponse = ElvisAMFClient::send( self::SERVICE, 'search', $params );
-//		return $searchResponse;
-//	}
-
 	/**
 	 * Retrieves an asset.
 	 *
@@ -93,27 +71,6 @@ class ElvisContentSourceService
 		}
 
 		return $resp;
-	}
-
-	/**
-	 * Creates a new collection
-	 *
-	 * @param string $name The collection name
-	 * @return string Id of the collection
-	 * @throws BizException
-	 */
-	public function createCollection( $name )
-	{
-		$params = array( $name );
-		$id = null;
-
-		try {
-			$id = ElvisAMFClient::send( self::SERVICE, 'createCollection', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-
-		return $id;
 	}
 
 	/**
