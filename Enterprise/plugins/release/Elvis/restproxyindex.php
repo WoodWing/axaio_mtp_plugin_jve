@@ -289,13 +289,13 @@ class Elvis_RestProxyIndex
 		}
 		switch( $this->httpParams['rendition'] ) {
 			case 'thumb':
-				$service = 'thumbnail/'.urlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
+				$service = 'thumbnail/'.rawurlencode( $this->elvisAssetId );
 				break;
 			case 'preview':
-				$service = 'preview/'.urlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
+				$service = 'preview/'.rawurlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
 				break;
 			case 'native':
-				$service = 'file/'.urlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
+				$service = 'file/'.rawurlencode( $this->elvisAssetId );
 				break;
 			default:
 				$message = 'The option provided for the"rendition" param is unsupported.';
@@ -312,11 +312,42 @@ class Elvis_RestProxyIndex
 	private function composePreviewUrlArguments()
 	{
 		if( isset( $this->httpParams['preview-args'] ) ) {
-			$arguments = '/previews/'.urlencode( $this->httpParams['preview-args'] );
+			$this->validatePreviewArgsParam( $this->httpParams['preview-args'] );
+			$arguments = '/previews/'.rawurlencode( $this->httpParams['preview-args'] );
 		} else {
 			$arguments = '';
 		}
 		return $arguments;
+	}
+
+	/**
+	 * Check whether the given preview-args parameter value is valid.
+	 *
+	 * The param is valid when it is alphanumeric or contains dashes(-) or underscores (_) or dots (.).
+	 * Example:
+	 *    http://127.0.0.1/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=500101124&rendition=preview&preview-args=maxWidth_200_maxHeight_200.jpg
+	 *
+	 * @param string $previewArgs
+	 * @throws Elvis_RestProxyIndex_HttpException when not valid.
+	 */
+	private function validatePreviewArgsParam( string $previewArgs )
+	{
+		// Do not accept % to avoid double encoding attacks https://www.owasp.org/index.php/Double_Encoding.
+		// Do not accept / to avoid accessing other assets through relative paths, for example:
+		//    http://127.0.0.1/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=500101124&rendition=preview&preview-args=../../D1wjdC_3KpzAyeZQKFPYUQ
+		//      L> Note that object id 500101124 is NOT the shadow of asset id D1wjdC_3KpzAyeZQKFPYUQ, so the hacker
+		//         tries to by-pass the access rights validation at Enterprise for asset D1wjdC_3KpzAyeZQKFPYUQ (the
+		//         hacker has no access rights for) by providing object id 500101124 (the hacker has access rights for).
+		$allowedSymbols = array(
+			'_', // used to separate arguments and values
+			'.', // used for file extension
+			'-'  // used for negative digits in crop param value
+		);
+		$isValid = $previewArgs && ctype_alnum( str_replace( $allowedSymbols, '', $previewArgs ) );
+		if( !$isValid ) {
+			$message = 'The "preview-args" param is not valid.';
+			throw new Elvis_RestProxyIndex_HttpException( $message, 400 );
+		}
 	}
 }
 
