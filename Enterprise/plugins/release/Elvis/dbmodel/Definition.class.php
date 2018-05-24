@@ -1,10 +1,9 @@
 <?php
-
 /**
- * @package    Elvis
- * @subpackage DBScripts
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
+ *
+ * Elvis DB model definition.
  */
 
 require_once BASEDIR.'/server/dbmodel/Provider.class.php';
@@ -20,35 +19,38 @@ class Elvis_DbModel_Definition extends WW_DbModel_Provider
 	}
 
 	/**
-	 * All Database Model versions made in history for this server plugin.
-	 *
-	 * @return string[] with versions.
+	 * @inheritdoc
 	 */
 	public function getVersions()
 	{
 		return array(
-			'1.0', // feature X
+			'1.0', // OAuth 2 authentication
 			// Add new versions at the -end- of list!
 		);
 	}
 
+	/**
+	 * Elvis_DbModel_Definition constructor.
+	 */
 	public function __construct()
 	{
 		$struct = array(
 			'tables' => array(
 				array( 'v' => '1.0', 'name' => DBPREFIX.'lvs_tokens',
-					'comment' => '...',
+					'comment' => 'Elvis access tokens.',
 					'fields' => array(
 						array( 'v' => '1.0', 'name' => 'user', 'type' => 'varchar(40)', 'default' => "''",
-							'comment' => '...' ),
+							'comment' => 'Short user name must be unique.' ),
 						array( 'v' => '1.0', 'name' => 'token', 'type' => 'varchar(1024)', 'default' => "''",
-							'comment' => '...' ),
+							'comment' => 'Elvis access token.' ),
 					),
 					'indexes' => array(
 						array( 'v' => '1.0', 'name' => 'primary', 'fields' => 'user', 'primary' => true ),
 					),
 					'inserts' => array(),
-					'lookups' => array(),
+					'lookups' => array(
+						array('v' => '1.0', 'field' => 'user', 'reftable' => 'smart_users', 'reffield' => 'user'),
+					),
 				),
 			),
 		);
@@ -66,10 +68,11 @@ class Elvis_DbModel_Definition extends WW_DbModel_Provider
 		);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getTablesWithoutAutoIncrement()
 	{
 		return array( DBPREFIX.'lvs_tokens' );
 	}
-
-
 }
