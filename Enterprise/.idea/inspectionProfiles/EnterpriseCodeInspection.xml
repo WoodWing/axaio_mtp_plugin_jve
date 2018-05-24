@@ -421,6 +421,7 @@
     <inspection_tool class="PhpPassByRefInspection" enabled="true" level="ERROR" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="ERROR" enabled="true" />
     </inspection_tool>
+    <inspection_tool class="PhpRedundantCatchClauseInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="PhpRedundantClosingTagInspection" enabled="true" level="WEAK WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
     </inspection_tool>
@@ -458,6 +459,7 @@
     <inspection_tool class="PhpUndefinedVariableInspection" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
     </inspection_tool>
+    <inspection_tool class="PhpUnhandledExceptionInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="PhpUnnecessaryFullyQualifiedNameInspection" enabled="true" level="WEAK WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
     </inspection_tool>
