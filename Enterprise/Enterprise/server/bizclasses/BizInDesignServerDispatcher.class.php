@@ -288,6 +288,7 @@ class BizInDesignServerDispatcher
 
 			// Get a background job that has highest prio in a FCFS order.
 			$jobId = BizInDesignServerJobs::getHighestFcfsJobId( false ); // background jobs only
+			$server = null;
 			if ( $jobId ) {
 				// Create a token that can be used for record locking.
 				require_once BASEDIR . '/server/utils/NumberUtils.class.php';
@@ -298,7 +299,7 @@ class BizInDesignServerDispatcher
 				try {
 					$server = BizInDesignServerJobs::assignIdleServerToJob( $jobId, false, $lockToken, null );
 				} catch ( BizException $e ) {
-					$server = null;
+					// Nothing to do.
 				}
 				if ( $server ) {
 					// Start the job processor in background (async cURL).
@@ -334,7 +335,7 @@ class BizInDesignServerDispatcher
 			}
 
 			// Take a nap between the Dispatch operations.
-			$this->takeNap( (bool)$jobId );
+			$this->takeNap( (bool)$server && (bool)$jobId ); // Dispatch was successful when a job is assigned to a server.
 
 			// Stay in current phase of processing
 			$this->newPhase = 'current';
@@ -543,8 +544,8 @@ class BizInDesignServerDispatcher
 		if( is_null($napCurve) ) {
 			$napCurve = array( 
 				  10,   15,   25,   35,   50,   70,
-				 100,  150,  250,  350,  500,  700,
-				1000, 1500, 2500 
+				 100,  150,  250,   500,  700,  1000,
+				 1500, 2500, 5000
 			);
 		}
 
