@@ -1,7 +1,5 @@
 <?php
 /**
- * @package     SCEnterprise
- * @subpackage  ServerPlugins
  * @since       v6.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  * @version     $Id: DuplicateImageWarning_WflCreateObjectRelations.class.php 825 2008-10-17 09:18:28Z sma $

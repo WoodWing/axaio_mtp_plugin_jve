@@ -2,8 +2,6 @@
 /**
  * SCE License class.
  *
- * @package SCEnterprise
- * @subpackage License
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  

@@ -1,7 +1,5 @@
 <?php
 /**
- * @package     SCEnterprise
- * @subpackage  ServerPlugins
  * @since       v6.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  * @version     $Id: DuplicateImageWarning_WflSaveObjects.class.php 979 2008-11-25 17:29:11Z sma $
