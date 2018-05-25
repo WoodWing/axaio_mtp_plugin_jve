@@ -2,8 +2,6 @@
 /**
  * /*INTFFULL*/ SOAP server.
  *
- * @package /*PACKAGENAME*/
- * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 

@@ -2,8 +2,6 @@
 /**
  * /*INTFFULL*/ SOAP client.
  *
- * @package /*PACKAGENAME*/
- * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
