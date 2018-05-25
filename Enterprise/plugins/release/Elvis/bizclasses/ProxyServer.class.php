@@ -271,6 +271,7 @@ class Elvis_BizClasses_ProxyServer
 	 * Compose the preview arguments that can be optionally added to the preview download URL.
 	 *
 	 * @return string
+	 * @throws Elvis_BizClasses_ProxyServerHttpException
 	 */
 	private function composePreviewUrlArguments()
 	{
