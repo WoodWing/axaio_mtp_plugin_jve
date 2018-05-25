@@ -8,8 +8,6 @@
  * apart from these we also use the message of the standard Exception
  * we do not use the code property of the standard Exception which is an integer
  * 
- * @package Enterprise
- * @subpackage BizServices
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

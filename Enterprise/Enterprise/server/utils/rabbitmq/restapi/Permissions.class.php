@@ -1,7 +1,5 @@
 <?php
 /**
- * @package    Enterprise
- * @subpackage RabbitMQ
  * @since      v10.0.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

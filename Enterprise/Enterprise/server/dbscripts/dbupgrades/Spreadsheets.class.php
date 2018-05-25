@@ -4,8 +4,6 @@
  * Since 8.2 the object type Spreadsheet is introduced. This module changes the object
  * type from Article into Spreadsheet for old objects that were created before 8.2.
  *
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v8.2.0 (this module was split from ObjectConverter class since 9.0.0)
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

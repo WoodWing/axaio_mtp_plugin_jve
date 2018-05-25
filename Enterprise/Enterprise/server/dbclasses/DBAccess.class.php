@@ -1,12 +1,10 @@
 <?php
 /**
-* Implements DB querying of authorizations.
-*
-* @package 	    Enterprise
-* @subpackage 	dbclasses
-* @since 		v10.0.0
-* @copyright 	WoodWing Software bv. All Rights Reserved.
-*/
+ * Implements DB querying of authorizations.
+ *
+ * @since 		v10.0.0
+ * @copyright 	WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 

@@ -4,8 +4,6 @@
  * duplicate placements. On the one hand this can have a severe negative impact on performance on the other hand this
  * results in plain data corruption. This script removes the duplicates.
  *
- * @package 	Enterprise
- * @subpackage 	dbscripts
  * @since 		v9.4.5
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

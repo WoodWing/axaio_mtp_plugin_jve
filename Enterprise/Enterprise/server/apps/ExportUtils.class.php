@@ -2,8 +2,6 @@
 /**
  * Helper functions for the implementation of the Export pages
  * 
- * @package 	Enterprise
- * @subpackage 	Apps
  * @since 		v4.2
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

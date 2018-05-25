@@ -2,8 +2,6 @@
 /**
  * Adds a new profile feature "Open for Edit (Unplaced)" to all existing access profiles in the database.
  *
- * @package 	Enterprise
- * @subpackage BizClasses
  * @since 		v10.1.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

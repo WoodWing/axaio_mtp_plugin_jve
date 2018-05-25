@@ -1,7 +1,5 @@
 <?php
 /**
- * @package     Enterprise
- * @subpackage  BuildTools
  * @since       7.6.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *

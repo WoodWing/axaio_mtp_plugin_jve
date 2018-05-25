@@ -3,8 +3,6 @@
 /**
  * Abstract class that defines an interface for a provider of a DB model definition.
  *
- * @package    Enterprise
- * @subpackage DbModel
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

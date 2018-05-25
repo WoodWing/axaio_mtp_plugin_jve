@@ -2,8 +2,6 @@
 /**
  * Handles string conversions of Enterprise license strings.
  *
- * @package Enterprise
- * @subpackage License
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
 

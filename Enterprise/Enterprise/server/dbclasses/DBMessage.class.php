@@ -2,8 +2,6 @@
 /**
  * Manages messages (sent to objects and users) at database.
  *
- * @package 	Enterprise
- * @subpackage 	DBClasses
  * @since 		v6.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  *

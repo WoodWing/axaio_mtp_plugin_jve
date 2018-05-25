@@ -2,8 +2,6 @@
 /**
  * Utility class that compares class data.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v7.4
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

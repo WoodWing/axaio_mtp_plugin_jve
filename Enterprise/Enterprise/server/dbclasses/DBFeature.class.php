@@ -2,8 +2,6 @@
 /**
  * Implements DB side of feature profile and feature access
  *
- * @package Enterprise
- * @subpackage DBClasses
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -2,8 +2,6 @@
 /**
  * Implements DB querying of placementtiles.
  * 
- * @package 	Enterprise
- * @subpackage 	DBClasses
  * @since 		v7.6
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

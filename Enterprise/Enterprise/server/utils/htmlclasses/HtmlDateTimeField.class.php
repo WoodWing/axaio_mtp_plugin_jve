@@ -4,8 +4,6 @@
  *
  * @todo Implement languages for the date-time picker: 'close', 'this month', 'days of the week', 'months'
  *
- * @package     Enterprise
- * @subpackage  HtmlClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

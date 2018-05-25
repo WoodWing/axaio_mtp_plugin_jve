@@ -9,8 +9,6 @@
  * For each text component, there is a XHTML 'document' created, which we call a frame. <br>
  * For a complete file conversion, a collection of frames is passed through (see xFrames param). <br>
  *
- * @package Enterprise
- * @subpackage WebEditor
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

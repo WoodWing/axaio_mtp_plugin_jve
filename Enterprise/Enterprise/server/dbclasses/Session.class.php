@@ -1,7 +1,5 @@
 <?php
 /**
- * @package     Enterprise
- * @subpackage  DBClasses
  * @since       10.5.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *

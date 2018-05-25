@@ -16,8 +16,6 @@
 ****************************************************************************/
 
 /**
- * @package 	Enterprise Demo Plugins
- * @subpackage 	EvlisSearch
  * @since 		v7.0
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *

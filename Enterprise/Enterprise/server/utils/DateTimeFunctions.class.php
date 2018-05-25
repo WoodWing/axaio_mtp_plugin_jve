@@ -3,8 +3,6 @@
 /**
  * Methods to calculate time date differences, add/deduct time/dates etc.
  *
- * @package 	Enterprise
- * @subpackage 	utils
  * @since 		v5.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

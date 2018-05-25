@@ -2,8 +2,6 @@
 /*
  * Utility class for handling folders.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

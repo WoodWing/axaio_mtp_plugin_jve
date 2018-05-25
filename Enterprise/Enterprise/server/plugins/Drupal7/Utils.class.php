@@ -3,8 +3,6 @@
 /**
  * Utility class to convert data classes between Drupal 7 and Enterprise.
  *
- * @package 	Enterprise
- * @subpackage 	Utils
  * @since 		v9.0.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

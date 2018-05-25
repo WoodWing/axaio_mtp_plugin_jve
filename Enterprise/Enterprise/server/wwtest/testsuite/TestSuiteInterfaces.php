@@ -11,8 +11,6 @@
  * All folders under those roots can be seen a test suites that be tagged by users to 
  * participate with the test run or untagged to exclude from test runs.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

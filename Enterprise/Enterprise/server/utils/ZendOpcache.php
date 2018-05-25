@@ -2,8 +2,6 @@
 /**
  * Helper class to checks Zend OPcache configurations and clears the cache.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v9.1
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

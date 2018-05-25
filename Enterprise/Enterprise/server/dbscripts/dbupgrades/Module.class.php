@@ -8,8 +8,6 @@
  * IMPORTANT: DB upgrade modules should focus on -data- migration, rather than trying to migrate the -model- itself.
  *            To change the model please use definitions in the server/dbmodel/Definition.class.php module instead.
  *
- * @package    Enterprise
- * @subpackage BizClasses
  * @since      9.0.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

@@ -2,8 +2,6 @@
 /**
  * XMP Parser to read XMP block from file into XML object
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v6.1
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

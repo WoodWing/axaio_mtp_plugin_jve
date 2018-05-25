@@ -4,8 +4,6 @@
  *
  * It takes a public key for encryption and a private key for decryption.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
 */

@@ -9,8 +9,6 @@
  * In architecture, the TransferClient class and the SoapClient class are in the same 'layer'.
  * They are each other co-workers; One does the file transfers and the other does the messaging.
  *
- * @package Enterprise
- * @subpackage BizClasses
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

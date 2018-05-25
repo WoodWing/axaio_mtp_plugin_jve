@@ -3,8 +3,6 @@
 /**
  * Contains helper functions for the AdobeDps2 tests.
  *
- * @package 	Enterprise
- * @subpackage 	Testsuite
  * @since 		v9.6
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

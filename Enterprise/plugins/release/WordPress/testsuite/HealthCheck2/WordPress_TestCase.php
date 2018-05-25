@@ -4,8 +4,6 @@
  * This class is automatically read and run by TestSuiteFactory class.
  * See TestSuiteInterfaces.php for more details about the TestSuite concept.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v9.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

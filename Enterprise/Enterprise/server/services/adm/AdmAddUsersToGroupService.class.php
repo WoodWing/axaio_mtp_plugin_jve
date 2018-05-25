@@ -2,8 +2,6 @@
 /**
  * AddUsersToGroup Admin service.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

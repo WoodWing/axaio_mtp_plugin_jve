@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	TransferServer
  * @since 		v8
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  * 

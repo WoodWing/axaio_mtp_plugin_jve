@@ -1,6 +1,4 @@
 #!/bin/sh
-# @package      Enterprise
-# @subpackage   buildtools
 # @since        9.6
 # @copyright    WoodWing Software bv. All Rights Reserved.
 #

@@ -1,7 +1,5 @@
 <?php
 /**
- * @package Enterprise
- * @subpackage TestSuite
  * @since v9.8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

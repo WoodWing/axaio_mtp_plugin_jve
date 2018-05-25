@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @package 	Enterprise
- * @subpackage 	ServerPlugins
  * @since 		v9.0.0
  * @copyright	WoodWing Software bv. All Rights Reserved.
  * @todo        Implement the Collection Widget handling for Image / File Drupal Fields.

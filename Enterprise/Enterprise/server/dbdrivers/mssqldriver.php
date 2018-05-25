@@ -2,8 +2,6 @@
 /**
  * Translates DBMS independent calls to Mssql specific calls.
  *
- * @package 	Enterprise
- * @subpackage 	DBDrivers
  * @since 		v3.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

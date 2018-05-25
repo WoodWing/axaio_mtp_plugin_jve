@@ -1,6 +1,4 @@
 #!/bin/sh
-# @package      Enterprise
-# @subpackage   Composer
 # @since        9.2
 # @copyright    WoodWing Software bv. All Rights Reserved.
 #

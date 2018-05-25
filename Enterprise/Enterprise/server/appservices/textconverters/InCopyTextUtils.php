@@ -2,8 +2,6 @@
 /**
  * Helper classes for InCopyTextImport/InCopyTextExport
  *
- * @package Enterprise
- * @subpackage WebEditor
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

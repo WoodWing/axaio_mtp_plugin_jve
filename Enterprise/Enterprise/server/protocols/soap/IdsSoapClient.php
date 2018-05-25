@@ -8,8 +8,6 @@
  * IMPORTANT: Unlike other SoapClient wrapper classes at Enterprise, this IDS client runs
  *            at the core server and services are implemented by IDS (instead of Enterprise).
  *
- * @package Enterprise
- * @subpackage Services
  * @since v7.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  *

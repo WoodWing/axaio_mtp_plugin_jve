@@ -2,8 +2,6 @@
 /**
  * Implements DB querying, puging and restoring of deleted objects.
  *
- * @package 	Enterprise
- * @subpackage 	DBClasses
  * @since 		v6.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

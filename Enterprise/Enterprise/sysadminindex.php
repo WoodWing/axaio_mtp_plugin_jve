@@ -3,8 +3,6 @@
  * Dispatches incoming System Administration service requests to SOAP/AMF/JSON servers.
  * Requests are logged in DEBUG mode in the OUTPUTDIRECTORY/services folder.
  *
- * @package Enterprise
- * @subpackage Core
  * @since v9.0.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

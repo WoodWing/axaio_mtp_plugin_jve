@@ -2,8 +2,6 @@
 /**
  * Application Services - Session management.
  *
- * @package 	Enterprise
- * @subpackage 	AppServices
  * @since 		v5.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

@@ -2,8 +2,6 @@
 /**
  * AbortOperation Publishing service.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -2,8 +2,6 @@
 /**
  * Keeps track of feature access objects introduced by server plugins.
  *
- * @package    Enterprise
- * @subpackage DBClasses
  * @since      10.2.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

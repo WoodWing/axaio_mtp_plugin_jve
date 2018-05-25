@@ -2,8 +2,6 @@
 /**
  * Solr Solarium Client.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v9.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

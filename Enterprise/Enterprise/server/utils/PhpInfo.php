@@ -5,8 +5,6 @@
  * It has plenty helper functions all returning HTML fragments that can be combined to
  * build a HTML info page. See its getAllInfo() function that builds a full page.
  * 
- * @package Enterprise
- * @subpackage Utils
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

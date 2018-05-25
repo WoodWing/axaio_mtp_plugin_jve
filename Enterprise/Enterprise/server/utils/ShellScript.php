@@ -5,8 +5,6 @@
  * It accepts template files that are preferably loaded from the Enterprise/config/shellscript folder by caller.
  * It fills in the command parameters on-the-fly before it executes the command.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

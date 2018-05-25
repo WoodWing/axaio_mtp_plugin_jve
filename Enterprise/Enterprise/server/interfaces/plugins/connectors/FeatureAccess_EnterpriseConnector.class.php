@@ -2,8 +2,6 @@
 /**
  * Server plug-in connector interface that allows plug-ins to provide their own feature access rights.
  *
- * @package    Enterprise
- * @subpackage ServerPlugins
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

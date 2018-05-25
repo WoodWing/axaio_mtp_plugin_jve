@@ -2,8 +2,6 @@
 /**
  * Implements DB querying of InDesignArticle data objects.
  * 
- * @package 	Enterprise
- * @subpackage 	DBClasses
  * @since 		v9.7
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

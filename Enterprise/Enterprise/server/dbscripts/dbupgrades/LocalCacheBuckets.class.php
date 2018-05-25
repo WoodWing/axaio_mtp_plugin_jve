@@ -8,8 +8,6 @@
  * Insert a new row with name = 'local_cache_buckets' and value = array() in the smart_config table.
  * 
  *
- * @package    Enterprise
- * @subpackage BizClasses
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

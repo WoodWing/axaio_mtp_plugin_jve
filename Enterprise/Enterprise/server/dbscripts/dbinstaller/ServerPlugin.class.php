@@ -2,8 +2,6 @@
 /**
  * Installer for the databases of server plugins. See base class for more details.
  *
- * @package    Enterprise
- * @subpackage dbscripts
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

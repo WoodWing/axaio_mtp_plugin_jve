@@ -3,8 +3,6 @@
  * Provides access to the publish history data in the database. This table stores
  * publish history data of dossiers.  
  * 
- * @package 	Enterprise
- * @subpackage DBClasses
  * @since 		v7.5
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

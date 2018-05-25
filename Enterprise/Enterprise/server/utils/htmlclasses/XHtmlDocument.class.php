@@ -21,8 +21,6 @@
  * //echo "<pre>".htmlentities( $field4->toString() )."</pre>";
  * echo $form->toString();
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v6.5
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

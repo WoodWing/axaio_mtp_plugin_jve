@@ -3,8 +3,6 @@
  * Implements DB querying of PropertyInfo objects from smart_properties table.
  * Customizations made in MetaData maintenance pages are reflected through PropertyInfo objects.
  *
- * @package 	Enterprise
- * @subpackage 	DBClasses
  * @since 		v7.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

@@ -3,8 +3,6 @@
  * Utility class to build HTML documenta based on HTML master templates.
  * This is especially used by web/admin applications.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

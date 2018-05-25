@@ -5,8 +5,6 @@
  * Creates Custom Server Plug-in files on-the-fly to speed up development of new integrations.
  * See config/plugin-templates/readme.txt for more info.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since 9.0.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  *

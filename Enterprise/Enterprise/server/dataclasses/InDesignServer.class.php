@@ -1,7 +1,5 @@
 <?php
 /**
- * @package Enterprise
- * @subpackage DataClasses
  * @since v9.7.0 stdClass is changed into InDesignServer
  * @copyright WoodWing Software bv. All Rights Reserved.
  *

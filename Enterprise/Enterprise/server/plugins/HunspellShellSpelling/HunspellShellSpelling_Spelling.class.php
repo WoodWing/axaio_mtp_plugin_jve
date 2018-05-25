@@ -2,8 +2,6 @@
 /**
  * Spelling checker and suggestions integrating Hunspell through command shell.
  *
- * @package Enterprise
- * @subpackage Core
  * @since v7.4
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

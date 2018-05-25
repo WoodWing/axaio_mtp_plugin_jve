@@ -1,6 +1,4 @@
 #!/bin/sh
-# @package      Enterprise
-# @subpackage   Build
 # @since        9.5
 # @copyright    WoodWing Software bv. All Rights Reserved.
 #

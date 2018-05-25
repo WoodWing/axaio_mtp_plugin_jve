@@ -5,8 +5,6 @@
  *
  * FOR DEVELOPERS ONLY!
  *
- * @package 	Enterprise
- * @subpackage 	DBScripts
  * @since 		v4.2
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

@@ -3,8 +3,6 @@
 /**
  * Contains helper functions for this test case.
  *
- * @package 	Enterprise
- * @subpackage 	Testsuite
  * @since 		v9.7.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

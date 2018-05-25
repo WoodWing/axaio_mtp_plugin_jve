@@ -35,8 +35,6 @@
  * - the hard-coded request is used to compare with the expected request
  * - the hard-coded response is used to the actual response
  * 
- * @package Enterprise
- * @subpackage Utils
  * @since v9.6
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -13,8 +13,6 @@
  * A flag defined in the {@link getUpdateFlag()} function is stored in smart_config to  
  * specify whether or not the conversion was already done correctly before.
  *
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v9.2.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

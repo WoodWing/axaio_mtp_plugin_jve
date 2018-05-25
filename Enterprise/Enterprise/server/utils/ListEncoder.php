@@ -3,8 +3,6 @@
 /**
  * Splitting a string by a delimiter.
  *
- * @package     Enterprise
- * @subpackage  Utils
  * @since       v10.0.5
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *
