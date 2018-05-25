@@ -6,7 +6,7 @@
  * Class to proxy API requests to Elvis.
  */
 
-class ElvisProxyClient
+class Elvis_BizClasses_ProxyClient
 {
 	/**
 	 * @var string
@@ -18,7 +18,7 @@ class ElvisProxyClient
 	private $service;
 
 	/**
-	 * ElvisProxyClient constructor.
+	 * Elvis_BizClasses_ProxyClient constructor.
 	 *
 	 * @param string $shortUserName
 	 * @param string $service
@@ -34,8 +34,8 @@ class ElvisProxyClient
 	 *
 	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
 	 *
-	 * @return ElvisClientResponse
-	 * @throws ElvisBizException
+	 * @return Elvis_BizClasses_ClientResponse
+	 * @throws Elvis_BizClasses_Exception
 	 */
 	private function proxyGet()
 	{
@@ -50,8 +50,7 @@ class ElvisProxyClient
 			}
 		);
 
-		require_once __DIR__.'/ElvisCurlClient.php';
-		return ElvisCurlClient::request( $this->shortUserName, $this->service, $curlOptions );
+		return Elvis_BizClasses_CurlClient::request( $this->shortUserName, $this->service, $curlOptions );
 	}
 
 	/**
@@ -59,7 +58,7 @@ class ElvisProxyClient
 	 *
 	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
 	 *
-	 * @throws ElvisBizException
+	 * @throws Elvis_BizClasses_Exception
 	 */
 	public function proxy()
 	{
@@ -70,8 +69,7 @@ class ElvisProxyClient
 				$this->proxyGet();
 				break;
 			default:
-				require_once __DIR__.'/ElvisBizException.php';
-				throw new ElvisBizException( 'HTTP method '.$httpMethod.' not supported' );
+				throw new Elvis_BizClasses_Exception( 'HTTP method '.$httpMethod.' not supported' );
 		}
 	}
 }

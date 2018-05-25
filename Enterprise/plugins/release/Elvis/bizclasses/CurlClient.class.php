@@ -10,7 +10,7 @@
 
 require_once __DIR__.'/../config.php';
 
-class ElvisCurlClient
+class Elvis_BizClasses_CurlClient
 {
 	/**
 	 * Execute service request against Elvis server.
@@ -18,8 +18,8 @@ class ElvisCurlClient
 	 * @param string $shortUserName
 	 * @param string $service
 	 * @param array $curlOptions cURL options to override.
-	 * @return ElvisClientResponse
-	 * @throws ElvisBizException
+	 * @return Elvis_BizClasses_ClientResponse
+	 * @throws Elvis_BizClasses_Exception
 	 */
 	public static function request( $shortUserName, $service, $curlOptions )
 	{
@@ -56,24 +56,22 @@ class ElvisCurlClient
 	 *
 	 * @param string $service
 	 * @param array $curlOptions cURL options to override.
-	 * @return ElvisClientResponse
-	 * @throws ElvisBizException
+	 * @return Elvis_BizClasses_ClientResponse
+	 * @throws Elvis_BizClasses_Exception
 	 */
 	private static function plainRequest( $service, $curlOptions )
 	{
 		$responseHeaders = [];
 		$ch = curl_init();
 		if( !$ch ) {
-			require_once __DIR__.'/ElvisBizException.php';
-			throw new ElvisBizException( 'Failed to create a CURL handle' );
+			throw new Elvis_BizClasses_Exception( 'Failed to create a CURL handle' );
 		}
 		curl_setopt_array( $ch, self::getCurlOptions( $service, $curlOptions, $responseHeaders ) );
 		$startTime = microtime( true );
 		$body = curl_exec( $ch );
 		$duration = microtime( true ) - $startTime;
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-		require_once __DIR__.'/ElvisClientResponse.php';
-		$response = new ElvisClientResponse( $httpStatusCode, $body );
+		$response = new Elvis_BizClasses_ClientResponse( $httpStatusCode, $body );
 
 		if( LogHandler::debugMode() ) {
 			// Requires curl_setopt($ch, CURLINFO_HEADER_OUT, 1)
@@ -170,11 +168,10 @@ class ElvisCurlClient
 	 *
 	 * @param  string $shortUserName
 	 * @return string access token
-	 * @throws ElvisBizException
+	 * @throws Elvis_BizClasses_Exception
 	 */
 	private static function getAccessToken( $shortUserName )
 	{
-		require_once __DIR__.'/../dbclasses/Token.class.php';
 		$accessToken = Elvis_DbClasses_Token::get( $shortUserName );
 		if( is_null( $accessToken ) ) {
 			$accessToken = self::requestAndSaveAccessToken( $shortUserName );
@@ -187,12 +184,11 @@ class ElvisCurlClient
 	 *
 	 * @param  string $shortUserName
 	 * @return string access token
-	 * @throws ElvisBizException
+	 * @throws Elvis_BizClasses_Exception
 	 */
 	private static function requestAndSaveAccessToken( $shortUserName )
 	{
 		$accessToken = self::requestAccessToken( $shortUserName );
-		require_once __DIR__.'/../dbclasses/Token.class.php';
 		Elvis_DbClasses_Token::save( $shortUserName, $accessToken );
 		return $accessToken;
 	}
@@ -202,7 +198,7 @@ class ElvisCurlClient
 	 *
 	 * @param  string $shortUserName
 	 * @return string access token
-	 * @throws ElvisBizException when access token can't be retrieved.
+	 * @throws Elvis_BizClasses_Exception when access token can't be retrieved.
 	 */
 	private static function requestAccessToken( $shortUserName )
 	{
@@ -216,8 +212,7 @@ class ElvisCurlClient
 		) );
 		$response = self::plainRequest( 'oauth/token', $curlOptions );
 		if( $response->isError() ) {
-			require_once __DIR__.'/ElvisBizException.php';
-			throw new ElvisBizException( 'Failed to retrieve access token' );
+			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token' );
 		}
 		return $response->jsonBody()->access_token;
 	}

@@ -4,11 +4,11 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-class ElvisBizException extends BizException
+class Elvis_BizClasses_Exception extends BizException
 {
 
 	/**
-	 * Construct the ElvisBizException.
+	 * Construct the Elvis_BizClasses_Exception.
 	 *
 	 * For ES 10.0 or later it constructs a S1144 error else it constructs S1069.
 	 *

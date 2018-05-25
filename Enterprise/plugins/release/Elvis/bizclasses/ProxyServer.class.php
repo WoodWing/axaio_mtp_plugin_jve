@@ -229,9 +229,7 @@ class Elvis_BizClasses_ProxyServer
 	private function proxyRequestToElvisServer()
 	{
 		$service = $this->composeRestServiceForFileDownload();
-
-		require_once __DIR__.'/../logic/ElvisProxyClient.php';
-		$client = new ElvisProxyClient( BizSession::getShortUserName(), $service );
+		$client = new Elvis_BizClasses_ProxyClient( BizSession::getShortUserName(), $service );
 		$client->proxy();
 	}
 

@@ -5,7 +5,7 @@
  *
  * Class to contain Elvis response data and provide usefull methods on it.
  */
-class ElvisClientResponse
+class Elvis_BizClasses_ClientResponse
 {
 	private $httpStatusCode;
 	private $body;
@@ -56,16 +56,16 @@ class ElvisClientResponse
 	 * JSON decoded representation of the response body.
 	 *
 	 * @return mixed JSON decoded representation of the response body.
-	 * @throws ElvisBizException
+	 * @throws Elvis_BizClasses_Exception
 	 */
 	public function jsonBody()
 	{
 		if( $this->body === false ) {
-			throw new ElvisBizException( 'Invalid response body' );
+			throw new Elvis_BizClasses_Exception( 'Invalid response body' );
 		}
 		$decoded = json_decode( $this->body );
 		if( !$decoded ) {
-			throw new ElvisBizException( 'Invalid response body' );
+			throw new Elvis_BizClasses_Exception( 'Invalid response body' );
 		}
 		return $decoded;
 	}
