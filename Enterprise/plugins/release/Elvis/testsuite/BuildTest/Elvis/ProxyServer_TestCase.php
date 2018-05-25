@@ -56,9 +56,14 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	{
 		try {
 			$this->setupTestData();
+
+			// Test workflow of the Elvis proxy.
 			$this->lookupProxyEntryInLogOnResponse();
 			$this->retrieveImageDownloadUrl();
 			$this->testDownloadImageViaProxyServer();
+
+			// Test security of the Elvis proxy.
+			$this->testPreviewArgs();
 
 			// Test error handling of the Elvis proxy.
 			$this->testInvalidTicket();
@@ -113,7 +118,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest();
 		$request->Ticket = $this->ticket;
-		$request->IDs = array( '500100729' ); // TODO: create Elvis shadow image object (instead of hard-coded image id)
+		$request->IDs = array( '500101124' ); // TODO: create Elvis shadow image object (instead of hard-coded image id)
 		$request->Areas = array( 'Workflow' );
 		$request->Rendition = 'native';
 		$request->Lock = false;
@@ -146,6 +151,29 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
 		$this->assertEquals( 200, $this->getHttpStatusCode( $http_response_header ) );
 		$this->assertGreaterThan( 0, strlen( $imageContents ) );
+	}
+
+	/**
+	 * Unit test the security of the preview-args URL parameter.
+	 */
+	private function testPreviewArgs()
+	{
+		require_once __DIR__.'/ProxyServerStub.class.php';
+		$stub = new WW_TestSuite_BuildTest_Elvis_ProxyServerStub();
+
+		// Attempt passing in relative paths. This could be used to by-pass access rights checks, so should not be allowed.
+		// Should fail because slashes are not allowed.
+		$this->assertFalse( $stub->isValidPreviewArgsParam( '../foo' ) );
+
+		// Attempt passing in relative paths with double encoding attack. '%252E%252E%252F' = '../' double escaped.
+		// Should fail because % chars are not allowed.
+		$this->assertFalse( $stub->isValidPreviewArgsParam( '%252E%252E%252Ffoo' ) );
+
+		// Call for success. Use a file extension since that is required for Elvis Server to download a preview with arguments.
+		$this->assertTrue( $stub->isValidPreviewArgsParam( 'maxWidth_800_maxHeight_600.jpg' ) );
+
+		// Make a crop.
+		$this->assertTrue( $stub->isValidPreviewArgsParam( 'cropWidth_200_cropHeight_200_cropOffsetX_0_cropOffsetY_50.jpg' ) );
 	}
 
 	/**
