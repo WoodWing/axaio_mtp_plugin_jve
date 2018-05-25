@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	SCEnterprise
- * @subpackage 	BizClasses
  * @since 		v4.1
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
