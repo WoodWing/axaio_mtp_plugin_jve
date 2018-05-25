@@ -42,7 +42,6 @@ if( file_exists( __DIR__.'/../../config.php' ) ) {
 $footprint = sprintf( '%03d', round( ( microtime( true ) - $beforeInclude ) * 1000 ) );
 LogHandler::Log( 'ElvisRestProxyIndex', 'CONTEXT', 'Enterprise Server footprint: '.$footprint.'ms (= startup time).' );
 
-require_once __DIR__.'/bizclasses/ProxyServer.class.php';
 $index = new Elvis_BizClasses_ProxyServer();
 $index->handle();
 

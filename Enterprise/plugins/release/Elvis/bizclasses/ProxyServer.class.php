@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__.'/ProxyServerHttpException.class.php';
-
 /**
  * @since 10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
@@ -60,7 +58,6 @@ class Elvis_BizClasses_ProxyServer
 	 */
 	private function parseHttpParams()
 	{
-		require_once BASEDIR.'/server/utils/HttpRequest.class.php';
 		$requestParams = WW_Utils_HttpRequest::getHttpParams( 'GP' ); // GET and POST only, no cookies
 
 		$this->httpParams = array( 'ticket' => null );

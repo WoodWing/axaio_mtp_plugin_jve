@@ -6,8 +6,6 @@
  * Test stub for the Elvis_BizClasses_ProxyServer class.
  */
 
-require_once __DIR__.'/../../../bizclasses/ProxyServer.class.php';
-
 class WW_TestSuite_BuildTest_Elvis_ProxyServerStub extends Elvis_BizClasses_ProxyServer
 {
 	/**
