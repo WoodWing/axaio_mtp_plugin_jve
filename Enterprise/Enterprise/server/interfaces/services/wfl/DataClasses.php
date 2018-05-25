@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @package Enterprise
- * @subpackage Workflow Services
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 

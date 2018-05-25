@@ -516,8 +516,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	public function generateTypeMap4AMF(array $map, $identifier)
 	{
 		$outTxt = "<?php\n\n/**\n"
-			." * @package ".$this->packageName."\n"
-			." * @subpackage Services\n"
 			." * @copyright WoodWing Software bv. All Rights Reserved.\n"
 			." *".'/'."\n"
 			."\n"
@@ -566,8 +564,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		);
 
 		$outTxt = "<?php\n\n/**\n"
-				." * @package ".$this->packageName."\n"
-				." * @subpackage $intfFull Services\n"
 				." * @copyright WoodWing Software bv. All Rights Reserved.\n"
 				." *".'/'."\n"
 				."\n"
@@ -1220,8 +1216,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 			// File header
 			$outTxt = "<?php\n\n/**\n"
-					." * @package ".$this->packageName."\n"
-					." * @subpackage Services\n"
 					." * @copyright WoodWing Software bv. All Rights Reserved.\n"
 					." *".'/'."\n"
 					."\n"
@@ -1980,8 +1974,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 		// Build the PHP class file header		
 		$outTxt = "<?php\n\n/**\n"
-				." * @package ".$this->packageName."\n"
-				." * @subpackage Services\n"
 				." * @copyright WoodWing Software bv. All Rights Reserved.\n"
 				." *".'/'."\n"
 				."\n"
