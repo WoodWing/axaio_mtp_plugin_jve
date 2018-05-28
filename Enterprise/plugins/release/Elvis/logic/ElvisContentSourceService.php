@@ -74,23 +74,6 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Removes an asset.
-	 *
-	 * @param string $assetId
-	 * @throws BizException
-	 */
-	public function remove( $assetId )
-	{
-		$params = array( $assetId );
-
-		try {
-			ElvisAMFClient::send( self::SERVICE, 'remove', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-	}
-
-	/**
 	 * Copies an asset.
 	 *
 	 * @param string $assetId

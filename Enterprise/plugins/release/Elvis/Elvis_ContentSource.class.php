@@ -98,22 +98,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 	
 	/**
-	 * deleteAlienObject
-	 *
-	 * Deletion of alien object.
-	 *
-	 * @param string	$alienId		Alien id
+	 * @inheritdoc
 	 */
 	public function deleteAlienObject( $alienId )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::deleteAlienObject called for alienId:' . $alienId );
-		
-		require_once dirname ( __FILE__ ).'/logic/ElvisContentSourceService.php';
-		require_once dirname ( __FILE__ ).'/util/ElvisUtils.class.php';
-
-		$service = new ElvisContentSourceService();
-		$elvisId = ElvisUtils::getElvisId( $alienId );
-		$service->remove( $elvisId );
+		// Nothing to do because alien objects are not supported for Elvis.
 	}
 	
 	/**
