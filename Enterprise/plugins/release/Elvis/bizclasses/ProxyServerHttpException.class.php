@@ -10,16 +10,58 @@
  */
 class Elvis_BizClasses_ProxyServerHttpException extends Exception
 {
+	/** @var Zend\Http\Response */
+	private $response;
+
 	/**
 	 * @inheritdoc
 	 */
 	public function __construct( $message = "", $code = 0, Exception $previous = null )
 	{
-		$response = new Zend\Http\Response();
-		$response->setStatusCode( $code );
-		$reasonPhrase = $response->getReasonPhrase();
+		$this->response = new Zend\Http\Response();
+		$this->response->setStatusCode( $code );
+		parent::__construct( $message, $code, $previous );
+	}
 
-		$statusMessage = "{$code} {$reasonPhrase}";
+	/**
+	 * Return the severity that can be used with the LogHandler.
+	 *
+	 * @return string 'ERROR' when server error returned, else 'INFO'.
+	 */
+	public function getSeverity()
+	{
+		return $this->response->isServerError() ? 'ERROR' : 'INFO';
+	}
+
+	/**
+	 * Get HTTP status message
+	 *
+	 * @return string
+	 */
+	public function getReasonPhrase()
+	{
+		$this->response->getReasonPhrase();
+	}
+
+	/**
+	 * Retrieve HTTP status code.
+	 *
+	 * @return int
+	 */
+	public function getStatusCode()
+	{
+		return $this->response->getStatusCode();
+	}
+
+	/**
+	 * Compose a HTTP status message, which consists of the HTTP status code and the message phrase.
+	 *
+	 * @return string
+	 */
+	public function getStatusMessage()
+	{
+		$statusMessage = $this->getStatusCode().' '.$this->getReasonPhrase();
+		$message = $this->getMessage();
 		if( $message ) { // if there are more lines, take first one only this only one can be sent through HTTP
 			if( strpos( $message, "\n" ) !== false ) {
 				$msgLines = explode( "\n", $message );
@@ -28,12 +70,7 @@ class Elvis_BizClasses_ProxyServerHttpException extends Exception
 			// Add message to status; for apps that can not reach message body (like Flex)
 			$statusMessage .= " - {$message}";
 		}
-
-		header( "HTTP/1.1 {$code} {$reasonPhrase}" );
-		header( "Status: {$statusMessage}" );
-
-		LogHandler::Log( __CLASS__, $response->isServerError() ? 'ERROR' : 'INFO', $statusMessage );
-		parent::__construct( $message, $code, $previous );
+		return $statusMessage;
 	}
 
 	/**

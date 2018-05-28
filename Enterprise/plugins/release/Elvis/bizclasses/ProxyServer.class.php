@@ -37,7 +37,9 @@ class Elvis_BizClasses_ProxyServer
 				throw Elvis_BizClasses_ProxyServerHttpException::createFromBizException( $e );
 			}
 		} catch( Elvis_BizClasses_ProxyServerHttpException $e ) {
-			// nothing to do here; the error is handled in the constructor of the exception already
+			header( 'HTTP/1.1 '.$e->getCode().' '.$e->getReasonPhrase() );
+			header( 'Status: '.$e->getStatusMessage() );
+			LogHandler::Log( __CLASS__, $e->getSeverity(), $e->getStatusMessage() );
 		}
 
 		PerformanceProfiler::stopProfile( 'ElvisRestProxyIndex', 1 );
@@ -302,8 +304,7 @@ class Elvis_BizClasses_ProxyServer
 		//         hacker has no access rights for) by providing object id 500101124 (the hacker has access rights for).
 		$allowedSymbols = array(
 			'_', // used to separate arguments and values
-			'.', // used for file extension
-			'-'  // used for negative digits in crop param value
+			'.'  // used for file extension
 		);
 		return $previewArgs && ctype_alnum( str_replace( $allowedSymbols, '', $previewArgs ) );
 	}
