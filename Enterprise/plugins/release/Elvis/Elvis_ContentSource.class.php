@@ -1,20 +1,17 @@
 <?php
 /**
+ * Elvis Content Source connector. Creates, updates and deletes shadow objects.
+ *
  * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Implements Content Source connector.
- * Creates, updates and deletes shadow objects.
  */
 
-// Plug-in config file
-require_once dirname(__FILE__).'/config.php';
-// Enterprise includes
+require_once __DIR__.'/config.php'; // Elvis config file
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_EnterpriseConnector.class.php';
-
 
 class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 {
+	/** @var MetadataHandler */
 	private $metadataHandler;
 
 	/**
@@ -22,7 +19,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	private function getMetadataHandler()
 	{
-		require_once dirname(__FILE__).'/model/MetadataHandler.class.php';
+		require_once __DIR__.'/model/MetadataHandler.class.php';
 		if( !isset($this->metadataHandler) ) {
 			$this->metadataHandler = new MetadataHandler();
 		}
@@ -30,12 +27,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 	
 	/**
-	 * getContentSourceId
-	 *
-	 * Return unique identifier for this content source implementation. Each alien object id needs
-	 * to start with _<this id>_
-	 *
-	 * @return string unique identifier for this content source, without underscores.
+	 * @inheritdoc
 	 */
 	final public function getContentSourceId()
 	{
@@ -43,47 +35,29 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 	
 	/**
-	 * Elvis content source does not support named queries
-	 *
-	 * @return array empty array
+	 * @inheritdoc
 	 */
 	final public function getQueries()
 	{
-		return array();
+		return array(); // Elvis content source does not support named queries
 	}
 	
 	/**
-	 * Elvis content source doesn't support named queries
-	 *
-	 * @param $query
-	 * @param $params
-	 * @param $firstEntry
-	 * @param $maxEntries
-	 * @param $order
-	 * @return null
+	 * @inheritdoc
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		return null;
+		return null; // Elvis content source does not support named queries
 	}
 
 	/**
-	 * Gets alien object. In case of rendition 'none' the lock param can be set to true, this is the
-	 * situation that Properties dialog is shown. If content source allows this, return the object
-	 * on failure the dialog will be read-only. If Property dialog is ok-ed, a shadow object will
-	 * be created. The object is assumed NOT be locked, hence there is no unlock sent to content source.
-	 *
-	 * @param string	$alienId	Alien object id, so include the _<ContentSourceId>_ prefix
-	 * @param string	$rendition	'none' (to get properties only), 'thumb', 'preview' or 'native'
-	 * @param boolean	$lock		See method comment.
-	 *
-	 * @return Object
+	 * @inheritdoc
 	 */
 	final public function getAlienObject( $alienId, $rendition, $lock )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getAlienObject called for alienId:' . $alienId . '; rendition:' . $rendition . '; lock:' . $lock );
 		
-		require_once dirname ( __FILE__ ).'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 		$hit = ElvisUtils::getHit( $elvisId );
 
@@ -170,26 +144,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$versionHandler->promoteVersion( $alienId, $version );
 	}
 	
-	/**
-	 * getShadowObject
-	 *
-	 * Deprecated since Enterprise 9.7, use getShadowObject2 instead
-	 *
-	 * Get shadow object. Meta data is all set already, access rights have been set etc.
-	 * All that is required is filling in the files for the requested object.
-	 * Furthermore the meta data can be adjusted if needed.
-	 * If Files is null, Enterprise will fill in the files
-	 * Only users who have no restricted access to the Elvis Content Source are allowed to lock the shadow object.
-	 * See EN-36871.
-	 *
-	 * Default implementation does nothing, leaving it all up to Enterprise
-	 *
-	 * @param string	$alienId 	Alien object id
-	 * @param Object	$object 	Shadow object from Enterprise
-	 * @param array		$objprops 	Array of all properties, both the public (also in Object) as well as internals
-	 * @param boolean	$lock		Whether object should be locked
-	 * @param string	$rendition	Rendition to get
-	 */
 	public function getShadowObject( $alienId, &$object, $objprops, $lock, $rendition )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
@@ -197,10 +151,8 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * getShadowObject2
-	 * 
-	 * Get shadow object version 2. It is an extension from the first getShadowObject.
-	 * 
+	 * @inheritdoc
+	 *
 	 * Meta data is all set already, access rights have been set etc.
 	 * All that is required is filling in the files for the requested object.
 	 * This will only be done when the version of the files is newer than the haveVersion.
@@ -208,23 +160,15 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * Only users who have no restricted access to the Elvis Content Source are allowed to lock the shadow object.
 	 * See EN-36871.
 	 * If Files is null, Enterprise will fill in the files
-	 * 
-	 * @param string $alienId
-	 * @param Object $object
-	 * @param array $objprops
-	 * @param bool $lock
-	 * @param string $rendition
-	 * @param string $haveVersion
 	 */
 	public function getShadowObject2( $alienId, &$object, $objprops, $lock, $rendition, $haveVersion )
 	{
 		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
 
-		$this->checkUserEditRight( $lock, $rendition );
+		require_once __DIR__.'/logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
 
-		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once dirname ( __FILE__ ).'/logic/ElvisContentSourceService.php';
-		require_once dirname ( __FILE__ ).'/util/ElvisUtils.class.php';
+		$this->checkUserEditRight( $lock, $rendition );
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 		$hit = ElvisUtils::getHit( $elvisId, $lock );
 		
@@ -275,30 +219,18 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * Create shadow object for specified alien object. The actual creation is done by Enterprise,
-	 * the Content Sources needs to instantiate and fill in an object of class Object.
-	 * When an empty name is filled in, auto-naming will be used.
-	 * It's up to the content source implementation if any renditions (like thumb/preview) are stored
-	 * inside Enterprise. If any rendition is stored in Enterprise it's the content source implementation's
-	 * responsibility to keep these up to date. This could for example be checked whenever the object
-	 * is requested via getShadowObject
-	 *
-	 * @param string $alienId     Alien object id, so include the _<ContentSourceId>_ prefix
-	 * @param Object $destObject  In some cases (CopyObject, SendToNext, Create relation)
-	 *                            this can be partly filled in by user, in other cases this is null.
-	 *                            In some cases this is mostly empty, so be aware.
-	 * @return Object	filled in with all fields, the actual creation of the Enterprise object is done by Enterprise.
+	 * @inheritdoc
 	 * @throws BizException in case mode is Copy_To_Production_Zone and no production zone is found.
 	 */
 	final public function createShadowObject( $alienId, $destObject )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId );
 
-		require_once __DIR__ . '/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
-			require_once __DIR__ . '/util/ElvisBrandAdminConfig.class.php';
+			require_once __DIR__.'/util/ElvisBrandAdminConfig.class.php';
 			$productionZone = ElvisBrandAdminConfig::getProductionZoneByPubId( $destObject->MetaData->BasicMetaData->Publication->Id );
 
 			if( $productionZone ) {
@@ -314,7 +246,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$hit = ElvisUtils::getHit( $elvisId );
 
 			// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
-			require_once dirname(__FILE__) . '/logic/ElvisObjectManager.php';
+			require_once __DIR__.'/logic/ElvisObjectManager.php';
 			$systemId = BizSession::getEnterpriseSystemId();
 			ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
 		}
@@ -339,14 +271,16 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		return $destObject;
 	}
-	
+
+	/**
+	 * @inheritdoc
+	 */
 	final public function createCopyObject( $alienId, $destObject )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createCopyObject called for alienId:' . $alienId );
 		
-		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-		require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 		
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 		$hit = ElvisUtils::getHit( $elvisId );
@@ -371,7 +305,14 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		return $destObject;
 	}
-	
+
+	/**
+	 * Compose a file attachment data object.
+	 *
+	 * @param string $fileUrl
+	 * @param string $type
+	 * @return Attachment
+	 */
 	private function createAttachment( $fileUrl, $type )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
@@ -406,22 +347,13 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 	
 	/**
-	 * saveShadowObject
-	 *
-	 * Saves shadow object. This is called after update of DB records is done in Enterprise, but
-	 * before any files are stored. This allows content source to save the files externally in
-	 * which case Files can be cleared. If Files not cleared, Enterprise will save the files
-	 *
-	 * Default implementation does nothing, leaving it all up to Enterprise
-	 *
-	 * @param string $alienId		Alien id of shadow object
-	 * @param Object &$object
+	 * @inheritdoc
 	 */
 	public function saveShadowObject( $alienId, &$object )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::saveShadowObject called for alienId:' . $alienId );
 		
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 		
 		// upload original to Elvis
@@ -442,18 +374,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 	
 	/**
-	 * setShadowObjectProperties
-	 *
-	 * Updates the metadata of a shadow object. This is called after updating DB records
-	 * in Enterprise. This allows the content source to synchronize metadata changes with
-	 * its external/integrated DB (if any). However, this is an edge case, because the
-	 * content source is more about content and less about metadata. Therefor, normally
-	 * there would be no need to implement this function. Nevertheless, it can be used in
-	 * case a tight integration with the external content source is needed.
-	 *
-	 * @since v8.2.0
-	 * @param string	$alienId		Alien id of shadow object
-	 * @param Object	$object
+	 * @inheritdoc
 	 */
 	public function setShadowObjectProperties( $alienId, &$object )
 	{
@@ -466,10 +387,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
-		require_once dirname( __FILE__ ).'/util/ElvisSessionUtil.php';
-		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
-		require_once dirname( __FILE__ ).'/util/ElvisObjectUtils.class.php';
-		require_once dirname( __FILE__ ).'/logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 		$service = new ElvisContentSourceService();
@@ -502,11 +422,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 
 	/**
-	 * Setting multiple shadow objects' properties.
-	 *
-	 * @since v9.2.0
-	 * @param array[] $shadowObjectIds List of array where key is the content source id and value its list of shadow ids.
-	 * @param MetaDataValue[] $metaDataValues The modified values that needs to be updated at the content source side.
+	 * @inheritdoc
 	 */
 	public function multiSetShadowObjectProperties( $shadowObjectIds, $metaDataValues )
 	{
@@ -515,11 +431,13 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			return;
 		}
 
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties '.
+			'called for $shadowObjectIds:'.implode(',', $shadowObjectIds ) );
+
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
-		require_once dirname( __FILE__ ).'/util/ElvisSessionUtil.php';
-		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
-		require_once dirname( __FILE__ ).'/logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 		require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBWorkflow.class.php';
 
@@ -559,14 +477,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * Deletion of shadow object, called just before the shadow object record is deleted
-	 * or after the object is restored from trash.
-	 *
-	 * @param string $alienId - Alien id of shadow object
-	 * @param string $shadowId - Enterprise id of shadow object
-	 * @param bool $permanent - Whether object will be permanently deleted
-	 * @param bool $restore if object is restored from trash
-	 * @throws Exception
+	 * @inheritdoc
 	 */
 	public function deleteShadowObject( $alienId, $shadowId, $permanent, $restore )
 	{
@@ -578,11 +489,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			return;
 		}
 		
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/logic/ElvisObjectManager.php';
+
 		// Only remove the system id in Elvis when the asset is completely removed in Enterprise (removed from the trash)
 		$elvisId = ElvisUtils::getElvisId( $alienId );
-
-		require_once dirname(__FILE__).'/logic/ElvisObjectManager.php';
 		$systemId = BizSession::getEnterpriseSystemId();
 		if( !$restore ) {
 			try {
@@ -596,118 +507,67 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 	
 	/**
-	 * listShadowObjectVersions
-	 *
-	 * Returns versions of show object or null if Enterprise should handle this
-	 *
-	 * Default implementation returns null to have Enterprise handle this.
-	 *
-	 * @param string	$alienId	Alien id of shadow object
-	 * @param string	$shadowId	Enterprise id of shadow object
-	 * @param string 	$rendition	Rendition to include in the version info
-	 *
-	 * @return array of VersionInfo or null if Enterprise should handle this
+	 * @inheritdoc
 	 */
 	public function listShadowObjectVersions( $alienId, $shadowId, $rendition )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::listShadowObjectVersions called for alienId:' . $alienId .
 														'; shadowId:' . $shadowId . '; rendition:' . $rendition );
 
-		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
+		require_once __DIR__.'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
 		$elvisAssetVersions = $versionHandler->listVersions( $alienId, $rendition );
 
-		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
 		$elvisAssetVersions = ElvisObjectUtils::setVersionStatusFromEnterprise( $shadowId, $elvisAssetVersions );
-
 		return $elvisAssetVersions;
 	}
 
 	/**
-	 * getShadowObjectVersion
-	 *
-	 * Returns versions of shadow object or null if Enterprise should handle this
-	 *
-	 * Default implementation returns null to have Enterprise handle this.
-	 *
-	 * @param string	$alienId	Alien id of shadow object
-	 * @param string	$shadowId	Enterprise id of shadow object
-	 * @param string 	$version	Version to get as returned by listShadowVersons
-	 * @param string 	$rendition	Rendition to get
-	 *
-	 * @return VersionInfo or null if Enterprise should handle this
+	 * @inheritdoc
 	 */
 	public function getShadowObjectVersion( $alienId, $shadowId, $version, $rendition )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObjectVersion called for alienId:' . $alienId .
 														'; shadowId:' . $shadowId . '; version:' . $version . '; rendition:' . $rendition);
 
-		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
+		require_once __DIR__.'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
 		return $versionHandler->retrieveVersion( $alienId, $version, $rendition );
 	}
 
 	/**
-	 * restoreShadowObjectVersion
-	 *
-	 * Restores versions of alien object, true when handled or null if Enterprise should handle this
-	 *
-	 * Default implementation returns null to have Enterprise handle this.
-	 *
-	 * @param string	$alienId	Alien id of shadow object
-	 * @param string	$shadowId	Enterprise id of shadow object
-	 * @param string 	$version	Version to get as returned by listAlienVersons
-	 *
-	 * @return true when handled or null if Enterprise should handle this
+	 * @inheritdoc
 	 */
 	public function restoreShadowObjectVersion( $alienId, $shadowId, $version )
 	{
 		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::restoreShadowObjectVersion called for alienId:' . $alienId .
 														'; shadowId:' . $shadowId . '; version:' . $version);
 
-		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
+		require_once __DIR__.'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
 		$versionHandler->promoteVersion( $alienId, $version );
-
 		return true;
 	}
 
 	/**
-	 * copyShadowObject
-	 *
-	 * Copies a shadow object.
-	 * All that is required is filling in the files for the copied object.
-	 * Furthermore the meta data can be adjusted if needed.
-	 * If Files is null, Enterprise will fill in the files
-	 *
-	 * Default implementation creates a new shadow object.
-	 *
-	 * @param string	$alienId	Alien id of shadow object
-	 * @param Object	$srcObject	Source Enterprise object (only metadata filled)
-	 * @param Object	$destObject	Destination Enterprise object
-	 *
-	 * @return Object	filled in with all fields, the actual creation of the Enterprise object is done by Enterprise.
+	 * @inheritdoc
 	 */
 	public function copyShadowObject( $alienId, $srcObject, $destObject )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-		require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
-
 		$shadowObject = null;
 		switch( ELVIS_CREATE_COPY ) {
 			case 'Hard_Copy_To_Enterprise':
 			case 'Shadow_Only':
+				require_once __DIR__.'/util/ElvisUtils.class.php';
+				require_once __DIR__.'/logic/ElvisContentSourceService.php';
+
 				$service = new ElvisContentSourceService();
 				$destName = $destObject->MetaData->BasicMetaData->Name;
-
 				$assetId = ElvisUtils::getElvisId( $alienId );
 				$copyId = $service->copy( $assetId, $destName );
-
 				$destId = ElvisUtils::getAlienId( $copyId );
-
 				LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . ', destId:' . $destId );
-
 				$shadowObject = $this->createShadowObject( $destId, $destObject );
 				break;
 
@@ -721,54 +581,17 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * Called by the core server to ask the Content Source connector whether or not the
-	 * given user has certain access ($right) to the given alien object.
-	 *
-	 * Access rights are setup per brand or overrule issue. Underneath, rights can be configured
-	 * more specific; per object type, status or category. Note that the given parameters
-	 * represent the values to be assigned, so the object stored in database might have different
-	 * values assigned at the time calling this function.
-	 *
-	 * By default NULL is returned, which means that the core server does access rights
-	 * checking as configured for Enterprise. However, when the connector wants to e.g. let
-	 * the integrated Content Source system do the checking, it should implement this function
-	 * and return TRUE or FALSE instead.
-	 *
-	 * @since 9.4
-	 * @param string $user Short user name.
-	 * @param string $right Access right to be checked. See BizAccessFeatureProfiles.class.php for possible flags.
-	 * @param integer $brandId
-	 * @param integer $overruleIssueId Id of issue that overrules the brand. Zero when none- or normal issue(s) assigned.
-	 * @param integer $categoryId
-	 * @param string $objectType
-	 * @param integer $statusId Valid status id, or -1 for Personal Status.
-	 * @param string $alienId
-	 * @param string $contentSource
-	 * @param string $documentId
-	 * @return boolean|null NULL to let core server decide (default). TRUE when allowed. FALSE when not allowed (experimental).
+	 * @inheritdoc
 	 */
 	public static function checkAccessForAlien( $user, $right,
-	$brandId, $overruleIssueId, $categoryId, $objectType, $statusId,
-	$alienId, $contentSource, $documentId )
+			$brandId, $overruleIssueId, $categoryId, $objectType, $statusId,
+			$alienId, $contentSource, $documentId )
 	{
 		return true;
 	}
 	
 	/**
-	 * Same as {@link:checkAccessForAlien()} but then for shadow objects.
-	 *
-	 * @since 9.4
-	 * @param string $user Short user name.
-	 * @param string $right Access right to be checked. See BizAccessFeatureProfiles.class.php for possible flags.
-	 * @param integer $brandId
-	 * @param integer $overruleIssueId Id of issue that overrules the brand. Zero when none- or normal issue(s) assigned.
-	 * @param integer $categoryId
-	 * @param string $objectType
-	 * @param integer $statusId Valid status id, or -1 for Personal Status.
-	 * @param string $shadowId
-	 * @param string $contentSource
-	 * @param string $documentId
-	 * @return boolean|null NULL to let core server decide (default). TRUE when allowed. FALSE when not allowed (experimental).
+	 * @inheritdoc
 	 */
 	public static function checkAccessForShadow( $user, $right,
 			$brandId, $overruleIssueId, $categoryId, $objectType, $statusId,
@@ -778,36 +601,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 	
 	/**
-	 * Called by the core server to ask the Content Source connector whether or not the connector can provide more
-	 * information about the given user abstracted from MetaData of the alien- or shadow object.
-	 *
-	 * When a content source creates an alien- or a shadow object it is possible that the MetaData contains user names
-	 * that are not known in Enterprise Server (yet). e.g: The fields Modifier, Creator, Deletor, RouteTo and LockedBy
-	 * can have such user names as values.
-	 *
-	 * If LDAP is enabled and if external systems can put objects into Enterprise Server it is possible that users are
-	 * only known in LDAP and not in Enterprise Server. Therefore users get abstracted from the MetaData information.
-	 * And if they are not known in Enterprise Server they are created on the fly with just the bare minimum information
-	 * available.
-	 *
-	 * Such users get a flag "ImportOnLogon" which is set to true. As soon as such user logs in into Enterprise Server,
-	 * the user information is further enriched from the information provided by LDAP. Like groups, external ID,
-	 * password and e-mail data etc.
-	 *
-	 * On the Users admin page, partially imported users are displayed with "Import Groups" set to 'Yes'. As soon as the
-	 * user logs in, this will be set to 'No'.
-	 *
-	 * This method allows the connector to enrich user information before the user gets created. e.g.:
-	 * The AdmUser->FullName is used to show the name of the user in the UI. While the MetaData contains the short
-	 * username, which not always describes the user properly.
-	 *
-	 * @since 9.4
-	 * @param AdmUser $user Object to enrich with more user information
-	 * @return AdmUser $user Enriched object
+	 * @inheritdoc
 	 */
 	public static function completeUser( AdmUser $user )
 	{
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
 		return ElvisUtils::enrichUser( $user );
 	}
 
