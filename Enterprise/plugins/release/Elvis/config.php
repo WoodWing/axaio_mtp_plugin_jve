@@ -245,9 +245,9 @@ if( !defined('ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE' )) {
  * FieldHandler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname 
  */
 
-require_once dirname(__FILE__) . '/model/fieldHandler/ReadOnlyFieldHandler.class.php';
-require_once dirname(__FILE__) . '/model/fieldHandler/ReadWriteFieldHandler.class.php';
-require_once dirname(__FILE__) . '/model/fieldHandler/ResolutionFieldHandler.class.php';
+require_once __DIR__.'/model/fieldHandler/ReadOnlyFieldHandler.class.php';
+require_once __DIR__.'/model/fieldHandler/ReadWriteFieldHandler.class.php';
+require_once __DIR__.'/model/fieldHandler/ResolutionFieldHandler.class.php';
 
 $cfgFieldHandlers = array();
 

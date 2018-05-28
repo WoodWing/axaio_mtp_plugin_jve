@@ -16,7 +16,7 @@ class Elvis_WflUnlockObjects extends WflUnlockObjects_EnterpriseConnector {
 
     final public function runBefore( WflUnlockObjectsRequest &$req )
     {
-	     require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
+	     require_once __DIR__.'/logic/ElvisContentSourceService.php';
         foreach( $req->IDs as $id ) {
             $elvisId = self::getDocumentIdForObjectId( $id );
             if( !is_null( $elvisId ) ) {

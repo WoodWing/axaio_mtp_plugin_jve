@@ -69,9 +69,9 @@ class ElvisUtils {
 	public static function getHit($elvisId, $lock = false)
 	{
 
-		require_once dirname(__FILE__) . '/../logic/ElvisContentSourceService.php';
-		require_once dirname(__FILE__) . '/../model/MetadataHandler.class.php';
-		require_once dirname(__FILE__) . '/../model/ElvisCSNotFoundException.php';
+		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../model/MetadataHandler.class.php';
+		require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
 		
 		$service = new ElvisContentSourceService();
 
@@ -304,7 +304,7 @@ class ElvisUtils {
 	 */
 	public static function enrichUser($user) {
 		//require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';
-		require_once dirname(__FILE__) . '/../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 		
 		$service = new ElvisContentSourceService();
 		$userDetails = $service->getUserDetails($user->Name);

@@ -24,7 +24,7 @@ class ElvisUpdateManager
 	 */
 	public static function sendUpdateObjects( array $objects, $shadowObjectRelations )
 	{
-		require_once dirname(__FILE__) . '/../util/ElvisObjectRelationUtils.class.php';
+		require_once __DIR__.'/../util/ElvisObjectRelationUtils.class.php';
 
 		// Retrieve shadow relations from objects if not specified
 		if( is_null( $shadowObjectRelations ) ) {
@@ -48,8 +48,8 @@ class ElvisUpdateManager
 
 		if( !is_null( $operations ) ) {
 			// Send the created message
-			require_once dirname(__FILE__) . '/../logic/ElvisContentSourceService.php';
-			require_once dirname(__FILE__) . '/../model/ElvisCSNotFoundException.php';
+			require_once __DIR__.'/../logic/ElvisContentSourceService.php';
+			require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
 
 			$service = new ElvisContentSourceService();
 			$service->updateObjects( $operations );
@@ -95,8 +95,8 @@ class ElvisUpdateManager
 
 			if( !is_null( $operations ) ) {
 				// Send the created message
-				require_once dirname(__FILE__) . '/../logic/ElvisContentSourceService.php';
-				require_once dirname(__FILE__) . '/../model/ElvisCSNotFoundException.php';
+				require_once __DIR__.'/../logic/ElvisContentSourceService.php';
+				require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
 
 				$service = new ElvisContentSourceService();
 				$service->deleteObjects( $operations );
@@ -135,9 +135,9 @@ class ElvisUpdateManager
 	 */
 	private static function composeElvisUpdateObjects( $objects, array $shadowObjectRelationsPerLayout )
 	{
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectDescriptor.php';
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisUpdateObjectOperation.php';
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectRelation.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisUpdateObjectOperation.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisObjectRelation.php';
 
 		// Enterprise System Id can be null, so use boolean 'false' instead, to indicate if it is already cached or not.
 		static $enterpriseSystemId = false;
@@ -320,10 +320,10 @@ class ElvisUpdateManager
 	private static function composeElvisPlacements( /** @noinspection PhpLanguageLevelInspection */
 		Object $object, $shadowPlacements )
 	{
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisPlacement.php';
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisPage.php';
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectDescriptor.php';
-		require_once dirname(__FILE__) . '/../util/ElvisPlacementUtils.class.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisPlacement.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisPage.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
+		require_once __DIR__.'/../util/ElvisPlacementUtils.class.php';
 
 		$elvisPlacements = null;
 		if( $shadowPlacements ) {
@@ -410,8 +410,8 @@ class ElvisUpdateManager
 	 */
 	private static function composeElvisTargets( $objTargets )
 	{
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectDescriptor.php';
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisTarget.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisTarget.php';
 
 		$elvisTargets = null;
 		if( $objTargets ) {
@@ -451,9 +451,9 @@ class ElvisUpdateManager
 	 */
 	public static function composeElvisDeleteObjects( $objects )
 	{
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectDescriptor.php';
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisEntityDescriptor.php';
-		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisDeleteObjectOperation.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisEntityDescriptor.php';
+		require_once __DIR__.'/../model/relation/operation/ElvisDeleteObjectOperation.php';
 
 		// Enterprise System Id can be null, so use boolean 'false' instead, to indicate if it is already cached or not.
 		static $enterpriseSystemId = false;

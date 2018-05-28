@@ -43,13 +43,13 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 	 */
 	final public function runBefore( WflDeleteObjectsRequest &$req )
 	{
-		require_once dirname(__FILE__).'/config.php';
+		require_once __DIR__.'/config.php';
 
 		// When the object is deleted from the Workflow area, the relations are deleted
 		$inWorkflow = in_array( 'Workflow', $req->Areas );
 		if( $inWorkflow && !$req->Permanent ) { // TODO In the runAfter the objects are needed. If objects are permanently deleted they must be cached in the runBefore.
-			require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
-			require_once dirname(__FILE__).'/util/ElvisObjectRelationUtils.class.php';
+			require_once __DIR__.'/util/ElvisObjectUtils.class.php';
+			require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
 
 			// Get current shadow relations placed on the layouts or dossiers, retrieved from DB.
 			$reqLayoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs, $req->Areas[0] );
@@ -104,9 +104,9 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 	 */
 	final public function runAfter( WflDeleteObjectsRequest $req, WflDeleteObjectsResponse &$resp )
 	{
-		require_once dirname(__FILE__).'/config.php';
-		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
-		require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
+		require_once __DIR__.'/config.php';
+		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
 
 		if( !empty( $this->deletedShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the following deleted layouts

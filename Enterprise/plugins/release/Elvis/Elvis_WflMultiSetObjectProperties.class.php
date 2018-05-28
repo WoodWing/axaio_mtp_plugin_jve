@@ -31,7 +31,7 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 		}
 
 		if( $statePropertyChanged ) {
-			require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+			require_once __DIR__.'/util/ElvisObjectUtils.class.php';
 			$this->oldStatuses = ElvisObjectUtils::getObjectsStatuses( ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs ) );
 		}
 	} 
@@ -77,7 +77,7 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 
 			// Update Elvis with new shadow relations of un-archived objects (if any)
 			if( !empty( $changedObjectIds ) ) {
-				require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
+				require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
 				ElvisUpdateManager::sendUpdateObjectsByIds( $changedObjectIds, null );
 			}
 		}

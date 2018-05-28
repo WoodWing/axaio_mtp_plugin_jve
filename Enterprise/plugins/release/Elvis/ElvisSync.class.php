@@ -3,8 +3,8 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once dirname(__FILE__) . '/config.php';
-require_once dirname(__FILE__) . '/logic/ElvisContentSourceService.php';
+require_once __DIR__.'/config.php';
+require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
 class ElvisSync
 {
@@ -219,7 +219,7 @@ class ElvisSync
 	{
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		require_once BASEDIR.'/server/services/wfl/WflLogOnService.class.php';
-		require_once dirname( __FILE__ ).'/PluginInfo.php';
+		require_once __DIR__.'/PluginInfo.php';
 
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'LogOn' );
 
@@ -291,7 +291,7 @@ class ElvisSync
 	 */
 	private function pushMetadataConfig()
 	{
-		require_once dirname( __FILE__ ).'/model/MetadataHandler.class.php';
+		require_once __DIR__.'/model/MetadataHandler.class.php';
 
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'pushMetadataConfig' );
 
@@ -361,7 +361,7 @@ class ElvisSync
 	 */
 	private function performUpdates( $updates )
 	{
-		require_once dirname( __FILE__ ).'/model/MetadataHandler.class.php';
+		require_once __DIR__.'/model/MetadataHandler.class.php';
 
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'PerformUpdates' );
 
@@ -403,8 +403,8 @@ class ElvisSync
 	 */
 	private function lockOrUnLockObject( $update )
 	{
-		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
-		require_once dirname( __FILE__ ).'/util/ElvisUserUtils.class.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisUserUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		if( !isset( $update->metadata['checkedOutBy'] ) ) {
@@ -452,8 +452,8 @@ class ElvisSync
 	 */
 	private function updateObjectProperties( $update, $metadataHandler )
 	{
-		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
-		require_once dirname( __FILE__ ).'/model/MetadataHandler.class.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/model/MetadataHandler.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		$alienId = ElvisUtils::getAlienId( $update->assetId );
@@ -480,7 +480,7 @@ class ElvisSync
 	 */
 	private function deleteObject( $update )
 	{
-		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizDeletedObject.class.php';
 
 		$alienId = ElvisUtils::getAlienId( $update->assetId );
@@ -505,7 +505,7 @@ class ElvisSync
 	 */
 	private function getUsername( $username )
 	{
-		require_once dirname( __FILE__ ).'/util/ElvisUserUtils.class.php';
+		require_once __DIR__.'/util/ElvisUserUtils.class.php';
 
 		$user = ElvisUserUtils::getUserByUsernameOrActingUser( $username );
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'getUsername in: '.( empty( $username ) ? 'empty' : $username ).' out: '.( is_null( $user ) ? 'empty' : $user->Name ) );

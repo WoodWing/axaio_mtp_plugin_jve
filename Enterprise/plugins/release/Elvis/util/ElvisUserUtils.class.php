@@ -49,7 +49,7 @@ class ElvisUserUtils
 					$username = BizSession::getUserInfo( 'user' ); // Get the current acting user
 					$user = self::getUser( $username );
 				} else {
-					require_once dirname(__FILE__).'/../config.php';
+					require_once __DIR__.'/../config.php';
 					$user = self::getUser(ELVIS_ENT_ADMIN_USER);
 				}
 			} else {

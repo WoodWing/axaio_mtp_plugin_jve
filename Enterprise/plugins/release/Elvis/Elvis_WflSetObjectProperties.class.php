@@ -18,9 +18,9 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 
 	final public function runBefore( WflSetObjectPropertiesRequest &$req )
 	{
-		require_once dirname(__FILE__).'/config.php';
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/config.php';
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		if( !is_null($req->MetaData->BasicMetaData->ID) && ElvisUtils::isElvisId($req->MetaData->BasicMetaData->ID) ) {
@@ -76,9 +76,9 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 
 	final public function runAfter( WflSetObjectPropertiesRequest $req, WflSetObjectPropertiesResponse &$resp )
 	{
-		require_once dirname(__FILE__).'/config.php';
-		require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
-		require_once dirname(__FILE__).'/util/ElvisObjectRelationUtils.class.php';
+		require_once __DIR__.'/config.php';
+		require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
+		require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
 
 		$updatedObjects = array();
 		$updatedShadowRelations = array();

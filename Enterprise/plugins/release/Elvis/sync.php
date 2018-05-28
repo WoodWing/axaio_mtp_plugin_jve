@@ -6,13 +6,13 @@
 // Example: Run for a maximum of 3 minutes with a wait time towards Elvis of 30 seconds
 // 		Cron settings (run every 3 minutes): */3 * * * *
 //		URL: http://localhost:8888/Enterprise/config/plugins/Elvis/sync.php?maxexectime=180&maxtimeoutperrun=15
-if( file_exists(dirname(__FILE__).'/../../config.php') ) {
+if( file_exists(__DIR__.'/../../config.php') ) {
 	require_once '../../config.php';
 } else { // fall back at symbolic link to VCS source location of server plug-in
 	require_once '../../../Enterprise/config/config.php';
 }
 require_once BASEDIR.'/server/secure.php';
-require_once dirname(__FILE__).'/ElvisSync.class.php';
+require_once __DIR__.'/ElvisSync.class.php';
 
 set_time_limit(3600);
 

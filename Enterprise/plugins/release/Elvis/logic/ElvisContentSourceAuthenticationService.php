@@ -50,7 +50,7 @@ class ElvisContentSourceAuthenticationService
 	 */
 	public function getContentStationClientVersion()
 	{
-		require_once dirname(__FILE__) . '/ElvisAMFClient.php';
+		require_once __DIR__.'/ElvisAMFClient.php';
 		try {
 			return ElvisAMFClient::send(self::SERVICE, 'getContentStationClientVersion', null );
 		} catch (Exception $e) {

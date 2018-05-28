@@ -18,7 +18,7 @@ class ElvisObjectUtils
 	public static function filterElvisShadowObjects( $objectIds )
 	{
 		require_once BASEDIR .'/server/dbclasses/DBBase.class.php';
-		require_once dirname( __FILE__ ).'/../config.php';
+		require_once __DIR__.'/../config.php';
 
 		$elvisShadowObjectIds = array();
 
@@ -181,7 +181,7 @@ class ElvisObjectUtils
 	 */
 	public static function isArchivedStatus( $statusName )
 	{
-		require_once dirname(__FILE__) . '/../config.php';
+		require_once __DIR__.'/../config.php';
 
 		static $ArchivedStatuses;
 		if (!isset($ArchivedStatuses)) {

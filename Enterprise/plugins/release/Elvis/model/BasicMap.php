@@ -5,8 +5,8 @@
  * Simplified version of org.granite.collections.BasicMap<K, V>
  */
 
-require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
-require_once dirname(__FILE__) . '/../SabreAMF/SabreAMF/Externalized.php';
+require_once __DIR__.'/AbstractRemoteObject.php';
+require_once __DIR__.'/../SabreAMF/SabreAMF/Externalized.php';
 
 class BasicMap extends AbstractRemoteObject implements SabreAMF_Externalized, IteratorAggregate, ArrayAccess, Countable
 {

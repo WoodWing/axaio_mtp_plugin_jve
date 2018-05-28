@@ -24,7 +24,7 @@ class Elvis_ConfigFiles extends ConfigFiles_EnterpriseConnector
 	 */
 	public function displayOptionValue( $configFile, $optionName, $value )
 	{
-		require_once dirname(__FILE__).'/config.php';
+		require_once __DIR__.'/config.php';
 		if( $optionName == 'ELVIS_SUPER_USER_PASS' || $optionName == 'ELVIS_ENT_ADMIN_PASS' ) {
 			$value = '***';
 		}

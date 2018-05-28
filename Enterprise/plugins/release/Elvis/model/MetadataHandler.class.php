@@ -117,11 +117,11 @@ class MetadataHandler
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
 
-		require_once dirname( __FILE__ ).'/../util/ElvisSessionUtil.php';
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
 		$editableFields = ElvisSessionUtil::getEditableFields();
 		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
-			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
+			require_once __DIR__.'/../logic/ElvisRESTClient.php';
 			$fieldInfos = ElvisRESTClient::fieldInfo();
 			if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
 				if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
@@ -136,7 +136,7 @@ class MetadataHandler
 		// Send to Elvis only editable metadata fields.
 		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $editableFields ) );
 		if( $elvisMetadata ) {
-			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
+			require_once __DIR__.'/../logic/ElvisRESTClient.php';
 			ElvisRESTClient::update( $elvisId, $elvisMetadata, $file, $clearCheckOutState );
 		}
 	}
@@ -153,7 +153,7 @@ class MetadataHandler
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
 
 		if( !empty( $elvisMetadata ) ) {
-			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
+			require_once __DIR__.'/../logic/ElvisRESTClient.php';
 			ElvisRESTClient::updateBulk( $elvisIds, $elvisMetadata );
 		}
 	}
@@ -163,19 +163,19 @@ class MetadataHandler
 	 */
 	private function _initFieldHandlers()
 	{
-		require_once dirname( __FILE__ ).'/../config.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/ContentSourceFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/CopyrightMarkedFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/NameFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/KeywordsFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/ReadOnlyFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/ReadWriteFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/ShadowIdFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/TypeFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/FormatFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/VersionFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/WriteOnlyFieldHandler.class.php';
-		require_once dirname( __FILE__ ).'/fieldHandler/UserFieldHandler.class.php';
+		require_once __DIR__.'/../config.php';
+		require_once __DIR__.'/fieldHandler/ContentSourceFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/CopyrightMarkedFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/NameFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/KeywordsFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/ReadOnlyFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/ReadWriteFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/ShadowIdFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/TypeFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/FormatFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/VersionFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/WriteOnlyFieldHandler.class.php';
+		require_once __DIR__.'/fieldHandler/UserFieldHandler.class.php';
 		if( isset( $this->fieldHandlers ) ) {
 			return;
 		}

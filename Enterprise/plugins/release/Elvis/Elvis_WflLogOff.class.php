@@ -23,7 +23,7 @@ class Elvis_WflLogOff extends WflLogOff_EnterpriseConnector
 	{
 		try {
 			// Logout from Elvis.
-			require_once dirname( __FILE__ ).'/logic/ElvisRESTClient.php';
+			require_once __DIR__.'/logic/ElvisRESTClient.php';
 			ElvisRESTClient::logout();
 		} catch( BizException $e ) {
 			// We did logout from Enterprise successfully already. When Elvis logout failed

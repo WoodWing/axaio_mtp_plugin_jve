@@ -19,7 +19,7 @@ class ElvisObjectRelationUtils
 	 */
 	public static function getCurrentShadowRelationsFromObjectIds( array $reqLayoutIds )
 	{
-		require_once dirname(__FILE__) . '/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/ElvisObjectUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 
 		$placedShadowObjectRelations = array();
@@ -53,7 +53,7 @@ class ElvisObjectRelationUtils
 	 */
 	public static function getShadowRelationsFromObjects( $objects, $area = 'Workflow' )
 	{
-		require_once dirname(__FILE__) . '/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/ElvisObjectUtils.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 
 		// Collect the objects placed on a layout.
@@ -97,7 +97,7 @@ class ElvisObjectRelationUtils
 	 */
 	public static function getLayoutIdsForShadowIds( $shadowIds )
 	{
-		require_once dirname(__FILE__) . '/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/ElvisObjectUtils.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizRelation.class.php';
 
 		// Find deleted Elvis assets. For each deleted asset, we need to collect the layouts.

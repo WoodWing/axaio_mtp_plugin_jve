@@ -6,25 +6,25 @@
  * Implements Content Source Service.
  */
 
-require_once dirname(__FILE__) . '/ElvisAMFClient.php';
-require_once dirname(__FILE__) . '/../model/ElvisSearchResponse.php';
-require_once dirname(__FILE__) . '/../model/ElvisFormattedValue.php';
-require_once dirname(__FILE__) . '/../model/BasicMap.php';
-require_once dirname(__FILE__) . '/../model/ElvisEntHit.php';
-require_once dirname(__FILE__) . '/../model/ElvisEntUpdate.php';
-require_once dirname(__FILE__) . '/../model/ElvisEntUserDetails.php';
-require_once dirname(__FILE__) . '/../model/ElvisCSException.php';
-require_once dirname(__FILE__) . '/../model/ElvisCSNotFoundException.php';
-require_once dirname(__FILE__) . '/../model/ElvisCSAlreadyExistsException.php';
-require_once dirname(__FILE__) . '/../model/ElvisCSLinkedToOtherSystemException.php';
-require_once dirname(__FILE__) . '/../model/ElvisCSAccessDeniedException.php';
-require_once dirname(__FILE__) . '/../model/relation/operation/ElvisUpdateObjectOperation.php';
-require_once dirname(__FILE__) . '/../model/relation/operation/ElvisDeleteObjectOperation.php';
-require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectRelation.php';
-require_once dirname(__FILE__) . '/../model/relation/operation/ElvisPlacement.php';
-require_once dirname(__FILE__) . '/../model/relation/operation/ElvisPage.php';
-require_once dirname(__FILE__) . '/../model/relation/operation/ElvisTarget.php';
-require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectDescriptor.php';
+require_once __DIR__.'/ElvisAMFClient.php';
+require_once __DIR__.'/../model/ElvisSearchResponse.php';
+require_once __DIR__.'/../model/ElvisFormattedValue.php';
+require_once __DIR__.'/../model/BasicMap.php';
+require_once __DIR__.'/../model/ElvisEntHit.php';
+require_once __DIR__.'/../model/ElvisEntUpdate.php';
+require_once __DIR__.'/../model/ElvisEntUserDetails.php';
+require_once __DIR__.'/../model/ElvisCSException.php';
+require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
+require_once __DIR__.'/../model/ElvisCSAlreadyExistsException.php';
+require_once __DIR__.'/../model/ElvisCSLinkedToOtherSystemException.php';
+require_once __DIR__.'/../model/ElvisCSAccessDeniedException.php';
+require_once __DIR__.'/../model/relation/operation/ElvisUpdateObjectOperation.php';
+require_once __DIR__.'/../model/relation/operation/ElvisDeleteObjectOperation.php';
+require_once __DIR__.'/../model/relation/operation/ElvisObjectRelation.php';
+require_once __DIR__.'/../model/relation/operation/ElvisPlacement.php';
+require_once __DIR__.'/../model/relation/operation/ElvisPage.php';
+require_once __DIR__.'/../model/relation/operation/ElvisTarget.php';
+require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
 
 /**
  * Interface used by the WoodWing Content Source plugin to perform asset
@@ -281,7 +281,7 @@ class ElvisContentSourceService
 	 */
 	public function registerShadowObjects( $shadowObjectIdentity )
 	{
-		require_once dirname( __FILE__ ).'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
+		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
 
 		ElvisAMFClient::registerClass( ElvisShadowObjectIdentity::getName() );
 
@@ -301,7 +301,7 @@ class ElvisContentSourceService
 	 */
 	public function unregisterShadowObjects( $shadowObjectIdentity )
 	{
-		require_once dirname( __FILE__ ).'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
+		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
 
 		ElvisAMFClient::registerClass( ElvisShadowObjectIdentity::getName() );
 

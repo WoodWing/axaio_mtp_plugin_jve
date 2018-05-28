@@ -17,8 +17,8 @@ class ElvisObjectManager
 	 */
 	public static function registerShadowObject($elvisId, $enterpriseSystemId)
 	{
-		require_once dirname(__FILE__) . '/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
-		require_once dirname(__FILE__) . '/../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
+		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
 		$operation = new ElvisShadowObjectIdentity();
 		$operation->enterpriseSystemId = strval( $enterpriseSystemId );
@@ -38,8 +38,8 @@ class ElvisObjectManager
 	 */
 	public static function unregisterShadowObject($elvisId, $enterpriseSystemId)
 	{
-		require_once dirname(__FILE__) . '/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
-		require_once dirname(__FILE__) . '/../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
+		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
 		$operation = new ElvisShadowObjectIdentity();
 		$operation->enterpriseSystemId = strval( $enterpriseSystemId );

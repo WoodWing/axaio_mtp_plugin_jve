@@ -5,7 +5,7 @@
  * Simplified version of com.ds.acm.logic.xmlservice.search.model.EntHit
  */
 
-require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
+require_once __DIR__.'/AbstractRemoteObject.php';
 
 class ElvisEntHit extends AbstractRemoteObject
 {

@@ -20,8 +20,8 @@ class Elvis_SysGetSubApplications extends SysGetSubApplications_EnterpriseConnec
 			$req->ClientAppName == 'Content Station' ) {
 
 			require_once BASEDIR.'/server/interfaces/services/sys/DataClasses.php';
-			require_once dirname(__FILE__).'/config.php';
-			require_once dirname(__FILE__).'/logic/ElvisContentSourceAuthenticationService.php';
+			require_once __DIR__.'/config.php';
+			require_once __DIR__.'/logic/ElvisContentSourceAuthenticationService.php';
 			
 			$service = new ElvisContentSourceAuthenticationService();
 			$subApp = new SysSubApplication();
