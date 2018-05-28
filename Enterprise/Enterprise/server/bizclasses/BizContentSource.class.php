@@ -715,7 +715,7 @@ class BizContentSource
 	 * Gets content source for specified alien object
 	 *
 	 * @param string 	$alienId	alien object id
-	 * @return EnterpriseConnector that can be passed to BizServerPlugin
+	 * @return ContentSource_EnterpriseConnector that can be passed to BizServerPlugin
 	 * @throws BizException when no content source found for alien
 	 */
 	private static function getContentSourceForAlienObject( $alienId )
