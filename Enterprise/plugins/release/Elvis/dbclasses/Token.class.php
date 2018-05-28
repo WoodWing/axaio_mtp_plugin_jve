@@ -13,14 +13,17 @@ class Elvis_DbClasses_Token extends DBBase
 	const TABLENAME = 'lvs_tokens';
 
 	/**
-	 * Saves an Elvis OAuth access token.
+	 * Save an Elvis OAuth access token.
 	 *
 	 * @param string $shortUserName short user name returned from BizSession::getShortUserName().
 	 * @param string $accessToken Elvis OAuth access token.
 	 */
 	public static function save( $shortUserName, $accessToken )
 	{
-		$values = array( 'user' => strval( $shortUserName ), 'token' => $accessToken );
+		$values = array(
+			'user' => strval( $shortUserName ),
+			'token' => strval( $accessToken )
+		);
 		//	rather update before insert because it's more likely it exists already but there's no way to see if the update
 		// updated a row or not
 		$insertResult = self::insertRow( self::TABLENAME, $values, true, null, false );
@@ -31,7 +34,7 @@ class Elvis_DbClasses_Token extends DBBase
 	}
 
 	/**
-	 * Returns Elvis OAuth access token for given user.
+	 * Return Elvis OAuth access token for given user.
 	 *
 	 * @param string $shortUserName short user name returned from BizSession::getShortUserName().
 	 * @return string|null Elvis OAuth access token or null when token isn't found.
