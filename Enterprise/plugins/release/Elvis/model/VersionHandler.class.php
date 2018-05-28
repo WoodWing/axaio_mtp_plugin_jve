@@ -87,6 +87,7 @@ class VersionHandler
 		$vi->Comment = $object->MetaData->WorkflowMetaData->Comment;
 		$vi->Object = $object->MetaData->BasicMetaData->Name;
 		$vi->File = ElvisUtils::getAttachment( $hit, $rendition, 'FileUrl' );
+		$vi->Slugline = '';
 
 		return $vi;
 	}
