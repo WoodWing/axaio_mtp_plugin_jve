@@ -16,6 +16,16 @@ class WoodWing_Service_Twitter extends Zend_Service_Twitter
 	const API_UPLOAD_URI = 'https://upload.twitter.com/1.1/';
 
 	/**
+	 * 386 is the current limit for a status message, 140 characters are displayed
+	 * initially, with the remainder linked from the web UI or client. The limit is
+	 * applied to a html encoded UTF-8 string (i.e. entities are counted in the limit
+	 * which may appear unusual but is a security measure).
+	 *
+	 * This should be reviewed in the future...
+	 */
+	const STATUS_MAX_CHARACTERS = 386;
+
+	/**
 	 * Update user's current status
 	 *
 	 * @param  string $status
@@ -28,37 +38,37 @@ class WoodWing_Service_Twitter extends Zend_Service_Twitter
 	 * @throws
 	 * @return Zend_Service_Twitter_Response
 	 */
-	public function statusesUpdate($status, $inReplyToStatusId = null, $mediaIds = null )
+	public function statusesUpdate( $status, $inReplyToStatusId = null, $mediaIds = null )
 	{
 		$this->init();
 		$path = 'statuses/update';
-		$len = iconv_strlen(htmlspecialchars($status, ENT_QUOTES, 'UTF-8'), 'UTF-8');
-		if ($len > self::STATUS_MAX_CHARACTERS) {
+		$len = iconv_strlen( htmlspecialchars( $status, ENT_QUOTES, 'UTF-8' ), 'UTF-8' );
+		if( $len > self::STATUS_MAX_CHARACTERS ) {
 			require_once 'Zend/Service/Twitter/Exception.php';
 			throw new Zend_Service_Twitter_Exception(
 				'Status must be no more than '
-				. self::STATUS_MAX_CHARACTERS
-				. ' characters in length'
+				.self::STATUS_MAX_CHARACTERS
+				.' characters in length'
 			);
-		} elseif (0 == $len) {
+		} elseif( 0 == $len ) {
 			require_once 'Zend/Service/Twitter/Exception.php';
 			throw new Zend_Service_Twitter_Exception(
 				'Status must contain at least one character'
 			);
 		}
 
-		$params = array('status' => $status);
-		$inReplyToStatusId = $this->validInteger($inReplyToStatusId);
-		if ($inReplyToStatusId) {
+		$params = array( 'status' => $status );
+		$inReplyToStatusId = $this->validInteger( $inReplyToStatusId );
+		if( $inReplyToStatusId ) {
 			$params['in_reply_to_status_id'] = $inReplyToStatusId;
 		}
 
-		if($mediaIds){
+		if( $mediaIds ) {
 			$params['media_ids'] = $mediaIds;
 		}
 
-		$response = $this->post($path, $params);
-		return new Zend_Service_Twitter_Response($response);
+		$response = $this->post( $path, $params );
+		return new Zend_Service_Twitter_Response( $response );
 	}
 
 	/**
@@ -74,8 +84,8 @@ class WoodWing_Service_Twitter extends Zend_Service_Twitter
 		$path = 'media/upload';
 		$params = array();
 
-		if( $media ){
-			$params = array('media' => base64_encode(file_get_contents($media)));
+		if( $media ) {
+			$params = array( 'media' => base64_encode( file_get_contents( $media ) ) );
 		}
 
 		$response = new Zend_Service_Twitter_Response( $this->post( $path, $params ) );
@@ -103,14 +113,51 @@ class WoodWing_Service_Twitter extends Zend_Service_Twitter
 	 * @throws Zend_Http_Client_Exception
 	 * @return void
 	 */
-	protected function prepare($path, Zend_Http_Client $client)
+	protected function prepare( $path, Zend_Http_Client $client )
 	{
 		$baseUrl = ( $path == 'media/upload' ? self::API_UPLOAD_URI : self::API_BASE_URI );
-		$client->setUri( $baseUrl . $path . '.json');
+		$client->setUri( $baseUrl.$path.'.json' );
 
 		/**
 		 * Do this each time to ensure oauth calls do not inject new params
 		 */
 		$client->resetParameters();
+	}
+
+	/**
+	 * Send a direct message to a user
+	 *
+	 * @param  int|string $user User to whom to send message
+	 * @param  string $text Message to send to user
+	 * @throws Exception\InvalidArgumentException if message is empty
+	 * @throws Exception\OutOfRangeException if message is too long
+	 * @throws Zend_Http_Client_Exception if HTTP request fails or times out
+	 * @throws Exception\DomainException if unable to decode JSON payload
+	 * @return Zend_Service_Twitter_Response
+	 */
+	public function directMessagesNew( $user, $text )
+	{
+		$this->init();
+		$path = 'direct_messages/new';
+		require_once __DIR__.'../../EnterpriseTwitterConnector.class.php';
+		$maxMessageLength = EnterpriseTwitterConnector::getMaxMessageLength();
+
+		$len = iconv_strlen( $text, 'UTF-8' );
+		if( 0 == $len ) {
+			require_once 'Zend/Service/Twitter/Exception.php';
+			throw new Zend_Service_Twitter_Exception(
+				'Direct message must contain at least one character'
+			);
+		} elseif( $maxMessageLength < $len ) {
+			require_once 'Zend/Service/Twitter/Exception.php';
+			throw new Zend_Service_Twitter_Exception(
+				"Direct message must contain no more than {$maxMessageLength} characters."
+			);
+		}
+
+		$params = $this->createUserParameter( $user, array() );
+		$params['text'] = $text;
+		$response = $this->post( $path, $params );
+		return new Zend_Service_Twitter_Response( $response );
 	}
 }
