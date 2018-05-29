@@ -26,7 +26,8 @@ class Twitter_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnec
 		$tweetPropertyInfo->Type = 'multiline';
 		$tweetPropertyInfo->MinValue = null; // Empty allowed.
 		$tweetPropertyInfo->MaxValue = null; // Many images allowed.
-		$tweetPropertyInfo->MaxLength = 140;
+		require_once __DIR__.'/EnterpriseTwitterConnector.class.php';
+		$tweetPropertyInfo->MaxLength = EnterpriseTwitterConnector::getMaxMessageLength();
 		$tweetPropertyInfo->ValueList = null;
 		$tweetPropertyInfo->AdminUI = false;
 		$tweetPropertyInfo->Widgets = null;
