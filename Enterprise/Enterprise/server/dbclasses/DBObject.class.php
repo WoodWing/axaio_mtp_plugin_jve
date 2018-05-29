@@ -1222,7 +1222,7 @@ class DBObject extends DBBase
 	/**
 	 * Marks all objects as non-indexed.
 	 *
-	 * @since 10.4.1
+	 * @since 10.1.8, 10.4.1
 	 * @param string[] $areas Possible values 'Workflow', 'Trash', and it can be both.
 	 */
 	static public function setNonIndexOnAllObjects( $areas = array('Workflow'))
