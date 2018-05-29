@@ -130,11 +130,11 @@ function installJSON() {
             function quote(string) {
                 rx_escapable.lastIndex = 0;
                 return rx_escapable.test(string) ? '"' + string.replace(rx_escapable, function (a) {
-                        var c = meta[a];
-                        return typeof c === 'string'
-                            ? c
-                            : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-                    }) + '"' : '"' + string + '"';
+                    var c = meta[a];
+                    return typeof c === 'string'
+                        ? c
+                        : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+                }) + '"' : '"' + string + '"';
             }
 
             function str(key, holder) {
@@ -241,7 +241,7 @@ function installJSON() {
                     rep = replacer;
                     if (replacer && typeof replacer !== 'function' &&
                         (typeof replacer !== 'object' ||
-                        typeof replacer.length !== 'number')) {
+                            typeof replacer.length !== 'number')) {
                         throw new Error('JSON.stringify');
                     }
 
@@ -1155,10 +1155,10 @@ function main()
                                                 var frameData = tfsObj.frameData; // Since SC CS4 v7.3.4 build 295/SC CS5 v7.3.4 build 293 and above
                                                 var idArticleIdsCsv = "";
                                                 if (isSC10plus) {
-                                                  var tfsObjIDids = tfsObj.allIndesignArticleIds;
-                                                  if( typeof( tfsObjIDids ) != "undefined" ) { // Since SC 10.2
-                                                    idArticleIdsCsv = tfsObjIDids.join(',');
-                                                  }
+                                                    var tfsObjIDids = tfsObj.allIndesignArticleIds;
+                                                    if( typeof( tfsObjIDids ) != "undefined" ) { // Since SC 10.2
+                                                        idArticleIdsCsv = tfsObjIDids.join(',');
+                                                    }
                                                 }
                                                 var frameHasTiles = false;
                                                 var frameDataObjects  = eval("(" + frameData + ")");
@@ -1219,7 +1219,7 @@ function main()
                                                                 if( oSpreadPage.id != oPage.id ) {
                                                                     if (shouldLog) {
                                                                         wwlog(INFO, "    Including other page (#" + getPageName( oSpreadPage ) + ") of the spread " +
-                                                                        "(than the article textframe is placed on) to support spread preview mode." );
+                                                                            "(than the article textframe is placed on) to support spread preview mode." );
                                                                         if (lookupStoryPages[oSpreadPage.id] == undefined) {
                                                                             arrPageNames.push( getPageName( oSpreadPage ) );
                                                                             lookupStoryPages[oSpreadPage.id] = 1;
@@ -1360,7 +1360,7 @@ function main()
                     var oPage = myDocPages[pgIdx];
                     if ( lookupPages[oPage.id] == 1 ) {
                         var section = oPage.appliedSection;
-                        
+
                         // if a new section is started, then reinitialize the section page counter. 
                         if ( oPage.appliedSection.index != currentSectionIdx ) {
                             currentSectionIdx = oPage.appliedSection.index;
@@ -1397,13 +1397,13 @@ function main()
             // because those may change due to ObjectOperation processing. Note that those may NOT be
             // stored in the DB yet, but reside in the layout in the editor workspace only.
             if (isSC10plus && getRelations == 'true') {
-              var rels = myDoc.entWorkflow.relations;
-              if (typeof(rels) != "undefined" ) {
-                  // remove the xml version processing instruction because the relations will be concatenated into our dump file
-                  rels = rels.replace('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>', '');
-                  // TODO update this into a regular expression in case the <xml> string changes in the future
-                  composeData.push( '\t<layout>' + ( rels ) + '</layout>\n' );
-              }
+                var rels = myDoc.entWorkflow.relations;
+                if (typeof(rels) != "undefined" ) {
+                    // remove the xml version processing instruction because the relations will be concatenated into our dump file
+                    rels = rels.replace('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>', '');
+                    // TODO update this into a regular expression in case the <xml> string changes in the future
+                    composeData.push( '\t<layout>' + ( rels ) + '</layout>\n' );
+                }
             }
 
             composeData.push( '</textcompose>\n' );
@@ -1425,30 +1425,60 @@ function main()
                     // CS5 7.4 has a special method for generating a preview that does not force
                     // the download of placed images.
                     var pageObjectsLen = arrSortPageObjects.length;
-                    for( var i = 0; i < pageObjectsLen; ++i ) {
-                        var pgIdx = arrSortPageObjects[i].key;
-                        var pg = arrSortPageObjects[i].value;
-                        // Export is per page. Figure out the file name to use for subsequent
-                        // exports to match the way exportFile creates names.
-                        var jpgPath = exportfile;
-                        // Grab the filename
-                        var jpgFilename = jpgPath.name;
-                        // Find the dot of the extension
-                        var lastDot = jpgFilename.lastIndexOf( '.' );
-                        // Initialize based on the absence of a dot
-                        var jpgBasename = jpgFilename;
-                        var jpgExt = "";
-                        if( lastDot >= 0 ) {
-                            // Slice the filename to get the basename and extension
-                            jpgBasename = jpgFilename.slice( 0, lastDot );
-                            jpgExt = jpgFilename.slice( lastDot );
+                    try {
+                        for( var i = 0; i < pageObjectsLen; ++i ) {
+                            var pgIdx = arrSortPageObjects[i].key;
+                            var pg = arrSortPageObjects[i].value;
+                            // Export is per page. Figure out the file name to use for subsequent
+                            // exports to match the way exportFile creates names.
+                            var jpgPath = exportfile;
+                            // Grab the filename
+                            var jpgFilename = jpgPath.name;
+                            // Find the dot of the extension
+                            var lastDot = jpgFilename.lastIndexOf( '.' );
+                            // Initialize based on the absence of a dot
+                            var jpgBasename = jpgFilename;
+                            var jpgExt = "";
+                            if( lastDot >= 0 ) {
+                                // Slice the filename to get the basename and extension
+                                jpgBasename = jpgFilename.slice( 0, lastDot );
+                                jpgExt = jpgFilename.slice( lastDot );
+                            }
+                            // Add the index to the basename
+                            jpgBasename += pgIdx+1;
+                            // Turn the path string into a file object
+                            jpgPath = new File( jpgPath.parent + '/' + jpgBasename + jpgExt );
+
+                            maxTries = 3; // 3 tries
+                            var count = 1;
+                            var bSucceeded = false;
+
+                            // A retry loop to export pages.
+                            // Usually only one attempt is needed per page.
+                            while( true ) {
+                                try {
+                                    wwlog( INFO, "  Export page #" + pgIdx + " to file: [" + jpgPath + "]; Attempt [" + count + "]" );
+                                    pg.exportJPEGPreview( jpgPath, PREVIEW_QUALITY, PREVIEW_RESOLUTION );
+                                    bSucceeded = true;
+                                }
+                                catch ( err ) {
+                                    // handle exception
+                                    if  (count++ == maxTries)
+                                        throw err;
+                                    bSucceeded = false;
+                                    // sometimes it helps to remove the jpg file before exporting again to the same file (EN-90300)
+                                    wwlog( INFO, "  Export page #" + pgIdx + "Removing file: [" + jpgPath + "] for next attempt" );
+                                    jpgPath.remove();
+                                }
+                                if ( bSucceeded )
+                                    break;
+                            }
                         }
-                        // Add the index to the basename
-                        jpgBasename += pgIdx+1;
-                        // Turn the path string into a file object
-                        jpgPath = new File( jpgPath.parent + '/' + jpgBasename + jpgExt );
-                        wwlog( INFO, "  Export page #" + pgIdx + " to file: [" + jpgPath + "]");
-                        pg.exportJPEGPreview( jpgPath, PREVIEW_QUALITY, PREVIEW_RESOLUTION );
+                    }
+                    catch (e ) {
+                        wwlog( ERROR, "Error #2.3: Exported to jpeg with exception :" + e.name + " - " + e.message + " - " + e.number + " Source: IDPreview.js#" + e.line );
+                        // preview generation fails, bail out entirely. Don't show an old preview.
+                        throw(e);
                     }
                 }
                 // no pages found, layout does not know anything about this article... should be saved first
@@ -1458,11 +1488,15 @@ function main()
         }
         catch( e )
         {
-            wwlog( ERROR, "Error #2: " + e.name + " - " + e.message + " Source: IDPreview.js#" + e.line );
+            wwlog( ERROR, "Error #2.4: " + e.name + " - " + e.message + " Source: IDPreview.js#" + e.line );
+            // preview generation fails, bail out entirely. Don't show an old preview.
+            throw(e);
         }
     }
     catch( e )
     {
+        wwlog( ERROR, "Error #2.5: " + e.name + " - " + e.message + " Source: IDPreview.js#" + e.line );
+        // preview generation fails, bail out entirely. Don't show an old preview.
         throw( e );
     }
     finally
