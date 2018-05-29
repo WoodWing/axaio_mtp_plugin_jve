@@ -1,3 +1,3 @@
 <?php
-echo phpinfo();
+echo phpinfo( INFO_GENERAL | INFO_MODULES );
 ?>
