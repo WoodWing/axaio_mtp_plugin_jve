@@ -6,15 +6,18 @@
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR . '/server/wwtest/testsuite/TestSuiteInterfaces.php';
+require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase extends TestCase
 {
 	/** @var WW_Utils_TestSuite $utils */
 	private $globalUtils = null;
 
-	/** @var string */
+	/** @var string $ticket */
 	private $ticket = null;
+
+	/** @var BizServerJob $bizServerJob */
+	private $bizServerJob;
 
 	public function getDisplayName()
 	{
@@ -50,10 +53,11 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 			$this->preCheckBeforeRunningCleanUpJob();
 			$this->createAndRunAutoCleanServiceLogs();
 			$this->postCheckAfterRunningCleanUpJob();
-		} catch ( BizException $e ) {
-
+			$this->tearDownTestData();
+		} catch( BizException $e ) {
+			$this->tearDownTestData();
 		}
-		// nothing to tear down for this test case.
+
 	}
 
 	/**
@@ -64,7 +68,7 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 		// Checks if settings are correct.
 		$this->assertEquals( 1, LOGLEVEL, 'LOGLEVEL is not enabled. Please make sure LOGLEVEL is set to 1' );
 
-		require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizServiceLogsCleanup.class.php';
 		$enabled = BizServiceLogsCleanup::isServiceLogsCleanupEnabled();
 		$message = 'AutoCleanServiceLogs is not enabled. Please make sure AUTOCLEAN_SERVICELOGS_DAYS is set to any value other than 0.';
 		$this->assertTrue( $enabled, $message );
@@ -72,6 +76,12 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 		// Initialization.
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->globalUtils = new WW_Utils_TestSuite();
+
+		require_once BASEDIR.'/server/bizclasses/BizServerJob.class.php';
+		$this->bizServerJob = new BizServerJob();
+
+		// Make sure to start with an empty queue.
+		$this->deletePendingJobs();
 	}
 
 	/**
@@ -113,9 +123,9 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	 */
 	private function manipulateLogDateTime()
 	{
-		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
-		$date = date('Y-m-d\TH:i:s', time()- 60 * 3600 * 24  );
-		DBBase::updateRow( 'log', array( 'date' => strval ( $date )), '', array() );
+		require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+		$date = date( 'Y-m-d\TH:i:s', time() - 60 * 3600 * 24 );
+		DBBase::updateRow( 'log', array( 'date' => strval( $date ) ), '', array() );
 	}
 
 	/**
@@ -126,7 +136,7 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	 */
 	private function preCheckBeforeRunningCleanUpJob()
 	{
-		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 		$totalLogEntries = DBBase::countRecordsInTable( 'log', 'id' );
 		$this->assertGreaterThan( 0, $totalLogEntries );
 	}
@@ -136,10 +146,15 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	 */
 	private function createAndRunAutoCleanServiceLogs()
 	{
+		$cleanServiceLogJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AutoCleanServiceLogs' ) );
+		$this->assertCount( 0, $cleanServiceLogJobs );
 		$result = $this->globalUtils->callCreateServerJob( $this, 'AutoCleanServiceLogs' );
 		$this->assertTrue( $result, 'AutoCleanServiceLogs Server Job cannot be created.' );
-		$result = $this->globalUtils->callRunServerJobs( $this );
+		$result = $this->globalUtils->callRunServerJobs( $this, 30, 1 );
 		$this->assertTrue( $result, 'Server Job cannot be executed.' );
+		$cleanServiceLogJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AutoCleanServiceLogs' ) );
+		$cleanServiceLogJob = reset( $cleanServiceLogJobs );
+		$this->assertEquals( ServerJobStatus::COMPLETED, $cleanServiceLogJob->JobStatus->getStatus() );
 	}
 
 	/**
@@ -149,8 +164,31 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	 */
 	private function postCheckAfterRunningCleanUpJob()
 	{
-		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 		$totalLogEntries = DBBase::countRecordsInTable( 'log', 'id' );
 		$this->assertEquals( 0, $totalLogEntries );
+	}
+
+	/**
+	 * Deletes any Enterprise Server jobs from the queue to avoid disturbing the tests.
+	 * Those jobs could be still pending from preceding test runs that ended unexpectedly.
+	 */
+	private function deletePendingJobs()
+	{
+		// Deletes all jobs from the queue.
+		$this->globalUtils->emptyServerJobsQueue();
+
+		// Check if the jobs are really deleted from the queue.
+		$jobs = $this->bizServerJob->listJobs();
+		$this->assertCount( 0, $jobs );
+	}
+
+	/**
+	 * Tear down testdata.
+	 */
+	private function tearDownTestData()
+	{
+		// Clear the job queue to avoid any bad aside effects on successor tests.
+		$this->deletePendingJobs();
 	}
 }

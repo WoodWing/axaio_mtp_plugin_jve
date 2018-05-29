@@ -1582,16 +1582,24 @@ class WW_Utils_TestSuite
 	{
 		$result = true;
 		try {
-			require_once 'Zend/Http/Client.php';
-			$url = LOCALURL_ROOT.INETROOT.'/jobindex.php';
-			$client = new Zend_Http_Client();
-			$client->setUri( $url );
-			$client->setParameterGet( 'createrecurringjob', $serverJobName );
-			$client->setConfig( array( 'timeout' => 5 ) );
-			$response = $client->request( Zend_Http_Client::GET );
-
-			if( !$response->isSuccessful() ) {
-				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$response->getHeadersAsString( true, '<br/>' ) );
+			$client = new Zend\Http\Client();
+			$client->setUri( LOCALURL_ROOT.INETROOT.'/jobindex.php' );
+			$client->setMethod( Zend\Http\Request::METHOD_GET );
+			$client->setParameterGet( array( 'createrecurringjob' => $serverJobName) );
+			$client->setOptions(
+				array(
+					'timeout' => null, // trick to allow overruling CURLOPT_TIMEOUT / CURLOPT_CONNECTTIMEOUT
+					'adapter' => 'Zend\Http\Client\Adapter\Curl',
+					'curloptions' => array(
+						CURLOPT_CONNECTTIMEOUT => 5,
+						CURLOPT_TIMEOUT => 10
+					)
+				)
+			);
+			$client->send();
+			$response = $client->getResponse();
+			if( !$response->isSuccess() ) {
+				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$response->getReasonPhrase(). '<br/>' );
 				$result = false;
 			}
 		} catch ( Zend_Http_Client_Exception $e ) {
@@ -1614,25 +1622,61 @@ class WW_Utils_TestSuite
 	{
 		$result = true;
 		try {
-			require_once 'Zend/Http/Client.php';
-			$url = LOCALURL_ROOT.INETROOT.'/jobindex.php';
-			$client = new Zend_Http_Client();
-			$client->setUri( $url );
-			$client->setParameterGet( 'maxexectime', $maxExecTime );
-			$client->setParameterGet( 'maxjobprocesses', $maxJobProcesses );
-			$client->setConfig( array( 'timeout' => $maxExecTime + 30 ) ); // before breaking connection, let's give the job processor 30s more to complete
-			$response = $client->request( Zend_Http_Client::GET );
+			// For zendframework v2.5.3: Make sure that the Execution timeout ( CURLOPT_TIMEOUT is
+			// set in the 'curloptions' key ). If we would simply call $client->setOptions(
+			// 'timeout' => $operationTimeout ) the Curl Adapter would apply the same value for
+			// 'CURLOPT_TIMEOUT' and 'CURLOPT_CONNECTTIMEOUT' which is not wanted.
 
-			if( !$response->isSuccessful() ) {
-				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$response->getHeadersAsString( true, '<br/>' ) );
+			$client = new Zend\Http\Client();
+			$client->setUri( LOCALURL_ROOT.INETROOT.'/jobindex.php' );
+			$client->setMethod( Zend\Http\Request::METHOD_GET );
+			$client->setParameterGet( array( 'maxexectime' => $maxExecTime ) );
+			$client->setParameterGet( array( 'maxjobprocesses' => $maxJobProcesses ) );
+			$client->setOptions(
+				array(
+					'timeout' => null, // trick to allow overruling CURLOPT_TIMEOUT / CURLOPT_CONNECTTIMEOUT
+					'adapter' => 'Zend\Http\Client\Adapter\Curl',
+					'curloptions' => array(
+						CURLOPT_CONNECTTIMEOUT => 5,
+						CURLOPT_TIMEOUT => $maxExecTime
+					)
+				)
+			);
+			$client->send();
+			$response = $client->getResponse();
+			if( !$response->isSuccess() ) {
+				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$response->getReasonPhrase(). '<br/>' );
 				$result = false;
 			}
-		} catch ( Zend_Http_Client_Exception $e ) {
+		} catch( Zend_Http_Client_Exception $e ) {
 			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$e->getMessage() );
 			$result = false;
 		}
 
-		sleep( 10 ); // To make sure that the server job is really ended.
 		return $result;
 	}
+
+	/**
+	 * Empty the Enterprise Server jobs in the job queue created by a test.
+	 *
+	 * In case of error in the BuildTest, the server jobs cannot be processed,
+	 * they are left in the queue. This function clears all the jobs in the queue
+	 * to make sure that the next run of the test, it starts with a cleared queue.
+	 *
+	 * This function can be called before and after the test.
+	 * @since 10.1.8
+	 */
+	public function emptyServerJobsQueue()
+	{
+		require_once BASEDIR . '/server/bizclasses/BizServerJob.class.php';
+		// Clear all the jobs created in the job queue.
+		$bizServerJob = new BizServerJob;
+		$jobs = $bizServerJob->listJobs();
+		if ( count( $jobs ) > 0 ) {
+			foreach( array_keys( $jobs ) as $jobId ) {
+				$bizServerJob->deleteJob( $jobId );
+			}
+		}
+	}
+
 }
