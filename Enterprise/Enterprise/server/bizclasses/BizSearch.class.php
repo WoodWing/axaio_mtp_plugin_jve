@@ -568,7 +568,7 @@ class BizSearch
 	/**
 	 * Flag all objects as not indexed in the database.
 	 *
-	 * @since 10.4.1
+	 * @since 10.1.8, 10.4.1
 	 * @param string[] $areas
 	 */
 	private static function setUnindexFlagOnAllObjects( array $areas)
