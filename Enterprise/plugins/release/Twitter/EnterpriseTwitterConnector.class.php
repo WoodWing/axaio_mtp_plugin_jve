@@ -282,7 +282,7 @@ class EnterpriseTwitterConnector
             LogHandler::Log('Twitter', 'DEBUG', 'Zend_Version ' . Zend_Version::VERSION);
             
             //Check if we have to use the twitter library in the connector
-            if (Zend_Version::compareVersion('1.12.3') == 1) {
+            if (Zend_Version::compareVersion('1.12.16') == 0) {
                 LogHandler::Log('Twitter', 'DEBUG', 'Use twitter_lib of plugin');
                 $orgPath = ini_get('include_path');
                 ini_set('include_path', dirname(__FILE__) . '/ZendFramework/twitter_lib' . PATH_SEPARATOR . $orgPath);           
@@ -290,6 +290,17 @@ class EnterpriseTwitterConnector
 
 			$included = true;
 		}
+	}
+
+	/**
+	 * Returns the maximum length of a Twitter message (tweet).
+	 *
+	 * @since 10.1.8
+	 * @return int
+	 */
+	static public function getMaxMessageLength()
+	{
+		return 280;
 	}
 
 }
