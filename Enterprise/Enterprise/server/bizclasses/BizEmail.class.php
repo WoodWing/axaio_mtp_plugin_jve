@@ -518,7 +518,7 @@ class BizEmail
 		return $emailTxt;
 	}
 
-    private function resolveModifierFromObject( $object )
+    private static function resolveModifierFromObject( $object )
     {
         require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
         $modifier = '';
@@ -601,14 +601,14 @@ class BizEmail
 
 	/**
 	 * Sends separate emails with attachments to passed list of email addresses.
-	 * @param array 	$emailTo List with email address to send the email to.
-	 * @param string 	$emailTxt text for email body.
-	 * @param string 	$subject subject of the email.
-	 * @param array 	$sender From address
-	 * @param array 	$attachments list of files to be added as attachment.
+	 * @param array $emailTo List with email address to send the email to.
+	 * @param string   $emailTxt text for email body.
+	 * @param string   $subject subject of the email.
+	 * @param array $sender From address
+	 * @param array|null $attachments List of files to be added as attachment. Set to null when email needs no attachment.
 	 * @return boolean	True in the case of success. Success means all emails are send.
 	 */
-	public static function sendMail( $emailTo, $emailTxt, $subject, $sender, $attachments )
+	public static function sendMail( $emailTo, $emailTxt, $subject, $sender, $attachments=null )
 	{
 		$transport = self::setupEmailTransport();
 		$result = true;
@@ -621,14 +621,17 @@ class BizEmail
 				$message->setSubject( $subject );
 
 				$body = new Mime\Message();
-				foreach( $attachments as $attachment ) {
-					$part = new Mime\Part();
-					$part->setContent( $attachment['content'] );
-					$part->setType( $attachment['format'] );
-					$part->setDisposition( Mime\Mime::DISPOSITION_ATTACHMENT );
-					$part->setEncoding( Mime\Mime::ENCODING_BASE64 );
-					$part->setFileName( $attachment['filename'] );
-					$body->addPart( $part );
+
+				if( !is_null( $attachments )) {
+					if( $attachments ) foreach( $attachments as $attachment ) {
+						$part = new Mime\Part();
+						$part->setContent( $attachment['content'] );
+						$part->setType( $attachment['format'] );
+						$part->setDisposition( Mime\Mime::DISPOSITION_ATTACHMENT );
+						$part->setEncoding( Mime\Mime::ENCODING_BASE64 );
+						$part->setFileName( $attachment['filename'] );
+						$body->addPart( $part );
+					}
 				}
 				$html = new Mime\Part();
 				$html->setContent( $emailTxt );
@@ -636,7 +639,9 @@ class BizEmail
 				$body->addPart( $html );
 
 				$message->setBody( $body );
-				$message->getHeaders()->get( 'content-type' )->setType( Mime\Mime::MULTIPART_MIXED );
+				if( !is_null( $attachments )) {
+					$message->getHeaders()->get( 'content-type' )->setType( Mime\Mime::MULTIPART_MIXED );
+				}
 				$transport->send( $message );
 
 			} catch( Exception $e ) {
@@ -663,7 +668,7 @@ class BizEmail
 	 * @param array $tos
 	 * @param string $subject
 	 * @param string $content
-	 * @return bool True when email sucessfully sent, False otherwise.
+	 * @return bool True when all email are sucessfully sent, False otherwise.
 	 */
 	public static function sendEmail( $from, $fromFullName, $tos, $subject, $content )
 	{
@@ -673,9 +678,9 @@ class BizEmail
 		}
 		// Setup email transport
 		$transport = self::setupEmailTransport();
-		
+		$result = true;
 		if( $transport ){
-			foreach ($tos as $to => $toFullName ) { 
+			foreach ($tos as $to => $toFullName ) {
 				// Future enhancement: translate per email/user
 				try{
 					$message = new Mail\Message();
@@ -695,10 +700,10 @@ class BizEmail
 
 				} catch( Exception $e ) {
 					LogHandler::Log( __CLASS__, 'ERROR', 'Error sending email to '. $to .', error:'.$e->getMessage() ); // $e->getMessage() is typically empty...
+					$result = false; // Mark as failure as long as there's one email not able to be sent out.
 				}
 			}
-			return true;
 		}
-		return false;
+		return $result;
 	}
 }
