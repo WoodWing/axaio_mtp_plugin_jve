@@ -172,6 +172,8 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	/**
 	 * Deletes any Enterprise Server jobs from the queue to avoid disturbing the tests.
 	 * Those jobs could be still pending from preceding test runs that ended unexpectedly.
+	 *
+	 * @since 10.1.8
 	 */
 	private function deletePendingJobs()
 	{
@@ -185,6 +187,8 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 
 	/**
 	 * Tear down testdata.
+	 *
+	 * @since 10.1.8
 	 */
 	private function tearDownTestData()
 	{
