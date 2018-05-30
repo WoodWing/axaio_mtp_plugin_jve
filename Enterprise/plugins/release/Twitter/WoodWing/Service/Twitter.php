@@ -16,7 +16,7 @@ class WoodWing_Service_Twitter extends Zend_Service_Twitter
 	const API_UPLOAD_URI = 'https://upload.twitter.com/1.1/';
 
 	/**
-	 * 386 is the current limit for a status message, 140 characters are displayed
+	 * 386 is the current limit for a status message, 280 characters are displayed
 	 * initially, with the remainder linked from the web UI or client. The limit is
 	 * applied to a html encoded UTF-8 string (i.e. entities are counted in the limit
 	 * which may appear unusual but is a security measure).
