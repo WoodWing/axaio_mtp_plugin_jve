@@ -46,7 +46,7 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Retrieves an asset.
+	 * Retrieve an asset from Elvis server.
 	 *
 	 * @param string $assetId
 	 * @param bool $checkout

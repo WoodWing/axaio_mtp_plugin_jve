@@ -19,9 +19,9 @@ class MetadataHandler
 	 * Retrieved metadata is translated from Elvis fields to Enterprise fields by using the configured field handlers.
 	 *
 	 * @param Object $entObject
-	 * @param array $elvisMetadata
+	 * @param mixed[] $elvisMetadata
 	 */
-	public function read( Object $entObject, array $elvisMetadata )
+	public function read( Object $entObject, $elvisMetadata )
 	{
 		$entMetaData = $this->composeMetadataObject( $entObject );
 		$this->initFieldHandlers();
@@ -85,9 +85,9 @@ class MetadataHandler
 	 * Metadata is translated from Enterprise fields to Elvis fields by using the configured field handlers.
 	 *
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues
-	 * @param array $elvisMetadata
+	 * @param mixed[] $elvisMetadata
 	 */
-	public function fillElvisMetadata( $entMetadataOrValues, array &$elvisMetadata )
+	public function fillElvisMetadata( $entMetadataOrValues, &$elvisMetadata )
 	{
 		$this->initFieldHandlers();
 
