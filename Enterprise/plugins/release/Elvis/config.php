@@ -245,61 +245,70 @@ if( !defined('ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE' )) {
  * FieldHandler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname 
  */
 
-require_once __DIR__.'/model/fieldHandler/ReadOnlyFieldHandler.class.php';
-require_once __DIR__.'/model/fieldHandler/ReadWriteFieldHandler.class.php';
-require_once __DIR__.'/model/fieldHandler/ResolutionFieldHandler.class.php';
+if( !function_exists( 'Elvis_Config_GetFieldHanders' ) ) {
+	function Elvis_Config_GetFieldHanders()
+	{
+		require_once __DIR__.'/model/fieldHandler/ReadOnlyFieldHandler.class.php';
+		require_once __DIR__.'/model/fieldHandler/ReadWriteFieldHandler.class.php';
+		require_once __DIR__.'/model/fieldHandler/ResolutionFieldHandler.class.php';
 
-$cfgFieldHandlers = array();
+		$cfgFieldHandlers = array();
 
-//Read Write Handlers
-$cfgFieldHandlers['Comment'] =           new ReadWriteFieldHandler("versionDescription", false, "text", "Comment");
-$cfgFieldHandlers['Rating'] =            new ReadWriteFieldHandler("rating", false, "number", "Rating");
-$cfgFieldHandlers['Copyright'] =         new ReadWriteFieldHandler("copyright", false, "text", "Copyright");
-$cfgFieldHandlers['CopyrightURL'] =      new ReadWriteFieldHandler("licensorWebsite", false, "text", "CopyrightURL");
-$cfgFieldHandlers['Author'] =            new ReadWriteFieldHandler("creatorName", false, "text", "Author");
-$cfgFieldHandlers['Credit'] =            new ReadWriteFieldHandler("credit", false, "text", "Credit");
-$cfgFieldHandlers['Source'] =            new ReadWriteFieldHandler("source", false, "text", "Source");
-$cfgFieldHandlers['Description'] =       new ReadWriteFieldHandler("description", false, "text",  "Description");
-$cfgFieldHandlers['DescriptionAuthor'] = new ReadWriteFieldHandler("captionWriter", false, "text", "DescriptionAuthor");
+		// Read Write Handlers
+		$cfgFieldHandlers['Comment'] = new ReadWriteFieldHandler( "versionDescription", false, "text", "Comment" );
+		$cfgFieldHandlers['Rating'] = new ReadWriteFieldHandler( "rating", false, "number", "Rating" );
+		$cfgFieldHandlers['Copyright'] = new ReadWriteFieldHandler( "copyright", false, "text", "Copyright" );
+		$cfgFieldHandlers['CopyrightURL'] = new ReadWriteFieldHandler( "licensorWebsite", false, "text", "CopyrightURL" );
+		$cfgFieldHandlers['Author'] = new ReadWriteFieldHandler( "creatorName", false, "text", "Author" );
+		$cfgFieldHandlers['Credit'] = new ReadWriteFieldHandler( "credit", false, "text", "Credit" );
+		$cfgFieldHandlers['Source'] = new ReadWriteFieldHandler( "source", false, "text", "Source" );
+		$cfgFieldHandlers['Description'] = new ReadWriteFieldHandler( "description", false, "text", "Description" );
+		$cfgFieldHandlers['DescriptionAuthor'] = new ReadWriteFieldHandler( "captionWriter", false, "text", "DescriptionAuthor" );
 
-//Read only Handlers
-$cfgFieldHandlers['AspectRatio'] = new ReadOnlyFieldHandler("aspectRatio", false, "decimal", "AspectRatio");
-$cfgFieldHandlers['Channels'] =    new ReadOnlyFieldHandler("audioChannels", false, "text", "Channels");
-$cfgFieldHandlers['ColorSpace'] =  new ReadOnlyFieldHandler("colorSpace", false, "text", "ColorSpace");
-$cfgFieldHandlers['Dpi'] =         new ResolutionFieldHandler("resolutionX", false, "number", "Dpi");
-$cfgFieldHandlers['Encoding'] =    new ReadOnlyFieldHandler("videoCodec", false, "text", "Encoding");
-$cfgFieldHandlers['Width'] =       new ReadOnlyFieldHandler("width", false, "number", "Width");
-$cfgFieldHandlers['Height'] =      new ReadOnlyFieldHandler("height", false, "number", "Height");
-$cfgFieldHandlers['Orientation'] = new ReadOnlyFieldHandler("orientation", false, "number", "Orientation");
-$cfgFieldHandlers['LengthChars'] = new ReadOnlyFieldHandler("numberOfCharacters", false, "number", "LengthChars");
-$cfgFieldHandlers['LengthLines'] = new ReadOnlyFieldHandler("numberOfLines", false, "number", "LengthLines");
-$cfgFieldHandlers['LengthParas'] = new ReadOnlyFieldHandler("numberOfParagraphs", false, "number", "LengthParas");
-$cfgFieldHandlers['LengthWords'] = new ReadOnlyFieldHandler("wordCount", false, "number", "LengthWords");
+		// Read only Handlers
+		$cfgFieldHandlers['AspectRatio'] = new ReadOnlyFieldHandler( "aspectRatio", false, "decimal", "AspectRatio" );
+		$cfgFieldHandlers['Channels'] = new ReadOnlyFieldHandler( "audioChannels", false, "text", "Channels" );
+		$cfgFieldHandlers['ColorSpace'] = new ReadOnlyFieldHandler( "colorSpace", false, "text", "ColorSpace" );
+		$cfgFieldHandlers['Dpi'] = new ResolutionFieldHandler( "resolutionX", false, "number", "Dpi" );
+		$cfgFieldHandlers['Encoding'] = new ReadOnlyFieldHandler( "videoCodec", false, "text", "Encoding" );
+		$cfgFieldHandlers['Width'] = new ReadOnlyFieldHandler( "width", false, "number", "Width" );
+		$cfgFieldHandlers['Height'] = new ReadOnlyFieldHandler( "height", false, "number", "Height" );
+		$cfgFieldHandlers['Orientation'] = new ReadOnlyFieldHandler( "orientation", false, "number", "Orientation" );
+		$cfgFieldHandlers['LengthChars'] = new ReadOnlyFieldHandler( "numberOfCharacters", false, "number", "LengthChars" );
+		$cfgFieldHandlers['LengthLines'] = new ReadOnlyFieldHandler( "numberOfLines", false, "number", "LengthLines" );
+		$cfgFieldHandlers['LengthParas'] = new ReadOnlyFieldHandler( "numberOfParagraphs", false, "number", "LengthParas" );
+		$cfgFieldHandlers['LengthWords'] = new ReadOnlyFieldHandler( "wordCount", false, "number", "LengthWords" );
 
-// Custom Enterprise field mapped to custom Elvis field - sample mappings
-/*
-$cfgFieldHandlers['C_BooleanTest'] = new ReadWriteFieldHandler("cf_BooleanTest", false, "boolean", "C_BooleanTest");
-$cfgFieldHandlers['C_DateTest'] = new ReadWriteFieldHandler("cf_DateTest", false, "datetime", "C_DateTest");
-$cfgFieldHandlers['C_DateTimeTest'] = new ReadWriteFieldHandler("cf_DateTimeTest", false, "datetime", "C_DateTimeTest");
-$cfgFieldHandlers['C_DoubleTest'] = new ReadWriteFieldHandler("cf_DoubleTest", false, "decimal", "C_DoubleTest");
-$cfgFieldHandlers['C_IntegerTest'] = new ReadWriteFieldHandler("cf_IntegerTest", false, "number", "C_IntegerTest");
-$cfgFieldHandlers['C_ListTest'] = new ReadWriteFieldHandler("cf_ListTest", false, "text", "C_ListTest");
-$cfgFieldHandlers['C_MultiLineTest'] = new ReadWriteFieldHandler("cf_MultiLineTest", false, "text", "C_MultiLineTest");
-$cfgFieldHandlers['C_MultiListTestElvisMultiField'] = new ReadWriteFieldHandler("cf_MultiListTestElvisMultiField", true, "text", "C_MultiListTestElvisMultiField");
-$cfgFieldHandlers['C_MultiStringTestElvisMultiField'] = new ReadWriteFieldHandler("cf_MultiStringTestElvisMultiField", true, "text", "C_MultiStringTestElvisMultiField");
-$cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest");
-// In case the mapping is only applicable for a specific brand, the brand Id ( e.g. 1) can be added.
-$cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest", 1 );
-*/
+		// Custom Enterprise field mapped to custom Elvis field - sample mappings
+		/*
+		$cfgFieldHandlers['C_BooleanTest'] = new ReadWriteFieldHandler("cf_BooleanTest", false, "boolean", "C_BooleanTest");
+		$cfgFieldHandlers['C_DateTest'] = new ReadWriteFieldHandler("cf_DateTest", false, "datetime", "C_DateTest");
+		$cfgFieldHandlers['C_DateTimeTest'] = new ReadWriteFieldHandler("cf_DateTimeTest", false, "datetime", "C_DateTimeTest");
+		$cfgFieldHandlers['C_DoubleTest'] = new ReadWriteFieldHandler("cf_DoubleTest", false, "decimal", "C_DoubleTest");
+		$cfgFieldHandlers['C_IntegerTest'] = new ReadWriteFieldHandler("cf_IntegerTest", false, "number", "C_IntegerTest");
+		$cfgFieldHandlers['C_ListTest'] = new ReadWriteFieldHandler("cf_ListTest", false, "text", "C_ListTest");
+		$cfgFieldHandlers['C_MultiLineTest'] = new ReadWriteFieldHandler("cf_MultiLineTest", false, "text", "C_MultiLineTest");
+		$cfgFieldHandlers['C_MultiListTestElvisMultiField'] = new ReadWriteFieldHandler("cf_MultiListTestElvisMultiField", true, "text", "C_MultiListTestElvisMultiField");
+		$cfgFieldHandlers['C_MultiStringTestElvisMultiField'] = new ReadWriteFieldHandler("cf_MultiStringTestElvisMultiField", true, "text", "C_MultiStringTestElvisMultiField");
+		$cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest");
+		// In case the mapping is only applicable for a specific brand, the brand Id ( e.g. 1) can be added.
+		$cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest", 1 );
+		*/
 
-//LogHandler::logPhpObject($cfgFieldHandlers);
-
-if( !defined('ELVIS_FIELD_HANDLERS') ) {
-	define( 'ELVIS_FIELD_HANDLERS', serialize( $cfgFieldHandlers ) );
+		return $cfgFieldHandlers;
+	}
+}
+if( defined( 'ELVIS_FIELD_HANDLERS' ) ) { // Warn incomplete migrations.
+	LogHandler::Log( 'EVLIS', 'ERROR', 'The ELVIS_FIELD_HANDLERS option is no longer supported. '.
+		'To configure field handlers in your config_overrule.php file, please define a function named '.
+		'Elvis_Config_GetFieldHanders. In the config/plugins/Elvis/config.php file there is the default implementation '.
+		'of this function which could be used as an example. And, please remove your ELVIS_FIELD_HANDLERS option definition. '
+);
 }
 
-/**
- * Constants, should never be changed!
+/* --------------------------------------------------------------------------------
+ * Constants. Please do NOT make changes below!
+ * --------------------------------------------------------------------------------
  */
 define('ELVIS_CONTENTSOURCEID', 'ELVIS');
 define('ELVIS_CONTENTSOURCEPREFIX', '_ELVIS_');

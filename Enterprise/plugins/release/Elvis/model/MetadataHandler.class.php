@@ -182,7 +182,7 @@ class MetadataHandler
 		//FieldHandler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname
 
 		//Get configurable field handlers from config
-		$this->fieldHandlers = unserialize( ELVIS_FIELD_HANDLERS );
+		$this->fieldHandlers = Elvis_Config_GetFieldHanders();
 
 		//Special FieldHandlers
 		$this->fieldHandlers['Keywords'] = new KeywordsFieldHandler();               //"tags", true, "text", "Keywords"
