@@ -2130,6 +2130,10 @@ class WW_Utils_TestSuite
 	 */
 	public function callCreateServerJob( TestCase $testCase, $serverJobName )
 	{
+		// For zendframework v2.5.3: Make sure that the Execution timeout ( CURLOPT_TIMEOUT is
+		// set in the 'curloptions' key ). If we would simply call $client->setOptions(
+		// 'timeout' => $operationTimeout ) the Curl Adapter would apply the same value for
+		// 'CURLOPT_TIMEOUT' and 'CURLOPT_CONNECTTIMEOUT' which is not wanted.
 		$result = true;
 		try {
 			$client = new Zend\Http\Client();
@@ -2152,7 +2156,7 @@ class WW_Utils_TestSuite
 				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$response->getReasonPhrase(). '<br/>' );
 				$result = false;
 			}
-		} catch ( Zend_Http_Client_Exception $e ) {
+		} catch ( Exception $e ) {
 			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php to create a new Server Job: '.$e->getMessage() );
 			$result = false;
 		}
@@ -2180,15 +2184,14 @@ class WW_Utils_TestSuite
 			$client = new Zend\Http\Client();
 			$client->setUri( LOCALURL_ROOT.INETROOT.'/jobindex.php' );
 			$client->setMethod( Zend\Http\Request::METHOD_GET );
-			$client->setParameterGet( array( 'maxexectime' => $maxExecTime ) );
-			$client->setParameterGet( array( 'maxjobprocesses' => $maxJobProcesses ) );
+			$client->setParameterGet( array( 'maxjobprocesses' => $maxJobProcesses, 'maxexectime' => $maxExecTime ) );
 			$client->setOptions(
 				array(
 					'timeout' => null, // trick to allow overruling CURLOPT_TIMEOUT / CURLOPT_CONNECTTIMEOUT
 					'adapter' => 'Zend\Http\Client\Adapter\Curl',
 					'curloptions' => array(
 						CURLOPT_CONNECTTIMEOUT => 5,
-						CURLOPT_TIMEOUT => $maxExecTime
+						CURLOPT_TIMEOUT => $maxExecTime + 2 // Add two seconds to allow the jobindex to finish before curl finishes.
 					)
 				)
 			);
@@ -2198,7 +2201,7 @@ class WW_Utils_TestSuite
 				$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$response->getReasonPhrase(). '<br/>' );
 				$result = false;
 			}
-		} catch( Zend_Http_Client_Exception $e ) {
+		} catch( Exception $e ) {
 			$testCase->setResult( 'ERROR', 'Failed calling jobindex.php: '.$e->getMessage() );
 			$result = false;
 		}
@@ -2220,7 +2223,7 @@ class WW_Utils_TestSuite
 	{
 		require_once BASEDIR . '/server/bizclasses/BizServerJob.class.php';
 		// Clear all the jobs created in the job queue.
-		$bizServerJob = new BizServerJob;
+		$bizServerJob = new BizServerJob();
 		$jobs = $bizServerJob->listJobs();
 		if ( count( $jobs ) > 0 ) {
 			foreach( array_keys( $jobs ) as $jobId ) {
