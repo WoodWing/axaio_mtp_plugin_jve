@@ -120,6 +120,7 @@ class WwcxToWcmlConversion_WflGetObjects extends WflGetObjects_EnterpriseConnect
 	private function callInDesignServerToConvertArticle( $wwcxIdsPath, $wcmlIdsPath )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
 		try {
 			// Run javascript.js at InDesign Server, to convert the wwcx file to wcml
 			BizInDesignServerJobs::createAndRunJob(
