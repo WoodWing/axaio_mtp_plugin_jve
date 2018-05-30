@@ -31,71 +31,44 @@ class ElvisUtils {
 
 	/**
 	 * Extracts Elvis asset id from alien id provided by enterprise
-	 * @param $alienId - id of enterprise object, including _<ContentSourceId>_ prefix
+	 *
+	 * @since 10.5.0 Renamed function from getElvisId into getAssetIdFromAlienId
+	 * @param string $alienId Enterprise alien object id (including _<ContentSourceId>_ prefix)
 	 * @return string Elvis asset id
 	 */
-	public static function getElvisId($alienId)
+	public static function getAssetIdFromAlienId( $alienId )
 	{
-		/**
-		 * _HACK__HACK_:
-		 * We use str_replace, because sometimes Enterprise prefixes the $alienId with two prefixes.
-		 * Bad example: _ELVIS__ELVIS_<ASSETID>
-		 * How it should be: _ELVIS_<ASSETID>
-		 * /_HACK__HACK__ 
-		 */
+		// Note that str_replace() is used because sometimes Enterprise prefixes the $alienId with two prefixes.
+		// Bad example: _ELVIS__ELVIS_<ASSETID>
+		// How it should be: _ELVIS_<ASSETID>
 		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
-		return str_replace(ELVIS_CONTENTSOURCEPREFIX, "", $alienId);
-	}
-	
-	public static function isElvisId($alienId)
-	{
-		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
-		return strpos($alienId, ELVIS_CONTENTSOURCEPREFIX) !== false;
-	}
-	
-	public static function getAlienId($elvisId)
-	{
-		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
-		return ELVIS_CONTENTSOURCEPREFIX . $elvisId;
+		return str_replace( ELVIS_CONTENTSOURCEPREFIX, '', $alienId );
 	}
 
 	/**
-	 * Returns hit from server, base on provided Elvis id
-	 * @param $elvisId - for hit to be returned
-	 * @param $lock - true if we have lock on Elvis server
-	 * @return ElvisEntHit - hit from Elvis server
-	 * @throws BizException - thrown if more then on hit found for specified Elvis ID
+	 * Tells whether a given Enterprise alien object id belongs to the Elvis content source.
+	 *
+	 * @since 10.5.0 Renamed function from isElvisId into isElvisAssetId
+	 * @param string $alienId
+	 * @return bool
 	 */
-	public static function getHit($elvisId, $lock = false)
+	public static function isElvisAssetId( $alienId )
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
+		return strpos( $alienId, ELVIS_CONTENTSOURCEPREFIX ) !== false;
+	}
 
-		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
-		require_once __DIR__.'/../model/MetadataHandler.class.php';
-		require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
-		
-		$service = new ElvisContentSourceService();
-
-		$metadataHandler = new MetadataHandler();
-		$metadataToReturn = $metadataHandler->getMetadataToReturn();
-		$metadataToReturn[] = 'filename'; // needed to determine mimetype on receive thumb/preview/origin
-		$metadataToReturn[] = 'sceId';
-		$metadataToReturn[] = 'sceSystemId';
-		$metadataToReturn[] = 'resolutionUnit'; // required to convert Elvis resolutionX to Enterprise Dpi
-
-		try {
-			$hit = $service->retrieve($elvisId, $lock, $metadataToReturn);
-		} catch (ElvisCSNotFoundException $e) {
-			if ($e instanceof ElvisCSNotFoundException) {
-				// notify clients that related object not found on Elvis side
-				throw new BizException('ERR_NOTFOUND', 'Server', 'Elvis assetId: ' . $elvisId . ', ' . $e->getMessage());
-			}
-
-			// Turn any uncatched ElvisCSException into a BizException
-			$detail = 'Elvis assetId: ' . $elvisId;
-			throw new BizException(null, 'Server', $detail, $e->getMessage());
-		}
-			
-		return $hit;
+	/**
+	 * Compose an Enterprise alien object id for a given Elvis asset id.
+	 *
+	 * @since 10.5.0 Renamed function from getAlienId into getAlienIdFromAssetId
+	 * @param string $assetId
+	 * @return string Alien id
+	 */
+	public static function getAlienIdFromAssetId( $assetId )
+	{
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
+		return ELVIS_CONTENTSOURCEPREFIX.$assetId;
 	}
 
 	/**
@@ -274,7 +247,7 @@ class ElvisUtils {
 	public static function removeGhostShadowObject($elvisId)
 	{
 		// construct alienId
-		$alienId = self::getAlienId($elvisId);
+		$alienId = self::getAlienIdFromAssetId($elvisId);
 		
 		// ensure we invoke BizDeletedObject::deleteObject once (to avoid recursion)
 		if (!in_array($alienId, self::$toDelete)) {

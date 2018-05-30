@@ -23,7 +23,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
-		if( !is_null($req->MetaData->BasicMetaData->ID) && ElvisUtils::isElvisId($req->MetaData->BasicMetaData->ID) ) {
+		if( !is_null($req->MetaData->BasicMetaData->ID) && ElvisUtils::isElvisAssetId($req->MetaData->BasicMetaData->ID) ) {
 			// Hack: WflSetObjectPropertiesService incorrectly sets MetaData->BasicMetaData->ID to $req->ID 
 			// even if it's a shadow object. This is wrong for shadow objects and leads to all kind of issues in the Enterprise core.
 			$req->MetaData->BasicMetaData->ID = null;

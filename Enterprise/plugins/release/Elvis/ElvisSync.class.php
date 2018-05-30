@@ -413,7 +413,7 @@ class ElvisSync
 		}
 
 		$checkedOutBy = self::getUsername( $update->metadata['checkedOutBy'] );
-		$alienId = ElvisUtils::getAlienId( $update->assetId );
+		$alienId = ElvisUtils::getAlienIdFromAssetId( $update->assetId );
 		$username = self::getUsername( $update->username );
 
 		$requestInfo = array();
@@ -456,7 +456,7 @@ class ElvisSync
 		require_once __DIR__.'/model/MetadataHandler.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
-		$alienId = ElvisUtils::getAlienId( $update->assetId );
+		$alienId = ElvisUtils::getAlienIdFromAssetId( $update->assetId );
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'UpdateObjectProperties - for: '.$alienId );
 		try {
 			$entMetadata = new MetaData();
@@ -483,7 +483,7 @@ class ElvisSync
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizDeletedObject.class.php';
 
-		$alienId = ElvisUtils::getAlienId( $update->assetId );
+		$alienId = ElvisUtils::getAlienIdFromAssetId( $update->assetId );
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'DeletingObject: '.$alienId );
 
 		try {

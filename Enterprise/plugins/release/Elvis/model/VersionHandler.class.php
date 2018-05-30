@@ -17,7 +17,7 @@ class VersionHandler
 		require_once __DIR__.'/../util/ElvisUtils.class.php';
 		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
-		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$service = new ElvisContentSourceService();
 		$hits = $service->listVersions( $elvisId ); // get asset versions
 		$versions = array();
@@ -41,7 +41,7 @@ class VersionHandler
 		require_once __DIR__.'/../util/ElvisUtils.class.php';
 		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
-		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$versionNumber = ElvisUtils::getElvisVersionNumber( $version );
 		$service = new ElvisContentSourceService();
 		$hit = $service->retrieveVersion( $elvisId, $versionNumber );
@@ -60,7 +60,7 @@ class VersionHandler
 		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
 		$service = new ElvisContentSourceService();
-		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$elvisVersion = ElvisUtils::getElvisVersionNumber( $version );
 		$service->promoteVersion( $elvisId, $elvisVersion );
 	}

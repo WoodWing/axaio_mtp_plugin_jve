@@ -50,27 +50,34 @@ class ElvisContentSourceService
 	 *
 	 * @param string $assetId
 	 * @param bool $checkout
-	 * @param string[] $metadataToReturn
 	 * @return ElvisEntHit
 	 * @throws BizException
 	 */
-	public function retrieve( $assetId, $checkout, $metadataToReturn )
+	public function retrieve( $assetId, $checkout )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::retrieve - $assetId:'.$assetId );
-		ElvisAMFClient::registerClass( ElvisEntHit::getName() );
-		ElvisAMFClient::registerClass( ElvisFormattedValue::getName() );
-		ElvisAMFClient::registerClass( BasicMap::getName() );
+		require_once __DIR__.'/../model/MetadataHandler.class.php';
 
-		$params = array( $assetId, $checkout, $metadataToReturn );
-		$resp = null;
+		$metadataHandler = new MetadataHandler();
+		$metadataToReturn = $metadataHandler->getMetadataToReturn();
+		$metadataToReturn[] = 'filename'; // needed to determine mimetype on receive thumb/preview/origin
+		$metadataToReturn[] = 'sceId';
+		$metadataToReturn[] = 'sceSystemId';
+		$metadataToReturn[] = 'resolutionUnit'; // required to convert Elvis resolutionX to Enterprise Dpi
 
-		try {
-			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieve', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		if( $checkout ) {
+			$client->checkout( $assetId );
 		}
+		$rawHit = $client->retrieve( $assetId, $metadataToReturn );
 
-		return $resp;
+		/** @var ElvisEntHit $hit */
+		$hit = WW_Utils_PHPClass::typeCast( $rawHit, 'ElvisEntHit' );
+		$hit->metadata = (array)$hit->metadata;
+		$hit->metadata['id'] = $assetId;
+		$hit->metadata['assetFileModified'] = $hit->metadata['assetFileModified']->value / 1000; // msec to sec
+		$hit->metadata['assetCreated'] = $hit->metadata['assetCreated']->value / 1000; // msec to sec
+		$hit->metadata['fileSize'] = $hit->metadata['fileSize']->value;
+		return $hit;
 	}
 
 	/**

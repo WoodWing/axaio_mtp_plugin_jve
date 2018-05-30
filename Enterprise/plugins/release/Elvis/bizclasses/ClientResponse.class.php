@@ -7,19 +7,29 @@
  */
 class Elvis_BizClasses_ClientResponse
 {
+	/** @var int */
 	private $httpStatusCode;
+
+	/** @var bool|string|stdClass */
 	private $body;
 
 	/**
 	 * Response constructor.
 	 *
 	 * @param integer $httpStatusCode
-	 * @param string $body
+	 * @param bool|string|stdClass $body
+	 * @param bool $expectJson
 	 */
-	public function __construct( $httpStatusCode, $body )
+	public function __construct( $httpStatusCode, $body, $expectJson )
 	{
 		$this->httpStatusCode = intval( $httpStatusCode );
 		$this->body = $body;
+		if( $expectJson && $this->body ) {
+			$decoded = json_decode( $this->body );
+			if( $decoded && isset( $decoded->errorcode ) ) {
+				$this->httpStatusCode = intval( $decoded->errorcode );
+			}
+		}
 	}
 
 	/**

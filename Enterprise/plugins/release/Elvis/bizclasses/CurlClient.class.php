@@ -12,22 +12,35 @@ require_once __DIR__.'/../config.php';
 
 class Elvis_BizClasses_CurlClient
 {
+	/** @var array */
+	private $curlOptions;
+
+	/**
+	 * @param array $curlOptions cURL options to override.
+	 */
+	public function setCurlOptions( $curlOptions )
+	{
+		$this->curlOptions = $curlOptions;
+	}
 	/**
 	 * Execute service request against Elvis server.
 	 *
-	 * @param string $shortUserName
-	 * @param string $service
-	 * @param array $curlOptions cURL options to override.
+	 * @param Elvis_BizClasses_ClientRequest $request
 	 * @return Elvis_BizClasses_ClientResponse
 	 * @throws Elvis_BizClasses_Exception
 	 */
-	public static function request( $shortUserName, $service, $curlOptions )
+	public function execute( $request )
 	{
-		$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::getAccessToken( $shortUserName ) );
-		$response = self::plainRequest( $service, $curlOptions );
+		$curlOptions = $this->curlOptions;
+		$userShortName = $request->getUserShortName();
+		if( !$userShortName ) {
+			throw new Elvis_BizClasses_Exception( 'No user name provided for request.' );
+		}
+		$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::getAccessToken( $userShortName ) );
+		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isAuthenticationError() ) {
-			$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::requestAndSaveAccessToken( $shortUserName ) );
-			$response = self::plainRequest( $service, $curlOptions );
+			$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::requestAndSaveAccessToken( $userShortName ) );
+			$response = self::plainRequest( $request, $curlOptions );
 		}
 		return $response;
 	}
@@ -54,27 +67,28 @@ class Elvis_BizClasses_CurlClient
 	/**
 	 * Execute service request against Elvis server.
 	 *
-	 * @param string $service
+	 * @param Elvis_BizClasses_ClientRequest $request
 	 * @param array $curlOptions cURL options to override.
 	 * @return Elvis_BizClasses_ClientResponse
 	 * @throws Elvis_BizClasses_Exception
 	 */
-	private static function plainRequest( $service, $curlOptions )
+	private static function plainRequest( $request, $curlOptions )
 	{
 		$responseHeaders = [];
 		$ch = curl_init();
 		if( !$ch ) {
 			throw new Elvis_BizClasses_Exception( 'Failed to create a CURL handle' );
 		}
-		curl_setopt_array( $ch, self::getCurlOptions( $service, $curlOptions, $responseHeaders ) );
+		curl_setopt_array( $ch, self::getCurlOptions( $request, $curlOptions, $responseHeaders ) );
 		$startTime = microtime( true );
 		$body = curl_exec( $ch );
 		$duration = microtime( true ) - $startTime;
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-		$response = new Elvis_BizClasses_ClientResponse( $httpStatusCode, $body );
+		$response = new Elvis_BizClasses_ClientResponse( $httpStatusCode, $body, $request->getExpectJson() );
 
 		if( LogHandler::debugMode() ) {
 			// Requires curl_setopt($ch, CURLINFO_HEADER_OUT, 1)
+			$service = $request->composeServicePath(); // relative path, no query params
 			$requestHeaders = curl_getinfo( $ch, CURLINFO_HEADER_OUT );
 			$logService = 'Elvis_'.str_replace( '/', '_', $service );
 			LogHandler::logService( $logService, $requestHeaders, true, 'JSON' );
@@ -89,14 +103,14 @@ class Elvis_BizClasses_CurlClient
 	/**
 	 * Get all request cURL options.
 	 *
-	 * @param string $service Elvis service to request.
+	 * @param Elvis_BizClasses_ClientRequest $request
 	 * @param array $curlOptions existing cURL options which will be added.
 	 * @param array $headers array to save response headers in.
 	 * @return array request cURL options.
 	 */
-	private static function getCurlOptions( $service, $curlOptions, &$headers )
+	private static function getCurlOptions( $request, $curlOptions, &$headers )
 	{
-		$url = ELVIS_URL.'/'.$service;
+		$url = ELVIS_URL.'/'.$request->composeServiceUrl();
 		$defaultCurlOptions = array(
 			CURLOPT_HEADER => false, // CURLOPT_HEADERFUNCTION is used instead
 			CURLOPT_CONNECTTIMEOUT => ELVIS_CONNECTION_TIMEOUT,
@@ -106,6 +120,10 @@ class Elvis_BizClasses_CurlClient
 		);
 		// Enable this to retrieve the HTTP headers sent out (after calling curl_exec)
 		$defaultCurlOptions[ CURLINFO_HEADER_OUT ] = 1;
+
+		if( $request->getExpectJson() ) {
+			$defaultCurlOptions[ CURLOPT_RETURNTRANSFER ] = 1;
+		}
 
 		// Hidden options, in case customer wants to overrule some settings.
 		if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
@@ -210,7 +228,8 @@ class Elvis_BizClasses_CurlClient
 			CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
 			CURLOPT_USERPWD => ELVIS_CLIENT_ID.':'.ELVIS_CLIENT_SECRET
 		) );
-		$response = self::plainRequest( 'oauth/token', $curlOptions );
+		$request = new Elvis_BizClasses_ClientRequest( 'oauth/token' );
+		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isError() ) {
 			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token' );
 		}

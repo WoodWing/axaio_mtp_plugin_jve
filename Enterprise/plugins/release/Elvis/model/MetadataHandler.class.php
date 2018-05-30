@@ -1,31 +1,33 @@
 <?php
 class MetadataHandler
 {
-	/** @var ReadWriteFieldHandler[] $fieldHandlers */
+	/** @var ReadWriteFieldHandler[] */
 	private $fieldHandlers;
-	/** @var ReadWriteFieldHandler[] $fieldHandlersByElvisMetadata */
+
+	/** @var ReadWriteFieldHandler[] */
 	private $fieldHandlersByElvisMetadata;
-	/** @var  string[] $metadataToReturn Elvis field names */
+
+	/** @var  string[] Elvis field names */
 	private $metadataToReturn;
+
 	/** @var string Can be used to set handler type name ( the context ) that is calling MetaData handler, e.g 'VersionHandler', 'UserFieldHandler' and etc. */
 	private $handlerName;
 
 	/**
-	 * Fills enterprise metadata object with metadata retrieved from $elvisMetadata,
-	 * using the configured field handlers. Retrieved metadata is translated
-	 * from Elvis fields to Enterprise fields.
+	 * Fill an Enterprise MetaData data object with metadata retrieved from Elvis.
 	 *
-	 * @param Object $smartObject
-	 * @param mixed[] $elvisMetadata
+	 * Retrieved metadata is translated from Elvis fields to Enterprise fields by using the configured field handlers.
+	 *
+	 * @param Object $entObject
+	 * @param array $elvisMetadata
 	 */
-	public function read( $smartObject, $elvisMetadata )
+	public function read( Object $entObject, array $elvisMetadata )
 	{
-		$meta = $this->prepareMetadataObject( $smartObject );
-
-		$this->_initFieldHandlers();
-		foreach($this->fieldHandlers as $fieldHandler) {
-			if( $this->fieldsCanBeMapped( $smartObject->MetaData->BasicMetaData, $fieldHandler ) ) {
-				$fieldHandler->read($meta, $elvisMetadata);
+		$entMetaData = $this->composeMetadataObject( $entObject );
+		$this->initFieldHandlers();
+		foreach( $this->fieldHandlers as $fieldHandler ) {
+			if( $this->fieldsCanBeMapped( $entObject->MetaData->BasicMetaData, $fieldHandler ) ) {
+				$fieldHandler->read( $entMetaData, $elvisMetadata );
 			}
 		}
 	}
@@ -41,12 +43,12 @@ class MetadataHandler
 	 * @param ReadWriteFieldHandler $fieldHandler
 	 * @return bool
 	 */
-	private function fieldsCanBeMapped( BasicMetaData $basicMetaData, ReadWriteFieldHandler $fieldHandler  )
+	private function fieldsCanBeMapped( BasicMetaData $basicMetaData, ReadWriteFieldHandler $fieldHandler )
 	{
 		$result = false;
-		if( empty( $fieldHandler->mappedToBrand() )  ) {
+		if( empty( $fieldHandler->mappedToBrand() ) ) {
 			$result = true;
-		} elseif( ( intval($fieldHandler->mappedToBrand() ) == intval( $basicMetaData->Publication->Id ) ) ) {
+		} elseif( ( intval( $fieldHandler->mappedToBrand() ) == intval( $basicMetaData->Publication->Id ) ) ) {
 			$result = true;
 		}
 
@@ -58,37 +60,36 @@ class MetadataHandler
 	 * using the metadata available in $elvisMetadata. Retrieved metadata is translated
 	 * from Elvis fields to Enterprise fields.
 	 *
-	 * @param Object $smartObject
+	 * @param Object $entObject
 	 * @param mixed[] $elvisMetadata
 	 */
-	public function readByElvisMetadata( $smartObject, $elvisMetadata )
+	public function readByElvisMetadata( Object $entObject, $elvisMetadata )
 	{
-		$meta = $this->prepareMetadataObject( $smartObject );
-
-		$this->_initFieldHandlers();
+		$entMetaData = $this->composeMetadataObject( $entObject );
+		$this->initFieldHandlers();
 		foreach( $elvisMetadata as $fieldName => $fieldValue ) {
 			if( !array_key_exists( $fieldName, $this->fieldHandlersByElvisMetadata ) ) {
 				$message = 'No Enterprise mapping available for Elvis metadata field: '.$fieldName;
 				LogHandler::Log( 'ELVIS', 'INFO', $message );
 				continue;
 			}
-
 			$fieldHandler = $this->fieldHandlersByElvisMetadata[ $fieldName ];
-			$fieldHandler->read( $meta, $elvisMetadata );
+			$fieldHandler->read( $entMetaData, $elvisMetadata );
 		}
 	}
 
 
 	/**
-	 * Creates Elvis metadata from Enterprise metadata
-	 * Provided metadata from Enterprise is translated to Elvis
+	 * Compose Elvis metadata from Enterprise metadata.
+	 *
+	 * Metadata is translated from Enterprise fields to Elvis fields by using the configured field handlers.
 	 *
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues
-	 * @param mixed[] $elvisMetadata
+	 * @param array $elvisMetadata
 	 */
-	public function fillElvisMetadata( $entMetadataOrValues, &$elvisMetadata )
+	public function fillElvisMetadata( $entMetadataOrValues, array &$elvisMetadata )
 	{
-		$this->_initFieldHandlers();
+		$this->initFieldHandlers();
 
 		if( $entMetadataOrValues instanceof MetaData ) {
 			foreach( $this->fieldHandlers as $fieldHandler ) {
@@ -105,14 +106,14 @@ class MetadataHandler
 	}
 
 	/**
-	 * Updates Elvis metadata.
+	 * Update (changed) Enterprise metadata in Elvis server.
 	 *
-	 * @param string $elvisId Id of asset
-	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
+	 * @param string $assetId
+	 * @param MetaData|MetaDataValue[] $entMetadataOrValues The (changed) metadata to update.
 	 * @param Attachment|null $file
-	 * @param bool|null $clearCheckOutState Set to true or null(default) to checkin the object during update, false to retain the checkout status of the object.
+	 * @param bool|null $clearCheckOutState Set to true or null(default) to check-in the object during update, false to retain the checkout status of the object.
 	 */
-	public function update( $elvisId, $entMetadataOrValues, $file=null, $clearCheckOutState=null )
+	public function update( $assetId, $entMetadataOrValues, $file = null, $clearCheckOutState = null )
 	{
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
@@ -137,31 +138,31 @@ class MetadataHandler
 		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $editableFields ) );
 		if( $elvisMetadata ) {
 			require_once __DIR__.'/../logic/ElvisRESTClient.php';
-			ElvisRESTClient::update( $elvisId, $elvisMetadata, $file, $clearCheckOutState );
+			ElvisRESTClient::update( $assetId, $elvisMetadata, $file, $clearCheckOutState );
 		}
 	}
 
 	/**
-	 * Updates Elvis metadata for multiple assets.
+	 * Update (changed) Enterprise metadata in Elvis server for multiple assets.
 	 *
-	 * @param string[] $elvisIds Ids of assets
+	 * @param string[] $assetIds
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Changed metadata
 	 */
-	public function updateBulk( $elvisIds, $entMetadataOrValues )
+	public function updateBulk( $assetIds, $entMetadataOrValues )
 	{
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
 
 		if( !empty( $elvisMetadata ) ) {
 			require_once __DIR__.'/../logic/ElvisRESTClient.php';
-			ElvisRESTClient::updateBulk( $elvisIds, $elvisMetadata );
+			ElvisRESTClient::updateBulk( $assetIds, $elvisMetadata );
 		}
 	}
 
 	/**
-	 * Initializes fieldHandlers when needed
+	 * Initialize the configured field handlers.
 	 */
-	private function _initFieldHandlers()
+	private function initFieldHandlers()
 	{
 		require_once __DIR__.'/../config.php';
 		require_once __DIR__.'/fieldHandler/ContentSourceFieldHandler.class.php';
@@ -210,21 +211,20 @@ class MetadataHandler
 			$this->fieldHandlersByElvisMetadata[ $fieldHandler->lvsFieldName ] = $fieldHandler;
 		}
 
-		//Write only
+		// Write only
 
-//		We don't map these for now
+		//	We don't map these for now
 
-// 		$this->fieldHandlers['Brand'] = BasicMetadata
-// 		$this->fieldHandlers['Category'] = BasicMetadata
-// 		$this->fieldHandlers['Status'] = WorkflowMetadata
-// 		$this->fieldHandlers['Issue'] =
-// 		$this->fieldHandlers['Targets'] = Targets
+		//	$this->fieldHandlers['Brand'] = BasicMetadata
+		//	$this->fieldHandlers['Category'] = BasicMetadata
+		//	$this->fieldHandlers['Status'] = WorkflowMetadata
+		//	$this->fieldHandlers['Issue'] =
+		//	$this->fieldHandlers['Targets'] = Targets
 
-//		Not mapped because complexity > importance
+		//	Not mapped because complexity > importance
 
-//		$this->fieldHandlers['Compression'] = new ReadOnlyFieldHandler("compression", false, "number", "Compression");
-//		$this->fieldHandlers['Urgency'] = new UrgencyFieldHandler();
-
+		//	$this->fieldHandlers['Compression'] = new ReadOnlyFieldHandler("compression", false, "number", "Compression");
+		//	$this->fieldHandlers['Urgency'] = new UrgencyFieldHandler();
 	}
 
 	/**
@@ -235,7 +235,7 @@ class MetadataHandler
 	public function getMetadataToReturn()
 	{
 		if( !isset( $this->metadataToReturn ) ) {
-			$this->_initFieldHandlers();
+			$this->initFieldHandlers();
 			$this->metadataToReturn = array();
 			foreach( $this->fieldHandlers as $fieldHandler ) {
 				$elvisFieldName = $fieldHandler->lvsFieldName;
@@ -255,7 +255,7 @@ class MetadataHandler
 	public function getMetadataToUpdate()
 	{
 		if( !isset( $this->metadataToUpdate ) ) {
-			$this->_initFieldHandlers();
+			$this->initFieldHandlers();
 			$this->metadataToUpdate = array();
 			foreach( $this->fieldHandlers as $fieldHandler ) {
 				if( !( $fieldHandler instanceof ReadOnlyFieldHandler ) ) {
@@ -271,7 +271,7 @@ class MetadataHandler
 	 * @param Object $smartObject
 	 * @return MetaData
 	 */
-	private function prepareMetadataObject( $smartObject )
+	private function composeMetadataObject( Object $smartObject ): MetaData
 	{
 		if( !$smartObject->MetaData ) {
 			$smartObject->MetaData = new MetaData();
@@ -318,6 +318,4 @@ class MetadataHandler
 	{
 		return $this->handlerName;
 	}
-
-
 }

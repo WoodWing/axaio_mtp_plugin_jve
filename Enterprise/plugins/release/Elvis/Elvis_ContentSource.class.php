@@ -55,11 +55,14 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function getAlienObject( $alienId, $rendition, $lock )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getAlienObject called for alienId:' . $alienId . '; rendition:' . $rendition . '; lock:' . $lock );
-		
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		$elvisId = ElvisUtils::getElvisId( $alienId );
-		$hit = ElvisUtils::getHit( $elvisId );
+		require_once __DIR__.'/logic/ElvisContentSourceService.php';
+
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getAlienObject called for alienId:' . $alienId . '; rendition:' . $rendition . '; lock:' . $lock );
+
+		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
+		$service = new ElvisContentSourceService();
+		$hit = $service->retrieve( $assetId, $lock );
 
 		$object = new Object();
 		$object->MetaData = new MetaData();
@@ -93,15 +96,16 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public function getShadowObject2( $alienId, &$object, $objprops, $lock, $rendition, $haveVersion )
 	{
-		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
-
 		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 
+		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
+
 		$this->checkUserEditRight( $lock, $rendition );
-		$elvisId = ElvisUtils::getElvisId( $alienId );
-		$hit = ElvisUtils::getHit( $elvisId, $lock );
-		
+		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
+		$service = new ElvisContentSourceService();
+		$hit = $service->retrieve( $assetId, $lock );
+
 		if( !$haveVersion || version_compare( $haveVersion, ElvisUtils::getEnterpriseVersionNumber($hit->metadata['versionNumber']), '<' ) ) {
 			$object->Files = $this->getFiles( $hit, array( $rendition ) );
 		}
@@ -125,7 +129,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$elvisMetadata['sceModifier'] = $objprops['Modifier'];
 
 			$service = new ElvisContentSourceService();
-			$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
+			$service->updateWorkflowMetadata( $assetId, $elvisMetadata );
 		}
 	}
 
@@ -154,10 +158,13 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function createShadowObject( $alienId, $destObject )
 	{
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		require_once __DIR__.'/logic/ElvisContentSourceService.php';
+
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId );
 
-		require_once __DIR__.'/util/ElvisUtils.class.php';
-		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$service = new ElvisContentSourceService();
+		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
 			require_once __DIR__.'/util/ElvisBrandAdminConfig.class.php';
@@ -166,19 +173,17 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			if( $productionZone ) {
 				$productionZone = ElvisBrandAdminConfig::substituteDateInProductionZone( $productionZone );
 
-				require_once __DIR__.'/logic/ElvisContentSourceService.php';
-				$service = new ElvisContentSourceService();
-				$hit = $service->copyTo( $elvisId, $productionZone, $destObject->MetaData->BasicMetaData->Name, BizSession::getEnterpriseSystemId() );
+				$hit = $service->copyTo( $assetId, $productionZone, $destObject->MetaData->BasicMetaData->Name, BizSession::getEnterpriseSystemId() );
 			} else {
 				throw new BizException( 'ERR_INVALID_PROPERTY', 'Server', 'Unable to find the production zone property.' );
 			}
 		} else {
-			$hit = ElvisUtils::getHit( $elvisId );
+			$hit = $service->retrieve( $assetId, false );
 
 			// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
 			require_once __DIR__.'/logic/ElvisObjectManager.php';
 			$systemId = BizSession::getEnterpriseSystemId();
-			ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
+			ElvisObjectManager::registerShadowObject( $assetId, $systemId );
 		}
 
 		if( !$destObject ) {
@@ -207,17 +212,17 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function createCopyObject( $alienId, $destObject )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createCopyObject called for alienId:' . $alienId );
-		
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once __DIR__.'/logic/ElvisContentSourceService.php';
-		
-		$elvisId = ElvisUtils::getElvisId( $alienId );
-		$hit = ElvisUtils::getHit( $elvisId );
-		
-		// Export original asset file to Enterprise
+
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createCopyObject called for alienId:' . $alienId );
+
+		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$service = new ElvisContentSourceService();
-		$fileUrl = $service->exportOriginalForAsset( $elvisId );
+		$hit = $service->retrieve( $assetId, false );
+
+		// Export original asset file to Enterprise
+		$fileUrl = $service->exportOriginalForAsset( $assetId );
 		
 		if( !$destObject ) {
 			$destObject = new Object();
@@ -281,10 +286,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public function saveShadowObject( $alienId, &$object )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::saveShadowObject called for alienId:' . $alienId );
-		
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		$elvisId = ElvisUtils::getElvisId( $alienId );
+
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::saveShadowObject called for alienId:' . $alienId );
+
+		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		
 		// upload original to Elvis
 		if( $object->Files ) {
@@ -321,7 +327,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
 		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
-		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$service = new ElvisContentSourceService();
 
 		// Revert smart connection checkout when changing properties
@@ -423,7 +429,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		require_once __DIR__.'/logic/ElvisObjectManager.php';
 
 		// Only remove the system id in Elvis when the asset is completely removed in Enterprise (removed from the trash)
-		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$systemId = BizSession::getEnterpriseSystemId();
 		if( !$restore ) {
 			try {
@@ -494,9 +500,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 				$service = new ElvisContentSourceService();
 				$destName = $destObject->MetaData->BasicMetaData->Name;
-				$assetId = ElvisUtils::getElvisId( $alienId );
+				$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 				$copyId = $service->copy( $assetId, $destName );
-				$destId = ElvisUtils::getAlienId( $copyId );
+				$destId = ElvisUtils::getAlienIdFromAssetId( $copyId );
 				LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . ', destId:' . $destId );
 				$shadowObject = $this->createShadowObject( $destId, $destObject );
 				break;

@@ -49,8 +49,11 @@ class Elvis_BizClasses_ProxyClient
 				return strlen( $headerLine );
 			}
 		);
-
-		return Elvis_BizClasses_CurlClient::request( $this->shortUserName, $this->service, $curlOptions );
+		$request = new Elvis_BizClasses_ClientRequest( $this->service );
+		$request->setUserShortName( $this->shortUserName );
+		$client = new Elvis_BizClasses_CurlClient();
+		$client->setCurlOptions( $curlOptions );
+		return $client->execute( $request );
 	}
 
 	/**

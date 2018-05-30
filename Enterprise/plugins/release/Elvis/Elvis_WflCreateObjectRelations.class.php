@@ -28,7 +28,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 				$parent = $relation->Parent;
 				$child = $relation->Child;
 
-				if( ElvisUtils::isElvisId( $child ) ) {
+				if( ElvisUtils::isElvisAssetId( $child ) ) {
 					// Create copy of asset
 					$object = new Object();
 					$contentSource = new Elvis_ContentSource();
