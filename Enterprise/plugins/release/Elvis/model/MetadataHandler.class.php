@@ -118,16 +118,11 @@ class MetadataHandler
 		require_once dirname( __FILE__ ).'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
 		$editableFields = ElvisSessionUtil::getEditableFields();
-		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
+		if( $editableFields == null ) { // This should not happen as these fields are cached during the log on to Elvis.
 			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
 			$fieldInfos = ElvisRESTClient::fieldInfo();
-			if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
-				if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
-					( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
-				) {
-					$editableFields[] = $field;
-				}
-			}
+			require_once __DIR__.'/../util/ElvisUtils.php';
+			$editableFields = ElvisUtils::extractEditableFieldsFromFieldInfos( $fieldInfos );
 			ElvisSessionUtil::setEditableFields( $editableFields );
 		}
 
