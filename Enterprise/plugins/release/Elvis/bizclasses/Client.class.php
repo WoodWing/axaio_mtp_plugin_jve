@@ -22,7 +22,7 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
-	 * Checkout an asset at Elvis server.
+	 * Checkout an asset at the Elvis server.
 	 *
 	 * @param string $assetId
 	 * @throws BizException
@@ -40,7 +40,7 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
-	 * Retrieve an asset from Elvis server.
+	 * Retrieve an asset from the Elvis server.
 	 *
 	 * @param string $assetId
 	 * @param string[] $metadataToReturn
@@ -64,5 +64,31 @@ class Elvis_BizClasses_Client
 			throw new BizException( 'ERR_NOTFOUND', 'Server', 'Elvis assetId: ' . $assetId, null, null, 'INFO' );
 		}
 		return $body->hits[0];
+	}
+
+	/**
+	 * Retrieve versions of an asset from the Elvis server.
+	 *
+	 * @param string $assetId
+	 * @return stdClass[] representation of ElvisEntHit[]
+	 * @throws BizException
+	 */
+	public function listVersions( string $assetId )
+	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/asset/history - $assetId:'.$assetId );
+
+		$request = new Elvis_BizClasses_ClientRequest( 'services/asset/history' );
+		$request->addQueryParam( 'id', $assetId );
+		$request->addQueryParam( 'detailLevel', 1 );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setExpectJson();
+
+		$client = new Elvis_BizClasses_CurlClient();
+		$response = $client->execute( $request );
+		$body = $response->jsonBody();
+		if( !isset( $body->hits[0] ) ) {
+			throw new BizException( 'ERR_NOTFOUND', 'Server', 'Elvis assetId: ' . $assetId, null, null, 'INFO' );
+		}
+		return array_map( function ( $hit ) { return $hit->hit; }, $body->hits );
 	}
 }

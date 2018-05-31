@@ -93,6 +93,7 @@ class ElvisUtils {
 		if( $url ) {
 			$type = self::getMimeType( $hit, $url, $rendition );
 			if( $type ) {
+				$objectId = $hit->metadata['sceId'];
 				$attachment = new Attachment();
 				$attachment->Rendition = $rendition;
 				$attachment->Type = $type;
@@ -103,12 +104,9 @@ class ElvisUtils {
 						$attempt = 0;
 						do {
 							$attempt += 1;
-							$httpStatus = $transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ); // $httpStatus can be a boolean when running with Server <= 10.1.3
+							$proxyUrl = self::composePrivateProxyFileDownloadUrl( $objectId, $rendition, BizSession::getTicket() );
+							$httpStatus = $transferServer->copyToFileTransferServer( $proxyUrl, $attachment );
 							$retry = self::retryCopyToFileTransferServer( $attempt, $httpStatus );
-							if( $retry ) {
-								require_once __DIR__.'/../logic/ElvisAMFClient.php';
-								ElvisAMFClient::login();
-							}
 						} while( $retry );
 						if( intval( $httpStatus ) >= 500 ) {
 							ElvisAMFClient::throwExceptionForElvisCommunicationFailure(
@@ -125,7 +123,6 @@ class ElvisUtils {
 						$attachment->ContentSourceFileLink = self::replaceUrlForClientsAccess( $url );
 						break;
 					case 'ContentSourceProxyLink': // let client download from our Elvis proxy server
-						$objectId = $hit->metadata['sceId'];
 						$attachment->ContentSourceProxyLink = self::composePublicProxyFileDownloadUrl( $objectId, $rendition );
 						break;
 				}
@@ -137,6 +134,8 @@ class ElvisUtils {
 	/**
 	 * Compose an URL for client applications to perform a file download over the Elvis proxy server.
 	 *
+	 * File downloads are authorized through the tickets in the cookie jar of the acting client application.
+	 *
 	 * @since 10.5.0
 	 * @param string $objectId
 	 * @param string $rendition File rendition to download.
@@ -144,9 +143,28 @@ class ElvisUtils {
 	 */
 	private static function composePublicProxyFileDownloadUrl( $objectId, $rendition )
 	{
-		return ELVIS_CONTENTSOURCE_PROXYURL.
+		return ELVIS_CONTENTSOURCE_PUBLIC_PROXYURL.
 			'?objectid='.urlencode( $objectId ).
 			'&rendition='.urlencode( $rendition );
+	}
+
+	/**
+	 * Compose an URL for the server to perform a file download over the Elvis proxy server.
+	 *
+	 * File downloads are authorized through the provided ticket of the acting client application.
+	 *
+	 * @since 10.5.0
+	 * @param string $objectId
+	 * @param string $rendition File rendition to download.
+	 * @param string $ticket
+	 * @return string The proxy file download URL.
+	 */
+	private static function composePrivateProxyFileDownloadUrl( $objectId, $rendition, $ticket )
+	{
+		return ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
+			'?objectid='.urlencode( $objectId ).
+			'&rendition='.urlencode( $rendition ).
+			'&ticket='.urlencode( $ticket );
 	}
 
 	/**

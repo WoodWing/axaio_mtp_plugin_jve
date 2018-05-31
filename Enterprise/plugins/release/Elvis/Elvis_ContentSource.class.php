@@ -559,7 +559,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	public function getContentSourceProxyLinksBaseUrl()
 	{
 		require_once __DIR__.'/config.php';
-		return ELVIS_CONTENTSOURCE_PROXYURL;
+		return ELVIS_CONTENTSOURCE_PUBLIC_PROXYURL;
 	}
 
 	/**

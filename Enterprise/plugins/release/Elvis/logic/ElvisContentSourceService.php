@@ -68,15 +68,38 @@ class ElvisContentSourceService
 		if( $checkout ) {
 			$client->checkout( $assetId );
 		}
-		$rawHit = $client->retrieve( $assetId, $metadataToReturn );
+		$stdClassHit = $client->retrieve( $assetId, $metadataToReturn );
+		return $this->convertStdClassToElvisEntHit( $stdClassHit );
+	}
 
+	/**
+	 * Convert a stdClass object into an ElvisEntHit object.
+	 *
+	 * REST responses from Elvis server are JSON decoded and result into stdClass.
+	 * This function can be called to convert it to the real data class ElvisEntHit.
+	 *
+	 * @param stdClass $stdClassHit
+	 * @return ElvisEntHit
+	 */
+	private function convertStdClassToElvisEntHit( stdClass $stdClassHit )
+	{
 		/** @var ElvisEntHit $hit */
-		$hit = WW_Utils_PHPClass::typeCast( $rawHit, 'ElvisEntHit' );
+		$hit = WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntHit' );
 		$hit->metadata = (array)$hit->metadata;
-		$hit->metadata['id'] = $assetId;
-		$hit->metadata['assetFileModified'] = $hit->metadata['assetFileModified']->value / 1000; // msec to sec
-		$hit->metadata['assetCreated'] = $hit->metadata['assetCreated']->value / 1000; // msec to sec
-		$hit->metadata['fileSize'] = $hit->metadata['fileSize']->value;
+		if( isset( $hit->id ) ) {
+			$hit->metadata[ 'id' ] = $hit->id;
+		}
+		foreach( $hit->metadata as $key => $value ) {
+			if( isset( $value->value ) ) {
+				$hit->metadata[ $key ] = $value->value;
+			}
+		}
+		$datetimes = array( 'assetCreated', 'assetFileModified', 'fileCreated', 'fileModified' );
+		foreach( $datetimes as $datetime ) {
+			if( isset( $hit->metadata[ $datetime ] ) ) {
+				$hit->metadata[ $datetime ] = $hit->metadata[ $datetime ] / 1000; // msec to sec
+			}
+		}
 		return $hit;
 	}
 
@@ -139,18 +162,9 @@ class ElvisContentSourceService
 	 */
 	public function listVersions( $assetId )
 	{
-		ElvisAMFClient::registerClass( ElvisEntHit::getName() );
-		ElvisAMFClient::registerClass( ElvisFormattedValue::getName() );
-		ElvisAMFClient::registerClass( BasicMap::getName() );
-		$params = array( $assetId );
-
-		try {
-			$hits = ElvisAMFClient::send( self::SERVICE, 'listVersions', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-
-		return $hits;
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$stdClassHits = $client->listVersions( $assetId );
+		return array_map( array( $this, 'convertStdClassToElvisEntHit' ), $stdClassHits );
 	}
 
 	/**

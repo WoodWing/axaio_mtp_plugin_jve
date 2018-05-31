@@ -182,7 +182,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	private function testInvalidTicket()
 	{
 		require_once BASEDIR.'/config/plugins/Elvis/config.php';
-		$url = ELVIS_CONTENTSOURCE_PROXYURL.
+		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
 			'&rendition=native';
 		@file_get_contents( $url.'&ticket=123' );
@@ -196,7 +196,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	private function testObjectNotFound()
 	{
 		require_once BASEDIR.'/config/plugins/Elvis/config.php';
-		$url = ELVIS_CONTENTSOURCE_PROXYURL.
+		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?objectid=9223372036854775807'. // take max int 64 for non-existing object id
 			'&rendition=preview';
 		@file_get_contents( $url.'&ticket='.$this->ticket );
@@ -210,7 +210,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	private function testUnsupportedFileRendition()
 	{
 		require_once BASEDIR.'/config/plugins/Elvis/config.php';
-		$url = ELVIS_CONTENTSOURCE_PROXYURL.
+		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
 			'&rendition=foo';
 		@file_get_contents( $url.'&ticket='.$this->ticket );
