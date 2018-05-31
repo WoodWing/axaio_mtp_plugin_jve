@@ -34,10 +34,10 @@ class ServerJobProcessor
 		
 		// Enrich given options with defaults
 		$defaults = array(
-			'sleeptime' => 1,
-			'maxexectime' => 5,
-			'maxjobprocesses' => 5,
-			'processmaxjobs' => 100,
+			'sleeptime' => 1, // How many seconds to snooze between job executions.
+			'maxexectime' => 5, // After how many seconds this process should end.
+			'processmaxjobs' => PHP_INT_MAX, // How many jobs this process should execute. Sky high value, so by default only 'maxexectime' is effective.
+			'maxjobprocesses' => 5, // How many job processors are allowed to run in parallel on this machine.
 		);
 		$this->jobsProcessed = 0;
 		$this->options = array_merge( $defaults, $options );
