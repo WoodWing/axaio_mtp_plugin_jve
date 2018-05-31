@@ -704,10 +704,11 @@ class BizSession
 
 		$dbSession = self::getDbSession( $ticket );
 		$ticketRow = $dbSession->getSessionTicketRow();
+		// L> Note that $ticketRow is null for server jobs, which is by design. The DBTicket::checkTicket() below deals with that.
 
 		// Throw error when ticket is not (or no longer) valid.
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		if( !$ticketRow || !DBTicket::checkTicket( $ticket, $ticketRow ) ) {
+		if( !DBTicket::checkTicket( $ticket, $ticketRow ) ) {
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 		}
 		self::$userRow = $dbSession->getSessionUserRow();
