@@ -22,6 +22,7 @@ class ServerJobProcessor
 	private $watchDogFile;   // See runTresholdPhase()
 	private $watchDogHandle; // See runTresholdPhase()
 	private $myServer;       // ServerJob of the Enterprise Server current process is working for.
+	private $jobsProcessed;  // Number of jobs processed during this run.
 	
 	public function __construct( array $options = array() )
 	{
@@ -36,7 +37,9 @@ class ServerJobProcessor
 			'sleeptime' => 1,
 			'maxexectime' => 5,
 			'maxjobprocesses' => 5,
+			'processmaxjobs' => 100,
 		);
+		$this->jobsProcessed = 0;
 		$this->options = array_merge( $defaults, $options );
 		$this->myServer = null;
 	}
@@ -254,11 +257,12 @@ class ServerJobProcessor
 				$newPhase = 'treshold';
 			}
 				
-			// Overrule new phase suggestion (above) when running out of time or
+			// Overrule new phase suggestion (above) when running out of time or when executed enough jobs of
 			// when system admin asked us to stop for maintenance reasons.
 			$newPhase = $this->resolveLogicalPhase( $phases, $phase, $newPhase );
 			if( $newPhase != 'stopped' ) {
-				if( $this->stopWatch->Fetch() >= $this->options['maxexectime'] ) {
+				if( $this->stopWatch->Fetch() >= $this->options['maxexectime'] ||
+					$this->jobsProcessed >= $this->options['processmaxjobs'] ) {
 					$this->log( 'DEBUG', 'Server Job processor has reached end of life time.' );
 					$newPhase = 'finishing';
 				} else if( self::hasMaintenanceStarted() ) {
@@ -454,6 +458,7 @@ class ServerJobProcessor
 
 			// Process the job on this machine
 			$this->processJob( $job );
+			$this->jobsProcessed += 1;
 
 			// Look up the job configuration.
 			require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';

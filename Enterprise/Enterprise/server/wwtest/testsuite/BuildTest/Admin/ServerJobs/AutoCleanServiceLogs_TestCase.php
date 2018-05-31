@@ -9,7 +9,7 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase extends TestCase
 {
 	/** @var WW_Utils_TestSuite $utils */
-	private $globalUtils = null;
+	private $testSuiteUtils = null;
 
 	/** @var string $ticket */
 	private $ticket = null;
@@ -55,7 +55,6 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 		} catch( BizException $e ) {
 			$this->tearDownTestData();
 		}
-
 	}
 
 	/**
@@ -73,7 +72,8 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 
 		// Initialization.
 		require_once BASEDIR.'/server/utils/TestSuite.php';
-		$this->globalUtils = new WW_Utils_TestSuite();
+		$this->testSuiteUtils = new WW_Utils_TestSuite();
+		$this->testSuiteUtils->initTest( 'JSON' ); // Talk over HTTP to server to avoid bad side effects on the session of this test.
 
 		require_once BASEDIR.'/server/bizclasses/BizServerJob.class.php';
 		$this->bizServerJob = new BizServerJob();
@@ -90,27 +90,38 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	 */
 	private function populateDataInLogTable()
 	{
-		$this->doLogin();
-		$this->doLogOff();
+		$this->logOn();
+		$this->logOff();
 		$this->manipulateLogDateTime();
 	}
 
 	/**
 	 * LogOn test user through workflow interface
 	 */
-	private function doLogin()
+	private function logOn()
 	{
-		$response = $this->globalUtils->wflLogOn( $this );
+		$this->testSuiteUtils->setRequestComposer(
+			function( WflLogOnRequest $req ) {
+				$req->RequestInfo = array(); // Performance: request to resolve ticket only.
+				// Pick a fake client to avoid implicit logout the test user.
+				$req->ClientAppName = 'WW_TestSuite_BuildTest_AutoCleanServiceLogs';
+				$req->ClientAppVersion = '1.0.0 build 0';
+			}
+		);
+		$response = $this->testSuiteUtils->wflLogOn( $this );
+		$this->assertInstanceOf( 'WflLogOnResponse', $response );
+		$this->assertFalse( empty( $response->Ticket ) );
 		$this->ticket = $response->Ticket;
-		$this->assertNotNull( $this->ticket, 'No ticket found. LogOn is not successful, test cannot be continued.' );
 	}
 
 	/**
 	 * LogOff test user through workflow interface
 	 */
-	private function doLogOff()
+	private function logOff()
 	{
-		$this->globalUtils->wflLogOff( $this, $this->ticket );
+		if( $this->ticket ) {
+			$this->testSuiteUtils->wflLogOff( $this, $this->ticket );
+		}
 	}
 
 	/**
@@ -146,11 +157,12 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	{
 		$cleanServiceLogJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AutoCleanServiceLogs' ) );
 		$this->assertCount( 0, $cleanServiceLogJobs );
-		$result = $this->globalUtils->callCreateServerJob( $this, 'AutoCleanServiceLogs' );
+		$result = $this->testSuiteUtils->callCreateServerJob( $this, 'AutoCleanServiceLogs' );
 		$this->assertTrue( $result, 'AutoCleanServiceLogs Server Job cannot be created.' );
-		$result = $this->globalUtils->callRunServerJobs( $this, 30, 1 );
+		$result = $this->testSuiteUtils->callRunServerJobs( $this, 1 );
 		$this->assertTrue( $result, 'Server Job cannot be executed.' );
 		$cleanServiceLogJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AutoCleanServiceLogs' ) );
+		$this->assertCount( 1, $cleanServiceLogJobs );
 		$cleanServiceLogJob = reset( $cleanServiceLogJobs );
 		$this->assertEquals( ServerJobStatus::COMPLETED, $cleanServiceLogJob->JobStatus->getStatus() );
 	}
@@ -176,7 +188,7 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	private function deletePendingJobs()
 	{
 		// Deletes all jobs from the queue.
-		$this->globalUtils->emptyServerJobsQueue();
+		$this->testSuiteUtils->emptyServerJobsQueue();
 
 		// Check if the jobs are really deleted from the queue.
 		$jobs = $this->bizServerJob->listJobs();

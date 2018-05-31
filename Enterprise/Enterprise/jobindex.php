@@ -37,6 +37,9 @@ if( isset($_GET['sleeptime']) ) {
 if( isset($_GET['maxexectime']) ) {
 	$options['maxexectime'] = intval($_GET['maxexectime']);
 }
+if( isset($_GET['processmaxjobs']) ) {
+	$options['processmaxjobs'] = intval($_GET['processmaxjobs']);
+}
 if( isset($_GET['maxjobprocesses']) ) {
 	$options['maxjobprocesses'] = intval($_GET['maxjobprocesses']);
 }
