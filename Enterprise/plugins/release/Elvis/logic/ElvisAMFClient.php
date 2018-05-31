@@ -296,6 +296,12 @@ class ElvisAMFClient extends ElvisClient
 			ElvisSessionUtil::setElvisServerVersion( $serverVersion );
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 		}
+
+		// Cache the editable fields
+		$fieldInfos = ElvisRESTClient::fieldInfo();
+		require_once __DIR__.'/../util/ElvisUtils.class.php';
+		$editableFields = ElvisUtils::extractEditableFieldsFromFieldInfos( $fieldInfos );
+		ElvisSessionUtil::setEditableFields( $editableFields );
 	}
 
 	/**
