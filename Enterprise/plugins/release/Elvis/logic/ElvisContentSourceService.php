@@ -49,11 +49,22 @@ class ElvisContentSourceService
 	 * Retrieve an asset from Elvis server.
 	 *
 	 * @param string $assetId
-	 * @param bool $checkout
+	 * @throws BizException when checkout failed.
+	 */
+	public function checkout( $assetId )
+	{
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$client->checkout( $assetId );
+	}
+
+	/**
+	 * Retrieve an asset from Elvis server.
+	 *
+	 * @param string $assetId
 	 * @return ElvisEntHit
 	 * @throws BizException
 	 */
-	public function retrieve( $assetId, $checkout )
+	public function retrieve( $assetId )
 	{
 		require_once __DIR__.'/../model/MetadataHandler.class.php';
 
@@ -65,9 +76,6 @@ class ElvisContentSourceService
 		$metadataToReturn[] = 'resolutionUnit'; // required to convert Elvis resolutionX to Enterprise Dpi
 
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		if( $checkout ) {
-			$client->checkout( $assetId );
-		}
 		$stdClassHit = $client->retrieve( $assetId, $metadataToReturn );
 		return $this->convertStdClassToElvisEntHit( $stdClassHit );
 	}

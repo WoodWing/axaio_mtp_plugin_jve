@@ -31,9 +31,8 @@ class Elvis_BizClasses_Client
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/checkout - $assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/checkout' );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/checkout', $this->shortUserName );
 		$request->addPathParam( $assetId );
-		$request->setUserShortName( $this->shortUserName );
 
 		$client = new Elvis_BizClasses_CurlClient();
 		$client->execute( $request );
@@ -49,12 +48,11 @@ class Elvis_BizClasses_Client
 	 */
 	public function retrieve( string $assetId, array $metadataToReturn )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/retrieve - $assetId:'.$assetId );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/retrieve - assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/search' );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/search', $this->shortUserName );
 		$request->addSearchQueryParam( 'q', 'id', $assetId );
 		$request->addCsvQueryParam( 'metadataToReturn', $metadataToReturn );
-		$request->setUserShortName( $this->shortUserName );
 		$request->setExpectJson();
 
 		$client = new Elvis_BizClasses_CurlClient();
@@ -75,12 +73,11 @@ class Elvis_BizClasses_Client
 	 */
 	public function listVersions( string $assetId )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/asset/history - $assetId:'.$assetId );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/asset/history - assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/asset/history' );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/asset/history', $this->shortUserName );
 		$request->addQueryParam( 'id', $assetId );
 		$request->addQueryParam( 'detailLevel', 1 );
-		$request->setUserShortName( $this->shortUserName );
 		$request->setExpectJson();
 
 		$client = new Elvis_BizClasses_CurlClient();

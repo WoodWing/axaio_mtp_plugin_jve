@@ -10,14 +10,14 @@ class Elvis_BizClasses_ClientResponse
 	/** @var int */
 	private $httpStatusCode;
 
-	/** @var bool|string|stdClass */
+	/** @var bool|string */
 	private $body;
 
 	/**
 	 * Response constructor.
 	 *
 	 * @param integer $httpStatusCode
-	 * @param bool|string|stdClass $body
+	 * @param bool|string $body
 	 * @param bool $expectJson
 	 */
 	public function __construct( $httpStatusCode, $body, $expectJson )

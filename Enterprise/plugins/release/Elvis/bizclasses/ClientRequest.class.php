@@ -24,23 +24,15 @@ class Elvis_BizClasses_ClientRequest
 	 * Constructor.
 	 *
 	 * @param string $relativeRestServicePath
+	 * @param string $userShortName For who this request should be authorized.
 	 */
-	public function __construct( $relativeRestServicePath )
+	public function __construct( string $relativeRestServicePath, string $userShortName )
 	{
 		$relativeRestServicePath = trim( $relativeRestServicePath, '/' );
 		foreach( explode( '/', $relativeRestServicePath ) as $pathParam ) {
 			$this->addPathParam($pathParam );
 		}
-	}
-
-	/**
-	 * Define the user name for which this request should be authorized.
-	 *
-	 * @param $name
-	 */
-	public function setUserShortName( string $name )
-	{
-		$this->userShortName = $name;
+		$this->userShortName = $userShortName;
 	}
 
 	/**

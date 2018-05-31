@@ -13,12 +13,12 @@ require_once __DIR__.'/../config.php';
 class Elvis_BizClasses_CurlClient
 {
 	/** @var array */
-	private $curlOptions;
+	private $curlOptions = array();
 
 	/**
 	 * @param array $curlOptions cURL options to override.
 	 */
-	public function setCurlOptions( $curlOptions )
+	public function setCurlOptions( array $curlOptions )
 	{
 		$this->curlOptions = $curlOptions;
 	}
@@ -33,9 +33,6 @@ class Elvis_BizClasses_CurlClient
 	{
 		$curlOptions = $this->curlOptions;
 		$userShortName = $request->getUserShortName();
-		if( !$userShortName ) {
-			throw new Elvis_BizClasses_Exception( 'No user name provided for request.' );
-		}
 		$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::getAccessToken( $userShortName ) );
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isAuthenticationError() ) {
@@ -228,7 +225,7 @@ class Elvis_BizClasses_CurlClient
 			CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
 			CURLOPT_USERPWD => ELVIS_CLIENT_ID.':'.ELVIS_CLIENT_SECRET
 		) );
-		$request = new Elvis_BizClasses_ClientRequest( 'oauth/token' );
+		$request = new Elvis_BizClasses_ClientRequest( 'oauth/token', $shortUserName );
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isError() ) {
 			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token' );

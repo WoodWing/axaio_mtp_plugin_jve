@@ -62,7 +62,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$service = new ElvisContentSourceService();
-		$hit = $service->retrieve( $assetId, $lock );
+		if( $lock ) {
+			$service->checkout( $assetId );
+		}
+		$hit = $service->retrieve( $assetId );
 
 		$object = new Object();
 		$object->MetaData = new MetaData();
@@ -104,7 +107,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$this->checkUserEditRight( $lock, $rendition );
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$service = new ElvisContentSourceService();
-		$hit = $service->retrieve( $assetId, $lock );
+		if( $lock ) {
+			$service->checkout( $assetId );
+		}
+		$hit = $service->retrieve( $assetId );
 
 		if( !$haveVersion || version_compare( $haveVersion, ElvisUtils::getEnterpriseVersionNumber($hit->metadata['versionNumber']), '<' ) ) {
 			$object->Files = $this->getFiles( $hit, array( $rendition ) );
@@ -178,7 +184,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 				throw new BizException( 'ERR_INVALID_PROPERTY', 'Server', 'Unable to find the production zone property.' );
 			}
 		} else {
-			$hit = $service->retrieve( $assetId, false );
+			$hit = $service->retrieve( $assetId );
 
 			// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
 			require_once __DIR__.'/logic/ElvisObjectManager.php';
@@ -219,7 +225,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$service = new ElvisContentSourceService();
-		$hit = $service->retrieve( $assetId, false );
+		$hit = $service->retrieve( $assetId );
 
 		// Export original asset file to Enterprise
 		$fileUrl = $service->exportOriginalForAsset( $assetId );
