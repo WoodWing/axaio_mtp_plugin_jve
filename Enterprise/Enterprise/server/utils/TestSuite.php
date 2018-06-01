@@ -2148,7 +2148,7 @@ class WW_Utils_TestSuite
 				'adapter' => 'Zend\Http\Client\Adapter\Curl',
 				'curloptions' => array(
 					CURLOPT_CONNECTTIMEOUT => 5,
-					CURLOPT_TIMEOUT => 5
+					CURLOPT_TIMEOUT => 60
 				) ) );
 			$client->send();
 			$response = $client->getResponse();
