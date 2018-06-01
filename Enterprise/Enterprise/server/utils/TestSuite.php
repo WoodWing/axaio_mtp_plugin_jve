@@ -17,6 +17,8 @@ class WW_Utils_TestSuite
 	/** @var string $protocol  */
 	private $protocol = null;
 
+	/** @var callable $requestComposer  */
+	private $requestComposer = null;
 	/**
 	 * Initializes this test utils class.
 	 *
@@ -286,6 +288,20 @@ class WW_Utils_TestSuite
 	}
 
 	/**
+	 * Setup a callback function that is called just before calling the webservice.
+	 *
+	 * This enables the caller to manupulate the request that could be composed by other functions.
+	 * The callback function accepts one parameter, which is the request.
+	 *
+	 * @since 10.2.0
+	 * @param callable $callback
+	 */
+	public function setRequestComposer( $callback )
+	{
+		$this->requestComposer = $callback;
+	}
+
+	/**
 	 * Runs any service request. When a given expected error is not raised by the service,
 	 * the test fails. And vice versa, when no error expected, but raised, the test fails.
 	 *
@@ -304,6 +320,15 @@ class WW_Utils_TestSuite
 	public function callService( TestCase $testCase, $request, $stepInfo, $expectedErrorCodeOrMsgKey = null, 
 		$throwException = false )
 	{
+		// Copy and clear request composer since it can throw exception.
+		$requestComposer = $this->requestComposer;
+		$this->requestComposer = null; // reset (has to be set per function call)
+
+		// Let caller overrule request composition.
+		if( $requestComposer ) {
+			call_user_func( $requestComposer, $request );
+		}
+
 		$baseName = get_class( $request );
 		$baseName = substr( $baseName, 0, strlen($baseName) - strlen('Request') );
 		$responseName = $baseName.'Response';
