@@ -16,7 +16,8 @@ function inputvar( $name, $value, $type = null, $domain = null, $nullallowed = t
 {
 	switch ($type) {
 		case 'checkbox':
-			return '<input type="checkbox" title="'.$title.'" name="'.$name.'" '.(trim($value)?'checked="checked"':'').($disabled?' disabled':'').'/>';
+			$title = $title ? 'title="'.$title.'" ' : '';
+			return '<input type="checkbox" '.$title .'name="'.$name.'" '.(trim($value)?'checked="checked"':'').($disabled?' disabled':'').'/>';
 		case 'combo':
 			$combo = '<select name="'.$name.'"'.($disabled?' disabled':'').'>';
 			if ($nullallowed) {

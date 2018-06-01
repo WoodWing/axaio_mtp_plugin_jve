@@ -322,9 +322,10 @@ class ActionPropertiesQueryAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$deltxt = inputvar( "multiDelete$i", '', 'checkbox', null, true, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS"), !$isConfigurable );
+			$deleteCheckboxTooltipTitle = $isConfigurable ? BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") : 'Default fields are not allowed to be deleted. Use reset instead to clear all the fields.';
+			$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
 			$detailTxt .= "<tr$clr>";
-			$detailTxt .= "<td>$deltxt</td>";
+			$detailTxt .= $this->composeCheckboxInATableCell( $deleteCheckbox, $deleteCheckboxTooltipTitle );
 			$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
 			$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
 			$detailTxt .= '</tr>';
@@ -680,5 +681,32 @@ class ActionPropertiesQueryAdminApp
 				break;
 		}
 		return $editable;
+	}
+
+
+	/**
+	 * To compose the checkbox in a table cell with the tooltip wrapper.
+	 *
+	 * The tooltip wrapper is typically needed when the checkbox is set to disabled.
+	 * This is due to jquery-ui tooltip doesn't work on disabled elements ( disabled
+	 * elements do not trigger any DOM events ).
+	 * So, the workaround is that the checkbox is drawn around the tooltip wrapper.
+	 * For non-disabled checkbox, this function can still be called, CSS is catered
+	 * to take care of the disabled checkbox.
+	 *
+	 * @since 10.x.x
+	 * @param string $title
+	 * @param string $checkbox
+	 * @return string
+	 */
+	private function composeCheckboxInATableCell( string $checkbox, string $title ):string
+	{
+		$detailTxt = '<td align="center">';
+		$detailTxt .= '<div class="tooltip-wrapper" title="'.$title.'" >';
+		$detailTxt .= $checkbox;
+		$detailTxt .= '</div>';
+		$detailTxt .= '</td>';
+		$detailTxt .= PHP_EOL;
+		return $detailTxt;
 	}
 }

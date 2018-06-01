@@ -35,11 +35,14 @@ function checkDeleteCheckboxes()
     var countCheckBoxes = document.forms['propfilter'].recs.value;
     for(var i = 0; i < countCheckBoxes; i++) {
         var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
-        objCheckBox.checked = !(objCheckBox.checked)
+        if( objCheckBox.disabled == false ) {
+            objCheckBox.checked = !(objCheckBox.checked)
+        }
     }
     return false;
 }
 $(document).ready(function() {
+    // Drawing the dialog box.
     $(function dialogBox() {
         $("#dialog_confirm").dialog({
             autoOpen: false,
@@ -65,6 +68,7 @@ $(document).ready(function() {
         }).parent().appendTo($("#propfilter"));
     });
 
+    // Event when dialog_button is clicked.
     $("#dialog_button").click( function( event ){
         event.preventDefault();
         if( $("input[name=recs]").val() == 0 ){
@@ -74,6 +78,11 @@ $(document).ready(function() {
             document.forms.propfilter.submit();
         }
     });
+
+    // Event for tooltips.
+    $( function() {
+        $( document ).tooltip();
+    } );
 });
 function SetCombos(sAction)
 {
@@ -82,6 +91,27 @@ function SetCombos(sAction)
 	f.submit();
 }
 </script>
+
+
+<style>
+	.tooltip-wrapper {
+		display: inline-block; /* display: block works as well */
+		margin: 1px; /* make some space so the tooltip is visible */
+	}
+
+	/* Only applicable for disabled elements */
+	.tooltip-wrapper input[disabled] {
+		/* don't let button block mouse events from reaching wrapper */
+		pointer-events: none;
+	}
+
+	/* Overwrite the jquery-ui tooltip (popup) style to be similar to Enterprise */
+	.ui-tooltip {
+		background-color: #777;
+		color: white;
+		font-size: 8pt;
+	}
+</style>
 
 <table class="appframe"><tr class="text"><td>
 	
@@ -117,7 +147,9 @@ function SetCombos(sAction)
 		<table class="listpane">
 			<tr>
 				<th style="<!--DELETE_COLUMN-->">
-					<input type="checkbox" title="Multi Delete Toggle" name="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes(); " />
+					<div class="tooltip-wrapper" title="Multi Delete Toggle">
+						<input type="checkbox" name="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes();">
+					</div>
 				</th>
 				<th><!--RES:LIS_ORDER--></th>
 				<th><!--RES:OBJ_PROPERTY--></th>
