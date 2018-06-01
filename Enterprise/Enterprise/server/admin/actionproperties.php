@@ -362,7 +362,7 @@ class ActionPropertiesAdminApp
 				$detailTxt .= "<td>".$row['category'].'</td>';
 				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
 				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				if( empty( $row['edit'] )) {
+				if( empty( $row['edit'] ) && ( in_array( $row['property'], $this->sysProps ) || !$isConfigurable )) {
 					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
 				} else {
 					$title = $isConfigurable ? BizResources::localize("OBJ_EDITABLE") : $nonAdjustableDefaultFieldsMsg;
@@ -463,7 +463,8 @@ class ActionPropertiesAdminApp
 			} else {
 				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
 				$detailTxt .= '<td>'.formvar($prop).'</td>';
-				if( empty( $row['edit'] )) {
+				$isConfigurable = $this->isConfigurableField( $prop );
+				if( empty( $row['edit'] ) && ( in_array( $row['property'], $this->sysProps ) || !$isConfigurable )) {
 					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:LOCKIMAGE).'</td>';
 				} else {
 					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:'').'</td>';
