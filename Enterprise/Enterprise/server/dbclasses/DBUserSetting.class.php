@@ -8,7 +8,7 @@
  * @copyright	WoodWing Software bv. All Rights Reserved.
  */
 
-class DBUserSetting
+class DBUserSetting extends DBBase
 {
 	const TABLENAME = 'settings';
 	/**
@@ -92,6 +92,22 @@ class DBUserSetting
 		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
+	}
+
+	/**
+	 * Deletes a specific setting for a certain user/application combination.
+	 *
+	 * @since 10.1.8
+	 * @param string $user
+	 * @param string $appname
+	 * @param string $setting
+	 * @return bool|null
+	 */
+	static public function deleteApplicationSettingByName( $user, $appname, $setting )
+	{
+		$where = '`user` = ? AND `appname` = ? AND `setting` = ? ';
+		$params = array( strval( $user), strval( $appname ), strval( $setting ));
+		return self::deleteRows( self::TABLENAME, $where, $params );
 	}
 	
     static public function addSetting( $user, $setting, $value, $appname = null )
