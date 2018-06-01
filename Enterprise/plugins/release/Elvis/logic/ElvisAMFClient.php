@@ -299,7 +299,7 @@ class ElvisAMFClient extends ElvisClient
 
 		// Delete the cache of the editable fields. At the first modify action the cache is refreshed, EN-90272.
 		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-		DBUserSetting::deleteApplicationSettingByName( BizSession::getShortUserName(), 'ElvisContentSource', 'EditableFields');
+		DBUserSetting::deleteSettingsByName( BizSession::getShortUserName(), 'ElvisContentSource', array( 'EditableFields' ) );
 	}
 
 	/**

@@ -95,21 +95,24 @@ class DBUserSetting extends DBBase
 	}
 
 	/**
-	 * Deletes a specific setting for a certain user/application combination.
+	 * Remove the specified user settings or all settings for a client application.
 	 *
-	 * @since 10.1.8
-	 * @param string $user
-	 * @param string $appname
-	 * @param string $setting
-	 * @return bool|null
+	 * @param string $userShortName
+	 * @param string $clientAppName
+	 * @param string[] $settingNames
 	 */
-	static public function deleteApplicationSettingByName( $user, $appname, $setting )
+	static public function deleteSettingsByName( $userShortName, $clientAppName, $settingNames )
 	{
-		$where = '`user` = ? AND `appname` = ? AND `setting` = ? ';
-		$params = array( strval( $user), strval( $appname ), strval( $setting ));
-		return self::deleteRows( self::TABLENAME, $where, $params );
+		if( $settingNames ) {
+			$questionMarks = array_fill( 0, count( $settingNames ), '?' );
+			$questionMarksCsv = implode( ', ', $questionMarks );
+			$where = '`user` = ? AND `appname` = ? AND `setting` IN ( '.$questionMarksCsv.' )';
+			$params = array( strval( $userShortName ), strval( $clientAppName ) );
+			$params = array_merge( $params, array_map( 'strval', $settingNames ) );
+			self::deleteRows( self::TABLENAME, $where, $params );
+		}
 	}
-	
+
     static public function addSetting( $user, $setting, $value, $appname = null )
 	{
 		$dbDriver = DBDriverFactory::gen();
