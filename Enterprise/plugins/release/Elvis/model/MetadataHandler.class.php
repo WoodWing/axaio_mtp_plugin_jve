@@ -107,6 +107,11 @@ class MetadataHandler
 	/**
 	 * Updates Elvis metadata.
 	 *
+	 * If a user logs on the cache of editable fields is cleared. The very first time a user changes a property of an
+	 * asset the cache is rebuild. For all subsequent modify actions the cache is reused. The advantage of this approach
+	 * is that if a user does not modify properties the cache can remain empty. But when he does the cache is rebuild
+	 * with the latest information of Elvis.
+	 *
 	 * @param string $elvisId Id of asset
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
 	 * @param Attachment|null $file
@@ -120,10 +125,10 @@ class MetadataHandler
 		require_once dirname( __FILE__ ).'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
 		$editableFields = ElvisSessionUtil::getEditableFields();
-		if( $editableFields == null ) { // This should not happen as these fields are cached during the log on to Elvis.
+		if( $editableFields == null ) {
 			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
 			$fieldInfos = ElvisRESTClient::fieldInfo();
-			require_once __DIR__.'/../util/ElvisUtils.php';
+			require_once __DIR__.'/../util/ElvisUtils.class.php';
 			$editableFields = ElvisUtils::extractEditableFieldsFromFieldInfos( $fieldInfos );
 			ElvisSessionUtil::setEditableFields( $editableFields );
 		}

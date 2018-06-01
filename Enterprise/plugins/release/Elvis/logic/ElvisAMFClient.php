@@ -297,11 +297,9 @@ class ElvisAMFClient extends ElvisClient
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 		}
 
-		// Cache the editable fields
-		$fieldInfos = ElvisRESTClient::fieldInfo();
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
-		$editableFields = ElvisUtils::extractEditableFieldsFromFieldInfos( $fieldInfos );
-		ElvisSessionUtil::setEditableFields( $editableFields );
+		// Delete the cache of the editable fields. At the first modify action the cache is refreshed, EN-90272.
+		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
+		DBUserSetting::deleteSettingsByName( BizSession::getShortUserName(), 'ElvisContentSource', array( 'EditableFields' ) );
 	}
 
 	/**
