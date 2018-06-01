@@ -644,38 +644,12 @@ class ActionPropertiesAdminApp
 		$multiObjAllowedActions = $multiObjAllowedActions = array_merge( array( '' ), BizWorkflow::getMultiObjectsAllowedActions() );
 		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
 
- 		if( $usages ) {
+		if( $usages ) {
  			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
  		} else {
 		   $rows = array();
 		   if( $this->mode == 'add' ) {
-			   $addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
-			   if( $addDefaultDynamicFields == 'true' ) {
-				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
-			   } else {
-				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
-			   }
-
-			   if( $this->action != '' ) { // When action is <All>, don't fix anything as some action needs 'Dossier' and some don't.
-				   BizWorkflow::fixDossierPropertyUsage( $this->action, $this->objType, '', $usages );
-			   }
-			   // TODO: Mark asterisk on the fields that might be removed when Client doesn't support the field(s).
-
-			   $order = 5;
-			   if( $usages ) foreach( $usages as $usage ) {
-				   $values = array();
-				   $values['publication'] = $this->publ;
-				   $values['action'] = $this->action;
-				   $values['type'] = $this->objType;
-				   $values['orderid'] = $order;
-				   $values['property'] = $usage->Name;
-				   $values['edit'] = $usage->Editable ? 'on' : '';
-				   $values['mandatory'] = $usage->Mandatory ? 'on' : '';
-				   $values['restricted'] = $usage->Restricted ? 'on' : '';
-				   $values['multipleobjects'] = $usage->MultipleObjects ? 'on' : '';
-					$this->insertActionProperty( $values );
-				   $order += 5;
-			   }
+			   $usages = $this->preInsertDefaultProperties();
 			   $rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
 		   }
 	   }
@@ -817,5 +791,50 @@ class ActionPropertiesAdminApp
 		$detailTxt .= '</td>';
 		$detailTxt .= PHP_EOL;
 		return $detailTxt;
+	}
+
+	/**
+	 * Inserts a list of default properties ( with or without non-static properties ).
+	 *
+	 * On a fresh setup of Dialog Setup, list of default static properties will be pre-added
+	 * before the user can add a new property. On top of that, user can choose if some selective
+	 * non-static (dynamic) properties need to be added.
+	 * If user choose to add in the non-static properties as well, both static and non-static default
+	 * properties will be added into database; otherwise, only the default static properties will
+	 * be added.
+	 *
+	 * @since 10.x.x
+	 */
+	private function preInsertDefaultProperties():void
+	{
+		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
+		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
+		$addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
+		if( $addDefaultDynamicFields == 'true' ) {
+			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
+		} else {
+			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
+		}
+
+		if( $this->action != '' ) { // When action is <All>, don't fix anything as some action needs 'Dossier' and some don't.
+			BizWorkflow::fixDossierPropertyUsage( $this->action, $this->objType, '', $usages );
+		}
+		// TODO: Mark asterisk on the fields that might be removed when Client doesn't support the field(s).
+
+		$order = 5;
+		if( $usages ) foreach( $usages as $usage ) {
+			$values = array();
+			$values['publication'] = $this->publ;
+			$values['action'] = $this->action;
+			$values['type'] = $this->objType;
+			$values['orderid'] = $order;
+			$values['property'] = $usage->Name;
+			$values['edit'] = $usage->Editable ? 'on' : '';
+			$values['mandatory'] = $usage->Mandatory ? 'on' : '';
+			$values['restricted'] = $usage->Restricted ? 'on' : '';
+			$values['multipleobjects'] = $usage->MultipleObjects ? 'on' : '';
+			$this->insertActionProperty( $values );
+			$order += 5;
+		}
 	}
 }
