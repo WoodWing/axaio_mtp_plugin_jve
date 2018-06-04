@@ -15,7 +15,10 @@ class Elvis_BizClasses_ClientRequest
 	private $pathParams;
 
 	/** @var array */
-	private $queryParams;
+	private $queryParams = array();
+
+	/** @var array */
+	private $postParams = array();
 
 	/** @var string */
 	private $userShortName;
@@ -64,7 +67,7 @@ class Elvis_BizClasses_ClientRequest
 		$this->pathParams[] = urlencode( $value );
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// - - - - - - - - - - - - - - - - - QUERY PARAMS - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/**
 	 * Add a query parameter to the REST service request.
@@ -85,7 +88,7 @@ class Elvis_BizClasses_ClientRequest
 	 */
 	public function addQueryParamAsJson( string $name, $value )
 	{
-		$this->addQueryParam( $name, json_encode( $value ) );
+		$this->queryParams[ urlencode( $name ) ] = json_encode( $value );
 	}
 
 	/**
@@ -110,8 +113,47 @@ class Elvis_BizClasses_ClientRequest
 	{
 		$values = array_map( 'strval', $values );
 		$values = array_map( 'urlencode', $values );
-		$this->queryParams[ $name ] = implode( ',', $values );
+		$this->queryParams[ urlencode( $name ) ] = implode( ',', $values );
 	}
+
+	// - - - - - - - - - - - - - - - - - POST PARAMS - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/**
+	 * Add a POST parameter to the REST service request.
+	 *
+	 * @param string $name
+	 * @param string $value
+	 */
+	public function addPostParam( string $name, string $value )
+	{
+		$this->postParams[ urlencode( $name ) ] = urlencode( $value );
+	}
+
+	/**
+	 * Add a POST parameter to the REST service request that needs to be JSON encoded.
+	 *
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function addPostParamAsJson( string $name, $value )
+	{
+		$this->postParams[ urlencode( $name ) ] = json_encode( $value );
+	}
+
+	/**
+	 * Add a CSV (comma separated value list) POST parameter to the REST service request.
+	 *
+	 * @param string $name
+	 * @param string[] $values
+	 */
+	public function addCsvPostParam( string $name, array $values )
+	{
+		$values = array_map( 'strval', $values );
+		$values = array_map( 'urlencode', $values );
+		$this->postParams[ urlencode( $name ) ] = implode( ',', $values );
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/**
 	 * Compose the relative REST service path. Base path and query parameters are excluded.
@@ -151,9 +193,25 @@ class Elvis_BizClasses_ClientRequest
 	}
 
 	/**
+	 * @return array
+	 */
+	public function getPostParams() : array
+	{
+		return $this->postParams;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getQueryParams() : array
+	{
+		return $this->queryParams;
+	}
+
+	/**
 	 * @return string
 	 */
-	public function getHttpMethod()
+	public function getHttpMethod() : string
 	{
 		return $this->httpMethod;
 	}
@@ -171,7 +229,7 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @return bool
 	 */
-	public function getExpectJson()
+	public function getExpectJson() : bool
 	{
 		return $this->expectJson;
 	}

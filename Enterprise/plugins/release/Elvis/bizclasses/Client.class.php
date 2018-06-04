@@ -24,22 +24,55 @@ class Elvis_BizClasses_Client
 	/**
 	 * Create a new asset at the Elvis server.
 	 *
-	 * @param array $metadata Metadata to be updated in Elvis
+	 * @param stdClass $metadata Metadata to be updated in Elvis
 	 * @param string[] $metadataToReturn
-	 * @param Attachment $fileToUpload
+	 * @param Attachment|null $fileToUpload
 	 * @return stdClass representation of ElvisEntHit
 	 * @throws BizException
 	 */
-	public function create( array $metadata, array $metadataToReturn, Attachment $fileToUpload ) : stdClass
+	public function create( stdClass $metadata, array $metadataToReturn, $fileToUpload ) : stdClass
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/create' );
 
 		$request = new Elvis_BizClasses_ClientRequest( 'services/create', $this->shortUserName );
-		$request->addQueryParamAsJson( 'metadata', $metadata );
-		$request->addCsvQueryParam( 'metadataToReturn', $metadataToReturn );
+		$request->addPostParamAsJson( 'metadata', $metadata );
+		$request->addCsvPostParam( 'metadataToReturn', $metadataToReturn );
 		$request->setHttpPostMethod();
 		$request->setExpectJson();
-		$request->addFileToUpload( $fileToUpload );
+		if( !is_null( $fileToUpload ) ) {
+			$request->addFileToUpload( $fileToUpload );
+		}
+
+		$client = new Elvis_BizClasses_CurlClient();
+		$response = $client->execute( $request );
+		return $response->jsonBody();
+	}
+
+	/**
+	 * Update an asset at the Elvis server.
+	 *
+	 * @param string $assetId
+	 * @param stdClass $metadata Metadata to be updated in Elvis
+	 * @param string[] $metadataToReturn
+	 * @param Attachment|null $fileToUpload
+	 * @param bool $undoCheckout
+	 * @return stdClass representation of ElvisEntHit
+	 * @throws BizException
+	 */
+	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, $fileToUpload, bool $undoCheckout ) : stdClass
+	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/create' );
+
+		$request = new Elvis_BizClasses_ClientRequest( 'services/update', $this->shortUserName );
+		$request->addPostParam( 'id', $assetId );
+		$request->addPostParamAsJson( 'metadata', $metadata );
+		$request->addPostParam( 'clearCheckoutState', $undoCheckout ? 'true' : 'false' );
+		$request->addCsvPostParam( 'metadataToReturn', $metadataToReturn );
+		$request->setHttpPostMethod();
+		$request->setExpectJson();
+		if( !is_null( $fileToUpload ) ) {
+			$request->addFileToUpload( $fileToUpload );
+		}
 
 		$client = new Elvis_BizClasses_CurlClient();
 		$response = $client->execute( $request );
@@ -57,6 +90,23 @@ class Elvis_BizClasses_Client
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/checkout - assetId:'.$assetId );
 
 		$request = new Elvis_BizClasses_ClientRequest( 'services/checkout', $this->shortUserName );
+		$request->addPathParam( $assetId );
+
+		$client = new Elvis_BizClasses_CurlClient();
+		$client->execute( $request );
+	}
+
+	/**
+	 * Checkout an asset at the Elvis server.
+	 *
+	 * @param string $assetId
+	 * @throws BizException
+	 */
+	public function undoCheckout( string $assetId )
+	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/undocheckout - assetId:'.$assetId );
+
+		$request = new Elvis_BizClasses_ClientRequest( 'services/undocheckout', $this->shortUserName );
 		$request->addPathParam( $assetId );
 
 		$client = new Elvis_BizClasses_CurlClient();
@@ -108,7 +158,7 @@ class Elvis_BizClasses_Client
 		$client = new Elvis_BizClasses_CurlClient();
 		$response = $client->execute( $request );
 		$body = $response->jsonBody();
-		if( !isset( $body->hits[0] ) ) {
+		if( !isset( $body->hits ) ) {
 			throw new BizException( 'ERR_NOTFOUND', 'Server', 'Elvis assetId: ' . $assetId, null, null, 'INFO' );
 		}
 		return array_map( function ( $hit ) { return $hit->hit; }, $body->hits );

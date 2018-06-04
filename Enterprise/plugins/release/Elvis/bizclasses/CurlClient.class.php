@@ -107,9 +107,11 @@ class Elvis_BizClasses_CurlClient
 		if( LogHandler::debugMode() ) {
 			// Requires curl_setopt($ch, CURLINFO_HEADER_OUT, 1)
 			$service = $request->composeServicePath(); // relative path, no query params
-			$requestHeaders = curl_getinfo( $ch, CURLINFO_HEADER_OUT );
+			$requestData = curl_getinfo( $ch, CURLINFO_HEADER_OUT ).PHP_EOL.
+				'QUERY params:'.PHP_EOL.LogHandler::prettyPrint( $request->getQueryParams() ).PHP_EOL.
+				'POST params:'.PHP_EOL.LogHandler::prettyPrint( $request->getPostParams() ).PHP_EOL;
 			$logService = 'Elvis_'.str_replace( '/', '_', $service );
-			LogHandler::logService( $logService, $requestHeaders, true, 'JSON' );
+			LogHandler::logService( $logService, $requestData, true, 'JSON' );
 			LogHandler::logService( $logService, join( '', $responseHeaders ).PHP_EOL.$response->body(), $response->isError() ? null : false, 'JSON' );
 			LogHandler::Log( 'ELVIS', 'DEBUG', 'Request '.$service.' duration: '.sprintf( '%.3f', $duration * 1000 ).'ms' );
 		}
@@ -145,7 +147,7 @@ class Elvis_BizClasses_CurlClient
 			// seems like for some PHP cURL version, it will send Content-Length = -1 in the HTTP headers which is unwanted
 			// since it leads to a bad request. To avoid this, here we set the CURLOPT_POSTFIELDS to be empty (array()),
 			// to make sure that the Content-Length is 0.
-			$defaultCurlOptions[ CURLOPT_POSTFIELDS ] = array();
+			$defaultCurlOptions[ CURLOPT_POSTFIELDS ] = $request->getPostParams();
 
 			$fileToUpload = $request->getFileToUpload();
 			if( $fileToUpload ) {

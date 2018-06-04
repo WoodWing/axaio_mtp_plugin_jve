@@ -27,6 +27,9 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 			'<li>Add the image to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>'.
 			'<li>Get image metadata for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>'.
 			'<li>Download the Elvis image via the Elvis proxy server.</li>'.
+			'<li>Retrieve the object version history for the Elvis shadow image object for which no versions are available yet.</li>'.
+			'<li>Upload a new version for the image directly to Elvis server.</li>'.
+			'<li>Retrieve the object version history for the Elvis shadow image object for which one versions should be available now.</li>'.
 			'<li>Test downloading the Elvis image (native file) via the Elvis proxy server. Expect HTTP 200.</li>'.
 			'<li>Attempt download image preview via the Elvis proxy server with invalid ticket. Expect HTTP 403.</li>'.
 			'<li>Attempt download image preview via the Elvis proxy server with non-existing object id. Expect HTTP 404.</li>'.
@@ -64,6 +67,9 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	/** @var string */
 	private $imageProxyDownloadLink;
 
+	/** @var string[] */
+	private $lockedObjectIds = array();
+
 	/** @var BizTransferServer */
 	private $transferServer;
 
@@ -83,6 +89,9 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 			$this->createShadowImageObject();
 			$this->retrieveImageDownloadUrl();
 			$this->testDownloadImageViaProxyServer();
+			$this->testListZeroVersionsOfImage();
+			$this->updateElvisImage();
+			$this->testListOneVersionsOfImage();
 
 			// Test security of the Elvis proxy.
 			$this->testPreviewArgs();
@@ -335,6 +344,7 @@ EOT;
 
 		$this->imageObject = reset( $response->Objects );
 		$this->assertInstanceOf( 'Object', $this->imageObject );
+		$this->lockedObjectIds[] = $this->imageObject->MetaData->BasicMetaData->ID;
 		$this->assertEquals( 'ELVIS', $this->imageObject->MetaData->BasicMetaData->ContentSource );
 		switch( ELVIS_CREATE_COPY ) {
 			case 'Shadow_Only':
@@ -342,6 +352,7 @@ EOT;
 				break;
 			case 'Copy_To_Production_Zone':
 				$this->assertNotEquals( $this->imageAssetHit->id, $this->imageObject->MetaData->BasicMetaData->DocumentID );
+				$this->imageAssetHit->id = $this->imageObject->MetaData->BasicMetaData->DocumentID;
 				break;
 		}
 
@@ -363,6 +374,70 @@ EOT;
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
 		$this->assertEquals( 200, $this->getHttpStatusCode( $http_response_header ) );
 		$this->assertGreaterThan( 0, strlen( $imageContents ) );
+	}
+
+	/**
+	 * Test retrieving the object version history for the Elvis shadow image object for which no versions are available yet.
+	 */
+	private function testListZeroVersionsOfImage()
+	{
+		$versions = $this->listObjectVersions( $this->shadowImageId );
+		$this->assertCount( 0, $versions ); // no versions created yet
+	}
+
+	/**
+	 * Retrieve an object version history.
+	 *
+	 * @param string $objectId
+	 * @return VersionInfo[]
+	 */
+	private function listObjectVersions( string $objectId ) : array
+	{
+		require_once BASEDIR . '/server/services/wfl/WflListVersionsService.class.php';
+		$request = new WflListVersionsRequest();
+		$request->Ticket = $this->workflowTicket;
+		$request->ID = $objectId;
+		$request->Rendition = 'native';
+		$request->Areas = array( 'Workflow' );
+
+		/** @var WflListVersionsResponse $response */
+		$response = $this->testSuiteUtils->callService( $this, $request, 'List versions object.' );
+		$this->assertInstanceOf( 'WflListVersionsResponse', $response );
+		$this->assertInternalType( 'array', $response->Versions );
+		return $response->Versions;
+	}
+
+	/**
+	 * Update the Elvis image by directly uploading a new file to Elvis server.
+	 */
+	private function updateElvisImage()
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		$service = new ElvisContentSourceService();
+
+		$fileToUpload = new Attachment();
+		$fileToUpload->Rendition = 'native';
+		$fileToUpload->Type = 'image/png';
+		$fileToUpload->FilePath = __DIR__.'/testdata/image2.png';
+
+		$metadata = array();
+		BizSession::startSession( $this->workflowTicket );
+		BizSession::checkTicket( $this->workflowTicket );
+		$hit = $service->update( $this->imageAssetHit->id, $metadata, $fileToUpload, true ); // check-in
+		BizSession::endSession();
+
+		$this->assertInstanceOf( 'ElvisEntHit', $hit );
+		$this->assertNotNull( $hit->id );
+		$this->imageAssetHit = $hit;
+	}
+
+	/**
+	 * Test retrieving the object version history for the Elvis shadow image object for which one version should be available.
+	 */
+	private function testListOneVersionsOfImage()
+	{
+		$versions = $this->listObjectVersions( $this->shadowImageId );
+		$this->assertCount( 1, $versions );
 	}
 
 	/**
@@ -435,6 +510,24 @@ EOT;
 	 */
 	private function tearDownTestData()
 	{
+		$this->deleteObjects();
+		if( $this->workflowTicket ) {
+			$this->testSuiteUtils->wflLogOff( $this, $this->workflowTicket );
+		}
+		$this->workflowFactory->teardownTestData();
+		if( $this->transferServerFiles ) {
+			foreach( $this->transferServerFiles as $file ) {
+				$this->transferServer->deleteFile( $file->FilePath );
+			}
+			unset( $this->transferServerFiles );
+		}
+	}
+
+	/**
+	 * Remove the objects created by this test script.
+	 */
+	private function deleteObjects()
+	{
 		foreach( array( $this->imageObject, $this->dossierObject ) as $object ) {
 			if( $object ) {
 				$errorReport = '';
@@ -444,19 +537,6 @@ EOT;
 		}
 		unset( $this->imageObject );
 		unset( $this->dossierObject );
-
-		if( $this->workflowTicket ) {
-			$this->testSuiteUtils->wflLogOff( $this, $this->workflowTicket );
-		}
-
-		$this->workflowFactory->teardownTestData();
-
-		if( $this->transferServerFiles ) {
-			foreach( $this->transferServerFiles as $file ) {
-				$this->transferServer->deleteFile( $file->FilePath );
-			}
-			unset( $this->transferServerFiles );
-		}
 	}
 
 	/**

@@ -49,20 +49,39 @@ class ElvisContentSourceService
 	 *
 	 * @since 10.5.0
 	 * @param array $metadata Metadata to be updated in Elvis
-	 * @param Attachment $fileToUpload
+	 * @param Attachment|null $fileToUpload
 	 * @return ElvisEntHit
 	 * @throws BizException
 	 */
-	public function create( array $metadata, Attachment $fileToUpload ) : ElvisEntHit
+	public function create( array $metadata, $fileToUpload ) : ElvisEntHit
 	{
 		$metadataToReturn = $this->getMetadataToReturn();
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$stdClassHit = $client->create( $metadata, $metadataToReturn, $fileToUpload );
+		$stdClassHit = $client->create( (object)$metadata, $metadataToReturn, $fileToUpload );
 		return $this->convertStdClassToElvisEntHit( $stdClassHit );
 	}
 
 	/**
-	 * Retrieve an asset from Elvis server.
+	 * Update an asset at the Elvis server.
+	 *
+	 * @since 10.5.0
+	 * @param string $assetId
+	 * @param array $metadata Metadata to be updated in Elvis
+	 * @param Attachment|null $fileToUpload
+	 * @param bool $undoCheckout
+	 * @return ElvisEntHit
+	 * @throws BizException
+	 */
+	public function update( string $assetId, array $metadata, $fileToUpload, bool $undoCheckout ) : ElvisEntHit
+	{
+		$metadataToReturn = $this->getMetadataToReturn();
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$stdClassHit = $client->update( $assetId, (object)$metadata, $metadataToReturn, $fileToUpload, $undoCheckout );
+		return $this->convertStdClassToElvisEntHit( $stdClassHit );
+	}
+
+	/**
+	 * Lock an asset for editing in Elvis server.
 	 *
 	 * @since 10.5.0
 	 * @param string $assetId
@@ -72,6 +91,18 @@ class ElvisContentSourceService
 	{
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$client->checkout( $assetId );
+	}
+
+	/**
+	 * Release the edit lock for an asset in Elvis server.
+	 *
+	 * @param string $assetId
+	 * @throws BizException when checkout failed.
+	 */
+	public function undoCheckout( $assetId )
+	{
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$client->undoCheckout( $assetId );
 	}
 
 	/**
@@ -246,22 +277,6 @@ class ElvisContentSourceService
 		}
 
 		return $resp;
-	}
-
-	/**
-	 * Does undo check out an asset in Elvis.
-	 *
-	 * @param string $assetId
-	 * @throws BizException
-	 */
-	public function undoCheckout( $assetId )
-	{
-		try {
-			$params = array( $assetId );
-			ElvisAMFClient::send( self::SERVICE, 'undoCheckout', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
 	}
 
 	/**

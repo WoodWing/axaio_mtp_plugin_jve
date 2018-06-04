@@ -86,7 +86,7 @@ class ElvisUtils {
 	 * @return Attachment|null The file attachment, or null when not found.
 	 * @throws BizException
 	 */
-	public static function getAttachment( $hit, $rendition, $fileLinkType )
+	public static function getAttachment( ElvisEntHit $hit, string $rendition, string $fileLinkType )
 	{
 		$attachment = null;
 		$url = self::getUrlFromRendition( $hit, $rendition );

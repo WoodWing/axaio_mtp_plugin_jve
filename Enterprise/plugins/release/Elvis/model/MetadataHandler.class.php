@@ -111,9 +111,9 @@ class MetadataHandler
 	 * @param string $assetId
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues The (changed) metadata to update.
 	 * @param Attachment|null $file
-	 * @param bool|null $clearCheckOutState Set to true or null(default) to check-in the object during update, false to retain the checkout status of the object.
+	 * @param bool $undoCheckout Set to true to check-in the object, or false to retain the checkout status of the object.
 	 */
-	public function update( $assetId, $entMetadataOrValues, $file = null, $clearCheckOutState = null )
+	public function update( $assetId, $entMetadataOrValues, $file = null, $undoCheckout = false )
 	{
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
@@ -137,8 +137,9 @@ class MetadataHandler
 		// Send to Elvis only editable metadata fields.
 		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $editableFields ) );
 		if( $elvisMetadata ) {
-			require_once __DIR__.'/../logic/ElvisRESTClient.php';
-			ElvisRESTClient::update( $assetId, $elvisMetadata, $file, $clearCheckOutState );
+			require_once __DIR__.'/../logic/ElvisContentSourceService.php';
+			$service = new ElvisContentSourceService();
+			$service->update( $assetId, $elvisMetadata, $file, $undoCheckout );
 		}
 	}
 

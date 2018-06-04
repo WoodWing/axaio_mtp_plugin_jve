@@ -133,7 +133,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 setting Enterprise metadata.' );
 
 			$elvisMetadata = $this->fillElvisEnterpriseMetadata( $object->MetaData );
-			$elvisMetadata['sceId'] = $object->MetaData->BasicMetaData->ID;
+			$elvisMetadata['sceId'] = $objprops['ID'];
 			$elvisMetadata['sceCreated'] = $objprops['Created'];
 			$elvisMetadata['sceCreator'] = $objprops['Creator'];
 			$elvisMetadata['sceModified'] = $objprops['Modified'];
@@ -305,15 +305,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		
 		// upload original to Elvis
 		if( $object->Files ) {
-			if( ElvisUtils::saveObjectsDoesReleaseObjectLock() ) {
-				$clearCheckOutState = true; // Check-in object.
-			} else {
-				$clearCheckOutState = false; // Object remains checked-out.
-			}
-
+			$undoCheckout = ElvisUtils::saveObjectsDoesReleaseObjectLock();
 			foreach( $object->Files as $file ) {
 				if( $file->Rendition == 'native' && $file->FilePath != null ) {
-					/*$metadata = */$this->getMetadataHandler()->update( $elvisId, $object->MetaData, $file, $clearCheckOutState );
+					$this->getMetadataHandler()->update( $elvisId, $object->MetaData, $file, $undoCheckout );
 				}
 			}
 		}
@@ -574,23 +569,28 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * Helper to make array filled with default Enterprise metadata
-	 * fields required for Elvis.
+	 * Populate array with default Enterprise metadata fields required for Elvis.
+	 *
 	 * @param MetaData $metadata Enterprise metadata object
 	 * @return array $elvisMetaData Map containing Enterprise metadata properties which are always synchronized to Elvis
 	 */
-	private function fillElvisEnterpriseMetadata( $metadata )
+	private function fillElvisEnterpriseMetadata( MetaData $metadata ) : array
 	{
+		// Note that when client requests for NoMetaData, the Publication and Category are not set.
+		// This happens e.g. when clicking an object in CS in the dossier view having the Versions pane open.
 		$elvisMetadata = array();
-		$elvisMetadata['sceCategoryId'] = $metadata->BasicMetaData->Category->Id;
-		$elvisMetadata['sceCategory'] = $metadata->BasicMetaData->Category->Name;
-		$elvisMetadata['scePublicationId'] = $metadata->BasicMetaData->Publication->Id;
-		$elvisMetadata['scePublication'] = $metadata->BasicMetaData->Publication->Name;
-
+		if( isset( $metadata->BasicMetaData->Category ) ) {
+			$elvisMetadata['sceCategoryId'] = $metadata->BasicMetaData->Category->Id;
+			$elvisMetadata['sceCategory'] = $metadata->BasicMetaData->Category->Name;
+		}
+		if( isset( $metadata->BasicMetaData->Publication ) ) {
+			$elvisMetadata['scePublicationId'] = $metadata->BasicMetaData->Publication->Id;
+			$elvisMetadata['scePublication'] = $metadata->BasicMetaData->Publication->Name;
+		}
 		return $elvisMetadata;
 	}
 
-	private function fillElvisEnterpriseMetadataMulti( $metadataValues )
+	private function fillElvisEnterpriseMetadataMulti( array $metadataValues ) : array
 	{
 		$elvisMetadata = array();
 		foreach( $metadataValues as $metadataValue ) {
@@ -616,7 +616,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * @param string[] $renditions
 	 * @return Attachment[]
 	 */
-	private function getFiles( $hit, array $renditions )
+	private function getFiles( ElvisEntHit $hit, array $renditions ) : array
 	{
 		if( $this->isContentSourceFileLinksRequested() ) {
 			$fileLinkType = 'ContentSourceFileLink';
