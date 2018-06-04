@@ -8,6 +8,8 @@
  * @copyright	WoodWing Software bv. All Rights Reserved.
  */
 
+require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+
 class DBUserSetting extends DBBase
 {
 	const TABLENAME = 'settings';
