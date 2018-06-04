@@ -822,19 +822,24 @@ class ActionPropertiesAdminApp
 		// TODO: Mark asterisk on the fields that might be removed when Client doesn't support the field(s).
 
 		$order = 5;
+		$listOfValues = array();
 		if( $usages ) foreach( $usages as $usage ) {
-			$values = array();
-			$values['publication'] = $this->publ;
-			$values['action'] = $this->action;
-			$values['type'] = $this->objType;
-			$values['orderid'] = $order;
-			$values['property'] = $usage->Name;
-			$values['edit'] = $usage->Editable ? 'on' : '';
-			$values['mandatory'] = $usage->Mandatory ? 'on' : '';
-			$values['restricted'] = $usage->Restricted ? 'on' : '';
-			$values['multipleobjects'] = $usage->MultipleObjects ? 'on' : '';
-			$this->insertActionProperty( $values );
+			$values = array(
+				$this->publ,
+				$this->action,
+				$this->objType,
+				$order,
+				$usage->Name,
+				$usage->Editable ? 'on' : '',
+				$usage->Mandatory ? 'on' : '',
+				$usage->Restricted ? 'on' : '',
+				$usage->MultipleObjects ? 'on' : '',
+			);
+			$listOfValues[] = $values;
 			$order += 5;
 		}
+		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		DBActionproperty::insertActionsProperty( $fields, $listOfValues );
 	}
 }

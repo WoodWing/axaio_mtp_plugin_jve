@@ -139,19 +139,6 @@ class ActionPropertiesQueryAdminApp
 	}
 
 	/**
-	 * Inserts multiple new action property records into database in one call.
-	 *
-	 * @since 10.x.x
-	 * @param string[] $columns
-	 * @param string[] $values
-	 */
-	private function insertActionsProperty( $columns, $values )
-	{
-		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
-		DBActionproperty::insertActionsProperty( $columns, $values );
-	}
-
-	/**
 	 * Compose Query default property usages and create Query actions properties.
 	 */
 	private function composeAndInsertActionsProperty()
@@ -176,7 +163,8 @@ class ActionPropertiesQueryAdminApp
 			$order += 5;
 		}
 		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
-		$this->insertActionsProperty( $fields, $listOfValues );
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		DBActionproperty::insertActionsProperty( $fields, $listOfValues );
 	}
 
 	/**
