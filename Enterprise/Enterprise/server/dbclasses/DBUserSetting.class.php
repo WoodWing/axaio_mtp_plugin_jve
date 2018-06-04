@@ -124,8 +124,10 @@ class DBUserSetting extends DBBase
 	}
 
 	/**
-	 * Remove the specified user settings or all settings for a client application.
+	 * Remove the specified user settings for a client application.
 	 *
+	 * @since 10.1.8
+	 * @since 10.3.0
 	 * @param string $userShortName
 	 * @param string $clientAppName
 	 * @param string[] $settingNames
