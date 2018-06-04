@@ -13,6 +13,8 @@
  * class that no longer allows empty values.
  */
 
+require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+
 class DBUserSetting extends DBBase
 {
 	const TABLENAME = 'settings';

@@ -436,25 +436,4 @@ class ElvisUtils {
 		LogHandler::Log('ELVIS', 'DEBUG', 'client for ticket '. BizSession::getTicket() . ": ". $activeClient);
 		return (bool)stristr($activeClient, $clientName);
 	}
-
-	/**
-	 * Extracts the fields that are marked as editable from the response returned by the fieldinfo web service.
-	 *
-	 * @since 10.1.8
-	 * @param stdClass $fieldInfos
-	 * @return array
-	 */
-	static public function extractEditableFieldsFromFieldInfos( stdClass $fieldInfos )
-	{
-		$editableFields = array();
-		if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
-			if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
-				( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
-			) {
-				$editableFields[] = $field;
-			}
-		}
-
-		return $editableFields;
-	}
 }
