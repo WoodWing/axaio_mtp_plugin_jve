@@ -266,6 +266,11 @@ class ElvisAMFClient extends ElvisClient
 	/**
 	 * Logon to Elvis using the credentials available in the ElvisSessionUtil.
 	 *
+	 * During the log on also the Elvis Server version is stored and the editable fields (if any) stored in the user settings
+	 * are deleted. The reason for this second action is that once a user modifies an asset or it properties the latest
+	 * information is retrieved from Elvis. That information is stored in the user settings and will be reused during
+	 * the whole session, EN-90272.
+	 *
 	 * The session cookies returned by Elvis will be tracked by the ElvisSessionUtil for succeeding calls.
 	 */
 	public static function login()
@@ -297,7 +302,7 @@ class ElvisAMFClient extends ElvisClient
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 		}
 
-		// Delete the cache of the editable fields. At the first modify action the cache is refreshed, EN-90272.
+		// At the first modify ( property or asset ) action, the 'cache' is refreshed, EN-90272.
 		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
 		DBUserSetting::deleteSettingsByName( BizSession::getShortUserName(), 'ElvisContentSource', array( 'EditableFields' ) );
 	}
