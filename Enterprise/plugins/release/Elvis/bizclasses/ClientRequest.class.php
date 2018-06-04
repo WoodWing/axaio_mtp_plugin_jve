@@ -8,6 +8,9 @@
 
 class Elvis_BizClasses_ClientRequest
 {
+	const HTTP_METHOD_GET = 'GET';
+	const HTTP_METHOD_POST = 'POST';
+
 	/** @var array */
 	private $pathParams;
 
@@ -20,6 +23,12 @@ class Elvis_BizClasses_ClientRequest
 	/** @var bool */
 	private $expectJson = false;
 
+	/** @var Attachment|null */
+	private $fileToUpload = null;
+
+	/** @var string */
+	private $httpMethod = self::HTTP_METHOD_GET;
+
 	/**
 	 * Constructor.
 	 *
@@ -30,7 +39,7 @@ class Elvis_BizClasses_ClientRequest
 	{
 		$relativeRestServicePath = trim( $relativeRestServicePath, '/' );
 		foreach( explode( '/', $relativeRestServicePath ) as $pathParam ) {
-			$this->addPathParam($pathParam );
+			$this->addPathParam( $pathParam );
 		}
 		$this->userShortName = $userShortName;
 	}
@@ -55,6 +64,8 @@ class Elvis_BizClasses_ClientRequest
 		$this->pathParams[] = urlencode( $value );
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	/**
 	 * Add a query parameter to the REST service request.
 	 *
@@ -67,6 +78,17 @@ class Elvis_BizClasses_ClientRequest
 	}
 
 	/**
+	 * Add a query parameter to the REST service request that needs to be JSON encoded.
+	 *
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function addQueryParamAsJson( string $name, $value )
+	{
+		$this->addQueryParam( $name, json_encode( $value ) );
+	}
+
+	/**
 	 * Add a search query parameter to the REST service request.
 	 *
 	 * @param string $paramName
@@ -75,7 +97,7 @@ class Elvis_BizClasses_ClientRequest
 	 */
 	public function addSearchQueryParam( string $paramName, string $searchName, string $searchValue )
 	{
-		$this->queryParams[ urlencode( $paramName ) ] = $searchName.':"'.urlencode( $searchValue ).'"';
+		$this->queryParams[ urlencode( $paramName ) ] = urlencode( $searchName ).':"'.urlencode( $searchValue ).'"';
 	}
 
 	/**
@@ -109,7 +131,7 @@ class Elvis_BizClasses_ClientRequest
 	public function composeServiceUrl(): string
 	{
 		$queryParamsUrl = '';
-		if( $this->queryParams ) {
+		if( $this->queryParams && $this->httpMethod == self::HTTP_METHOD_GET ) {
 			$separator = '?';
 			foreach( $this->queryParams as $name => $value ) {
 				$queryParamsUrl .= $separator.$name.'='.$value;
@@ -118,6 +140,22 @@ class Elvis_BizClasses_ClientRequest
 
 		}
 		return $this->composeServicePath().$queryParamsUrl;
+	}
+
+	/**
+	 * Define the HTTP POST method for the request.
+	 */
+	public function setHttpPostMethod()
+	{
+		$this->httpMethod = self::HTTP_METHOD_POST;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getHttpMethod()
+	{
+		return $this->httpMethod;
 	}
 
 	/**
@@ -136,5 +174,21 @@ class Elvis_BizClasses_ClientRequest
 	public function getExpectJson()
 	{
 		return $this->expectJson;
+	}
+
+	/**
+	 * @param Attachment $file
+	 */
+	public function addFileToUpload( Attachment $file )
+	{
+		$this->fileToUpload = $file;
+	}
+
+	/**
+	 * @return Attachment|null
+	 */
+	public function getFileToUpload()
+	{
+		return $this->fileToUpload;
 	}
 }

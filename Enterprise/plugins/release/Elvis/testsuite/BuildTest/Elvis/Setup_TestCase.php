@@ -44,7 +44,6 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 			$vars = array();
 			$vars['BuildTest_Elvis'] = $utils->parseTestSuiteOptions( $this, $response );
 			$vars['BuildTest_Elvis']['ticket'] = $response->Ticket;
-			$vars['BuildTest_Elvis']['logonResponse'] = $response;
 			$this->setSessionVariables( $vars );
 		}
 	}

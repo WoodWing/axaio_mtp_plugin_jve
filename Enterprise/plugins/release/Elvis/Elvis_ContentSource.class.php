@@ -112,6 +112,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		}
 		$hit = $service->retrieve( $assetId );
 
+		$hasSceId = array_key_exists('sceId', $hit->{'metadata'}) && empty($hit->{'metadata'}['sceId']);
+		if( !$hasSceId ) {
+			$hit->{'metadata'}['sceId'] = $object->MetaData->BasicMetaData->ID; // needed by getFiles()
+		}
+
 		if( !$haveVersion || version_compare( $haveVersion, ElvisUtils::getEnterpriseVersionNumber($hit->metadata['versionNumber']), '<' ) ) {
 			$object->Files = $this->getFiles( $hit, array( $rendition ) );
 		}
@@ -120,11 +125,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		/*
 		 * When creating a new shadow object some metadata needs to be set from Enterprise -> Elvis. However,
 		 * this data is not available in i.e. createShadowObjects. The object in Enterprise is created at a later stage.
-		 * Currently there is no proper way of setting the Entprise object ID, so it is set here (once).
+		 * Currently there is no proper way of setting the Enterprise object ID, so it is set here (once).
 		 * There are way more scenario's to trigger this method except for creating a new shadow object, so check if the
 		 * Enterprise object Id is already set, if not, only then update the metadata.  
 		 */
-		if( !array_key_exists('sceId', $hit->{'metadata'}) && empty($hit->{'metadata'}['sceId']) ) {
+		if( !$hasSceId ) {
 			LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 setting Enterprise metadata.' );
 
 			$elvisMetadata = $this->fillElvisEnterpriseMetadata( $object->MetaData );

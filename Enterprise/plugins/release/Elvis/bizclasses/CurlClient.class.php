@@ -15,6 +15,9 @@ class Elvis_BizClasses_CurlClient
 	/** @var array */
 	private $curlOptions = array();
 
+	/** @var string */
+	private static $severity;
+
 	/**
 	 * @param array $curlOptions cURL options to override.
 	 */
@@ -23,16 +26,34 @@ class Elvis_BizClasses_CurlClient
 		$this->curlOptions = $curlOptions;
 	}
 	/**
-	 * Execute service request against Elvis server.
+	 * Execute a service request against Elvis server for the session user or ELVIS_SUPER_USER.
 	 *
 	 * @param Elvis_BizClasses_ClientRequest $request
 	 * @return Elvis_BizClasses_ClientResponse
 	 * @throws Elvis_BizClasses_Exception
 	 */
-	public function execute( $request )
+	public function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
+	{
+		try {
+			self::$severity = 'INFO'; // failure on workflow user is not severe because we have a fallback user to try
+			$response = self::executeForUser( $request, $request->getUserShortName() );
+		} catch( Elvis_BizClasses_Exception $e ) {
+			self::$severity = 'ERROR'; // failure on fallback user means error
+			$response = self::executeForUser( $request, ELVIS_SUPER_USER );
+		}
+		return $response;
+	}
+
+	/**
+	 * Execute a service request against Elvis server for a specific user.
+	 *
+	 * @param Elvis_BizClasses_ClientRequest $request
+	 * @param string $userShortName
+	 * @return Elvis_BizClasses_ClientResponse
+	 */
+	private function executeForUser( Elvis_BizClasses_ClientRequest $request, string $userShortName ) : Elvis_BizClasses_ClientResponse
 	{
 		$curlOptions = $this->curlOptions;
-		$userShortName = $request->getUserShortName();
 		$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::getAccessToken( $userShortName ) );
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isAuthenticationError() ) {
@@ -48,7 +69,7 @@ class Elvis_BizClasses_CurlClient
 	 * @param string $accessToken
 	 * @return array HTTP headers
 	 */
-	private static function composeHttpHeaders( $accessToken )
+	private static function composeHttpHeaders( string $accessToken ) : array
 	{
 		$headerOptions = array();
 		// Elvis has support for 'ETag' and so it returns it in the file download response headers. When the web browser
@@ -69,7 +90,7 @@ class Elvis_BizClasses_CurlClient
 	 * @return Elvis_BizClasses_ClientResponse
 	 * @throws Elvis_BizClasses_Exception
 	 */
-	private static function plainRequest( $request, $curlOptions )
+	private static function plainRequest( Elvis_BizClasses_ClientRequest $request, array $curlOptions ) : Elvis_BizClasses_ClientResponse
 	{
 		$responseHeaders = [];
 		$ch = curl_init();
@@ -105,7 +126,7 @@ class Elvis_BizClasses_CurlClient
 	 * @param array $headers array to save response headers in.
 	 * @return array request cURL options.
 	 */
-	private static function getCurlOptions( $request, $curlOptions, &$headers )
+	private static function getCurlOptions( Elvis_BizClasses_ClientRequest $request, array $curlOptions, array &$headers ) : array
 	{
 		$url = ELVIS_URL.'/'.$request->composeServiceUrl();
 		$defaultCurlOptions = array(
@@ -117,6 +138,22 @@ class Elvis_BizClasses_CurlClient
 		);
 		// Enable this to retrieve the HTTP headers sent out (after calling curl_exec)
 		$defaultCurlOptions[ CURLINFO_HEADER_OUT ] = 1;
+
+		if( $request->getHttpMethod() == Elvis_BizClasses_ClientRequest::HTTP_METHOD_POST ) {
+			$defaultCurlOptions[ CURLOPT_POST ] = 1;
+			// When there's no post data in a POST method, make sure to clear the CURLOPT_POSTFIELDS.  Otherwise, it
+			// seems like for some PHP cURL version, it will send Content-Length = -1 in the HTTP headers which is unwanted
+			// since it leads to a bad request. To avoid this, here we set the CURLOPT_POSTFIELDS to be empty (array()),
+			// to make sure that the Content-Length is 0.
+			$defaultCurlOptions[ CURLOPT_POSTFIELDS ] = array();
+
+			$fileToUpload = $request->getFileToUpload();
+			if( $fileToUpload ) {
+				$defaultCurlOptions[ CURLOPT_SAFE_UPLOAD ] = true;
+				$defaultCurlOptions[ CURLOPT_POSTFIELDS ]['Filedata'] =
+					new CURLFile( $fileToUpload->FilePath, $fileToUpload->Type );
+			}
+		}
 
 		if( $request->getExpectJson() ) {
 			$defaultCurlOptions[ CURLOPT_RETURNTRANSFER ] = 1;
@@ -141,7 +178,7 @@ class Elvis_BizClasses_CurlClient
 	 * @param array $options cURL option array.
 	 * @param array $headers array to save response headers in.
 	 */
-	private static function addSaveHeaderFunction( &$options, &$headers )
+	private static function addSaveHeaderFunction( array &$options, array &$headers )
 	{
 		if( array_key_exists( CURLOPT_HEADERFUNCTION, $options ) ) {
 			$existingHeaderFunction = $options[ CURLOPT_HEADERFUNCTION ];
@@ -164,7 +201,7 @@ class Elvis_BizClasses_CurlClient
 	 * @param array $curlOptions
 	 * @return array with cURL options
 	 */
-	private static function postUrlEncodedOptions( $post, $curlOptions )
+	private static function postUrlEncodedOptions( array $post, array $curlOptions ) : array
 	{
 		$urlEncodedFields = array();
 		foreach( $post as $key => $value ) {
@@ -185,7 +222,7 @@ class Elvis_BizClasses_CurlClient
 	 * @return string access token
 	 * @throws Elvis_BizClasses_Exception
 	 */
-	private static function getAccessToken( $shortUserName )
+	private static function getAccessToken( string $shortUserName ) : string
 	{
 		$accessToken = Elvis_DbClasses_Token::get( $shortUserName );
 		if( is_null( $accessToken ) ) {
@@ -201,7 +238,7 @@ class Elvis_BizClasses_CurlClient
 	 * @return string access token
 	 * @throws Elvis_BizClasses_Exception
 	 */
-	private static function requestAndSaveAccessToken( $shortUserName )
+	private static function requestAndSaveAccessToken( string $shortUserName ) : string
 	{
 		$accessToken = self::requestAccessToken( $shortUserName );
 		Elvis_DbClasses_Token::save( $shortUserName, $accessToken );
@@ -215,7 +252,7 @@ class Elvis_BizClasses_CurlClient
 	 * @return string access token
 	 * @throws Elvis_BizClasses_Exception when access token can't be retrieved.
 	 */
-	private static function requestAccessToken( $shortUserName )
+	private static function requestAccessToken( string $shortUserName ) : string
 	{
 		$post = array(
 			'grant_type' => 'client_credentials',
@@ -228,7 +265,7 @@ class Elvis_BizClasses_CurlClient
 		$request = new Elvis_BizClasses_ClientRequest( 'oauth/token', $shortUserName );
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isError() ) {
-			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token' );
+			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token', self::$severity );
 		}
 		return $response->jsonBody()->access_token;
 	}

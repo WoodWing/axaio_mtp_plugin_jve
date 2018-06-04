@@ -22,6 +22,31 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
+	 * Create a new asset at the Elvis server.
+	 *
+	 * @param array $metadata Metadata to be updated in Elvis
+	 * @param string[] $metadataToReturn
+	 * @param Attachment $fileToUpload
+	 * @return stdClass representation of ElvisEntHit
+	 * @throws BizException
+	 */
+	public function create( array $metadata, array $metadataToReturn, Attachment $fileToUpload ) : stdClass
+	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/create' );
+
+		$request = new Elvis_BizClasses_ClientRequest( 'services/create', $this->shortUserName );
+		$request->addQueryParamAsJson( 'metadata', $metadata );
+		$request->addCsvQueryParam( 'metadataToReturn', $metadataToReturn );
+		$request->setHttpPostMethod();
+		$request->setExpectJson();
+		$request->addFileToUpload( $fileToUpload );
+
+		$client = new Elvis_BizClasses_CurlClient();
+		$response = $client->execute( $request );
+		return $response->jsonBody();
+	}
+
+	/**
 	 * Checkout an asset at the Elvis server.
 	 *
 	 * @param string $assetId
@@ -29,7 +54,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function checkout( string $assetId )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/checkout - $assetId:'.$assetId );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/checkout - assetId:'.$assetId );
 
 		$request = new Elvis_BizClasses_ClientRequest( 'services/checkout', $this->shortUserName );
 		$request->addPathParam( $assetId );
@@ -46,7 +71,7 @@ class Elvis_BizClasses_Client
 	 * @return stdClass representation of ElvisEntHit
 	 * @throws BizException
 	 */
-	public function retrieve( string $assetId, array $metadataToReturn )
+	public function retrieve( string $assetId, array $metadataToReturn ) : stdClass
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/retrieve - assetId:'.$assetId );
 
@@ -71,7 +96,7 @@ class Elvis_BizClasses_Client
 	 * @return stdClass[] representation of ElvisEntHit[]
 	 * @throws BizException
 	 */
-	public function listVersions( string $assetId )
+	public function listVersions( string $assetId ) : array
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/asset/history - assetId:'.$assetId );
 

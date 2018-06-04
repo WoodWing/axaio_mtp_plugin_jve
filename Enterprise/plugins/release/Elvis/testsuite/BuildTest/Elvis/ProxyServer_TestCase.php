@@ -22,6 +22,9 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		return 'Mimic Content Station using downloading images over Elvis proxy:'.
 			'<ul>'.
 			'<li>Lookup the Elvis proxy entry. (Check ContentSourceProxyLinks_ELVIS in LogOnResponse->ServerInfo->FeatureSet.)</li>'.
+			'<li>Upload an image to Elvis server (no shadow object created yet).</li>'.
+			'<li>Create a dossier in Enterprise (CreateObjects).</li>'.
+			'<li>Add the image to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>'.
 			'<li>Get image metadata for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>'.
 			'<li>Download the Elvis image via the Elvis proxy server.</li>'.
 			'<li>Test downloading the Elvis image (native file) via the Elvis proxy server. Expect HTTP 200.</li>'.
@@ -32,10 +35,16 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	}
 
 	/** @var WW_Utils_TestSuite */
-	private $utils;
+	private $testSuiteUtils;
 
-	/** @var string */
-	private $ticket;
+	/** @var WW_TestSuite_Setup_WorkflowFactory */
+	private $workflowFactory;
+
+	/** @var string Session ticket of the admin user setting up the brand, workflow and access rights. */
+	private $adminTicket;
+
+	/** @var string Session ticket of the end workflow user editing dossiers and images. */
+	private $workflowTicket;
 
 	/** @var WflLogOnResponse */
 	private $logonResponse;
@@ -43,11 +52,23 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	/** @var string */
 	private $proxyUrl;
 
+	/** @var ElvisEntHit */
+	private $imageAssetHit;
+
 	/** @var Object */
 	private $imageObject;
 
+	/** @var Object */
+	private $dossierObject;
+
 	/** @var string */
 	private $imageProxyDownloadLink;
+
+	/** @var BizTransferServer */
+	private $transferServer;
+
+	/** @var Attachment[] Files copied to the transfer server folder. */
+	private $transferServerFiles = array();
 
 	/**
 	 * @inheritdoc
@@ -59,6 +80,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 
 			// Test workflow of the Elvis proxy.
 			$this->lookupProxyEntryInLogOnResponse();
+			$this->createShadowImageObject();
 			$this->retrieveImageDownloadUrl();
 			$this->testDownloadImageViaProxyServer();
 
@@ -80,17 +102,125 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	private function setupTestData()
 	{
 		require_once __DIR__.'/../../../config.php';
+		$this->assertTrue( in_array(ELVIS_CREATE_COPY, array( 'Shadow_Only', 'Copy_To_Production_Zone' ) ),
+			'For the ELVIS_CREATE_COPY option, only the values "Shadow_Only" and "Copy_To_Production_Zone" '.
+			'are supported for this test. Please adjust the configuration and retry.' );
+
+		require_once __DIR__.'/../../../config.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
-		$this->utils = new WW_Utils_TestSuite();
-		$this->utils->initTest( 'JSON' );
+		$this->testSuiteUtils = new WW_Utils_TestSuite();
+		$this->testSuiteUtils->initTest( 'JSON' );
 
-		require_once BASEDIR.'/server/interfaces/services/wfl/WflLogOnResponse.class.php';
 		$vars = $this->getSessionVariables();
-		$this->ticket = $vars['BuildTest_Elvis']['ticket'];
-		$this->assertNotNull( $this->ticket, 'No ticket found. Please enable the "Setup test data" test case and try again.' );
+		$this->adminTicket = $vars['BuildTest_Elvis']['ticket'];
+		$this->assertNotNull( $this->adminTicket, 'No ticket found. Please enable the "Setup test data" test case and try again.' );
 
-		$this->logonResponse = @$vars['BuildTest_Elvis']['logonResponse'];
+		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
+		$this->transferServer = new BizTransferServer();
+
+		require_once BASEDIR.'/server/wwtest/testsuite/Setup/WorkflowFactory.class.php';
+		$this->workflowFactory = new WW_TestSuite_Setup_WorkflowFactory( $this, $this->adminTicket, $this->testSuiteUtils );
+		$this->workflowFactory->setConfig( $this->getWorkflowConfig() );
+		$this->workflowFactory->setupTestData();
+
+		$this->testSuiteUtils->setRequestComposer(
+			function( WflLogOnRequest $req ) {
+				$req->ClientAppName = 'WW_TestSuite_BuildTest_Elvis';
+				$req->ClientAppVersion = '1.0.0 build 0';
+				$req->RequestInfo = array( 'Publications', 'ServerInfo' );
+				$req->User = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( 'John %timestamp%' );
+				$req->Password = 'ww';
+			}
+		);
+		$this->logonResponse = $this->testSuiteUtils->wflLogOn( $this );
 		$this->assertNotNull( $this->logonResponse );
+
+		$this->workflowTicket = $this->logonResponse->Ticket;
+		$this->assertNotNull( $this->workflowTicket );
+	}
+
+	/**
+	 * Compose a home brewed data structure which specifies the brand setup, user authorization and workflow objects.
+	 *
+	 * These are the admin entities to be automatically setup (and tear down) by the $this->workflowTicket utils class.
+	 * It composes the specified layout objects for us as well but without creating/deleting them in the DB.
+	 *
+	 * @return stdClass
+	 */
+	private function getWorkflowConfig()
+	{
+		$config = <<<EOT
+{
+	"Publications": [{
+		"Name": "PubTest1 %timestamp%",
+		"PubChannels": [{
+			"Name": "Print",
+			"Type": "print",
+			"PublishSystem": "Enterprise",
+			"Issues": [{ "Name": "Week 35" }],
+			"Editions": [{ "Name": "North" },{ "Name": "South"	}]
+		}],
+		"States": [{
+			"Name": "Dossier Draft",
+			"Type": "Dossier",
+			"Color": "FFFFFF"
+		},{
+			"Name": "Image Draft",
+			"Type": "Image",
+			"Color": "FFFFFF"
+		}],
+		"Categories": [{ "Name": "People" }]
+	}],
+	"Users": [{
+		"Name": "John %timestamp%",
+		"FullName": "John Smith %timestamp%",
+		"Password": "ww",
+		"Deactivated": false,
+		"FixedPassword": false,
+		"EmailUser": false,
+		"EmailGroup": false
+	}],
+	"UserGroups": [{
+		"Name": "Editors %timestamp%",
+		"Admin": false
+	}],
+	"Memberships": [{
+		"User": "John %timestamp%",
+		"UserGroup": "Editors %timestamp%"
+	}],
+	"AccessProfiles": [{
+		"Name": "Full %timestamp%",
+		"ProfileFeatures": ["View", "Read", "Write", "Open_Edit", "Delete", "Purge", "Change_Status", "CreateDossier"]
+	}],
+	"UserAuthorizations": [{
+		"Publication": "PubTest1 %timestamp%",
+		"UserGroup": "Editors %timestamp%",
+		"AccessProfile": "Full %timestamp%"
+	}],
+	"AdminAuthorizations": [{
+		"Publication": "PubTest1 %timestamp%",
+		"UserGroup": "Editors %timestamp%"
+	}],
+	"Objects":[{
+		"Name": "Dossier1 %timestamp%",
+		"Type": "Dossier",
+		"Comment": "Created by Build Test class: %classname%",
+		"Publication": "PubTest1 %timestamp%",
+		"Category": "People",
+		"State": "Dossier Draft",
+		"Targets": [{
+			"PubChannel": "Print",
+			"Issue": "Week 35",
+			"Editions": [ "North", "South" ]
+		}]
+	}]
+}
+EOT;
+
+		$config = str_replace( '%classname%', __CLASS__, $config );
+		$config = json_decode( $config );
+		$this->assertNotNull( $config );
+		return $config;
 	}
 
 	/**
@@ -111,27 +241,109 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	}
 
 	/**
+	 * Upload an image to Elvis, create a dossier in Enterprise and add the image into the dossier.
+	 *
+	 * This simulates a D&D operation in CS. As a result a shadow image object is created in Enterprise.
+	 */
+	private function createShadowImageObject()
+	{
+		$this->createElvisImage();
+		$this->createEntDossier();
+		$this->addElvisImageToEntDossier();
+	}
+
+	/**
+	 * Upload an image file directly to Elvis server. (This does NOT create a shadow object yet.)
+	 */
+	private function createElvisImage()
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		$service = new ElvisContentSourceService();
+
+		$fileToUpload = new Attachment();
+		$fileToUpload->Rendition = 'native';
+		$fileToUpload->Type = 'image/png';
+		$fileToUpload->FilePath = __DIR__.'/testdata/image1.png';
+
+		$metadata = array();
+		BizSession::startSession( $this->workflowTicket );
+		BizSession::checkTicket( $this->workflowTicket );
+		$hit = $service->create( $metadata, $fileToUpload );
+		BizSession::endSession();
+
+		$this->assertInstanceOf( 'ElvisEntHit', $hit );
+		$this->assertNotNull( $hit->id );
+		$this->imageAssetHit = $hit;
+	}
+
+	/**
+	 * Create a dossier as configured in getWorkflowConfig().
+	 */
+	private function createEntDossier()
+	{
+		$object = $this->workflowFactory->getObjectConfig()->getComposedObject( 'Dossier1 %timestamp%' );
+		$response = $this->testSuiteUtils->callCreateObjectService( $this, $this->workflowTicket, array( $object ) );
+		$this->assertInstanceOf( 'WflCreateObjectsResponse', $response );
+		$this->assertInstanceOf( 'Object', $response->Objects[0] );
+		$this->dossierObject = $response->Objects[0];
+	}
+
+	/**
+	 * Add the Elvis image to the dossier to let the core automatically create a shadow image.
+	 */
+	private function addElvisImageToEntDossier()
+	{
+		require_once __DIR__.'/../../../util/ElvisUtils.class.php';
+
+		$relation = new Relation();
+		$relation->Parent = $this->dossierObject->MetaData->BasicMetaData->ID;
+		$relation->Child = ElvisUtils::getAlienIdFromAssetId( $this->imageAssetHit->id );
+		$relation->Type = 'Contained';
+
+		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';
+		$request = new WflCreateObjectRelationsRequest();
+		$request->Ticket = $this->workflowTicket;
+		$request->Relations[] = $relation;
+
+		/** @var WflCreateObjectRelationsResponse $response */
+		$response = $this->testSuiteUtils->callService( $this, $request, 'Place the Elvis image in the dossier' );
+		$this->assertInstanceOf( 'WflCreateObjectRelationsResponse', $response );
+
+		$this->assertCount( 1, $response->Relations );
+		$this->assertInstanceOf( 'Relation', $response->Relations[0] );
+		$this->assertNotNull( $response->Relations[0]->Child );
+		$this->shadowImageId = $response->Relations[0]->Child;
+	}
+
+	/**
 	 * Expect the Elvis proxy download URL in the GetObjects response.
 	 */
 	private function retrieveImageDownloadUrl()
 	{
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest();
-		$request->Ticket = $this->ticket;
-		$request->IDs = array( '500101124' ); // TODO: create Elvis shadow image object (instead of hard-coded image id)
+		$request->Ticket = $this->workflowTicket;
+		$request->IDs = array( $this->shadowImageId );
 		$request->Areas = array( 'Workflow' );
 		$request->Rendition = 'native';
 		$request->Lock = false;
 		$request->RequestInfo = array( 'ContentSourceProxyLinks_ELVIS', 'MetaData' );
 		/** @var WflGetObjectsResponse $response */
-		$response = $this->utils->callService( $this, $request, 'Get image object' );
+		$response = $this->testSuiteUtils->callService( $this, $request, 'Get image object' );
 		$this->assertInstanceOf( 'WflGetObjectsResponse', $response );
 		$this->assertCount( 1, $response->Objects );
 
 		$this->imageObject = reset( $response->Objects );
 		$this->assertInstanceOf( 'Object', $this->imageObject );
-
 		$this->assertEquals( 'ELVIS', $this->imageObject->MetaData->BasicMetaData->ContentSource );
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Shadow_Only':
+				$this->assertEquals( $this->imageAssetHit->id, $this->imageObject->MetaData->BasicMetaData->DocumentID );
+				break;
+			case 'Copy_To_Production_Zone':
+				$this->assertNotEquals( $this->imageAssetHit->id, $this->imageObject->MetaData->BasicMetaData->DocumentID );
+				break;
+		}
 
 		$file = reset( $this->imageObject->Files );
 		$this->assertEquals( 'native', $file->Rendition );
@@ -147,7 +359,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	 */
 	private function testDownloadImageViaProxyServer()
 	{
-		$imageContents = file_get_contents( $this->imageProxyDownloadLink.'&ticket='.$this->ticket );
+		$imageContents = file_get_contents( $this->imageProxyDownloadLink.'&ticket='.$this->workflowTicket );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
 		$this->assertEquals( 200, $this->getHttpStatusCode( $http_response_header ) );
 		$this->assertGreaterThan( 0, strlen( $imageContents ) );
@@ -199,7 +411,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?objectid=9223372036854775807'. // take max int 64 for non-existing object id
 			'&rendition=preview';
-		@file_get_contents( $url.'&ticket='.$this->ticket );
+		@file_get_contents( $url.'&ticket='.$this->workflowTicket );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
 		$this->assertEquals( 404, $this->getHttpStatusCode( $http_response_header ) );
 	}
@@ -213,7 +425,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
 			'&rendition=foo';
-		@file_get_contents( $url.'&ticket='.$this->ticket );
+		@file_get_contents( $url.'&ticket='.$this->workflowTicket );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
 		$this->assertEquals( 400, $this->getHttpStatusCode( $http_response_header ) );
 	}
@@ -223,7 +435,28 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	 */
 	private function tearDownTestData()
 	{
-		// No test data created yet, so nothing to clean so far.
+		foreach( array( $this->imageObject, $this->dossierObject ) as $object ) {
+			if( $object ) {
+				$errorReport = '';
+				$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $object->MetaData->BasicMetaData->ID,
+					'Deleting object for '.__CLASS__, $errorReport );
+			}
+		}
+		unset( $this->imageObject );
+		unset( $this->dossierObject );
+
+		if( $this->workflowTicket ) {
+			$this->testSuiteUtils->wflLogOff( $this, $this->workflowTicket );
+		}
+
+		$this->workflowFactory->teardownTestData();
+
+		if( $this->transferServerFiles ) {
+			foreach( $this->transferServerFiles as $file ) {
+				$this->transferServer->deleteFile( $file->FilePath );
+			}
+			unset( $this->transferServerFiles );
+		}
 	}
 
 	/**

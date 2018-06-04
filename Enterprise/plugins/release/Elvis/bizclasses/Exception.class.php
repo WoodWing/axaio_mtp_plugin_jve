@@ -10,20 +10,13 @@ class Elvis_BizClasses_Exception extends BizException
 	/**
 	 * Construct the Elvis_BizClasses_Exception.
 	 *
-	 * For ES 10.0 or later it constructs a S1144 error else it constructs S1069.
-	 *
 	 * @param string $detail Error detail of code specifying the error.
+	 * @param string|null $severity Severity / log level, such as 'ERROR', 'WARN', etc. See LogHandler for accepted values.
 	 */
-	public function __construct( $detail )
+	public function __construct( $detail, $severity = null )
 	{
-		require_once BASEDIR.'/server/utils/VersionUtils.class.php';
-		$serverVer = explode( ' ', SERVERVERSION ); // split '9.2.0' from 'build 123'
-		if( VersionUtils::versionCompare( $serverVer[0], '10.0.0', '>=' ) ) {
-			$localizedMessage = self::replaceLineEndingIfAny( BizResources::localize( 'Elvis.ERR_CONNECT' ) );
-			parent::__construct( null, 'Server', $detail, $localizedMessage );
-		} else {
-			parent::__construct( 'ERR_INVALID_OPERATION', 'Server', $detail );
-		}
+		$localizedMessage = self::replaceLineEndingIfAny( BizResources::localize( 'Elvis.ERR_CONNECT' ) );
+		parent::__construct( null, 'Server', $detail, $localizedMessage, null, $severity );
 	}
 
 	/**

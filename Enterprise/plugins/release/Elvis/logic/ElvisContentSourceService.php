@@ -32,7 +32,6 @@ require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
  */
 class ElvisContentSourceService
 {
-
 	const SERVICE = 'contentSourceService';
 
 	public function __construct()
@@ -46,8 +45,26 @@ class ElvisContentSourceService
 	}
 
 	/**
+	 * Create a new asset at the Elvis server.
+	 *
+	 * @since 10.5.0
+	 * @param array $metadata Metadata to be updated in Elvis
+	 * @param Attachment $fileToUpload
+	 * @return ElvisEntHit
+	 * @throws BizException
+	 */
+	public function create( array $metadata, Attachment $fileToUpload ) : ElvisEntHit
+	{
+		$metadataToReturn = $this->getMetadataToReturn();
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$stdClassHit = $client->create( $metadata, $metadataToReturn, $fileToUpload );
+		return $this->convertStdClassToElvisEntHit( $stdClassHit );
+	}
+
+	/**
 	 * Retrieve an asset from Elvis server.
 	 *
+	 * @since 10.5.0
 	 * @param string $assetId
 	 * @throws BizException when checkout failed.
 	 */
@@ -64,7 +81,21 @@ class ElvisContentSourceService
 	 * @return ElvisEntHit
 	 * @throws BizException
 	 */
-	public function retrieve( $assetId )
+	public function retrieve( $assetId ) : ElvisEntHit
+	{
+		$metadataToReturn = $this->getMetadataToReturn();
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$stdClassHit = $client->retrieve( $assetId, $metadataToReturn );
+		return $this->convertStdClassToElvisEntHit( $stdClassHit );
+	}
+
+	/**
+	 * Compose list of Elvis metadata properties to retrieve for an asset.
+	 *
+	 * @since 10.5.0
+	 * @return string[]
+	 */
+	private function getMetadataToReturn() : array
 	{
 		require_once __DIR__.'/../model/MetadataHandler.class.php';
 
@@ -74,10 +105,7 @@ class ElvisContentSourceService
 		$metadataToReturn[] = 'sceId';
 		$metadataToReturn[] = 'sceSystemId';
 		$metadataToReturn[] = 'resolutionUnit'; // required to convert Elvis resolutionX to Enterprise Dpi
-
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$stdClassHit = $client->retrieve( $assetId, $metadataToReturn );
-		return $this->convertStdClassToElvisEntHit( $stdClassHit );
+		return $metadataToReturn;
 	}
 
 	/**
@@ -86,10 +114,11 @@ class ElvisContentSourceService
 	 * REST responses from Elvis server are JSON decoded and result into stdClass.
 	 * This function can be called to convert it to the real data class ElvisEntHit.
 	 *
+	 * @since 10.5.0
 	 * @param stdClass $stdClassHit
 	 * @return ElvisEntHit
 	 */
-	private function convertStdClassToElvisEntHit( stdClass $stdClassHit )
+	private function convertStdClassToElvisEntHit( stdClass $stdClassHit ) : ElvisEntHit
 	{
 		/** @var ElvisEntHit $hit */
 		$hit = WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntHit' );
