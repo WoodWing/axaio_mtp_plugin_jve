@@ -143,12 +143,7 @@ class Elvis_BizClasses_CurlClient
 
 		if( $request->getHttpMethod() == Elvis_BizClasses_ClientRequest::HTTP_METHOD_POST ) {
 			$defaultCurlOptions[ CURLOPT_POST ] = 1;
-			// When there's no post data in a POST method, make sure to clear the CURLOPT_POSTFIELDS.  Otherwise, it
-			// seems like for some PHP cURL version, it will send Content-Length = -1 in the HTTP headers which is unwanted
-			// since it leads to a bad request. To avoid this, here we set the CURLOPT_POSTFIELDS to be empty (array()),
-			// to make sure that the Content-Length is 0.
 			$defaultCurlOptions[ CURLOPT_POSTFIELDS ] = $request->getPostParams();
-
 			$fileToUpload = $request->getFileToUpload();
 			if( $fileToUpload ) {
 				$defaultCurlOptions[ CURLOPT_SAFE_UPLOAD ] = true;

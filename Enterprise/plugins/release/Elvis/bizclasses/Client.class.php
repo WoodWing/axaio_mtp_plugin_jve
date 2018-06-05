@@ -97,7 +97,7 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
-	 * Checkout an asset at the Elvis server.
+	 * Undo checkout an asset at the Elvis server.
 	 *
 	 * @param string $assetId
 	 * @throws BizException
