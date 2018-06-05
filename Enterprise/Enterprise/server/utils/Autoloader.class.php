@@ -39,6 +39,9 @@
  */
 class WW_Utils_Autoloader
 {
+	/** @var array */
+	private static $serverPlugins = array();
+
 	/**
 	 * Register this autoloader. See module header for details.
 	 */
@@ -61,18 +64,31 @@ class WW_Utils_Autoloader
 				}
 			} elseif( strpos( $className, '_' ) !== false ) { // custom plugin classes
 				$classNameParts = explode( '_', $className );
-				$fileNameBase = array_pop( $classNameParts );
-				if( $fileNameBase ) {
-					$folders = array_map('strtolower', $classNameParts );
-					$folder = implode( '/', $folders );
-					$file = BASEDIR.'/config/plugins/'.$folder.'/'.$fileNameBase.'.class.php';
-					if( file_exists( $file ) ) {
-						require $file;
-						return true;
+				$pluginName = reset( $classNameParts );
+				if( array_key_exists( $pluginName, self::$serverPlugins ) ) { // plugin registered?
+					$fileNameBase = array_pop( $classNameParts );
+					if( $fileNameBase ) {
+						$folders = array_map( 'strtolower', $classNameParts );
+						$folder = implode( '/', $folders );
+						$file = BASEDIR.'/config/plugins/'.$folder.'/'.$fileNameBase.'.class.php';
+						if( file_exists( $file ) ) {
+							require $file;
+							return true;
+						}
 					}
 				}
 			}
 			return false;
 		} );
+	}
+
+	/**
+	 * Enable autoload of PHP classes defined by a given server plugin.
+	 *
+	 * @param string $pluginName
+	 */
+	public static function registerServerPlugin( string $pluginName )
+	{
+		self::$serverPlugins[ $pluginName ] = true;
 	}
 }

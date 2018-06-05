@@ -39,6 +39,8 @@ if( file_exists( __DIR__.'/../../config.php' ) ) {
 } else { // fall back at symbolic link to VCS source location of server plug-in
 	require_once '../../../Enterprise/config/config.php';
 }
+require_once __DIR__.'/config.php';
+
 $footprint = sprintf( '%03d', round( ( microtime( true ) - $beforeInclude ) * 1000 ) );
 LogHandler::Log( 'ElvisRestProxyIndex', 'CONTEXT', 'Enterprise Server footprint: '.$footprint.'ms (= startup time).' );
 

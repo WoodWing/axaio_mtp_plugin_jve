@@ -218,6 +218,10 @@ if( !defined('ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE' )) {
  * --------------------------------------------------------------------------------
  */
 
+// Enable autoload PHP classes defined by the Elvis plugin.
+require_once BASEDIR.'/server/utils/Autoloader.class.php';
+WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
+
 /**
  * Field mappings between Enterprise and Elvis fields. 
  * 
