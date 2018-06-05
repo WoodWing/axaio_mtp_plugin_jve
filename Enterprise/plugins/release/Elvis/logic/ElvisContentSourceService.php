@@ -222,11 +222,10 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Lists the versions of an asset.
+	 * List the version history of an asset in Elvis server.
 	 *
 	 * @param string $assetId
 	 * @return ElvisEntHit[]
-	 * @throws BizException
 	 */
 	public function listVersions( $assetId )
 	{
@@ -236,7 +235,7 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Promotes provided version to head.
+	 * Promote a provided asset version to the head version in the history in Elvis server.
 	 *
 	 * @param string $assetId
 	 * @param string $versionNumber
@@ -254,7 +253,7 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Returns particular VersionHit object for a given assetId
+	 * Return a particular asset version from the history in Elvis server.
 	 *
 	 * @param string $assetId
 	 * @param string $versionNumber
