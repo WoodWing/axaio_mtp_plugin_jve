@@ -48,7 +48,7 @@ class DBActionproperty extends DBBase
 	 *
 	 * @since 10.x.x
 	 * @param string[] $columns The list of DB field names.
-	 * @param string[] $values List of array list which contains the DB fields ( $columns ) values.
+	 * @param array $values List of array list which contains the DB fields ( $columns ) values.
 	 * @return bool
 	 */
 	public static function insertActionsProperty( $columns, $values )

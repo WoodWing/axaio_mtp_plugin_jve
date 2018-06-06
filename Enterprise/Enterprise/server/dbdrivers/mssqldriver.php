@@ -916,7 +916,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	 *
 	 * @param string $tableName Table name without the 'smart_' prefix.
 	 * @param string[] $fieldNames List of DB field names.
-	 * @param array[] $fieldValues List of array list which contains the database values. Refer to function header.
+	 * @param array $fieldValues List of array list which contains the database values. Refer to function header.
 	 * @param bool $autoincrement Whether the table to be inserted has autoincrement db field.
 	 * @return string The composed sql string.
 	 */

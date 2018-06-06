@@ -343,7 +343,7 @@ class BizProperty
 	 * @since 10.x.x
 	 * @param array $usages
 	 * @param string $action
-	 * @return string[] array
+	 * @return string[]
 	 */
 	private static function defaultPropertyUsageWhenUsagesAvailable( $usages, $action )
 	{
@@ -2942,7 +2942,7 @@ class BizProperty
 	 *
 	 * @since 10.x.x
 	 * @param string $staticProp
-	 * @param string[] $propUsage
+	 * @param PropertyUsage $propUsage
 	 * @return string[]
 	 */
 	private static function handleEditableAndMandatorySettingsForActionSendTo( $staticProp, $propUsage )
@@ -2981,7 +2981,7 @@ class BizProperty
 	 * @since 10.x.x
 	 * @param string[] $usages
 	 * @param string[] $staticProps
-	 * @return string[] array
+	 * @return string[]
 	 */
 	private static function filterPropsForActionSendTo( $usages, $staticProps )
 	{
