@@ -120,6 +120,7 @@ class WwcxToWcmlConversion_WflGetObjects extends WflGetObjects_EnterpriseConnect
 	private function callInDesignServerToConvertArticle( $wwcxIdsPath, $wcmlIdsPath )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
 		try {
 			// Run javascript.js at InDesign Server, to convert the wwcx file to wcml
 			BizInDesignServerJobs::createAndRunJob(
@@ -127,7 +128,7 @@ class WwcxToWcmlConversion_WflGetObjects extends WflGetObjects_EnterpriseConnect
 				array( 'wwcxPath' => $wwcxIdsPath, 'wcmlPath' => $wcmlIdsPath ),
 				'WwcxToWcml conversion', null, null, // jobtype, object id, ids obj
 				'8.0', // Hardcode doc version, this is the minimum version will use by the IDS to do conversion
-				'11.0' // Max version is CC 2015. CC 2017 (v12) doesn't support the conversion anymore.
+				'11.0' // Max version is CC 2015. CC 2017 and above (v12) do not support the conversion anymore.
 			);
 		} catch( BizException $e ) {
 			$detail = $e->getMessage().' ('.$e->getDetail().'). ';

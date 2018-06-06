@@ -133,6 +133,10 @@ class WW_TestSuite_BuildTest_UserAuthorizations_UserAuthorizations_TestCase exte
 	private function testWorkflowAccess()
 	{
 		global $globAuth;
+		if( !isset( $globAuth ) ) {
+			require_once BASEDIR.'/server/authorizationmodule.php';
+			$globAuth = new authorizationmodule();
+		}
 		$globAuth->getRights($this->workflowUser);
 		$layout1 = $this->workflowFactory->getObjectConfig()->getComposedObject( 'Layout %timestamp%' );
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';

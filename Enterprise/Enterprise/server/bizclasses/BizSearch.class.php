@@ -109,12 +109,12 @@ class BizSearch
 	 * @param string[] $areas Which area to search in: Workflow or Trash
 	 * @throws BizException
 	 */
-	public static function updateObjects( $objects, $suppressExceptions = true, $areas = array('Workflow') ) 
+	public static function updateObjects( $objects, $suppressExceptions = true, $areas = array('Workflow') )
 	{
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 			$connRetVals = array();
-			BizServerPlugin::runDefaultConnectors( 'Search', null, 'updateObjects', array($objects, $areas), $connRetVals );
+			BizServerPlugin::runDefaultConnectors( 'Search', null, 'updateObjects', array( $objects, $areas ), $connRetVals );
 			// All connectors did index at this point, so we flag them at Enterprise DB. See Note#001!
 
 			self::setIndexAndUnindexFlag( $objects, $connRetVals, $areas );
@@ -200,7 +200,7 @@ class BizSearch
 	 * See Search_EnterpriseConnector for comments
 	 * This is a facade hiding the details of calling the method from the right plug-in(s)
 	 * *
-	 * @param string[] $objectsIds List of object ids to unindex
+	 * @param integer[] $objectsIds List of object ids to unindex, null in case to unindex all objects.
 	 * @param string[] $areas Which area to search in: Workflow or Trash
 	 * @param boolean $suppressExceptions Whether or not to suppress throwing exceptions
 	 * @throws BizException
@@ -212,12 +212,17 @@ class BizSearch
 			$connRetVals = array();
 			BizServerPlugin::runDefaultConnectors( 'Search', null, 'unIndexObjects', array($objectsIds, false/*$deletedObject= true/false also doesn't matter as it is not used*/), $connRetVals );
 			// All connectors did unindex at this point, so we flag them at Enterprise DB. See Note#001!
-			$handledObjectIds = self::collectHandledObjectIds( $connRetVals );
-			self::setUnindexFlag( $handledObjectIds, $areas );
-			self::setLastOptimized( '' ); // clear!
-		} catch( BizException $e ) {
+			if( $connRetVals ) { // E.g. Solr is installed and running.
+				if( is_null( $objectsIds ) ) {
+					self::setUnindexFlagOnAllObjects( $areas );
+				} else {
+					$handledObjectIds = self::collectHandledObjectIds( $connRetVals );
+					self::setUnindexFlag( $handledObjectIds, $areas );
+				}
+				self::setLastOptimized( '' );
+			}
+		} catch( BizException $e ) { // E.g. Solr plug-in is installed but Solr is not up and running.
 			// BizException caught, no un-indexed needs to be done here.
-
 			if( $suppressExceptions ) {
 				LogHandler::Log( 'Search', 'ERROR', 'unIndexObjects error: '.$e->getMessage().' '.$e->getDetail() );
 			} else {
@@ -539,29 +544,38 @@ class BizSearch
 	 * Flag objects as indexed in the database.
 	 *
 	 * @param int[] $objectIds Object ids to be flagged as indexed.
-	 * @param array|null $areas
+	 * @param string[]|null $areas
 	 */
-	private static function setIndexFlag( $objectIds, array $areas=null )
+	private static function setIndexFlag( $objectIds, array $areas = null )
 	{
-		// Mark objects as indexed.  We also include the object types that we skipped to 
-		// prevent seeing them again and again in a growing list
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		$deletedObjects = in_array('Trash',$areas) ? true : false;
-		DBObject::setIndexed( $objectIds,  $deletedObjects);
+		$deletedObjects = in_array( 'Trash', $areas ) ? true : false;
+		DBObject::setIndexed( $objectIds, $deletedObjects );
 	}
 
 	/**
 	 * Flag objects as not indexed in the database.
 	 *
 	 * @param int[] $objectIds Object ids to be flagged as not indexed.
-	 * @param array $areas
+	 * @param string[] $areas
 	 */
-	private static function setUnindexFlag( $objectIds, array $areas)
+	private static function setUnindexFlag( $objectIds, array $areas )
 	{
-		// Mark objects as indexed.  We also include the object types that we skipped to 
-		// prevent seeing them again and again in a growing list
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		DBObject::setNonIndex( $objectIds , $areas );
+		DBObject::setNonIndex( $objectIds, $areas );
+	}
+
+	/**
+	 * Flag all objects as not indexed in the database.
+	 *
+	 * @since 10.1.8
+	 * @since 10.4.1
+	 * @param string[] $areas
+	 */
+	private static function setUnindexFlagOnAllObjects( array $areas)
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		DBObject::setNonIndexOnAllObjects( $areas );
 	}
 
 	/**

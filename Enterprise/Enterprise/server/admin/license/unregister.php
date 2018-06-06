@@ -71,7 +71,7 @@
 	}
 	$installationcode = $keystr;
 
-	$localURL = SERVERURL_ROOT.htmlspecialchars( $_SERVER['PHP_SELF'] );
+    $localURL = SERVERURL_ROOT.htmlspecialchars( INETROOT.'/server/admin/license/unregister.php' );
 	$localURL = str_replace( "unregister.php", "getlicense.php", $localURL );
 
 	$step = 10;

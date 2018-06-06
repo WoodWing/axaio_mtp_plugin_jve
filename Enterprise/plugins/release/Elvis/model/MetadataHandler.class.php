@@ -107,6 +107,11 @@ class MetadataHandler
 	/**
 	 * Updates Elvis metadata.
 	 *
+	 * If a user logs on the cache of editable fields is cleared. The very first time a user changes a property of an
+	 * asset the cache is rebuild. For all subsequent modify actions the cache is reused. The advantage of this approach
+	 * is that if a user does not modify properties no field information has to be retrieved from Elvis. This reduces
+	 * network traffic. But when he does modify properties the cache is rebuild with the latest information of Elvis.
+	 *
 	 * @param string $elvisId Id of asset
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
 	 * @param Attachment|null $file
@@ -120,16 +125,10 @@ class MetadataHandler
 		require_once dirname( __FILE__ ).'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
 		$editableFields = ElvisSessionUtil::getEditableFields();
-		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
+		if( $editableFields == null ) {
 			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
 			$fieldInfos = ElvisRESTClient::fieldInfo();
-			if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
-				if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
-					( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
-				) {
-					$editableFields[] = $field;
-				}
-			}
+			$editableFields = $this->extractEditableFieldsFromFieldInfos( $fieldInfos );
 			ElvisSessionUtil::setEditableFields( $editableFields );
 		}
 
@@ -320,4 +319,24 @@ class MetadataHandler
 	}
 
 
+	/**
+	 * Extracts the fields that are marked as editable from the response returned by the fieldinfo web service.
+	 *
+	 * @since 10.1.8
+	 * @param stdClass $fieldInfos
+	 * @return array
+	 */
+	private function extractEditableFieldsFromFieldInfos( stdClass $fieldInfos )
+	{
+		$editableFields = array();
+		if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
+			if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
+				( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
+			) {
+				$editableFields[] = $field;
+			}
+		}
+
+		return $editableFields;
+	}
 }

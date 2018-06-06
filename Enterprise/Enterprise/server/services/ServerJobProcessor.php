@@ -24,6 +24,7 @@ class ServerJobProcessor
 	private $watchDogFile;   // See runTresholdPhase()
 	private $watchDogHandle; // See runTresholdPhase()
 	private $myServer;       // ServerJob of the Enterprise Server current process is working for.
+	private $jobsProcessed;  // Number of jobs processed during this run.
 	
 	public function __construct( array $options = array() )
 	{
@@ -35,10 +36,12 @@ class ServerJobProcessor
 		
 		// Enrich given options with defaults
 		$defaults = array(
-			'sleeptime' => 1,
-			'maxexectime' => 5,
-			'maxjobprocesses' => 5,
+			'sleeptime' => 1, // How many seconds to snooze between job executions.
+			'maxexectime' => 5, // After how many seconds this process should end.
+			'processmaxjobs' => PHP_INT_MAX, // How many jobs this process should execute. Sky high value, so by default only 'maxexectime' is effective.
+			'maxjobprocesses' => 5, // How many job processors are allowed to run in parallel on this machine.
 		);
+		$this->jobsProcessed = 0;
 		$this->options = array_merge( $defaults, $options );
 		$this->myServer = null;
 	}
@@ -256,11 +259,12 @@ class ServerJobProcessor
 				$newPhase = 'treshold';
 			}
 				
-			// Overrule new phase suggestion (above) when running out of time or
+			// Overrule new phase suggestion (above) when running out of time or when executed enough jobs of
 			// when system admin asked us to stop for maintenance reasons.
 			$newPhase = $this->resolveLogicalPhase( $phases, $phase, $newPhase );
 			if( $newPhase != 'stopped' ) {
-				if( $this->stopWatch->Fetch() >= $this->options['maxexectime'] ) {
+				if( $this->stopWatch->Fetch() >= $this->options['maxexectime'] ||
+					$this->jobsProcessed >= $this->options['processmaxjobs'] ) {
 					$this->log( 'DEBUG', 'Server Job processor has reached end of life time.' );
 					$newPhase = 'finishing';
 				} else if( self::hasMaintenanceStarted() ) {
@@ -456,6 +460,7 @@ class ServerJobProcessor
 
 			// Process the job on this machine
 			$this->processJob( $job );
+			$this->jobsProcessed += 1;
 
 			// Look up the job configuration.
 			require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';

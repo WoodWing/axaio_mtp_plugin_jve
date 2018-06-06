@@ -33,6 +33,7 @@ class BizServerJobConfig
 		'EnterpriseEvent' => true,
 		'AutoCleanServerJobs' => true,
 		'AutoCleanServiceLogs' => true,
+		'AutoCleanWebEditDir' => true,
 	);
 
 	public function __construct()
@@ -348,6 +349,11 @@ class BizServerJobConfig
 					$bizServiceLogsCleanup = new BizServiceLogsCleanup();
 					$bizServiceLogsCleanup->getJobConfig( $jobConfig );
 					break;
+				case 'AutoCleanWebEditDir':
+					require_once BASEDIR.'/server/bizclasses/BizWebeditDirCleanup.class.php';
+					$bizWebEditDirCleanup = new BizWebeditDirCleanup();
+					$bizWebEditDirCleanup->getJobConfig( $jobConfig );
+					break;
 				default:
 					throw new BizException( 'ERR_ARGUMENT', 'Server', 
 						'No core server job handler class found for Server Job type "'.$jobType.'".' );
@@ -390,5 +396,37 @@ class BizServerJobConfig
 		}
 		
 		return $jobConfigs;
+	}
+
+	/**
+	 * Checks if a server job is registered and has a user assigned to it.
+	 *
+	 * @since 10.4.1
+	 * @param string $jobName
+	 * @return bool
+	 */
+	public function isJobRegisteredAndAssigned( string $jobName ): bool
+	{
+		$registered = false;
+		$userAssigned = false;
+		$result = true;
+		$dbConfigs = $this->listJobConfigs();
+		if( $dbConfigs ) foreach( $dbConfigs as $jobConfigs ) {
+			foreach ( $jobConfigs as $name => $jobConfig ) {
+				if( $name == $jobName ) {
+					$registered = true;
+					if( $jobConfig->UserId ) {
+						$userAssigned = true;
+					}
+					break 2;
+				}
+			}
+		}
+
+		if( !$registered || !$userAssigned ) {
+			$result = false;
+		}
+
+		return $result;
 	}
 }

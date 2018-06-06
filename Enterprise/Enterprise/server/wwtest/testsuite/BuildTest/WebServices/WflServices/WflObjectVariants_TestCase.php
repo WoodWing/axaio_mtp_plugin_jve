@@ -146,7 +146,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectVariants_TestCase 
 	}
 
 	/**
-	 * Check if the MasterId property can not be changed through (Multi)SetObjectProperties nor SaveObjects.
+	 * Check if the MasterId property can not be changed through SaveObjects.
 	 *
 	 * @param string $masterId
 	 * @param string $articleId
@@ -162,23 +162,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectVariants_TestCase 
 		$this->assertEquals( $masterId, $article->MetaData->BasicMetaData->MasterId );
 		$article = $this->getArticle( $articleId, false );
 		$this->assertEquals( $masterId, $article->MetaData->BasicMetaData->MasterId );
-
-		// Check readonly MasterId for SetObjectProperties.
-		$article->MetaData->BasicMetaData->MasterId = strval( PHP_INT_MAX -1 );
-		$article->MetaData = $this->setArticleProperties( $article->MetaData );
-		$this->assertEquals( $masterId, $article->MetaData->BasicMetaData->MasterId );
-		$article = $this->getArticle( $articleId, false );
-		$this->assertEquals( $masterId, $article->MetaData->BasicMetaData->MasterId );
-
 		$this->unlockArticle( $article->MetaData->BasicMetaData->ID );
-
-		// Check readonly MasterId for MultiSetObjectProperties.
-		$articleMetaDataValues = array( new MetaDataValue( 'MasterId', null,
-			array( new PropertyValue( strval( PHP_INT_MAX -1 ) ) )
-		) );
-		$this->multisetArticleProperties( $article->MetaData->BasicMetaData->ID, $articleMetaDataValues );
-		$article = $this->getArticle( $articleId, false );
-		$this->assertEquals( $masterId, $article->MetaData->BasicMetaData->MasterId );
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - SERVICE CALLS - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -660,6 +660,7 @@ class DBTicket extends DBBase
 	 * 
 	 * @param string $user
 	 * @throws BizException In case of database connection error.
+	 * @returns boolean|null True on success (or when nothing to do) and else null.
 	 */
 	public static function DbPurgeTicketsByUser( $user )
 	{
@@ -671,8 +672,10 @@ class DBTicket extends DBBase
 			}
 			$where = '`usr` = ?';
 			$params = array( strval( $user ) );
-			self::deleteRows( self::TABLENAME, $where, $params );
+			return self::deleteRows( self::TABLENAME, $where, $params );
 		}
+
+		return true;
 	}
 
 	/**
