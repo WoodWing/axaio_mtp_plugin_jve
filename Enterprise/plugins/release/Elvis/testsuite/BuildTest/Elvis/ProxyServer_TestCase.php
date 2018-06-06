@@ -11,29 +11,53 @@
 
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
+class WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData
+{
+	/** @var ElvisEntHit */
+	public $assetHit;
+
+	/** @var Object */
+	public $entObject;
+
+	/** @var string */
+	public $proxyDownloadLink;
+
+	/** @var string */
+	public $shadowId;
+
+	/** @var Attachment */
+	public $attachment;
+}
+
 class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 {
 	public function getDisplayName() { return 'Elvis proxy server'; }
-	public function getTestGoals()   { return 'Validates wether the Elvis proxy server is operating properly.'; }
+	public function getTestGoals()   { return 'Validates wether the Elvis integration and the Elvis proxy server are operating properly.'; }
 	public function getPrio()        { return 500; }
 
 	public function getTestMethods()
 	{
-		return 'Mimic Content Station using downloading images over Elvis proxy:'.
+		return 'Mimic Elvis client uploading images and Content Station creating shadow images and downloading images over the Elvis proxy:'.
 			'<ul>'.
+			'<li>Setup a brand, a user and access rights.</li>'.
 			'<li>Lookup the Elvis proxy entry. (Check ContentSourceProxyLinks_ELVIS in LogOnResponse->ServerInfo->FeatureSet.)</li>'.
-			'<li>Upload an image to Elvis server (no shadow object created yet).</li>'.
+			'<li>Upload an image0 to Elvis server (no shadow object created yet).</li>'.
 			'<li>Create a dossier in Enterprise (CreateObjects).</li>'.
-			'<li>Add the image to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>'.
-			'<li>Get image metadata for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>'.
-			'<li>Download the Elvis image via the Elvis proxy server.</li>'.
-			'<li>Retrieve the object version history for the Elvis shadow image object for which no versions are available yet.</li>'.
-			'<li>Upload a new version for the image directly to Elvis server.</li>'.
-			'<li>Retrieve the object version history for the Elvis shadow image object for which one versions should be available now.</li>'.
+			'<li>Add the image0 to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>'.
+			'<li>Get metadata of image0 for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>'.
+			'<li>Download Elvis image0 via the Elvis proxy server.</li>'.
+			'<li>Retrieve the object version history for the Elvis shadow image0 object for which no versions are available yet.</li>'.
+			'<li>Upload a new version for image0 directly to Elvis server.</li>'.
+			'<li>Retrieve the object version history for the Elvis shadow image0 object for which one versions should be available now.</li>'.
 			'<li>Test downloading the Elvis image (native file) via the Elvis proxy server. Expect HTTP 200.</li>'.
 			'<li>Attempt download image preview via the Elvis proxy server with invalid ticket. Expect HTTP 403.</li>'.
 			'<li>Attempt download image preview via the Elvis proxy server with non-existing object id. Expect HTTP 404.</li>'.
 			'<li>Attempt download image via the Elvis proxy server with unsupported file rendition. Expect HTTP 400.</li>'.
+			'<li>Add the image1 to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>'.
+			'<li>Get metadata of image1 for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>'.
+			'<li>Set the Description property with some multibyte UTF-8 chars for both images at once. (MultiSetObjectProperties, which calls updateBulk)</li>'.
+			'<li>Retrieve the metadata of both images directly from Elvis server and validate the description fields.</li>'.
+			'<li>Cleanup the brand, user and access rights.</li>'.
 			'</ul>';
 	}
 
@@ -55,17 +79,11 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	/** @var string */
 	private $proxyUrl;
 
-	/** @var ElvisEntHit */
-	private $imageAssetHit;
-
-	/** @var Object */
-	private $imageObject;
-
 	/** @var Object */
 	private $dossierObject;
 
-	/** @var string */
-	private $imageProxyDownloadLink;
+	/** @var WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData[] */
+	private $images = array();
 
 	/** @var string[] */
 	private $lockedObjectIds = array();
@@ -86,8 +104,9 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 
 			// Test workflow of the Elvis proxy.
 			$this->lookupProxyEntryInLogOnResponse();
-			$this->createShadowImageObject();
-			$this->retrieveImageDownloadUrl();
+			$this->createEntDossier();
+			$this->createShadowImageObject( 0 );
+			$this->retrieveImageWithDownloadUrl( 0 );
 			$this->testDownloadImageViaProxyServer();
 			$this->testListZeroVersionsOfImage();
 			$this->updateElvisImage();
@@ -100,6 +119,13 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 			$this->testInvalidTicket();
 			$this->testObjectNotFound();
 			$this->testUnsupportedFileRendition();
+
+			// Test bulk operations
+			$this->createShadowImageObject( 1 );
+			$this->retrieveImageWithDownloadUrl( 1 );
+			$this->multiSetImageDescriptionProperties();
+			$this->validateImageDescriptionFieldsAtElvis();
+
 		} catch( BizException $e ) {
 		}
 		$this->tearDownTestData();
@@ -146,6 +172,31 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 
 		$this->workflowTicket = $this->logonResponse->Ticket;
 		$this->assertNotNull( $this->workflowTicket );
+
+		// Aside to talking over HTTP/JSON, this script also does direct calls, such as $service->create() and
+		// $service->update(). For that we need a valid session.
+		BizSession::startSession( $this->workflowTicket );
+		BizSession::checkTicket( $this->workflowTicket );
+
+		// Create image0
+		$this->images[0] = new WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData();
+		$this->images[0]->attachments[0] = new Attachment();
+		$this->images[0]->attachments[0]->Rendition = 'native';
+		$this->images[0]->attachments[0]->Type = 'image/png';
+		$this->images[0]->attachments[0]->FilePath = __DIR__.'/testdata/image0_v1.png';
+
+		// Update image0
+		$this->images[0]->attachments[1] = new Attachment();
+		$this->images[0]->attachments[1]->Rendition = 'native';
+		$this->images[0]->attachments[1]->Type = 'image/png';
+		$this->images[0]->attachments[1]->FilePath = __DIR__.'/testdata/image0_v2.png';
+
+		// Create image1
+		$this->images[1] = new WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData();
+		$this->images[1]->attachments[0] = new Attachment();
+		$this->images[1]->attachments[0]->Rendition = 'native';
+		$this->images[1]->attachments[0]->Type = 'image/jpg';
+		$this->images[1]->attachments[0]->FilePath = __DIR__.'/testdata/image1_v1.jpg';
 	}
 
 	/**
@@ -250,42 +301,6 @@ EOT;
 	}
 
 	/**
-	 * Upload an image to Elvis, create a dossier in Enterprise and add the image into the dossier.
-	 *
-	 * This simulates a D&D operation in CS. As a result a shadow image object is created in Enterprise.
-	 */
-	private function createShadowImageObject()
-	{
-		$this->createElvisImage();
-		$this->createEntDossier();
-		$this->addElvisImageToEntDossier();
-	}
-
-	/**
-	 * Upload an image file directly to Elvis server. (This does NOT create a shadow object yet.)
-	 */
-	private function createElvisImage()
-	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
-		$service = new ElvisContentSourceService();
-
-		$fileToUpload = new Attachment();
-		$fileToUpload->Rendition = 'native';
-		$fileToUpload->Type = 'image/png';
-		$fileToUpload->FilePath = __DIR__.'/testdata/image1.png';
-
-		$metadata = array();
-		BizSession::startSession( $this->workflowTicket );
-		BizSession::checkTicket( $this->workflowTicket );
-		$hit = $service->create( $metadata, $fileToUpload );
-		BizSession::endSession();
-
-		$this->assertInstanceOf( 'ElvisEntHit', $hit );
-		$this->assertNotNull( $hit->id );
-		$this->imageAssetHit = $hit;
-	}
-
-	/**
 	 * Create a dossier as configured in getWorkflowConfig().
 	 */
 	private function createEntDossier()
@@ -298,15 +313,46 @@ EOT;
 	}
 
 	/**
-	 * Add the Elvis image to the dossier to let the core automatically create a shadow image.
+	 * Upload an image to Elvis and add it to the dossier.
+	 *
+	 * This simulates a D&D operation in CS. As a result a shadow image object is created in Enterprise.
+	 *
+	 * @param integer $imageIndex
 	 */
-	private function addElvisImageToEntDossier()
+	private function createShadowImageObject( $imageIndex )
+	{
+		$this->createElvisImage( $imageIndex );
+		$this->addElvisImageToEntDossier( $imageIndex );
+	}
+
+	/**
+	 * Upload an image file directly to Elvis server. (This does NOT create a shadow object yet.)
+	 *
+	 * @param integer $imageIndex
+	 */
+	private function createElvisImage( $imageIndex )
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		$service = new ElvisContentSourceService();
+		$metadata = array();
+		$hit = $service->create( $metadata, $this->images[ $imageIndex ]->attachments[0] );
+		$this->assertInstanceOf( 'ElvisEntHit', $hit );
+		$this->assertNotNull( $hit->id );
+		$this->images[ $imageIndex ]->assetHit = $hit;
+	}
+
+	/**
+	 * Add the Elvis image to the dossier to let the core automatically create a shadow image.
+	 *
+	 * @param integer $imageIndex
+	 */
+	private function addElvisImageToEntDossier( $imageIndex )
 	{
 		require_once __DIR__.'/../../../util/ElvisUtils.class.php';
 
 		$relation = new Relation();
 		$relation->Parent = $this->dossierObject->MetaData->BasicMetaData->ID;
-		$relation->Child = ElvisUtils::getAlienIdFromAssetId( $this->imageAssetHit->id );
+		$relation->Child = ElvisUtils::getAlienIdFromAssetId( $this->images[ $imageIndex ]->assetHit->id );
 		$relation->Type = 'Contained';
 
 		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';
@@ -321,18 +367,20 @@ EOT;
 		$this->assertCount( 1, $response->Relations );
 		$this->assertInstanceOf( 'Relation', $response->Relations[0] );
 		$this->assertNotNull( $response->Relations[0]->Child );
-		$this->shadowImageId = $response->Relations[0]->Child;
+		$this->images[ $imageIndex ]->shadowId = $response->Relations[0]->Child;
 	}
 
 	/**
 	 * Expect the Elvis proxy download URL in the GetObjects response.
+	 *
+	 * @param integer $imageIndex
 	 */
-	private function retrieveImageDownloadUrl()
+	private function retrieveImageWithDownloadUrl( $imageIndex )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest();
 		$request->Ticket = $this->workflowTicket;
-		$request->IDs = array( $this->shadowImageId );
+		$request->IDs = array( $this->images[ $imageIndex ]->shadowId );
 		$request->Areas = array( 'Workflow' );
 		$request->Rendition = 'native';
 		$request->Lock = false;
@@ -342,27 +390,29 @@ EOT;
 		$this->assertInstanceOf( 'WflGetObjectsResponse', $response );
 		$this->assertCount( 1, $response->Objects );
 
-		$this->imageObject = reset( $response->Objects );
-		$this->assertInstanceOf( 'Object', $this->imageObject );
-		$this->lockedObjectIds[] = $this->imageObject->MetaData->BasicMetaData->ID;
-		$this->assertEquals( 'ELVIS', $this->imageObject->MetaData->BasicMetaData->ContentSource );
+		$imageObject = reset( $response->Objects );
+		$this->assertInstanceOf( 'Object', $imageObject );
+		$this->images[ $imageIndex ]->entObject = $imageObject;
+
+		$this->lockedObjectIds[] = $imageObject->MetaData->BasicMetaData->ID;
+		$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
 		switch( ELVIS_CREATE_COPY ) {
 			case 'Shadow_Only':
-				$this->assertEquals( $this->imageAssetHit->id, $this->imageObject->MetaData->BasicMetaData->DocumentID );
+				$this->assertEquals( $this->images[ $imageIndex ]->assetHit->id, $imageObject->MetaData->BasicMetaData->DocumentID );
 				break;
 			case 'Copy_To_Production_Zone':
-				$this->assertNotEquals( $this->imageAssetHit->id, $this->imageObject->MetaData->BasicMetaData->DocumentID );
-				$this->imageAssetHit->id = $this->imageObject->MetaData->BasicMetaData->DocumentID;
+				$this->assertNotEquals( $this->images[ $imageIndex ]->assetHit->id, $imageObject->MetaData->BasicMetaData->DocumentID );
+				$this->images[ $imageIndex ]->assetHit->id = $imageObject->MetaData->BasicMetaData->DocumentID;
 				break;
 		}
 
-		$file = reset( $this->imageObject->Files );
+		$file = reset( $imageObject->Files );
 		$this->assertEquals( 'native', $file->Rendition );
 		$this->assertNull( $file->FileUrl );
 		$this->assertNull( $file->ContentSourceFileLink );
 		$this->assertNotNull( $file->ContentSourceProxyLink );
 
-		$this->imageProxyDownloadLink = $file->ContentSourceProxyLink;
+		$this->images[ $imageIndex ]->proxyDownloadLink = $file->ContentSourceProxyLink;
 	}
 
 	/**
@@ -370,7 +420,7 @@ EOT;
 	 */
 	private function testDownloadImageViaProxyServer()
 	{
-		$imageContents = file_get_contents( $this->imageProxyDownloadLink.'&ticket='.$this->workflowTicket );
+		$imageContents = file_get_contents( $this->images[0]->proxyDownloadLink.'&ticket='.$this->workflowTicket );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
 		$this->assertEquals( 200, $this->getHttpStatusCode( $http_response_header ) );
 		$this->assertGreaterThan( 0, strlen( $imageContents ) );
@@ -381,7 +431,7 @@ EOT;
 	 */
 	private function testListZeroVersionsOfImage()
 	{
-		$versions = $this->listObjectVersions( $this->shadowImageId );
+		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
 		$this->assertCount( 0, $versions ); // no versions created yet
 	}
 
@@ -414,21 +464,11 @@ EOT;
 	{
 		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
 		$service = new ElvisContentSourceService();
-
-		$fileToUpload = new Attachment();
-		$fileToUpload->Rendition = 'native';
-		$fileToUpload->Type = 'image/png';
-		$fileToUpload->FilePath = __DIR__.'/testdata/image2.png';
-
 		$metadata = array();
-		BizSession::startSession( $this->workflowTicket );
-		BizSession::checkTicket( $this->workflowTicket );
-		$hit = $service->update( $this->imageAssetHit->id, $metadata, $fileToUpload, true ); // check-in
-		BizSession::endSession();
-
+		$hit = $service->update( $this->images[0]->assetHit->id, $metadata, $this->images[0]->attachments[1], true ); // check-in
 		$this->assertInstanceOf( 'ElvisEntHit', $hit );
 		$this->assertNotNull( $hit->id );
-		$this->imageAssetHit = $hit;
+		$this->images[0]->assetHit = $hit;
 	}
 
 	/**
@@ -436,7 +476,7 @@ EOT;
 	 */
 	private function testListOneVersionsOfImage()
 	{
-		$versions = $this->listObjectVersions( $this->shadowImageId );
+		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
 		$this->assertCount( 1, $versions );
 	}
 
@@ -470,7 +510,7 @@ EOT;
 	{
 		require_once BASEDIR.'/config/plugins/Elvis/config.php';
 		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
-			'?objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
+			'?objectid='.urlencode( $this->images[0]->entObject->MetaData->BasicMetaData->ID ).
 			'&rendition=native';
 		@file_get_contents( $url.'&ticket=123' );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
@@ -498,11 +538,66 @@ EOT;
 	{
 		require_once BASEDIR.'/config/plugins/Elvis/config.php';
 		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
-			'?objectid='.urlencode( $this->imageObject->MetaData->BasicMetaData->ID ).
+			'?objectid='.urlencode( $this->images[0]->entObject->MetaData->BasicMetaData->ID ).
 			'&rendition=foo';
 		@file_get_contents( $url.'&ticket='.$this->workflowTicket );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
 		$this->assertEquals( 400, $this->getHttpStatusCode( $http_response_header ) );
+	}
+
+	/**
+	 * Set the Description property of all test images.
+	 */
+	private function multiSetImageDescriptionProperties()
+	{
+		$description = new MetaDataValue();
+		$description->Property = 'Description'; // there is a ReadWriteHandler for Elvis for this property
+		$description->PropertyValues = array();
+		$description->PropertyValues[0] = new PropertyValue();
+		$description->PropertyValues[0]->Value = '東京'; // the word 'Tokyo' written in Japanese for a UTF-8 multi-byte test
+
+		require_once BASEDIR . '/server/services/wfl/WflMultiSetObjectPropertiesService.class.php';
+		$request = new WflMultiSetObjectPropertiesRequest();
+		$request->Ticket = $this->workflowTicket;
+		$request->IDs = $this->getImageObjectIds();
+		$request->MetaData = array( $description );
+		/** @var WflMultiSetObjectPropertiesResponse $response */
+		$response = $this->testSuiteUtils->callService( $this, $request,
+			'Adjust the Description property for the test images.' );
+		$this->assertInstanceOf( 'WflMultiSetObjectPropertiesResponse', $response );
+		$this->assertCount( 0, $response->Reports );
+	}
+
+	/**
+	 * Compose a list of object ids of the images used in this test.
+	 *
+	 * @return string[]
+	 */
+	private function getImageObjectIds()
+	{
+		$objectIds = array();
+		if( $this->images ) foreach( $this->images as $image ) {
+			if( $image->entObject ) {
+				$objectIds[] = $image->entObject->MetaData->BasicMetaData->ID;
+			}
+		}
+		return $objectIds;
+	}
+
+	/**
+	 * Validate whether the Description for the images are correctly set in Elvis.
+	 *
+	 * Note that this script calls MultiSetObjectProperties and so the Elvis plugin calls services/bulkUpdate.
+	 * By retrieving the description directly from Elvis server we know if all works well.
+	 */
+	private function validateImageDescriptionFieldsAtElvis()
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		$service = new ElvisContentSourceService();
+		foreach( $this->images as $image ) {
+			$hit = $service->retrieve( $image->assetHit->id );
+			$this->assertEquals( '東京', $hit->metadata['description'] );
+		}
 	}
 
 	/**
@@ -521,6 +616,7 @@ EOT;
 			}
 			unset( $this->transferServerFiles );
 		}
+		BizSession::endSession();
 	}
 
 	/**
@@ -528,14 +624,14 @@ EOT;
 	 */
 	private function deleteObjects()
 	{
-		foreach( array( $this->imageObject, $this->dossierObject ) as $object ) {
-			if( $object ) {
-				$errorReport = '';
-				$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $object->MetaData->BasicMetaData->ID,
-					'Deleting object for '.__CLASS__, $errorReport );
-			}
+		$objectsIds = $this->getImageObjectIds();
+		$objectsIds[] = $this->dossierObject->MetaData->BasicMetaData->ID;
+		foreach( $objectsIds as $objectId ) {
+			$errorReport = '';
+			$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $objectId,
+				'Deleting object for '.__CLASS__, $errorReport );
 		}
-		unset( $this->imageObject );
+		unset( $this->images );
 		unset( $this->dossierObject );
 	}
 

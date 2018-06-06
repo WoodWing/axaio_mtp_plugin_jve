@@ -96,11 +96,17 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @param string $paramName
 	 * @param string $searchName
-	 * @param string $searchValue
+	 * @param string[] $searchValues
 	 */
-	public function addSearchQueryParam( string $paramName, string $searchName, string $searchValue )
+	public function addSearchQueryParam( string $paramName, string $searchName, array $searchValues )
 	{
-		$this->queryParams[ urlencode( $paramName ) ] = urlencode( $searchName ).':"'.urlencode( $searchValue ).'"';
+		$encSearchValue = '';
+		$operator = '';
+		foreach( $searchValues as $searchValue ) {
+			$encSearchValue .= $operator.urlencode( $searchName ).':"'.urlencode( $searchValue ).'"';
+			$operator = urlencode( ' OR ' );
+		}
+		$this->queryParams[ urlencode( $paramName ) ] = $encSearchValue;
 	}
 
 	/**
@@ -138,6 +144,24 @@ class Elvis_BizClasses_ClientRequest
 	public function addPostParamAsJson( string $name, $value )
 	{
 		$this->postParams[ urlencode( $name ) ] = json_encode( $value );
+	}
+
+	/**
+	 * Add a search POST parameter to the REST service request.
+	 *
+	 * @param string $paramName
+	 * @param string $searchName
+	 * @param string[] $searchValues
+	 */
+	public function addSearchPostParam( string $paramName, string $searchName, array $searchValues )
+	{
+		$encSearchValue = '';
+		$operator = '';
+		foreach( $searchValues as $searchValue ) {
+			$encSearchValue .= $operator.urlencode( $searchName ).':"'.urlencode( $searchValue ).'"';
+			$operator = ' OR ';
+		}
+		$this->postParams[ urlencode( $paramName ) ] = $encSearchValue;
 	}
 
 	/**

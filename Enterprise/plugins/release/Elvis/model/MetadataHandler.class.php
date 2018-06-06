@@ -85,9 +85,9 @@ class MetadataHandler
 	 * Metadata is translated from Enterprise fields to Elvis fields by using the configured field handlers.
 	 *
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues
-	 * @param mixed[] $elvisMetadata
+	 * @param array $elvisMetadata
 	 */
-	public function fillElvisMetadata( $entMetadataOrValues, &$elvisMetadata )
+	public function fillElvisMetadata( $entMetadataOrValues, array &$elvisMetadata )
 	{
 		$this->initFieldHandlers();
 
@@ -109,14 +109,14 @@ class MetadataHandler
 	 * Update (changed) Enterprise metadata in Elvis server.
 	 *
 	 * @param string $assetId
-	 * @param MetaData|MetaDataValue[] $entMetadataOrValues The (changed) metadata to update.
+	 * @param MetaData $entMetadata The (changed) metadata to update.
 	 * @param Attachment|null $file
 	 * @param bool $undoCheckout Set to true to check-in the object, or false to retain the checkout status of the object.
 	 */
-	public function update( $assetId, $entMetadataOrValues, $file = null, $undoCheckout = false )
+	public function update( string $assetId, MetaData $entMetadata, $file = null, $undoCheckout = false )
 	{
 		$elvisMetadata = array();
-		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
+		$this->fillElvisMetadata( $entMetadata, $elvisMetadata );
 
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
@@ -147,16 +147,15 @@ class MetadataHandler
 	 * Update (changed) Enterprise metadata in Elvis server for multiple assets.
 	 *
 	 * @param string[] $assetIds
-	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Changed metadata
+	 * @param MetaDataValue[] $entMetadataValues Changed metadata
 	 */
-	public function updateBulk( $assetIds, $entMetadataOrValues )
+	public function updateBulk( array $assetIds, array $entMetadataValues )
 	{
 		$elvisMetadata = array();
-		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
-
-		if( !empty( $elvisMetadata ) ) {
-			require_once __DIR__.'/../logic/ElvisRESTClient.php';
-			ElvisRESTClient::updateBulk( $assetIds, $elvisMetadata );
+		$this->fillElvisMetadata( $entMetadataValues, $elvisMetadata );
+		if( $assetIds && $elvisMetadata ) {
+			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+			$client->updateBulk( $assetIds, $elvisMetadata );
 		}
 	}
 

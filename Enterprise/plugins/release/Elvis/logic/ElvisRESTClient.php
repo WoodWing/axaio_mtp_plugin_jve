@@ -204,35 +204,6 @@ class ElvisRESTClient extends ElvisClient
 	}
 
 	/**
-	 * Performs a bulk update for provided metadata.
-	 *
-	 * Calls the updatebulk web service over the Elvis JSON REST interface.
-	 *
-	 * @param string[] $elvisIds Ids of assets
-	 * @param MetaData|MetaDataValue[] $metadata Changed metadata
-	 * @throws BizException
-	 */
-	public static function updateBulk( $elvisIds, $metadata )
-	{
-		$post = array();
-
-		// Build query for ids
-		$post['q'] = '';
-		foreach( $elvisIds as $elvisId ) {
-			if( !empty( $post['q'] ) ) {
-				$post['q'] .= ' OR ';
-			}
-			$post['q'] .= 'id:'.$elvisId;
-		}
-
-		if( !empty( $metadata ) ) {
-			$post['metadata'] = json_encode( $metadata );
-		}
-		$client = new ElvisRESTClient();
-		$client->send( 'services/updatebulk', $post );
-	}
-
-	/**
 	 * Performs REST logout of the acting Enterprise user from Elvis.
 	 *
 	 * Calls the logout web service over the Elvis JSON REST interface.

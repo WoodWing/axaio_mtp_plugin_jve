@@ -28,7 +28,6 @@ class Elvis_BizClasses_Client
 	 * @param string[] $metadataToReturn
 	 * @param Attachment|null $fileToUpload
 	 * @return stdClass representation of ElvisEntHit
-	 * @throws BizException
 	 */
 	public function create( stdClass $metadata, array $metadataToReturn, $fileToUpload ) : stdClass
 	{
@@ -57,11 +56,10 @@ class Elvis_BizClasses_Client
 	 * @param Attachment|null $fileToUpload
 	 * @param bool $undoCheckout
 	 * @return stdClass representation of ElvisEntHit
-	 * @throws BizException
 	 */
 	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, $fileToUpload, bool $undoCheckout ) : stdClass
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/create' );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/update' );
 
 		$request = new Elvis_BizClasses_ClientRequest( 'services/update', $this->shortUserName );
 		$request->addPostParam( 'id', $assetId );
@@ -80,10 +78,29 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
+	 * Update multiple assets in Elvis server for the provided metadata.
+	 *
+	 * @param string[] $assetIds
+	 * @param array $metadata Changed asset metadata
+	 */
+	public function updateBulk( array $assetIds, $metadata )
+	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/updatebulk' );
+
+		$request = new Elvis_BizClasses_ClientRequest( 'services/updatebulk', $this->shortUserName );
+		$request->addSearchPostParam( 'q', 'id', $assetIds );
+		$request->addPostParamAsJson( 'metadata', $metadata );
+		$request->setHttpPostMethod();
+		$request->setExpectJson();
+
+		$client = new Elvis_BizClasses_CurlClient();
+		$client->execute( $request );
+	}
+
+	/**
 	 * Checkout an asset at the Elvis server.
 	 *
 	 * @param string $assetId
-	 * @throws BizException
 	 */
 	public function checkout( string $assetId )
 	{
@@ -100,7 +117,6 @@ class Elvis_BizClasses_Client
 	 * Undo checkout an asset at the Elvis server.
 	 *
 	 * @param string $assetId
-	 * @throws BizException
 	 */
 	public function undoCheckout( string $assetId )
 	{
@@ -126,7 +142,7 @@ class Elvis_BizClasses_Client
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/retrieve - assetId:'.$assetId );
 
 		$request = new Elvis_BizClasses_ClientRequest( 'services/search', $this->shortUserName );
-		$request->addSearchQueryParam( 'q', 'id', $assetId );
+		$request->addSearchQueryParam( 'q', 'id', array( $assetId ) );
 		$request->addCsvQueryParam( 'metadataToReturn', $metadataToReturn );
 		$request->setExpectJson();
 

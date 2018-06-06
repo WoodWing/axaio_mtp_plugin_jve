@@ -373,6 +373,8 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			return;
 		}
 
+		// 9.2.0 bug: shadowObjectIds key should be the CS ID, but instead is index 0.
+		$shadowObjectIds = isset( $shadowObjectIds[ ELVIS_CONTENTSOURCEID ] ) ? $shadowObjectIds[ ELVIS_CONTENTSOURCEID ] : $shadowObjectIds[0];
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties '.
 			'called for $shadowObjectIds:'.implode(',', $shadowObjectIds ) );
 
@@ -394,16 +396,15 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$metaDataValues[] = $mdValue;
 		}
 
+		// Collect Elvis asset ids
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		// Collect Elvis Ids
-		// 9.2.0 bug: shadowObjectIds key should be the CS ID, but instead is index 0.
-		$elvisIds = array();
-		$Ids = isset( $shadowObjectIds[ ELVIS_CONTENTSOURCEID ] ) ? $shadowObjectIds[ ELVIS_CONTENTSOURCEID ] : $shadowObjectIds[0];
-		foreach( $Ids as $ObjId ) {
-			$elvisId = DBObject::getColumnValueByName( $ObjId, 'Workflow', 'documentid' );
-			LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties called for alienId:'.$elvisId );
-			$elvisIds[] = $elvisId;
+		$assetIds = array();
+		$rows = DBObject::getColumnsValuesForObjectIds( $shadowObjectIds, array( 'Workflow' ), array( 'id', 'documentid' ) );
+		foreach( $rows as $row ) {
+			$assetIds[] = $row[ 'documentid' ];
 		}
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties called '.
+			'for alienIds [ '.implode( ', ', $assetIds ).' ]' );
 
 		// Normally all metadata is set using the REST client. These are set using
 		// the permissions of the current user. However there are some specific
@@ -412,10 +413,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		// only set sce prefixed metadata properties as a super user.
 		$elvisMetadata = $this->fillElvisEnterpriseMetadataMulti( $metaDataValues );
 		$service = new ElvisContentSourceService();
-		$service->updateWorkflowMetadata( $elvisIds, $elvisMetadata );
+		$service->updateWorkflowMetadata( $assetIds, $elvisMetadata );
 
 		// Bulk REST client update
-		$this->getMetadataHandler()->updateBulk( $elvisIds, $metaDataValues );
+		$this->getMetadataHandler()->updateBulk( $assetIds, $metaDataValues );
 	}
 
 	/**
@@ -590,6 +591,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		return $elvisMetadata;
 	}
 
+	/**
+	 * @param MetaDataValue[] $metadataValues
+	 * @return array
+	 */
 	private function fillElvisEnterpriseMetadataMulti( array $metadataValues ) : array
 	{
 		$elvisMetadata = array();
@@ -669,10 +674,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	/**
 	 * Helper function to get the list of values from a metaDataValue.
 	 *
-	 * @param object $metaDataValue Metadata value structure of which the first value needs to be retrieved
+	 * @param MetaDataValue $metaDataValue Metadata value structure of which the first value needs to be retrieved
 	 * @return mixed The metadata value
 	 */
-	private function getFirstMetaDataValue( $metaDataValue )
+	private function getFirstMetaDataValue( MetaDataValue $metaDataValue )
 	{
 		if( !is_null($metaDataValue->Values) ) {
 			return $metaDataValue->Values[0];
