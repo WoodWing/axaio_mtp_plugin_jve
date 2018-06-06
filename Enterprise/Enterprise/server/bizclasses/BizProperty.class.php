@@ -2943,7 +2943,7 @@ class BizProperty
 	 * @since 10.x.x
 	 * @param string $staticProp
 	 * @param PropertyUsage $propUsage
-	 * @return string[]
+	 * @return PropertyUsage
 	 */
 	private static function handleEditableAndMandatorySettingsForActionSendTo( $staticProp, $propUsage )
 	{
