@@ -31,8 +31,6 @@ class Elvis_BizClasses_Client
 	 */
 	public function create( stdClass $metadata, array $metadataToReturn, $fileToUpload ) : stdClass
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/create' );
-
 		$request = new Elvis_BizClasses_ClientRequest( 'services/create' );
 		$request->setUserShortName( $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -60,8 +58,6 @@ class Elvis_BizClasses_Client
 	 */
 	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, $fileToUpload, bool $undoCheckout ) : stdClass
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/update for assetId:'.$assetId );
-
 		$request = new Elvis_BizClasses_ClientRequest( 'services/update' );
 		$request->setUserShortName( $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -88,8 +84,6 @@ class Elvis_BizClasses_Client
 	 */
 	public function updateBulk( array $assetIds, $metadata )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/updatebulk' );
-
 		$request = new Elvis_BizClasses_ClientRequest( 'services/updatebulk' );
 		$request->setUserShortName( $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
@@ -108,8 +102,6 @@ class Elvis_BizClasses_Client
 	 */
 	public function checkout( string $assetId )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/checkout for assetId:'.$assetId );
-
 		$request = new Elvis_BizClasses_ClientRequest( 'services/checkout' );
 		$request->setUserShortName( $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -126,8 +118,6 @@ class Elvis_BizClasses_Client
 	 */
 	public function undoCheckout( string $assetId )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/undocheckout for assetId:'.$assetId );
-
 		$request = new Elvis_BizClasses_ClientRequest( 'services/undocheckout' );
 		$request->setUserShortName( $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -148,8 +138,6 @@ class Elvis_BizClasses_Client
 	 */
 	public function retrieve( string $assetId, bool $checkOut, array $metadataToReturn ) : stdClass
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/retrieve for assetId:'.$assetId );
-
 		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/retrieve' );
 		$request->setUserShortName( $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -172,8 +160,6 @@ class Elvis_BizClasses_Client
 	 */
 	public function listVersions( string $assetId ) : array
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/asset/history for assetId:'.$assetId );
-
 		$request = new Elvis_BizClasses_ClientRequest( 'services/asset/history' );
 		$request->setUserShortName( $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -191,14 +177,51 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
+	 * Retrieve a version of an asset from the Elvis server.
+	 *
+	 * @param string $assetId
+	 * @param string $version
+	 * @return stdClass representation of ElvisEntHit
+	 */
+	public function retrieveVersion( string $assetId, string $version ) : stdClass
+	{
+		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/retrieveVersion' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
+		$request->setSubjectId( $assetId );
+		$request->addQueryParam( 'assetId', $assetId );
+		$request->addQueryParam( 'version', $version );
+		$request->setExpectJson();
+
+		$response = $this->execute( $request );
+		return $response->jsonBody();
+	}
+
+	/**
+	 * Promote a version to the head version of an asset at the Elvis server.
+	 *
+	 * @param string $assetId
+	 * @param string $version
+	 */
+	public function promoteVersion( string $assetId, string $version )
+	{
+		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/promoteVersion' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
+		$request->setSubjectId( $assetId );
+		$request->addQueryParam( 'assetId', $assetId );
+		$request->addQueryParam( 'version', $version );
+
+		$response = $this->execute( $request );
+	}
+
+	/**
 	 * Pings the Elvis Server and retrieves some basic information.
 	 *
 	 * @return stdClass Info object with properties state, version, available and server.
 	 */
 	public function getElvisServerInfo()
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/ping' );
-
 		$request = new Elvis_BizClasses_ClientRequest( 'services/ping' );
 		$request->setSubjectEntity( 'Elvis server version info' );
 		$request->setNotFoundErrorAsSevere(); // error on HTTP 404 (could happen for Elvis 4 that has no ping service)
@@ -220,6 +243,12 @@ class Elvis_BizClasses_Client
 	 */
 	private function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
+		$logMessage = 'Calling REST API '.$request->composeServicePath();
+		if( $request->getSubjectId() ) {
+			$logMessage .= ' for id: '.$request->getSubjectId();
+		}
+		LogHandler::Log( 'ELVIS', 'DEBUG', $logMessage );
+
 		$client = new Elvis_BizClasses_CurlClient();
 		$response = $client->execute( $request );
 		if( $response->isError() ) {

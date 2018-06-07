@@ -55,10 +55,12 @@ class ElvisContentSourceService
 	 */
 	public function create( array $metadata, $fileToUpload ) : ElvisEntHit
 	{
+		require_once __DIR__.'/../util/ElvisUtils.class.php';
+
 		$metadataToReturn = $this->getMetadataToReturn();
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->create( (object)$metadata, $metadataToReturn, $fileToUpload );
-		return $this->convertStdClassToElvisEntHit( $stdClassHit );
+		return ElvisUtils::convertStdClassToElvisEntHit( $stdClassHit );
 	}
 
 	/**
@@ -74,10 +76,12 @@ class ElvisContentSourceService
 	 */
 	public function update( string $assetId, array $metadata, $fileToUpload, bool $undoCheckout ) : ElvisEntHit
 	{
+		require_once __DIR__.'/../util/ElvisUtils.class.php';
+
 		$metadataToReturn = $this->getMetadataToReturn();
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->update( $assetId, (object)$metadata, $metadataToReturn, $fileToUpload, $undoCheckout );
-		return $this->convertStdClassToElvisEntHit( $stdClassHit );
+		return ElvisUtils::convertStdClassToElvisEntHit( $stdClassHit );
 	}
 
 	/**
@@ -115,10 +119,12 @@ class ElvisContentSourceService
 	 */
 	public function retrieve( string $assetId, bool $checkOut = false ) : ElvisEntHit
 	{
+		require_once __DIR__.'/../util/ElvisUtils.class.php';
+
 		$metadataToReturn = $this->getMetadataToReturn();
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->retrieve( $assetId, $checkOut, $metadataToReturn );
-		return $this->convertStdClassToElvisEntHit( $stdClassHit );
+		return ElvisUtils::convertStdClassToElvisEntHit( $stdClassHit );
 	}
 
 	/**
@@ -138,38 +144,6 @@ class ElvisContentSourceService
 		$metadataToReturn[] = 'sceSystemId';
 		$metadataToReturn[] = 'resolutionUnit'; // required to convert Elvis resolutionX to Enterprise Dpi
 		return $metadataToReturn;
-	}
-
-	/**
-	 * Convert a stdClass object into an ElvisEntHit object.
-	 *
-	 * REST responses from Elvis server are JSON decoded and result into stdClass.
-	 * This function can be called to convert it to the real data class ElvisEntHit.
-	 *
-	 * @since 10.5.0
-	 * @param stdClass $stdClassHit
-	 * @return ElvisEntHit
-	 */
-	private function convertStdClassToElvisEntHit( stdClass $stdClassHit ) : ElvisEntHit
-	{
-		/** @var ElvisEntHit $hit */
-		$hit = WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntHit' );
-		$hit->metadata = (array)$hit->metadata;
-		if( isset( $hit->id ) ) {
-			$hit->metadata[ 'id' ] = $hit->id;
-		}
-		foreach( $hit->metadata as $key => $value ) {
-			if( isset( $value->value ) ) {
-				$hit->metadata[ $key ] = $value->value;
-			}
-		}
-		$datetimes = array( 'assetCreated', 'assetFileModified', 'fileCreated', 'fileModified' );
-		foreach( $datetimes as $datetime ) {
-			if( isset( $hit->metadata[ $datetime ] ) ) {
-				$hit->metadata[ $datetime ] = $hit->metadata[ $datetime ] / 1000; // msec to sec
-			}
-		}
-		return $hit;
 	}
 
 	/**
@@ -215,63 +189,6 @@ class ElvisContentSourceService
 
 		try {
 			$resp = ElvisAMFClient::send( self::SERVICE, 'copyTo', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-
-		return $resp;
-	}
-
-	/**
-	 * List the version history of an asset in Elvis server.
-	 *
-	 * @param string $assetId
-	 * @return ElvisEntHit[]
-	 */
-	public function listVersions( $assetId )
-	{
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$stdClassHits = $client->listVersions( $assetId );
-		return array_map( array( $this, 'convertStdClassToElvisEntHit' ), $stdClassHits );
-	}
-
-	/**
-	 * Promote a provided asset version to the head version in the history in Elvis server.
-	 *
-	 * @param string $assetId
-	 * @param string $versionNumber
-	 * @throws BizException
-	 */
-	public function promoteVersion( $assetId, $versionNumber )
-	{
-		$params = array( $assetId, $versionNumber );
-
-		try {
-			ElvisAMFClient::send( self::SERVICE, 'promoteVersion', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-	}
-
-	/**
-	 * Return a particular asset version from the history in Elvis server.
-	 *
-	 * @param string $assetId
-	 * @param string $versionNumber
-	 * @return ElvisEntHit
-	 * @throws BizException
-	 */
-	public function retrieveVersion( $assetId, $versionNumber )
-	{
-		ElvisAMFClient::registerClass( ElvisEntHit::getName() );
-		ElvisAMFClient::registerClass( ElvisFormattedValue::getName() );
-		ElvisAMFClient::registerClass( BasicMap::getName() );
-
-		$params = array( $assetId, $versionNumber );
-		$resp = null;
-
-		try {
-			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveVersion', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}

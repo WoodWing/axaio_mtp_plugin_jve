@@ -108,9 +108,15 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 			$this->createShadowImageObject( 0 );
 			$this->retrieveImageWithDownloadUrl( 0 );
 			$this->testDownloadImageViaProxyServer();
+
+			// Test version history.
 			$this->testListZeroVersionsOfImage();
 			$this->updateElvisImage();
 			$this->testListOneVersionsOfImage();
+			$this->promoteElvisImageVersion(); // through Elvis
+			$this->testListTwoVersionsOfImage();
+			$this->restoreImageObjectVersion(); // through Enterprise
+			$this->testListThreeVersionsOfImage();
 
 			// Test security of the Elvis proxy.
 			$this->testPreviewArgs();
@@ -478,6 +484,51 @@ EOT;
 	{
 		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
 		$this->assertCount( 1, $versions );
+	}
+
+	/**
+	 * Promote v0.1 of the Elvis image asset directly at Elvis server. Make it the head version v0.3.
+	 */
+	private function promoteElvisImageVersion()
+	{
+		require_once __DIR__.'/../../../model/VersionHandler.class.php';
+		$handler = new VersionHandler();
+		$handler->promoteVersion( $this->images[0]->assetHit->id, '0.1' );
+	}
+
+	/**
+	 * Test retrieving the object version history for the Elvis shadow image object for which two version should be available.
+	 */
+	private function testListTwoVersionsOfImage()
+	{
+		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
+		$this->assertCount( 2, $versions );
+	}
+
+	/**
+	 * Restore v0.2 of the image shadow object in Enterprise. Make it the head version v0.4.
+	 */
+	private function restoreImageObjectVersion()
+	{
+		require_once BASEDIR . '/server/services/wfl/WflRestoreVersionService.class.php';
+		$request = new WflRestoreVersionRequest();
+		$request->Ticket = $this->workflowTicket;
+		$request->ID = $this->images[0]->entObject->MetaData->BasicMetaData->ID;
+		$request->Version = '0.2';
+
+		/** @var WflRestoreVersionResponse $response */
+		$response = $this->testSuiteUtils->callService( $this, $request,
+			'Restore version of test images.' );
+		$this->assertInstanceOf( 'WflRestoreVersionResponse', $response );
+	}
+
+	/**
+	 * Test retrieving the object version history for the Elvis shadow image object for which three version should be available.
+	 */
+	private function testListThreeVersionsOfImage()
+	{
+		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
+		$this->assertCount( 3, $versions );
 	}
 
 	/**

@@ -12,14 +12,15 @@ class VersionHandler
 	 * @param string $rendition Rendition to include in the version info
 	 * @return VersionInfo[]
 	 */
-	public function listVersions( $alienId, $rendition )
+	public function listVersions( string $alienId, string $rendition ) : array
 	{
 		require_once __DIR__.'/../util/ElvisUtils.class.php';
-		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
-		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$service = new ElvisContentSourceService();
-		$hits = $service->listVersions( $elvisId ); // get asset versions
+		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$stdClassHits = $client->listVersions( $assetId );
+		$hits = array_map( array( 'ElvisUtils', 'convertStdClassToElvisEntHit' ), $stdClassHits );
+
 		$versions = array();
 		foreach( $hits as $hit ) {
 			$vi = $this->fillVersionInfo( $hit, $rendition );
@@ -36,33 +37,32 @@ class VersionHandler
 	 * @param string $rendition File rendition to include in the version info.
 	 * @return VersionInfo
 	 */
-	public function retrieveVersion( $alienId, $version, $rendition )
+	public function retrieveVersion( string $alienId, string $version, string $rendition ) : VersionInfo
 	{
 		require_once __DIR__.'/../util/ElvisUtils.class.php';
-		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
-		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$versionNumber = ElvisUtils::getElvisVersionNumber( $version );
-		$service = new ElvisContentSourceService();
-		$hit = $service->retrieveVersion( $elvisId, $versionNumber );
+		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
+		$assetVersion = ElvisUtils::getElvisVersionNumber( $version );
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$stdClassHit = $client->retrieveVersion( $assetId, $assetVersion );
+		$hit = $this->convertStdClassToElvisEntHit( $stdClassHit );
 		return $this->fillVersionInfo( $hit, $rendition );
 	}
 
 	/**
 	 * Promote a version on Elvis server, by provided alien id and Enterprise object version number.
 	 *
-	 * @param string $alienId - alien id of shadow object in enterprise
-	 * @param string $version
+	 * @param string $alienId Alien id of shadow object in Enterprise.
+	 * @param string $version Enterprise object version.
 	 */
-	public function promoteVersion( $alienId, $version )
+	public function promoteVersion( string $alienId, string $version )
 	{
 		require_once __DIR__.'/../util/ElvisUtils.class.php';
-		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
-		$service = new ElvisContentSourceService();
-		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$elvisVersion = ElvisUtils::getElvisVersionNumber( $version );
-		$service->promoteVersion( $elvisId, $elvisVersion );
+		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
+		$assetVersion = ElvisUtils::getElvisVersionNumber( $version );
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$client->promoteVersion( $assetId, $assetVersion );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class VersionHandler
 	 * @param string $rendition
 	 * @return VersionInfo
 	 */
-	private function fillVersionInfo( $hit, $rendition )
+	private function fillVersionInfo( ElvisEntHit $hit, string $rendition ) : VersionInfo
 	{
 		require_once __DIR__.'/MetadataHandler.class.php';
 		$metadataHandler = new MetadataHandler();
