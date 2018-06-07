@@ -13,6 +13,9 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 {
+	/** @var string|null */
+	private $ticket;
+
 	public function getDisplayName() { return 'Setup test data'; }
 	public function getTestGoals()   { return 'Checks if the basic environment can be setup properly.'; }
 	public function getTestMethods() { return
@@ -41,10 +44,29 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 		// Save the retrieved ticket and brand info into session data.
 		// This data is picked up by successor sibling TestCase modules (within the parental TestSuite).
 		if( !is_null( $response ) ) {
+			$this->ticket = $response->Ticket;
+
+			// Test if Elvis is compatible with Enterprise.
+			require_once __DIR__.'/../../../config.php';
+			$this->testElvisServerConnection();
+
 			$vars = array();
 			$vars['BuildTest_Elvis'] = $utils->parseTestSuiteOptions( $this, $response );
 			$vars['BuildTest_Elvis']['ticket'] = $response->Ticket;
 			$this->setSessionVariables( $vars );
 		}
+	}
+
+	/**
+	 * Check if Elvis server is running and has minimum required version.
+	 */
+	private function testElvisServerConnection()
+	{
+		$client = new Elvis_BizClasses_Client( null );
+		$info = $client->getElvisServerInfo();
+		$this->assertEquals( 'running', $info->state );
+		$this->assertVersionGreaterThanOrEqual( ELVIS_MINVERSION, $info->version );
+		$this->assertTrue( $info->available );
+		$this->assertEquals( 'Elvis', $info->server );
 	}
 }

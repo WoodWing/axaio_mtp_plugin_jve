@@ -10,6 +10,9 @@ class Elvis_BizClasses_ClientResponse
 	/** @var int */
 	private $httpStatusCode;
 
+	/** @var string */
+	private $errorMessage;
+
 	/** @var bool|string */
 	private $body;
 
@@ -22,20 +25,26 @@ class Elvis_BizClasses_ClientResponse
 	 */
 	public function __construct( $httpStatusCode, $body, $expectJson )
 	{
+		$this->errorMessage = '';
 		$this->httpStatusCode = intval( $httpStatusCode );
 		$this->body = $body;
-		if( $expectJson && $this->body ) {
+		if( $expectJson && $this->body && $this->httpStatusCode >= 200 && $this->httpStatusCode < 300 ) {
 			$decoded = json_decode( $this->body );
 			if( $decoded && isset( $decoded->errorcode ) ) {
 				$this->httpStatusCode = intval( $decoded->errorcode );
+				$this->errorMessage = $decoded->message;
 			}
+		} else {
+			$response = new Zend\Http\Response();
+			$response->setStatusCode( $this->httpStatusCode );
+			$this->errorMessage = $response->getReasonPhrase();
 		}
 	}
 
 	/**
-	 * Whether the response is an error response or not.
+	 * Whether or not the response is a client (4xx) or server (5xx) error.
 	 *
-	 * @return bool true when the response is an error response otherwise false.
+	 * @return bool
 	 */
 	public function isError()
 	{
@@ -43,13 +52,64 @@ class Elvis_BizClasses_ClientResponse
 	}
 
 	/**
-	 * Whether the response is an authentication error response or not.
+	 * Whether or not the response is an Authentication error (HTTP 401).
 	 *
-	 * @return bool true when the response is an authentication error response otherwise false.
+	 * @return bool
 	 */
 	public function isAuthenticationError()
 	{
 		return $this->httpStatusCode === 401;
+	}
+
+	/**
+	 * Whether or not the response is an Forbidden error (HTTP 403).
+	 *
+	 * @return bool
+	 */
+	public function isForbiddenError()
+	{
+		return $this->httpStatusCode === 403;
+	}
+
+	/**
+	 * Whether or not the response is an Not Found error (HTTP 404).
+	 *
+	 * @return bool
+	 */
+	public function isNotFoundError()
+	{
+		return $this->httpStatusCode === 404;
+	}
+
+	/**
+	 * Whether or not the response is an Request Timeout error (HTTP 408).
+	 *
+	 * @return bool
+	 */
+	public function isRequestTimeoutError()
+	{
+		return $this->httpStatusCode === 408;
+	}
+
+	/**
+	 * Whether or not the response is a Gone error (HTTP 410).
+	 *
+	 * @return bool
+	 */
+	public function isGoneError()
+	{
+		return $this->httpStatusCode === 410;
+	}
+
+	/**
+	 * Whether or not the response is caused by client but not any of the 4xx errors listed above.
+	 *
+	 * @return bool
+	 */
+	public function isClientProgrammaticError()
+	{
+		$excludedErrorCodes = array( 401, 403, 404, 408, 410 );
+		return $this->httpStatusCode >= 400 && $this->httpStatusCode < 500 && !in_array( $this->httpStatusCode, $excludedErrorCodes );
 	}
 
 	/**
@@ -78,5 +138,13 @@ class Elvis_BizClasses_ClientResponse
 			throw new Elvis_BizClasses_Exception( 'Invalid response body' );
 		}
 		return $decoded;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getErrorMessage()
+	{
+		return $this->errorMessage;
 	}
 }

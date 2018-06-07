@@ -8,13 +8,13 @@
 
 class Elvis_BizClasses_Client
 {
-	/** @var string */
+	/** @var string|null */
 	private $shortUserName;
 
 	/**
-	 * Elvis_BizClasses_ProxyClient constructor.
+	 * Constructor.
 	 *
-	 * @param string $shortUserName
+	 * @param string|null $shortUserName For who requests should be authorized. NULL to use unauthorized requests.
 	 */
 	public function __construct( $shortUserName )
 	{
@@ -31,9 +31,11 @@ class Elvis_BizClasses_Client
 	 */
 	public function create( stdClass $metadata, array $metadataToReturn, $fileToUpload ) : stdClass
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/create' );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/create' );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/create', $this->shortUserName );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/create' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->addPostParamAsJson( 'metadata', $metadata );
 		$request->addCsvPostParam( 'metadataToReturn', $metadataToReturn );
 		$request->setHttpPostMethod();
@@ -42,8 +44,7 @@ class Elvis_BizClasses_Client
 			$request->addFileToUpload( $fileToUpload );
 		}
 
-		$client = new Elvis_BizClasses_CurlClient();
-		$response = $client->execute( $request );
+		$response = $this->execute( $request );
 		return $response->jsonBody();
 	}
 
@@ -59,9 +60,12 @@ class Elvis_BizClasses_Client
 	 */
 	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, $fileToUpload, bool $undoCheckout ) : stdClass
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/update' );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/update for assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/update', $this->shortUserName );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/update' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
+		$request->setSubjectId( $assetId );
 		$request->addPostParam( 'id', $assetId );
 		$request->addPostParamAsJson( 'metadata', $metadata );
 		$request->addPostParam( 'clearCheckoutState', $undoCheckout ? 'true' : 'false' );
@@ -72,8 +76,7 @@ class Elvis_BizClasses_Client
 			$request->addFileToUpload( $fileToUpload );
 		}
 
-		$client = new Elvis_BizClasses_CurlClient();
-		$response = $client->execute( $request );
+		$response = $this->execute( $request );
 		return $response->jsonBody();
 	}
 
@@ -85,16 +88,17 @@ class Elvis_BizClasses_Client
 	 */
 	public function updateBulk( array $assetIds, $metadata )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/updatebulk' );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/updatebulk' );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/updatebulk', $this->shortUserName );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/updatebulk' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
 		$request->addSearchPostParam( 'q', 'id', $assetIds );
 		$request->addPostParamAsJson( 'metadata', $metadata );
 		$request->setHttpPostMethod();
 		$request->setExpectJson();
 
-		$client = new Elvis_BizClasses_CurlClient();
-		$client->execute( $request );
+		$this->execute( $request );
 	}
 
 	/**
@@ -104,13 +108,15 @@ class Elvis_BizClasses_Client
 	 */
 	public function checkout( string $assetId )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/checkout - assetId:'.$assetId );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/checkout for assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/checkout', $this->shortUserName );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/checkout' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
+		$request->setSubjectId( $assetId );
 		$request->addPathParam( $assetId );
 
-		$client = new Elvis_BizClasses_CurlClient();
-		$client->execute( $request );
+		$this->execute( $request );
 	}
 
 	/**
@@ -120,13 +126,15 @@ class Elvis_BizClasses_Client
 	 */
 	public function undoCheckout( string $assetId )
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/undocheckout - assetId:'.$assetId );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/undocheckout for assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/undocheckout', $this->shortUserName );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/undocheckout' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
+		$request->setSubjectId( $assetId );
 		$request->addPathParam( $assetId );
 
-		$client = new Elvis_BizClasses_CurlClient();
-		$client->execute( $request );
+		$this->execute( $request );
 	}
 
 	/**
@@ -139,15 +147,17 @@ class Elvis_BizClasses_Client
 	 */
 	public function retrieve( string $assetId, array $metadataToReturn ) : stdClass
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/retrieve - assetId:'.$assetId );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/retrieve for assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/search', $this->shortUserName );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/search' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
+		$request->setSubjectId( $assetId );
 		$request->addSearchQueryParam( 'q', 'id', array( $assetId ) );
 		$request->addCsvQueryParam( 'metadataToReturn', $metadataToReturn );
 		$request->setExpectJson();
 
-		$client = new Elvis_BizClasses_CurlClient();
-		$response = $client->execute( $request );
+		$response = $this->execute( $request );
 		$body = $response->jsonBody();
 		if( !isset( $body->hits[0] ) ) {
 			throw new BizException( 'ERR_NOTFOUND', 'Server', 'Elvis assetId: ' . $assetId, null, null, 'INFO' );
@@ -164,19 +174,98 @@ class Elvis_BizClasses_Client
 	 */
 	public function listVersions( string $assetId ) : array
 	{
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSourceService::services/asset/history - assetId:'.$assetId );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/asset/history for assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/asset/history', $this->shortUserName );
+		$request = new Elvis_BizClasses_ClientRequest( 'services/asset/history' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
+		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'id', $assetId );
 		$request->addQueryParam( 'detailLevel', 1 );
 		$request->setExpectJson();
 
-		$client = new Elvis_BizClasses_CurlClient();
-		$response = $client->execute( $request );
+		$response = $this->execute( $request );
 		$body = $response->jsonBody();
 		if( !isset( $body->hits ) ) {
 			throw new BizException( 'ERR_NOTFOUND', 'Server', 'Elvis assetId: ' . $assetId, null, null, 'INFO' );
 		}
 		return array_map( function ( $hit ) { return $hit->hit; }, $body->hits );
+	}
+
+	/**
+	 * Pings the Elvis Server and retrieves some basic information.
+	 *
+	 * @return stdClass Info object with properties state, version, available and server.
+	 */
+	public function getElvisServerInfo()
+	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/ping' );
+
+		$request = new Elvis_BizClasses_ClientRequest( 'services/ping' );
+		$request->setSubjectEntity( 'Elvis server version info' );
+		$request->setNotFoundErrorAsSevere(); // error on HTTP 404 (could happen for Elvis 4 that has no ping service)
+		$request->setExpectJson();
+
+		// The Elvis ping service returns a JSON structure like this:
+		//     {"state":"running","version":"5.15.2.9","available":true,"server":"Elvis"}
+
+		$response = $this->execute( $request );
+		return $response->jsonBody();
+	}
+
+	/**
+	 * Execute a service request against Elvis server for the session user or ELVIS_SUPER_USER.
+	 *
+	 * @param Elvis_BizClasses_ClientRequest $request
+	 * @return Elvis_BizClasses_ClientResponse
+	 * @throws BizException
+	 */
+	private function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
+	{
+		$client = new Elvis_BizClasses_CurlClient();
+		$response = $client->execute( $request );
+		if( $response->isError() ) {
+			$detail = $response->getErrorMessage();
+			if( $response->isAuthenticationError() ) { // HTTP 401
+				if( $request->getUserShortName() !== ELVIS_SUPER_USER ) {
+					$request->setUserShortName( ELVIS_SUPER_USER );
+					$response = $this->execute( $request );
+				} else {
+					throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
+						null, null, 'INFO' );
+				}
+			}
+			if( $response->isForbiddenError() ) { // HTTP 403
+				throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
+					null, null, 'INFO' );
+			}
+			if( $response->isNotFoundError() || $response->isGoneError() ) { // HTTP 404 or 410
+				$severity = $request->isNotFoundErrorSevere() ? 'ERROR' : 'INFO';
+				if( $request->getSubjectEntity() ) {
+					if( $request->getSubjectId() ) {
+						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', $detail, // S1056
+							null, array( $request->getSubjectEntity(), $request->getSubjectId(), $severity ) );
+					} else {
+						throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', $detail, // S1036
+							null, array( $request->getSubjectEntity() ), $severity );
+					}
+				} else {
+					throw new BizException( 'ERR_NOT_FOUND', 'Client', $detail, // S1029
+						null, null, $severity );
+				}
+			}
+			if( $response->isRequestTimeoutError() ) { // HTTP 408
+				if( $request->getAttempt() <= 3 ) {
+					$request->nextAttempt();
+					$response = $this->execute( $request );
+				} else {
+					throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
+				}
+			}
+			if( $response->isClientProgrammaticError() ) { // all HTTP 4xx codes except the ones listed above
+				throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
+			}
+		}
+		return $response;
 	}
 }

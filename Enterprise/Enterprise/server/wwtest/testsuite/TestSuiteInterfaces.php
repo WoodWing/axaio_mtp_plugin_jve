@@ -1028,6 +1028,101 @@ abstract class TestCase implements TestModule
 		$this->assertInstanceOf( 'BizException', $e );
 		$this->assertEquals( $expectedErrorCode, $e->getErrorCode() );
 	}
+
+	/**
+	 * Asserts that a version is smaller than to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not smaller than $expected
+	 */
+	function assertVersionSmallerThan( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '<' ) ) {
+			if( !$message ) {
+				$message = "The version $actual is not smaller than $expected, which is unexpected.";
+			}
+			$this->throwError( $message );
+		}
+	}
+
+	/**
+	 * Asserts that a version is smaller than or equal to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not smaller than nor equal to $expected
+	 */
+	function assertVersionSmallerThanOrEqual( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '<=' ) ) {
+			if( !$message ) {
+				$message = "The version $actual is not smaller than nor equal to $expected, which is unexpected.";
+			}
+			$this->throwError( $message );
+		}
+	}
+
+	/**
+	 * Asserts that a version is equal to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not equal than $expected
+	 */
+	function assertVersionEqual( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '=' ) ) {
+			if( !$message ) {
+				$message = "The version $actual is not equal to $expected, which is unexpected.";
+			}
+			$this->throwError( $message );
+		}
+	}
+
+	/**
+	 * Asserts that a version is greater than to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not greater than $expected
+	 */
+	function assertVersionGreaterThan( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '>' ) ) {
+			if( !$message ) {
+				$message = "The version $actual is not greater than $expected, which is unexpected.";
+			}
+			$this->throwError( $message );
+		}
+	}
+
+	/**
+	 * Asserts that a version is greater than or equal to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not greater than nor equal to $expected
+	 */
+	function assertVersionGreaterThanOrEqual( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '>=' ) ) {
+			if( !$message ) {
+				$message = "The version $actual is not greater than nor equal to $expected, which is unexpected.";
+			}
+			$this->throwError( $message );
+		}
+	}
 }
 
 class TestResult

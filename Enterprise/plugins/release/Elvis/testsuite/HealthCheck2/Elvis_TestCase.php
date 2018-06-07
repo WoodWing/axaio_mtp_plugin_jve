@@ -47,9 +47,6 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if ( !$this->checkVersionCompatibility() ) {
 			return;
 		}
-		if ( !$this->checkFeatureCompatibility() ) {
-			return;
-		}
 		if( !$this->checkDbModelElvisPlugin() ) {
 			return;
 		}
@@ -239,19 +236,26 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 */
 	private function checkConnection()
 	{
-		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
-		$client = new ElvisRESTClient();
-		$this->serverVersion = $client->getElvisServerVersion();
-
-		// The server info service is introduced since Elvis 5.
-		// So we skip this test for Elvis 4 and assume all is ok.
-		if( version_compare( $this->serverVersion, '5.0', '<' ) ) {
-			$this->setResult( 'INFO', 'Connected to Elvis Server v'.$this->serverVersion.'.' );
-			return true;
-		}
-		$serverInfo = $client->getElvisServerInfo();
-		$help = 'Please check your Elvis installation.';
 		$result = true;
+		$this->serverVersion = null;
+		$serverInfo = null;
+		try {
+			require_once __DIR__.'/../../bizclasses/Client.class.php';
+			$client = new Elvis_BizClasses_Client( null );
+			$serverInfo = $client->getElvisServerInfo();
+			$this->serverVersion = $serverInfo->version;
+		} catch ( BizException $e ) {
+			if( $e->getErrorCode() == 'S1036' ) {
+				$help = 'The Elvis Server version is probably too old (before 5.x). Please check Elvis Server and the Compatibility Matrix.';
+				$this->setResult( 'ERROR', 'Could not detect Elvis Server version.', $help );
+			} else {
+				$help = 'Please check the ELVIS_URL option in the '.self::CONFIG_FILES.' file.';
+				$this->setResult( 'ERROR', 'Could not connect to Elvis Server.', $help );
+			}
+			$result = false;
+		}
+
+		$help = 'Please check your Elvis installation.';
 		if( $serverInfo ) {
 			if( $serverInfo->state == 'running' && $serverInfo->available ) {
 				$this->setResult( 'INFO', 'Elvis Server v'.$this->serverVersion.' is available and running.' );
@@ -263,10 +267,6 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverVersion.' is not running.', $help );
 				// no hard failure, leave $result == true untouched to continue testing the succeeding cases
 			}
-		} else {
-			$help = 'Please check the ELVIS_URL option in the '.self::CONFIG_FILES.' file.';
-			$this->setResult( 'ERROR', 'Could not connect to Elvis Server.', $help );
-			$result = false;
 		}
 		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server connection checked.' );
 		return $result;
@@ -280,53 +280,14 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 */
 	private function checkVersionCompatibility()
 	{
-		$result = true;
-		if( version_compare( $this->serverVersion, '4.6.4', '<' ) ) {
-			$result = false;
-		} elseif(
-			version_compare( $this->serverVersion, '5.0', '>=' ) &&
-			version_compare( $this->serverVersion, '5.0.60', '<' ) ){
-			$result = false;
-		}
-		if( !$result ) {
+		$versionOk = version_compare( $this->serverVersion, ELVIS_MINVERSION, '>=' );
+		if( !$versionOk ) {
 			$help = 'Please check the Compatibility Matrix.';
 			$message = 'Elvis Server v'.$this->serverVersion.' is not compatible with Enterprise Server v'.SERVERVERSION.'.';
 			$this->setResult( 'ERROR', $message, $help );
 		}
-
-		// With the Elvis_Original option there were some problems with older Elvis Server < v5.14. [EN-88325]
-		if( version_compare( $this->serverVersion, '5.14', '<=' ) &&
-			IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) {
-			$help = 'Please check the '.self::CONFIG_FILES.' file.';
-			$message = 'The IMAGE_RESTORE_LOCATION option is set to "'.IMAGE_RESTORE_LOCATION.'" '.
-				'but Elvis Server v'.$this->serverVersion.' does not support this feature. '.
-				'Please adjust the option or upgrade the Elvis Server.';
-			$this->setResult( 'ERROR', $message, $help );
-			$result = false;
-		}
 		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server version compatibility checked.' );
-		return $result;
-	}
-
-	/**
-	 * Checks if Elvis Server version is supports the features that are enabled for the integration.
-	 *
-	 * @since 10.1.1
-	 * @return boolean TRUE when check OK, else FALSE.
-	 */
-	private function checkFeatureCompatibility()
-	{
-		$result = true;
-		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' &&
-			version_compare( $this->serverVersion, '5.18', '<' ) ) { // Feature introduced since Elvis 5.18
-			$help = 'Either change the option or upgrade Elvis Server to v5.18 or newer.';
-			$message = 'The ELVIS_CREATE_COPY option is set to \'Copy_To_Production_Zone\' but this feature is not '.
-				' supported by Elvis Server v'.$this->serverVersion.'.';
-			$this->setResult( 'ERROR', $message, $help );
-			$result = false;
-		}
-		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server feature compatibility checked.' );
-		return $result;
+		return $versionOk;
 	}
 
 	/**

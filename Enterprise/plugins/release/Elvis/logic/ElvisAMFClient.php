@@ -290,15 +290,6 @@ class ElvisAMFClient extends ElvisClient
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO');
 		}
 		self::loginUserOrSuperuser( $credentials );
-
-		// Remember the version of the Elvis Server we are connected with.
-		require_once __DIR__.'/ElvisRESTClient.php';
-		$client = new ElvisRESTClient();
-		$serverVersion = $client->getElvisServerVersion();
-		if( $serverVersion ) {
-			ElvisSessionUtil::setElvisServerVersion( $serverVersion );
-			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
-		}
 	}
 
 	/**
@@ -435,14 +426,7 @@ class ElvisAMFClient extends ElvisClient
 	 */
 	public static function getInterfaceVersion()
 	{
-		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
-		$elvisVersion = ElvisSessionUtil::getElvisServerVersion();
-		// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
-		$ifVersion = 1;
-		if( version_compare( $elvisVersion, '5.18','>=' ) ) {
-			$ifVersion = 2;
-		}
-		return $ifVersion;
+		return 2;
 	}
 
 	/**

@@ -321,3 +321,4 @@ define('ELVIS_CLIENT_PACKAGE_PATH', '/install/clients/ElvisContentStation.xml');
 define('ELVIS_INTERNAL_USER_POSTFIX', ' (Elvis internal user)');
 define('ELVIS_CONTENTSOURCE_PUBLIC_PROXYURL', SERVERURL_ROOT.INETROOT.'/config/plugins/Elvis/restproxyindex.php');
 define('ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL', LOCALURL_ROOT.INETROOT.'/config/plugins/Elvis/restproxyindex.php');
+define('ELVIS_MINVERSION', '6.15.0.0'); // minimum required version // TODO: fine tune this version once known

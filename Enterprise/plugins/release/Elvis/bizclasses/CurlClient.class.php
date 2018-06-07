@@ -25,6 +25,7 @@ class Elvis_BizClasses_CurlClient
 	{
 		$this->curlOptions = $curlOptions;
 	}
+
 	/**
 	 * Execute a service request against Elvis server for the session user or ELVIS_SUPER_USER.
 	 *
@@ -34,12 +35,11 @@ class Elvis_BizClasses_CurlClient
 	 */
 	public function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
-		try {
-			self::$severity = 'INFO'; // failure on workflow user is not severe because we have a fallback user to try
-			$response = self::executeForUser( $request, $request->getUserShortName() );
-		} catch( Elvis_BizClasses_Exception $e ) {
-			self::$severity = 'ERROR'; // failure on fallback user means error
-			$response = self::executeForUser( $request, ELVIS_SUPER_USER );
+		$userShortName = $request->getUserShortName();
+		if( $userShortName ) {
+			$response = self::executeForUser( $request, $userShortName );
+		} else {
+			$response = self::executeUnauthorized( $request );
 		}
 		return $response;
 	}
@@ -64,12 +64,25 @@ class Elvis_BizClasses_CurlClient
 	}
 
 	/**
+	 * Execute a service request against Elvis server without user authorization.
+	 *
+	 * @param Elvis_BizClasses_ClientRequest $request
+	 * @return Elvis_BizClasses_ClientResponse
+	 */
+	private function executeUnauthorized( Elvis_BizClasses_ClientRequest $request )
+	{
+		$curlOptions = $this->curlOptions;
+		$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( null );
+		return self::plainRequest( $request, $curlOptions );
+	}
+
+	/**
 	 * Compose a list HTTP headers to send along with the request.
 	 *
-	 * @param string $accessToken
+	 * @param string|null $accessToken
 	 * @return array HTTP headers
 	 */
-	private static function composeHttpHeaders( string $accessToken ) : array
+	private static function composeHttpHeaders( $accessToken ) : array
 	{
 		$headerOptions = array();
 		// Elvis has support for 'ETag' and so it returns it in the file download response headers. When the web browser
@@ -78,7 +91,9 @@ class Elvis_BizClasses_CurlClient
 		if( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
 			$headerOptions[] = 'If-None-Match: '.$_SERVER['HTTP_IF_NONE_MATCH'];
 		}
-		$headerOptions = array_merge( $headerOptions, array( 'Authorization: Bearer '.$accessToken ) );
+		if( $accessToken ) {
+			$headerOptions = array_merge( $headerOptions, array( 'Authorization: Bearer '.$accessToken ) );
+		}
 		return $headerOptions;
 	}
 
@@ -259,10 +274,13 @@ class Elvis_BizClasses_CurlClient
 			CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
 			CURLOPT_USERPWD => ELVIS_CLIENT_ID.':'.ELVIS_CLIENT_SECRET
 		) );
-		$request = new Elvis_BizClasses_ClientRequest( 'oauth/token', $shortUserName );
+		$request = new Elvis_BizClasses_ClientRequest( 'oauth/token' );
+		$request->setUserShortName( $shortUserName );
+		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
+		$request->setSubjectId( $shortUserName );
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isError() ) {
-			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token', self::$severity );
+			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token', 'INFO' );
 		}
 		return $response->jsonBody()->access_token;
 	}

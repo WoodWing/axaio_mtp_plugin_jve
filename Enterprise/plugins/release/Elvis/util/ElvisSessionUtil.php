@@ -310,28 +310,6 @@ class ElvisSessionUtil
 	}
 
 	/**
-	 * Get the version of the Elvis Server the session user did login.
-	 *
-	 * @since 10.1.4
-	 * @return string|null Elvis Server version. NULL when never saved before.
-	 */
-	public static function getElvisServerVersion()
-	{
-		return self::getUserSetting( 'ElvisServerVersion' );
-	}
-
-	/**
-	 * Save the version of the Elvis Server the session user did login.
-	 *
-	 * @since 10.1.4
-	 * @param string $version Elvis Server version
-	 */
-	public static function setElvisServerVersion( $version )
-	{
-		self::setUserSetting( 'ElvisServerVersion', $version );
-	}
-
-	/**
 	 * Adds the content source prefix to the name
 	 *
 	 * @param string $name

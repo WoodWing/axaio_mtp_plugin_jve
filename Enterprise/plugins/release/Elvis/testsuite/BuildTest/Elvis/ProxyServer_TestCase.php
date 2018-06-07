@@ -147,7 +147,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		$this->testSuiteUtils->initTest( 'JSON' );
 
 		$vars = $this->getSessionVariables();
-		$this->adminTicket = $vars['BuildTest_Elvis']['ticket'];
+		$this->adminTicket = @$vars['BuildTest_Elvis']['ticket'];
 		$this->assertNotNull( $this->adminTicket, 'No ticket found. Please enable the "Setup test data" test case and try again.' );
 
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
@@ -609,7 +609,9 @@ EOT;
 		if( $this->workflowTicket ) {
 			$this->testSuiteUtils->wflLogOff( $this, $this->workflowTicket );
 		}
-		$this->workflowFactory->teardownTestData();
+		if( $this->workflowFactory ) {
+			$this->workflowFactory->teardownTestData();
+		}
 		if( $this->transferServerFiles ) {
 			foreach( $this->transferServerFiles as $file ) {
 				$this->transferServer->deleteFile( $file->FilePath );
@@ -625,7 +627,9 @@ EOT;
 	private function deleteObjects()
 	{
 		$objectsIds = $this->getImageObjectIds();
-		$objectsIds[] = $this->dossierObject->MetaData->BasicMetaData->ID;
+		if( $this->dossierObject ) {
+			$objectsIds[] = $this->dossierObject->MetaData->BasicMetaData->ID;
+		}
 		foreach( $objectsIds as $objectId ) {
 			$errorReport = '';
 			$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $objectId,

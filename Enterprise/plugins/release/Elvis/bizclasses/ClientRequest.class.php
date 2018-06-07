@@ -20,8 +20,8 @@ class Elvis_BizClasses_ClientRequest
 	/** @var array */
 	private $postParams = array();
 
-	/** @var string */
-	private $userShortName;
+	/** @var string|null */
+	private $userShortName = null;
 
 	/** @var bool */
 	private $expectJson = false;
@@ -32,29 +32,104 @@ class Elvis_BizClasses_ClientRequest
 	/** @var string */
 	private $httpMethod = self::HTTP_METHOD_GET;
 
+	/** @var int */
+	private $attempt = 1;
+
+	/** @var string */
+	private $subjectEntity = '';
+
+	/** @var string */
+	private $subjectId = '';
+
+	/** @var bool */
+	private $notFoundIsSevere = false;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param string $relativeRestServicePath
-	 * @param string $userShortName For who this request should be authorized.
 	 */
-	public function __construct( string $relativeRestServicePath, string $userShortName )
+	public function __construct( string $relativeRestServicePath )
 	{
 		$relativeRestServicePath = trim( $relativeRestServicePath, '/' );
 		foreach( explode( '/', $relativeRestServicePath ) as $pathParam ) {
 			$this->addPathParam( $pathParam );
 		}
+	}
+
+	/**
+	 * Set the user name for which this request should be authorized.
+	 *
+	 * @param string $userShortName
+	 */
+	public function setUserShortName( string $userShortName )
+	{
 		$this->userShortName = $userShortName;
+		$this->userShortName = ELVIS_SUPER_USER; // TODO: remove this hack once we can get rid of fallback user
 	}
 
 	/**
 	 * Retrieve the user name for which this request should be authorized.
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	public function getUserShortName()
 	{
 		return $this->userShortName;
+	}
+
+	/**
+	 * Increment the number of times this request was repeated.
+	 */
+	public function nextAttempt()
+	{
+		$this->attempt += 1;
+	}
+
+	/**
+	 * Retrieve the number of times this request was repeated.
+	 *
+	 * @return integer
+	 */
+	public function getAttempt()
+	{
+		return $this->attempt;
+	}
+
+	/**
+	 * Indicate the subject entity of this request.
+	 */
+	public function getSubjectEntity()
+	{
+		return $this->subjectEntity;
+	}
+
+	/**
+	 * Retrieve the subject entity of this request.
+	 *
+	 * @param string $entity
+	 */
+	public function setSubjectEntity( string $entity )
+	{
+		$this->subjectEntity = $entity;
+	}
+
+	/**
+	 * Indicate the subject id of this request.
+	 */
+	public function getSubjectId()
+	{
+		return $this->subjectId;
+	}
+
+	/**
+	 * Retrieve the subject id of this request.
+	 *
+	 * @param string $id
+	 */
+	public function setSubjectId( string $id )
+	{
+		$this->subjectId = $id;
 	}
 
 	/**
@@ -256,6 +331,24 @@ class Elvis_BizClasses_ClientRequest
 	public function getExpectJson() : bool
 	{
 		return $this->expectJson;
+	}
+
+	/**
+	 * Call this function when a Not Found error is severe.
+	 */
+	public function setNotFoundErrorAsSevere()
+	{
+		$this->notFoundIsSevere = true;
+	}
+
+	/**
+	 * Tells whether or not a Not Found error is severe.
+	 *
+	 * @return bool
+	 */
+	public function isNotFoundErrorSevere() : bool
+	{
+		return $this->notFoundIsSevere;
 	}
 
 	/**
