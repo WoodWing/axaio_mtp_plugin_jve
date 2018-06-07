@@ -102,14 +102,14 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		try {
 			$this->setupTestData();
 
-			// Test workflow of the Elvis proxy.
+			// Test workflow with image shadow objects and using the Elvis proxy.
 			$this->lookupProxyEntryInLogOnResponse();
 			$this->createEntDossier();
 			$this->createShadowImageObject( 0 );
 			$this->retrieveImageWithDownloadUrl( 0 );
 			$this->testDownloadImageViaProxyServer();
 
-			// Test version history.
+			// Test version history of image shadow objects.
 			$this->testListZeroVersionsOfImage();
 			$this->updateElvisImage();
 			$this->testListOneVersionsOfImage();
@@ -126,7 +126,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 			$this->testObjectNotFound();
 			$this->testUnsupportedFileRendition();
 
-			// Test bulk operations
+			// Test bulk operations with image shadow objects.
 			$this->createShadowImageObject( 1 );
 			$this->retrieveImageWithDownloadUrl( 1 );
 			$this->multiSetImageDescriptionProperties();

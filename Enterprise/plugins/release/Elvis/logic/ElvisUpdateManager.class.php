@@ -88,16 +88,12 @@ class ElvisUpdateManager
 	 * @param Object[] $objects List of objects for which shadow relations need to be deleted from Elvis.
 	 * @throws BizException
 	 */
-	public static function sendDeleteObjects( $objects )
+	public static function sendDeleteObjects( array $objects )
 	{
 		if( $objects ) {
 			$operations = self::composeElvisDeleteObjects( $objects );
-
-			if( !is_null( $operations ) ) {
-				// Send the created message
+			if( $operations ) {
 				require_once __DIR__.'/../logic/ElvisContentSourceService.php';
-				require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
-
 				$service = new ElvisContentSourceService();
 				$service->deleteObjects( $operations );
 			}
@@ -447,39 +443,28 @@ class ElvisUpdateManager
 	 * Composed DeleteObjectOperation to be communicated with Elvis server.
 	 *
 	 * @param Object[] $objects List of Layout object.
-	 * @return DeleteObjectOperation[]
+	 * @return ElvisDeleteObjectOperation[]
 	 */
-	public static function composeElvisDeleteObjects( $objects )
+	public static function composeElvisDeleteObjects( array $objects ) : array
 	{
 		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
 		require_once __DIR__.'/../model/relation/operation/ElvisEntityDescriptor.php';
 		require_once __DIR__.'/../model/relation/operation/ElvisDeleteObjectOperation.php';
+		require_once __DIR__.'/../util/ElvisObjectUtils.class.php';
 
-		// Enterprise System Id can be null, so use boolean 'false' instead, to indicate if it is already cached or not.
-		static $enterpriseSystemId = false;
-		if ( $enterpriseSystemId === false ) {
-			$enterpriseSystemId = BizSession::getEnterpriseSystemId();
-		}
-
-		$operations = null;
-		if( $objects ) foreach( $objects as $object ) {
-			// Never update objects in archived state
+		$operations = array();
+		foreach( $objects as $object ) {
 			if( ElvisObjectUtils::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
-				continue;
+				continue; // Never update objects in archived state
 			}
-
 			$operation = new ElvisDeleteObjectOperation();
-			$operation->enterpriseSystemId = strval( $enterpriseSystemId );
-
+			$operation->enterpriseSystemId = strval( BizSession::getEnterpriseSystemId() );
 			$operation->object = new ElvisObjectDescriptor();
-			$objId = $object->MetaData->BasicMetaData->ID;
-			$operation->object->id = strval( $objId );
+			$operation->object->id = strval( $object->MetaData->BasicMetaData->ID );
 			$operation->object->name = strval( $object->MetaData->BasicMetaData->Name );
 			$operation->object->type = strval( $object->MetaData->BasicMetaData->Type );
-
-			// Publication and category are not needed during delete, so null them
-			$operation->object->publication = null;
-			$operation->object->category = null;
+			$operation->object->publication = null; // not needed during delete
+			$operation->object->category = null; // not needed during delete
 
 			$operations[] = $operation;
 		}

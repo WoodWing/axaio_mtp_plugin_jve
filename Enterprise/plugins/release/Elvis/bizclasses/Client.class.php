@@ -152,6 +152,21 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
+	 * Deletes given assets.
+	 *
+	 * @param ElvisDeleteObjectOperation[] $deleteOperations
+	 */
+	public function deleteObjects( array $deleteOperations )
+	{
+		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/deleteObjects' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
+		$request->addQueryParamAsJson( 'deleteOperations', $deleteOperations );
+
+		$this->execute( $request );
+	}
+
+	/**
 	 * Retrieve versions of an asset from the Elvis server.
 	 *
 	 * @param string $assetId

@@ -245,21 +245,30 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Deletes given objects.
+	 * Deletes given assets.
 	 *
-	 * @param SabreAMF_ArrayCollection <DeleteObjectOperation> $deleteOperations
+	 * @param ElvisDeleteObjectOperation[] $deleteOperations
 	 * @throws BizException
 	 */
-	public function deleteObjects( $deleteOperations )
+	public function deleteObjects( array $deleteOperations )
 	{
-		ElvisAMFClient::registerClass( ElvisDeleteObjectOperation::getName() );
-		ElvisAMFClient::registerClass( ElvisObjectDescriptor::getName() );
+		if( true ) {
+			ElvisAMFClient::registerClass( ElvisDeleteObjectOperation::getName() );
+			ElvisAMFClient::registerClass( ElvisObjectDescriptor::getName() );
 
-		try {
-			$params = array( $deleteOperations );
-			ElvisAMFClient::send( self::SERVICE, 'deleteObjects', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
+			try {
+				$params = array( $deleteOperations );
+				ElvisAMFClient::send( self::SERVICE, 'deleteObjects', $params );
+			} catch( ElvisCSException $e ) {
+				throw $e->toBizException();
+			}
+		} else { // TODO: replace the entire function body with the else-part below once this problem is solved:
+						// {"errorname":"MethodArgumentConversionNotSupportedException","message":"Failed to convert value of type
+						// [java.lang.String] to required type [java.util.List]; nested exception is java.lang.IllegalStateException:
+						// Cannot convert value of type [java.lang.String] to required type [com.ds.acm.api.contentsource.model.operation.DeleteObjectOperation]:
+						// no matching editors or conversion strategy found","errorcode":500}
+			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+			$client->deleteObjects( $deleteOperations );
 		}
 	}
 
