@@ -609,14 +609,16 @@ EOT;
 		if( $this->workflowTicket ) {
 			$this->testSuiteUtils->wflLogOff( $this, $this->workflowTicket );
 		}
-		if( $this->workflowFactory ) {
-			$this->workflowFactory->teardownTestData();
-		}
 		if( $this->transferServerFiles ) {
 			foreach( $this->transferServerFiles as $file ) {
 				$this->transferServer->deleteFile( $file->FilePath );
 			}
 			unset( $this->transferServerFiles );
+		}
+		if( $this->workflowFactory ) {
+			try {
+				$this->workflowFactory->teardownTestData();
+			} catch( BizException $e ) {}
 		}
 		BizSession::endSession();
 	}
