@@ -175,13 +175,13 @@ class Elvis_BizClasses_ClientRequest
 	 */
 	public function addSearchQueryParam( string $paramName, string $searchName, array $searchValues )
 	{
-		$encSearchValue = '';
+		$paramValue = '';
 		$operator = '';
 		foreach( $searchValues as $searchValue ) {
-			$encSearchValue .= $operator.urlencode( $searchName ).':"'.urlencode( $searchValue ).'"';
+			$paramValue .= $operator.urlencode( $searchName ).':"'.urlencode( $searchValue ).'"';
 			$operator = urlencode( ' OR ' );
 		}
-		$this->queryParams[ urlencode( $paramName ) ] = $encSearchValue;
+		$this->queryParams[ urlencode( $paramName ) ] = $paramValue;
 	}
 
 	/**
@@ -207,7 +207,7 @@ class Elvis_BizClasses_ClientRequest
 	 */
 	public function addPostParam( string $name, string $value )
 	{
-		$this->postParams[ urlencode( $name ) ] = urlencode( $value );
+		$this->postParams[ $name ] = $value;
 	}
 
 	/**
@@ -218,7 +218,7 @@ class Elvis_BizClasses_ClientRequest
 	 */
 	public function addPostParamAsJson( string $name, $value )
 	{
-		$this->postParams[ urlencode( $name ) ] = json_encode( $value );
+		$this->postParams[ $name ] = json_encode( $value );
 	}
 
 	/**
@@ -230,13 +230,13 @@ class Elvis_BizClasses_ClientRequest
 	 */
 	public function addSearchPostParam( string $paramName, string $searchName, array $searchValues )
 	{
-		$encSearchValue = '';
+		$paramValue = '';
 		$operator = '';
 		foreach( $searchValues as $searchValue ) {
-			$encSearchValue .= $operator.urlencode( $searchName ).':"'.urlencode( $searchValue ).'"';
+			$paramValue .= $operator.$searchName.':"'.$searchValue.'"';
 			$operator = ' OR ';
 		}
-		$this->postParams[ urlencode( $paramName ) ] = $encSearchValue;
+		$this->postParams[ $paramName ] = $paramValue;
 	}
 
 	/**
@@ -248,8 +248,7 @@ class Elvis_BizClasses_ClientRequest
 	public function addCsvPostParam( string $name, array $values )
 	{
 		$values = array_map( 'strval', $values );
-		$values = array_map( 'urlencode', $values );
-		$this->postParams[ urlencode( $name ) ] = implode( ',', $values );
+		$this->postParams[ $name ] = implode( ',', $values );
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
