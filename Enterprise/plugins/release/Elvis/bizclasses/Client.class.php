@@ -141,28 +141,26 @@ class Elvis_BizClasses_Client
 	 * Retrieve an asset from the Elvis server.
 	 *
 	 * @param string $assetId
+	 * @param bool $checkOut
 	 * @param string[] $metadataToReturn
 	 * @return stdClass representation of ElvisEntHit
 	 * @throws BizException
 	 */
-	public function retrieve( string $assetId, array $metadataToReturn ) : stdClass
+	public function retrieve( string $assetId, bool $checkOut, array $metadataToReturn ) : stdClass
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API services/retrieve for assetId:'.$assetId );
 
-		$request = new Elvis_BizClasses_ClientRequest( 'services/search' );
+		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/retrieve' );
 		$request->setUserShortName( $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
-		$request->addSearchQueryParam( 'q', 'id', array( $assetId ) );
+		$request->addQueryParam( 'assetId', $assetId );
+		$request->addQueryParam( 'checkout', $checkOut ? 'true' : 'false' );
 		$request->addCsvQueryParam( 'metadataToReturn', $metadataToReturn );
 		$request->setExpectJson();
 
 		$response = $this->execute( $request );
-		$body = $response->jsonBody();
-		if( !isset( $body->hits[0] ) ) {
-			throw new BizException( 'ERR_NOTFOUND', 'Server', 'Elvis assetId: ' . $assetId, null, null, 'INFO' );
-		}
-		return $body->hits[0];
+		return $response->jsonBody();
 	}
 
 	/**

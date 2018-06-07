@@ -109,14 +109,15 @@ class ElvisContentSourceService
 	 * Retrieve an asset from Elvis server.
 	 *
 	 * @param string $assetId
+	 * @param bool $checkOut
 	 * @return ElvisEntHit
 	 * @throws BizException
 	 */
-	public function retrieve( $assetId ) : ElvisEntHit
+	public function retrieve( string $assetId, bool $checkOut = false ) : ElvisEntHit
 	{
 		$metadataToReturn = $this->getMetadataToReturn();
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$stdClassHit = $client->retrieve( $assetId, $metadataToReturn );
+		$stdClassHit = $client->retrieve( $assetId, $checkOut, $metadataToReturn );
 		return $this->convertStdClassToElvisEntHit( $stdClassHit );
 	}
 

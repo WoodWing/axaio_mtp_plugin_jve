@@ -62,10 +62,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$service = new ElvisContentSourceService();
-		if( $lock ) {
-			$service->checkout( $assetId );
-		}
-		$hit = $service->retrieve( $assetId );
+		$hit = $service->retrieve( $assetId, $lock );
 
 		$object = new Object();
 		$object->MetaData = new MetaData();
@@ -107,10 +104,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$this->checkUserEditRight( $lock, $rendition );
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$service = new ElvisContentSourceService();
-		if( $lock ) {
-			$service->checkout( $assetId );
-		}
-		$hit = $service->retrieve( $assetId );
+		$hit = $service->retrieve( $assetId, $lock );
 
 		$hasSceId = array_key_exists('sceId', $hit->{'metadata'}) && empty($hit->{'metadata'}['sceId']);
 		if( !$hasSceId ) {
