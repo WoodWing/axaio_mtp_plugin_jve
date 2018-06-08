@@ -26,6 +26,9 @@ class Elvis_BizClasses_ClientRequest
 	/** @var bool */
 	private $expectJson = false;
 
+	/** @var bool */
+	private $expectRawData = false;
+
 	/** @var Attachment|null */
 	private $fileToUpload = null;
 
@@ -383,7 +386,7 @@ class Elvis_BizClasses_ClientRequest
 	 */
 	public function setExpectRawData()
 	{
-		$this->expectJson = true;
+		$this->expectRawData = true;
 	}
 
 	/**
@@ -393,7 +396,7 @@ class Elvis_BizClasses_ClientRequest
 	 */
 	public function getExpectRawData() : bool
 	{
-		return $this->expectJson;
+		return $this->expectRawData;
 	}
 
 	/**
