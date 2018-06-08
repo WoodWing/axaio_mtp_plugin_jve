@@ -5,18 +5,15 @@
 function myconfirm(code)
 {
 	switch(code) {
-		case 'delaction':
-			txt = "<!--RES:ACT_SURE_DELETE_ACTION_PROPERTY_QMK-->";
-			break;
         case 'deleteAllSelected':
             if( isThereAnyCheckboxesChecked() ) {
-                txt = "Are you sure you want to delete the selected properties?"; // TODO: Localise the string
+                txt = "Are you sure you want to delete the selected properties?"; // 10.x.x TODO: Localise the string
             } else {
-                return alert( "There is no checkbox selected." ); // TODO: Localise the string
+                return alert( "There is no row selected for deletion." ); // 10.x.x TODO: Localise the string
             }
             break;
         case 'reset':
-            txt = "Are you sure you want to delete all properties?"; // TODO: Localise the string
+            txt = "Are you sure you want to reset? (This will delete all properties including the mandatory properties)."; // 10.x.x TODO: Localise the string
             break;
     }
 	return confirm(txt);
@@ -150,7 +147,7 @@ function SetCombos(sAction)
 		<table class="listpane">
 			<tr>
 				<th style="<!--DELETE_COLUMN-->">
-					<div class="tooltip-wrapper" title="Multi Delete Toggle">
+					<div class="tooltip-wrapper">
 						<input type="checkbox" name="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes();">
 					</div>
 				</th>
@@ -166,12 +163,15 @@ function SetCombos(sAction)
 					<input style="<!--ADD_BUTTON-->" type="submit" id="dialog_button" name="addButton" value="<!--RES:ACT_ADD-->" />
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="add" name="add" value="">
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
-					<div   style="display:none" id="dialog_confirm" title="Add Default fields?">
+					<!--10.x.x TODO: Localise the string-->
+					<div   style="display:none" id="dialog_confirm" title="Add default fields?">
 						<p>
 							<span style="float: left; margin: 0 0px 0px 0;"></span>
-							Some compulsory fields will be added.
-							However, there are also some regular used fields, do you want to add them?
-							(You will still be able to remove these regular used fields later.)
+							This is a first setup for this configuration,
+							mandatory properties (if there's any) will be added automatically. <br/>
+							There are also some regularly used properties, do you want to add them? <br/>
+							(Note that you will be able to remove these regularly used properties or reset
+							the configuration later.)
 						</p>
 					</div>
 					<input style="<!--UPDATE_BUTTON-->" type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>

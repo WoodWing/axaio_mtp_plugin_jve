@@ -347,9 +347,9 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$nonAdjustableDefaultFieldsMsg = 'These are compulsory fields and so their settings cannot be adjusted.';
+			$nonAdjustableDefaultFieldsMsg = 'This setting cannot be adjusted because it is a mandatory property.'; // 10.x.x TODO: Localise the string
 			$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
-			$deleteCheckboxTooltipTitle = $isConfigurable ? BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") : 'Default fields are not allowed to be deleted. Use reset instead to clear all the fields.';
+			$deleteCheckboxTooltipTitle = $isConfigurable ? BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") : 'Mandatory property is not allowed to be deleted, use Reset instead to clear all properties.'; // 10.x.x TODO: Localise the string
 			if( $this->isActionOnlyForFieldsDisplay( $this->action ) ) {
 				$detailTxt .= "<tr$clr>";
 				$detailTxt .= $this->composeCheckboxInATableCell( $deleteCheckbox, $deleteCheckboxTooltipTitle );
@@ -819,8 +819,6 @@ class ActionPropertiesAdminApp
 		if( $this->action != '' ) { // When action is <All>, don't fix anything as some action needs 'Dossier' and some don't.
 			BizWorkflow::fixDossierPropertyUsage( $this->action, $this->objType, '', $usages );
 		}
-		// TODO: Mark asterisk on the fields that might be removed when Client doesn't support the field(s).
-
 		$order = 5;
 		$listOfValues = array();
 		if( $usages ) foreach( $usages as $usage ) {
