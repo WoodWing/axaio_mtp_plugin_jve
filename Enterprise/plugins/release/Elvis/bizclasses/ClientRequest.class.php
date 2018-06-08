@@ -48,11 +48,36 @@ class Elvis_BizClasses_ClientRequest
 	private $notFoundIsSevere = false;
 
 	/**
+	 * Compose a new request class for which no authorization is required.
+	 *
+	 * @param string $relativeRestServicePath
+	 * @return Elvis_BizClasses_ClientRequest
+	 */
+	public static function newUnauthorizedRequest( string $relativeRestServicePath ) : Elvis_BizClasses_ClientRequest
+	{
+		return new self( $relativeRestServicePath );
+	}
+
+	/**
+	 * Compose a new request class for which authorization is required.
+	 *
+	 * @param string $relativeRestServicePath
+	 * @param string $userShortName
+	 * @return Elvis_BizClasses_ClientRequest
+	 */
+	public static function newAuthorizedRequest( string $relativeRestServicePath, string $userShortName ) : Elvis_BizClasses_ClientRequest
+	{
+		$request = new self( $relativeRestServicePath );
+		$request->setUserShortName( $userShortName );
+		return $request;
+	}
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $relativeRestServicePath
 	 */
-	public function __construct( string $relativeRestServicePath )
+	private function __construct( string $relativeRestServicePath )
 	{
 		$relativeRestServicePath = trim( $relativeRestServicePath, '/' );
 		foreach( explode( '/', $relativeRestServicePath ) as $pathParam ) {

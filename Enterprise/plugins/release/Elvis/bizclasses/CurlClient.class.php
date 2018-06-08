@@ -274,8 +274,7 @@ class Elvis_BizClasses_CurlClient
 			CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
 			CURLOPT_USERPWD => ELVIS_CLIENT_ID.':'.ELVIS_CLIENT_SECRET
 		) );
-		$request = new Elvis_BizClasses_ClientRequest( 'oauth/token' );
-		$request->setUserShortName( $shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'oauth/token', $shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
 		$request->setSubjectId( $shortUserName );
 		$response = self::plainRequest( $request, $curlOptions );

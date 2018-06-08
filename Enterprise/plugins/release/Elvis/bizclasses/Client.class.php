@@ -31,8 +31,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function create( stdClass $metadata, array $metadataToReturn, $fileToUpload ) : stdClass
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'services/create' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/create', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->addPostParamAsJson( 'metadata', $metadata );
 		$request->addCsvPostParam( 'metadataToReturn', $metadataToReturn );
@@ -58,8 +57,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, $fileToUpload, bool $undoCheckout ) : stdClass
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'services/update' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/update', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addPostParam( 'id', $assetId );
@@ -84,8 +82,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function updateBulk( array $assetIds, $metadata )
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'services/updatebulk' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/updatebulk', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
 		$request->addSearchPostParam( 'q', 'id', $assetIds );
 		$request->addPostParamAsJson( 'metadata', $metadata );
@@ -102,8 +99,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function checkout( string $assetId )
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'services/checkout' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/checkout', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addPathParam( $assetId );
@@ -118,8 +114,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function undoCheckout( string $assetId )
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'services/undocheckout' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/undocheckout', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addPathParam( $assetId );
@@ -138,8 +133,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function retrieve( string $assetId, bool $checkOut, array $metadataToReturn ) : stdClass
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/retrieve' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/retrieve', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'assetId', $assetId );
@@ -158,8 +152,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function deleteObjects( array $deleteOperations )
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/deleteObjects' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/deleteObjects', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
 		$request->addQueryParamAsJson( 'deleteOperations', $deleteOperations );
 
@@ -175,8 +168,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function copy( string $assetId, string $name ) : string
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/copy' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/copy', $this->shortUserName );
 		$request->setSubjectId( $assetId );
 		$request->setSubjectName( $name );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -201,8 +193,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function copyTo( string $assetId, string $destFolderPath, string $name, string $entSystemId ) : stdClass
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/copyTo' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/copyTo', $this->shortUserName );
 		$request->setSubjectId( $assetId );
 		$request->setSubjectName( $name );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -223,8 +214,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function listVersions( string $assetId ) : array
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'services/asset/history' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/asset/history', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'id', $assetId );
@@ -248,8 +238,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function retrieveVersion( string $assetId, string $version ) : stdClass
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/retrieveVersion' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/retrieveVersion', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'assetId', $assetId );
@@ -268,8 +257,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function promoteVersion( string $assetId, string $version )
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/promoteVersion' );
-		$request->setUserShortName( $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/promoteVersion', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'assetId', $assetId );
@@ -285,7 +273,7 @@ class Elvis_BizClasses_Client
 	 */
 	public function getElvisServerInfo()
 	{
-		$request = new Elvis_BizClasses_ClientRequest( 'services/ping' );
+		$request = Elvis_BizClasses_ClientRequest::newUnauthorizedRequest( 'services/ping' );
 		$request->setSubjectEntity( 'Elvis server version info' );
 		$request->setNotFoundErrorAsSevere(); // error on HTTP 404 (could happen for Elvis 4 that has no ping service)
 		$request->setExpectJson();
