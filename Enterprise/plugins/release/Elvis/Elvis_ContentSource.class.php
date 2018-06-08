@@ -178,21 +178,19 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
 			require_once __DIR__.'/util/ElvisBrandAdminConfig.class.php';
 			$productionZone = ElvisBrandAdminConfig::getProductionZoneByPubId( $destObject->MetaData->BasicMetaData->Publication->Id );
-
 			if( $productionZone ) {
 				$productionZone = ElvisBrandAdminConfig::substituteDateInProductionZone( $productionZone );
-
 				$hit = $service->copyTo( $assetId, $productionZone, $destObject->MetaData->BasicMetaData->Name, BizSession::getEnterpriseSystemId() );
 			} else {
 				throw new BizException( 'ERR_INVALID_PROPERTY', 'Server', 'Unable to find the production zone property.' );
 			}
-		} else {
+		} else { // Register shadow object in Elvis.
 			$hit = $service->retrieve( $assetId );
-
-			// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
-			require_once __DIR__.'/logic/ElvisObjectManager.php';
 			$systemId = BizSession::getEnterpriseSystemId();
-			ElvisObjectManager::registerShadowObject( $assetId, $systemId );
+			if( $systemId ) {
+				require_once __DIR__.'/logic/ElvisObjectManager.php';
+				ElvisObjectManager::registerShadowObject( $assetId, $systemId ); // Throws BizException if not possible (e.g. already linked)
+			}
 		}
 
 		if( !$destObject ) {
@@ -434,16 +432,18 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		require_once __DIR__.'/logic/ElvisObjectManager.php';
 
 		// Only remove the system id in Elvis when the asset is completely removed in Enterprise (removed from the trash)
-		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
+		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$systemId = BizSession::getEnterpriseSystemId();
-		if( !$restore ) {
-			try {
-				ElvisObjectManager::unregisterShadowObject( $elvisId, $systemId );
-			} catch ( Exception $exception ) {
-				LogHandler::Log( 'ELVIS', 'WARN', 'Unable to unregister asset in Elvis: ' . $exception );
+		if( $assetId && $systemId ) {
+			if( !$restore ) {
+				try {
+					ElvisObjectManager::unregisterShadowObject( $assetId, $systemId );
+				} catch( Exception $exception ) {
+					LogHandler::Log( 'ELVIS', 'WARN', 'Unable to unregister asset in Elvis: '.$exception );
+				}
+			} else {
+				ElvisObjectManager::registerShadowObject( $assetId, $systemId );
 			}
-		} else {
-			ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
 		}
 	}
 	

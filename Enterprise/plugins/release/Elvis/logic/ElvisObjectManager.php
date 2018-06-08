@@ -1,51 +1,46 @@
 <?php
 /**
- * @since      4.4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Manager class for operations on Elvis Shadow Objects (e.g. registering and un-registering in Elvis).
+ *
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 class ElvisObjectManager
 {
 	/**
-	 * Links an Elvis asset to this Enterprise System.
+	 * Link a shadow object to an Elvis asset.
 	 *
-	 * @param string $elvisId
+	 * @param string $assetId
 	 * @param string $enterpriseSystemId
-	 * @throws BizException
 	 */
-	public static function registerShadowObject($elvisId, $enterpriseSystemId)
+	public static function registerShadowObject( string $assetId, string $enterpriseSystemId )
 	{
 		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
 		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
 		$operation = new ElvisShadowObjectIdentity();
-		$operation->enterpriseSystemId = strval( $enterpriseSystemId );
-		$operation->assetId = strval( $elvisId );
+		$operation->enterpriseSystemId = $enterpriseSystemId;
+		$operation->assetId = $assetId;
 
-		// Link the shadow object to the Elvis asset
 		$service = new ElvisContentSourceService();
 		$service->registerShadowObjects( $operation );
 	}
 
 	/**
-	 * Un-links an Elvis asset from this Enterprise System.
+	 * Un-link a shadow object from an Elvis asset.
 	 *
-	 * @param $elvisId
-	 * @param $enterpriseSystemId
-	 * @throws BizException
+	 * @param string $assetId
+	 * @param string $enterpriseSystemId
 	 */
-	public static function unregisterShadowObject($elvisId, $enterpriseSystemId)
+	public static function unregisterShadowObject( string $assetId, string $enterpriseSystemId )
 	{
 		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
 		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 
 		$operation = new ElvisShadowObjectIdentity();
-		$operation->enterpriseSystemId = strval( $enterpriseSystemId );
-		$operation->assetId = strval( $elvisId );
+		$operation->enterpriseSystemId = $enterpriseSystemId;
+		$operation->assetId = $assetId;
 
-		// Un-link shadow object from Elvis asset
 		$service = new ElvisContentSourceService();
 		$service->unregisterShadowObjects( $operation );
 	}

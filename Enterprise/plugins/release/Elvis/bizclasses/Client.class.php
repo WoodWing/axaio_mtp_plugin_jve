@@ -31,7 +31,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function create( stdClass $metadata, array $metadataToReturn, $fileToUpload ) : stdClass
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/create', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'services/create', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->addPostParamAsJson( 'metadata', $metadata );
 		$request->addCsvPostParam( 'metadataToReturn', $metadataToReturn );
@@ -57,7 +58,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, $fileToUpload, bool $undoCheckout ) : stdClass
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/update', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'services/update', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addPostParam( 'id', $assetId );
@@ -82,7 +84,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function updateBulk( array $assetIds, $metadata )
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/updatebulk', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'services/updatebulk', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
 		$request->addSearchPostParam( 'q', 'id', $assetIds );
 		$request->addPostParamAsJson( 'metadata', $metadata );
@@ -99,7 +102,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function checkout( string $assetId )
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/checkout', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'services/checkout', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addPathParam( $assetId );
@@ -114,7 +118,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function undoCheckout( string $assetId )
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/undocheckout', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'services/undocheckout', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addPathParam( $assetId );
@@ -133,7 +138,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function retrieve( string $assetId, bool $checkOut, array $metadataToReturn ) : stdClass
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/retrieve', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/retrieve', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'assetId', $assetId );
@@ -152,7 +158,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function deleteObjects( array $deleteOperations )
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/deleteObjects', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/deleteObjects', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
 		$request->addQueryParamAsJson( 'deleteOperations', $deleteOperations );
 
@@ -168,7 +175,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function copy( string $assetId, string $name ) : string
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/copy', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/copy', $this->shortUserName );
 		$request->setSubjectId( $assetId );
 		$request->setSubjectName( $name );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -193,7 +201,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function copyTo( string $assetId, string $destFolderPath, string $name, string $entSystemId ) : stdClass
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/copyTo', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/copyTo', $this->shortUserName );
 		$request->setSubjectId( $assetId );
 		$request->setSubjectName( $name );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
@@ -214,7 +223,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function listVersions( string $assetId ) : array
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'services/asset/history', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'services/asset/history', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'id', $assetId );
@@ -238,7 +248,8 @@ class Elvis_BizClasses_Client
 	 */
 	public function retrieveVersion( string $assetId, string $version ) : stdClass
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/retrieveVersion', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/retrieveVersion', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'assetId', $assetId );
@@ -257,13 +268,47 @@ class Elvis_BizClasses_Client
 	 */
 	public function promoteVersion( string $assetId, string $version )
 	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'private-api/contentsource/promoteVersion', $this->shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/promoteVersion', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'assetId', $assetId );
 		$request->addQueryParam( 'version', $version );
 
 		$response = $this->execute( $request );
+	}
+
+	/**
+	 * Link a shadow object to an Elvis asset.
+	 *
+	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
+	 */
+	public function registerShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity )
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/registerShadowObject', $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
+		$request->setSubjectId( $shadowObjectIdentity->assetId );
+		$request->addQueryParamAsJson( 'shadowObjectIdentity', $shadowObjectIdentity );
+
+		$response = $this->execute( $request );
+	}
+
+	/**
+	 * Un-link a shadow object from an Elvis asset.
+	 *
+	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
+	 */
+	public function unregisterShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity )
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/unregisterShadowObject', $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
+		$request->setSubjectId( $shadowObjectIdentity->assetId );
+		$request->addQueryParamAsJson( 'shadowObjectIdentity', $shadowObjectIdentity );
+
+		$response = $this->execute( $request );
+
 	}
 
 	/**
