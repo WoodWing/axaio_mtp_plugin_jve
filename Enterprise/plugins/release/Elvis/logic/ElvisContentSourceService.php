@@ -54,12 +54,12 @@ class ElvisContentSourceService
 	 */
 	public function create( array $metadata, $fileToUpload ) : ElvisEntHit
 	{
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
+		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$metadataToReturn = $this->getMetadataToReturn();
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->create( (object)$metadata, $metadataToReturn, $fileToUpload );
-		return ElvisUtils::convertStdClassToElvisEntHit( $stdClassHit );
+		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}
 
 	/**
@@ -74,12 +74,12 @@ class ElvisContentSourceService
 	 */
 	public function update( string $assetId, array $metadata, $fileToUpload, bool $undoCheckout ) : ElvisEntHit
 	{
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
+		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$metadataToReturn = $this->getMetadataToReturn();
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->update( $assetId, (object)$metadata, $metadataToReturn, $fileToUpload, $undoCheckout );
-		return ElvisUtils::convertStdClassToElvisEntHit( $stdClassHit );
+		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}
 
 	/**
@@ -114,12 +114,12 @@ class ElvisContentSourceService
 	 */
 	public function retrieve( string $assetId, bool $checkOut = false ) : ElvisEntHit
 	{
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
+		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$metadataToReturn = $this->getMetadataToReturn();
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->retrieve( $assetId, $checkOut, $metadataToReturn );
-		return ElvisUtils::convertStdClassToElvisEntHit( $stdClassHit );
+		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}
 
 	/**
@@ -167,11 +167,11 @@ class ElvisContentSourceService
 	 */
 	public function copyTo( string $assetId, string $destFolderPath, string $name, string $entSystemId ) : ElvisEntHit
 	{
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
+		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->copyTo( $assetId, $destFolderPath, $name, $entSystemId );
-		return ElvisUtils::convertStdClassToElvisEntHit( $stdClassHit );
+		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}
 
 	/**

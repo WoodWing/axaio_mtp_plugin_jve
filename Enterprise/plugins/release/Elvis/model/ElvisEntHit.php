@@ -34,4 +34,38 @@ class ElvisEntHit extends AbstractRemoteObject
 
 	/** @var int $permissions */
 	public $permissions;
+
+	/**
+	 * Convert a stdClass object into an ElvisEntHit object.
+	 *
+	 * REST responses from Elvis server are JSON decoded and result into stdClass.
+	 * This function can be called to convert it to the real data class ElvisEntHit.
+	 *
+	 * @since 10.5.0
+	 * @param stdClass $stdClassHit
+	 * @return ElvisEntHit
+	 */
+	public static function fromStdClass( stdClass $stdClassHit ) : ElvisEntHit
+	{
+		require_once __DIR__.'/../model/ElvisEntHit.php';
+
+		/** @var ElvisEntHit $hit */
+		$hit = WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntHit' );
+		$hit->metadata = (array)$hit->metadata;
+		if( isset( $hit->id ) ) {
+			$hit->metadata[ 'id' ] = $hit->id;
+		}
+		foreach( $hit->metadata as $key => $value ) {
+			if( isset( $value->value ) ) {
+				$hit->metadata[ $key ] = $value->value;
+			}
+		}
+		$datetimes = array( 'assetCreated', 'assetFileModified', 'fileCreated', 'fileModified' );
+		foreach( $datetimes as $datetime ) {
+			if( isset( $hit->metadata[ $datetime ] ) ) {
+				$hit->metadata[ $datetime ] = $hit->metadata[ $datetime ] / 1000; // msec to sec
+			}
+		}
+		return $hit;
+	}
 }

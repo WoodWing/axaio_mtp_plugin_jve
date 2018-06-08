@@ -404,4 +404,18 @@ class Elvis_BizClasses_ClientRequest
 	{
 		return $this->fileToUpload;
 	}
+
+	/**
+	 * Compose a description of the request e.g. for logging purposes.
+	 *
+	 * @return string
+	 */
+	public function getDescription()
+	{
+		$description = $this->composeServicePath();
+		if( $this->getSubjectId() ) {
+			$description .= ' for id: '.$this->getSubjectId();
+		}
+		return $description;
+	}
 }

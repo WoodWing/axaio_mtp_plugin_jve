@@ -306,11 +306,7 @@ class Elvis_BizClasses_Client
 	 */
 	private function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
-		$logMessage = 'Calling REST API '.$request->composeServicePath();
-		if( $request->getSubjectId() ) {
-			$logMessage .= ' for id: '.$request->getSubjectId();
-		}
-		LogHandler::Log( 'ELVIS', 'DEBUG', $logMessage );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API '.$request->getDescription() );
 
 		$client = new Elvis_BizClasses_CurlClient();
 		$response = $client->execute( $request );
