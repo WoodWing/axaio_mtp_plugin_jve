@@ -167,7 +167,7 @@ class Elvis_BizClasses_CurlClient
 			}
 		}
 
-		if( $request->getExpectJson() ) {
+		if( $request->getExpectJson() || $request->getExpectRawData() ) {
 			$defaultCurlOptions[ CURLOPT_RETURNTRANSFER ] = 1;
 		}
 

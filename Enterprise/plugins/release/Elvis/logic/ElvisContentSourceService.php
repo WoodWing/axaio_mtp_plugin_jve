@@ -51,7 +51,6 @@ class ElvisContentSourceService
 	 * @param array $metadata Metadata to be updated in Elvis
 	 * @param Attachment|null $fileToUpload
 	 * @return ElvisEntHit
-	 * @throws BizException
 	 */
 	public function create( array $metadata, $fileToUpload ) : ElvisEntHit
 	{
@@ -72,7 +71,6 @@ class ElvisContentSourceService
 	 * @param Attachment|null $fileToUpload
 	 * @param bool $undoCheckout
 	 * @return ElvisEntHit
-	 * @throws BizException
 	 */
 	public function update( string $assetId, array $metadata, $fileToUpload, bool $undoCheckout ) : ElvisEntHit
 	{
@@ -89,7 +87,6 @@ class ElvisContentSourceService
 	 *
 	 * @since 10.5.0
 	 * @param string $assetId
-	 * @throws BizException when checkout failed.
 	 */
 	public function checkout( $assetId )
 	{
@@ -101,7 +98,6 @@ class ElvisContentSourceService
 	 * Release the edit lock for an asset in Elvis server.
 	 *
 	 * @param string $assetId
-	 * @throws BizException when checkout failed.
 	 */
 	public function undoCheckout( $assetId )
 	{
@@ -115,7 +111,6 @@ class ElvisContentSourceService
 	 * @param string $assetId
 	 * @param bool $checkOut
 	 * @return ElvisEntHit
-	 * @throws BizException
 	 */
 	public function retrieve( string $assetId, bool $checkOut = false ) : ElvisEntHit
 	{
@@ -152,24 +147,16 @@ class ElvisContentSourceService
 	 * @param string $assetId
 	 * @param string $name
 	 * @return string Elvis id of the copied asset
-	 * @throws BizException
 	 */
-	public function copy( $assetId, $name )
+	public function copy( string $assetId, string $name ) : string
 	{
-		$params = array( $assetId, $name );
-		$copyId = null;
-
-		try {
-			$copyId = ElvisAMFClient::send( self::SERVICE, 'copy', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-
-		return $copyId;
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		return $client->copy( $assetId, $name );
 	}
 
 	/**
-	 * Copies an asset in Elvis to a pre-defined folder and returns the copy to Enterprise.
+	 * Copy an asset in Elvis to a pre-defined folder and return the copy to Enterprise.
+	 *
 	 * The copied asset is already registered as shadow object in Elvis.
 	 *
 	 * @param string $assetId Id of the original Elvis asset to be copied.
@@ -177,23 +164,14 @@ class ElvisContentSourceService
 	 * @param string|null $name The name of the asset. If not set, the value remains empty and Elvis uses the asset filename.
 	 * @param string $entSystemId Enterprise system id.
 	 * @return ElvisEntHit The copied Elvis asset.
-	 * @throws BizException
 	 */
-	public function copyTo( $assetId, $destFolderPath, $name, $entSystemId )
+	public function copyTo( string $assetId, string $destFolderPath, string $name, string $entSystemId ) : ElvisEntHit
 	{
-		ElvisAMFClient::registerClass( ElvisEntHit::getName() );
-		ElvisAMFClient::registerClass( ElvisFormattedValue::getName() );
-		ElvisAMFClient::registerClass( BasicMap::getName() );
-		$resp = null;
-		$params = array( $assetId, $destFolderPath, $name, $entSystemId );
+		require_once __DIR__.'/../util/ElvisUtils.class.php';
 
-		try {
-			$resp = ElvisAMFClient::send( self::SERVICE, 'copyTo', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-
-		return $resp;
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$stdClassHit = $client->copyTo( $assetId, $destFolderPath, $name, $entSystemId );
+		return ElvisUtils::convertStdClassToElvisEntHit( $stdClassHit );
 	}
 
 	/**
@@ -245,7 +223,7 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Deletes given assets.
+	 * Delete given assets.
 	 *
 	 * @param ElvisDeleteObjectOperation[] $deleteOperations
 	 * @throws BizException

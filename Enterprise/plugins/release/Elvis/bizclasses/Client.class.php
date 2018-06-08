@@ -152,7 +152,7 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
-	 * Deletes given assets.
+	 * Delete given assets.
 	 *
 	 * @param ElvisDeleteObjectOperation[] $deleteOperations
 	 */
@@ -164,6 +164,54 @@ class Elvis_BizClasses_Client
 		$request->addQueryParamAsJson( 'deleteOperations', $deleteOperations );
 
 		$this->execute( $request );
+	}
+
+	/**
+	 * Copy an asset.
+	 *
+	 * @param string $assetId
+	 * @param string $name
+	 * @return string Id of the copied asset.
+	 */
+	public function copy( string $assetId, string $name ) : string
+	{
+		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/copy' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectId( $assetId );
+		$request->setSubjectName( $name );
+		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
+		$request->addQueryParam( 'assetId', $assetId );
+		$request->addQueryParam( 'name', $name );
+		$request->setExpectRawData();
+
+		$response = $this->execute( $request );
+		return $response->body();
+	}
+
+	/**
+	 * Copy an asset in Elvis to a pre-defined folder and return the copy to Enterprise.
+	 *
+	 * The copied asset is already registered as shadow object in Elvis.
+	 *
+	 * @param string $assetId Id of the original Elvis asset to be copied.
+	 * @param string $destFolderPath Path on Elvis where the asset will be copied to.
+	 * @param string|null $name The name of the asset. If not set, the value remains empty and Elvis uses the asset filename.
+	 * @param string $entSystemId Enterprise system id.
+	 * @return stdClass representation of an ElvisEntHit of the copied Elvis asset.
+	 */
+	public function copyTo( string $assetId, string $destFolderPath, string $name, string $entSystemId ) : stdClass
+	{
+		$request = new Elvis_BizClasses_ClientRequest( 'private-api/contentsource/copyTo' );
+		$request->setUserShortName( $this->shortUserName );
+		$request->setSubjectId( $assetId );
+		$request->setSubjectName( $name );
+		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
+		$request->addQueryParam( 'assetId', $assetId );
+		$request->addQueryParam( 'name', $name );
+		$request->setExpectJson();
+
+		$response = $this->execute( $request );
+		return $response->jsonBody();
 	}
 
 	/**
@@ -300,6 +348,14 @@ class Elvis_BizClasses_Client
 				if( $request->getAttempt() <= 3 ) {
 					$request->nextAttempt();
 					$response = $this->execute( $request );
+				} else {
+					throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
+				}
+			}
+			if( $response->isConflictError() ) { // HTTP 409
+				if( $request->getSubjectEntity() && $request->getSubjectName() ) {
+					throw new BizException( 'ERR_SUBJECT_EXISTS', 'Client', $detail, // S1038
+						null, array( $request->getSubjectEntity(), $request->getSubjectName(), 'INFO' ) );
 				} else {
 					throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
 				}

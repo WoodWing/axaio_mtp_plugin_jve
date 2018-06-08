@@ -1157,8 +1157,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		if( $response && count($response->Users) ) {
 			$newUser = $response->Users[0];
 			if( $newUser->EncryptedPassword != $oriUser->EncryptedPassword ) {
-				$this->setResult( 'ERROR', '<b>Test: </b>'.$stepInfo.'<br/>'.
-					'<b> The encrypted password for the imported user differs from the original source user.</b>', '' );
+				$this->setResult( 'ERROR', 'Test: '.$stepInfo.PHP_EOL.
+					'The encrypted password for the imported user differs from the original source user.', '' );
 			}
 		}
 	}
@@ -1209,8 +1209,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 		$response = $this->utils->callService( $this, $request, $stepInfo );
 		foreach ($response->Users[0]->UserGroups as $group) {
 			if ($group->Id == $groupId) {
-				$this->setResult( 'ERROR', '<b>Test: </b>'.$stepInfo.'<br/>'.
-					'<b>The user still has a reference to the deleted group.</b>', '' );
+				$this->setResult( 'ERROR', 'Test: '.$stepInfo.PHP_EOL.
+					'The user still has a reference to the deleted group.', '' );
 			}
 		}
 	}

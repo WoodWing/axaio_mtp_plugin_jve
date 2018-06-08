@@ -92,6 +92,16 @@ class Elvis_BizClasses_ClientResponse
 	}
 
 	/**
+	 * Whether or not the response is an Conflict error (HTTP 409).
+	 *
+	 * @return bool
+	 */
+	public function isConflictError()
+	{
+		return $this->httpStatusCode === 409;
+	}
+
+	/**
 	 * Whether or not the response is a Gone error (HTTP 410).
 	 *
 	 * @return bool
@@ -108,7 +118,7 @@ class Elvis_BizClasses_ClientResponse
 	 */
 	public function isClientProgrammaticError()
 	{
-		$excludedErrorCodes = array( 401, 403, 404, 408, 410 );
+		$excludedErrorCodes = array( 401, 403, 404, 408, 409, 410 );
 		return $this->httpStatusCode >= 400 && $this->httpStatusCode < 500 && !in_array( $this->httpStatusCode, $excludedErrorCodes );
 	}
 

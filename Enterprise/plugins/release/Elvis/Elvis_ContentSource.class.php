@@ -67,7 +67,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$object = new Object();
 		$object->MetaData = new MetaData();
 		$object->Relations = array();
-		$object->Files = $this->getFiles( $hit, array( $rendition ) );
+		if( $rendition ) {
+			$object->Files = $this->getFiles( $hit, array( $rendition ) );
+		}
 		
 		$this->fillMetadata( $object, $hit );
 		
@@ -111,8 +113,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$hit->{'metadata'}['sceId'] = $object->MetaData->BasicMetaData->ID; // needed by getFiles()
 		}
 
-		if( !$haveVersion || version_compare( $haveVersion, ElvisUtils::getEnterpriseVersionNumber($hit->metadata['versionNumber']), '<' ) ) {
-			$object->Files = $this->getFiles( $hit, array( $rendition ) );
+		if( $rendition ) {
+			if( !$haveVersion || version_compare( $haveVersion, ElvisUtils::getEnterpriseVersionNumber( $hit->metadata['versionNumber'] ), '<' ) ) {
+				$object->Files = $this->getFiles( $hit, array( $rendition ) );
+			}
 		}
 		$this->getMetadataHandler()->read( $object, $hit->metadata );
 

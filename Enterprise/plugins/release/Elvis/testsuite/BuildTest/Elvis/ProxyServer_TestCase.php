@@ -132,6 +132,12 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 			$this->multiSetImageDescriptionProperties();
 			$this->validateImageDescriptionFieldsAtElvis();
 
+			// Test copy operation on shadow image.
+			$this->copyShadowImageObject();
+			$this->retrieveElvisImage( 2 );
+			$this->retrieveImageWithDownloadUrl( 2 );
+			$this->testCopiedShadowImage();
+
 		} catch( BizException $e ) {
 		}
 		$this->tearDownTestData();
@@ -203,6 +209,9 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		$this->images[1]->attachments[0]->Rendition = 'native';
 		$this->images[1]->attachments[0]->Type = 'image/jpg';
 		$this->images[1]->attachments[0]->FilePath = __DIR__.'/testdata/image1_v1.jpg';
+
+		// Copy image1 to image2
+		$this->images[2] = new WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData();
 	}
 
 	/**
@@ -646,9 +655,64 @@ EOT;
 		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
 		$service = new ElvisContentSourceService();
 		foreach( $this->images as $image ) {
-			$hit = $service->retrieve( $image->assetHit->id );
-			$this->assertEquals( '東京', $hit->metadata['description'] );
+			if( $image->assetHit ) {
+				$hit = $service->retrieve( $image->assetHit->id );
+				$this->assertEquals( '東京', $hit->metadata['description'] );
+			}
 		}
+	}
+
+	/**
+	 * Copy shadow image1.
+	 */
+	private function copyShadowImageObject()
+	{
+		$imageObject = $this->images[1]->entObject;
+
+		require_once BASEDIR.'/server/services/wfl/WflCopyObjectService.class.php';
+		$request = new WflCopyObjectRequest();
+		$request->Ticket = $this->workflowTicket;
+		$request->SourceID = $imageObject->MetaData->BasicMetaData->ID;
+		$request->MetaData = $imageObject->MetaData;
+		$request->Relations = $imageObject->Relations;
+		$request->Targets = $imageObject->Targets;
+
+		$request->MetaData->BasicMetaData->Name = $imageObject->MetaData->BasicMetaData->Name.'-copy';
+
+		/** @var WflCopyObjectResponse $response */
+		$response = $this->testSuiteUtils->callService( $this, $request, 'Copy shadow image object.' );
+		$this->assertInstanceOf( 'WflCopyObjectResponse', $response );
+		$this->assertInstanceOf( 'MetaData', $response->MetaData );
+
+		$this->images[2]->entObject = new Object();
+		$this->images[2]->entObject->MetaData = $response->MetaData;
+		$this->images[2]->shadowId = $response->MetaData->BasicMetaData->ID;
+	}
+
+	/**
+	 * Retrieve an image directly from Elvis server.
+	 *
+	 * @param integer $imageIndex
+	 */
+	private function retrieveElvisImage( $imageIndex )
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+
+		$imageObject = $this->images[ $imageIndex ]->entObject;
+		$service = new ElvisContentSourceService();
+		$hit = $service->retrieve( $imageObject->MetaData->BasicMetaData->DocumentID, false );
+		$this->assertInstanceOf( 'ElvisEntHit', $hit );
+		$this->assertNotNull( $hit->id );
+		$this->images[ $imageIndex ]->assetHit = $hit;
+	}
+
+	/**
+	 * Check if image2 contains copied properties.
+	 */
+	private function testCopiedShadowImage()
+	{
+		$imageObject = $this->images[2]->entObject;
+		$this->assertEquals( '0.1', $imageObject->MetaData->WorkflowMetaData->Version );
 	}
 
 	/**

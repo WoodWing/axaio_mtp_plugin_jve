@@ -371,9 +371,9 @@ class WW_Utils_TestSuite
 			}
 			if( $response ) {
 				if( $expectedErrorCodeOrMsgKey ) { // Should not come here as error is expected!!
-					$message = '<b>Test: </b>'.$stepInfo.'<br/>'.
-							'<b>The service response was unexpected: </b>Success!<br/>'.
-							'<b>Expected response: </b>'.$expectedErrorCodeOrMsgKey.'.';
+					$message = 'Test: '.$stepInfo.PHP_EOL.
+							'The service response was unexpected: Success!'.PHP_EOL.
+							'Expected response: '.$expectedErrorCodeOrMsgKey.'.';
 					if( $throwException ) {
 						$testCase->throwError( $message );
 					} else {
@@ -401,10 +401,10 @@ class WW_Utils_TestSuite
 				
 				// Expect an error here, but is the error same as the $expectedError?
 				if( $sysError != $expectedError ) {
-					$message = '<b>Test: </b>'.$stepInfo.'<br/>'.
-								'<b>The service response was unexpected: </b>'.$e->getMessage().
-								' (Detail: '.$e->getDetail().')<br/>'.
-								'<b>Expected response: </b>'.$expectedErrorCodeOrMsgKey.'.';
+					$message = 'Test:'.$stepInfo.PHP_EOL.
+								'The service response was unexpected: '.$e->getMessage().
+								' (Detail: '.$e->getDetail().')'.PHP_EOL.
+								'Expected response: '.$expectedErrorCodeOrMsgKey.'.';
 					if( $throwException ) {
 						$testCase->throwError( $message );
 					} else {
@@ -412,10 +412,10 @@ class WW_Utils_TestSuite
 					}
 				}				
 			} else { // No error expected
-				$message =  '<b>Test: </b>'.$stepInfo.'<br/>'.
-							'<b>The service response was unexpected: </b>'.$e->getMessage().
-							' (Detail: '.$e->getDetail().')<br/>'.
-							'<b>Expected response: </b>Success!';
+				$message =  'Test: '.$stepInfo.PHP_EOL.
+							'The service response was unexpected: '.$e->getMessage().
+							' (Detail: '.$e->getDetail().')'.PHP_EOL.
+							'Expected response: Success!';
 				if( $throwException ) {
 					$testCase->throwError( $message );
 				} else {

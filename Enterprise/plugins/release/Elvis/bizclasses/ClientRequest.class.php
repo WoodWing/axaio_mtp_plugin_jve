@@ -41,6 +41,9 @@ class Elvis_BizClasses_ClientRequest
 	/** @var string */
 	private $subjectId = '';
 
+	/** @var string */
+	private $subjectName = '';
+
 	/** @var bool */
 	private $notFoundIsSevere = false;
 
@@ -130,6 +133,24 @@ class Elvis_BizClasses_ClientRequest
 	public function setSubjectId( string $id )
 	{
 		$this->subjectId = $id;
+	}
+
+	/**
+	 * Indicate the subject name of this request.
+	 */
+	public function getSubjectName()
+	{
+		return $this->subjectName;
+	}
+
+	/**
+	 * Retrieve the subject name of this request.
+	 *
+	 * @param string $name
+	 */
+	public function setSubjectName( string $name )
+	{
+		$this->subjectName = $name;
 	}
 
 	/**
@@ -328,6 +349,24 @@ class Elvis_BizClasses_ClientRequest
 	 * @return bool
 	 */
 	public function getExpectJson() : bool
+	{
+		return $this->expectJson;
+	}
+
+	/**
+	 * Call this function when raw data is expected in the response.
+	 */
+	public function setExpectRawData()
+	{
+		$this->expectJson = true;
+	}
+
+	/**
+	 * Tells whether or not raw data is expected in the response.
+	 *
+	 * @return bool
+	 */
+	public function getExpectRawData() : bool
 	{
 		return $this->expectJson;
 	}
