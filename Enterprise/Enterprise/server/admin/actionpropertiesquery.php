@@ -316,7 +316,7 @@ class ActionPropertiesQueryAdminApp
 				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") );
 			}
 			$detailTxt .= "<tr$clr>";
-			$detailTxt .= '<td align="center">' . $deleteCheckbox . '</td>';
+			$detailTxt .= '<td align="center" width="5">' . $deleteCheckbox . '</td>';
 			$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
 			$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
 			$detailTxt .= '</tr>';
