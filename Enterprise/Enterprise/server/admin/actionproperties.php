@@ -347,40 +347,44 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$nonAdjustableDefaultFieldsMsg = 'This setting cannot be adjusted because it is a mandatory property.'; // 10.x.x TODO: Localise the string
-			$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
-			$deleteCheckboxTooltipTitle = $isConfigurable ? BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") : 'Mandatory property is not allowed to be deleted, use Reset instead to clear all properties.'; // 10.x.x TODO: Localise the string
+			$nonAdjustableDefaultFieldsMsg = 'This setting cannot be adjusted nor deleted because it is a mandatory property.'; // 10.x.x TODO: Localise the string
+			if( $isConfigurable ) {
+				$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
+				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") );
+			} else {
+				$deleteCheckbox = '';
+			}
 			if( $this->isActionOnlyForFieldsDisplay( $this->action ) ) {
 				$detailTxt .= "<tr$clr>";
-				$detailTxt .= $this->composeCheckboxInATableCell( $deleteCheckbox, $deleteCheckboxTooltipTitle );
+				$detailTxt .= '<td align="center">' . $deleteCheckbox. '</td>';
 				$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
 				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
 				$detailTxt .= '</tr>';
 			} else {
 				$detailTxt .= "<tr$clr>";
-				$detailTxt .= $this->composeCheckboxInATableCell( $deleteCheckbox, $deleteCheckboxTooltipTitle );
+				$detailTxt .= '<td align="center">' . $deleteCheckbox.'</td>';
 				$detailTxt .= "<td>".$row['category'].'</td>';
 				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
 				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				if( empty( $row['edit'] ) && ( in_array( $row['property'], $this->sysProps ) || !$isConfigurable )) {
+				if( empty( $row['edit'] ) && in_array( $row['property'], $this->sysProps ) ) {
 					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
 				} else {
 					$title = $isConfigurable ? BizResources::localize("OBJ_EDITABLE") : $nonAdjustableDefaultFieldsMsg;
 					$checkbox = inputvar("edit$i", $row['edit'], 'checkbox', null, true, null, !$isConfigurable );
-					$detailTxt .= $this->composeCheckboxInATableCell( $checkbox, $title );
+					$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
 				}
 				$title = $isConfigurable ? BizResources::localize("OBJ_MANDATORY") : $nonAdjustableDefaultFieldsMsg;
 				$checkbox = inputvar("mandatory$i", $row['mandatory'], 'checkbox', null, true, null, !$isConfigurable );
-				$detailTxt .= $this->composeCheckboxInATableCell( $checkbox, $title );
+				$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
 
 				$title = $isConfigurable ? BizResources::localize("OBJ_RESTRICTED") : $nonAdjustableDefaultFieldsMsg;
 				$checkbox = inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, null, !$isConfigurable );
-				$detailTxt .= $this->composeCheckboxInATableCell( $checkbox, $title );
+				$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
 
 				if( $showMultiObj ) {
 					$title = $isConfigurable ? BizResources::localize("OBJ_MULTIPLE_OBJECTS") : $nonAdjustableDefaultFieldsMsg;
 					$checkbox = inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, null, !$isConfigurable );
-					$detailTxt .= $this->composeCheckboxInATableCell( $checkbox, $title );
+					$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
 				} else { // Don't fill in the multiple objects column.
 					$detailTxt .= '<td style="display:none"></td>'; // No checkbox.
 				}
@@ -464,7 +468,7 @@ class ActionPropertiesAdminApp
 				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
 				$detailTxt .= '<td>'.formvar($prop).'</td>';
 				$isConfigurable = $this->isConfigurableField( $prop );
-				if( empty( $row['edit'] ) && ( in_array( $row['property'], $this->sysProps ) || !$isConfigurable )) {
+				if( empty( $row['edit'] ) && in_array( $row['property'], $this->sysProps )) {
 					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:LOCKIMAGE).'</td>';
 				} else {
 					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:'').'</td>';
@@ -768,7 +772,7 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
-	 * To compose the checkbox in a table cell with the tooltip wrapper.
+	 * To place a checkbox in a tooltip wrapper.
 	 *
 	 * The tooltip wrapper is typically needed when the checkbox is set to disabled.
 	 * This is due to jquery-ui tooltip doesn't work on disabled elements ( disabled
@@ -782,14 +786,11 @@ class ActionPropertiesAdminApp
 	 * @param string $checkbox
 	 * @return string
 	 */
-	private function composeCheckboxInATableCell( string $checkbox, string $title ):string
+	private function placeCheckboxInAToolTipWrapper( string $checkbox, string $title ):string
 	{
-		$detailTxt = '<td align="center">';
-		$detailTxt .= '<div class="tooltip-wrapper" title="'.$title.'" >';
+		$detailTxt = '<div class="tooltip-wrapper" title="'.$title.'" >';
 		$detailTxt .= $checkbox;
 		$detailTxt .= '</div>';
-		$detailTxt .= '</td>';
-		$detailTxt .= PHP_EOL;
 		return $detailTxt;
 	}
 
