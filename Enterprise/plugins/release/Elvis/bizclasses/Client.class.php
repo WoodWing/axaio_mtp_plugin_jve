@@ -308,11 +308,40 @@ class Elvis_BizClasses_Client
 		$request->addQueryParamAsJson( 'shadowObjectIdentity', $shadowObjectIdentity );
 
 		$response = $this->execute( $request );
-
 	}
 
 	/**
-	 * Pings the Elvis Server and retrieves some basic information.
+	 * Retrieve detailed user information from Elvis Server.
+	 *
+	 * Can only be requested by users with admin permissions.
+	 *
+	 * @param string $username The username of the user to request the info for.
+	 * @return stdClass representation of ElvisEntUserDetails that contains the detailed user information.
+	 * @throws BizException
+	 */
+	public function getUserDetails( string $username ) : stdClass
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/getUserDetails', $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
+		$request->setSubjectName( $username );
+		$request->addQueryParam( 'username', $username );
+		$request->setExpectJson();
+
+		$response = $this->execute( $request );
+
+		// >>> Elvis returns HTTP 200 with empty body when user does not exist, but expected is HTTP 404 so here we detect.
+		if( !$response->body() ) {
+			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', '', // S1056
+				null, array( $request->getSubjectEntity(), $request->getSubjectId(), 'INFO' ) );
+		}
+		// <<<
+
+		return $response->jsonBody();
+	}
+
+	/**
+	 * Ping the Elvis Server and retrieve some basic information.
 	 *
 	 * @return stdClass Info object with properties state, version, available and server.
 	 */

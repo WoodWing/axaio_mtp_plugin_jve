@@ -54,6 +54,11 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 			$vars['BuildTest_Elvis'] = $utils->parseTestSuiteOptions( $this, $response );
 			$vars['BuildTest_Elvis']['ticket'] = $response->Ticket;
 			$this->setSessionVariables( $vars );
+
+			$suiteOpts = unserialize( TESTSUITE );
+			$this->assertEquals( ELVIS_ENT_ADMIN_USER, $suiteOpts['User'],
+				'Make sure the TESTSUITE["User"] option matches the ELVIS_ENT_ADMIN_USER option.');
+			$this->checkIfFallbackUserIsEnabledInElvis( $response->Ticket );
 		}
 	}
 
@@ -68,5 +73,22 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 		$this->assertVersionGreaterThanOrEqual( ELVIS_MINVERSION, $info->version );
 		$this->assertTrue( $info->available );
 		$this->assertEquals( 'Elvis', $info->server );
+	}
+
+	/**
+	 * Check if the configured ELVIS_SUPER_USER is enabled in Elvis.
+	 *
+	 * @param string $ticket
+	 */
+	private function checkIfFallbackUserIsEnabledInElvis( string $ticket )
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../config.php'; // ELVIS_SUPER_USER
+
+		BizSession::startSession( $ticket );
+		$service = new ElvisContentSourceService();
+		$userDetails = $service->getUserDetails( ELVIS_SUPER_USER );
+		$this->assertTrue( $userDetails->enabled );
+		BizSession::endSession();
 	}
 }

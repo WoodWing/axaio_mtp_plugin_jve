@@ -372,25 +372,19 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Gets detailed user information.
+	 * Retrieve detailed user information.
 	 *
-	 * Can only be requested by users with SUPER_USER permissions
-	 *
-	 * @param string $username The username of the user to request the info for
-	 * @return ElvisEntUserDetails User information or null if the user could not be found
-	 * @throws BizException
+	 * @param string $username The username of the user to request the info for.
+	 * @return ElvisEntUserDetails The user information.
 	 */
-	public function getUserDetails( $username )
+	public function getUserDetails( string $username ) : ElvisEntUserDetails
 	{
-		ElvisAMFClient::registerClass( ElvisEntUserDetails::getName() );
+		require_once __DIR__.'/../config.php'; // ELVIS_ENT_ADMIN_USER
+		require_once __DIR__.'/../model/ElvisEntUserDetails.php';
 
-		try {
-			$params = array( $username );
-			$resp = ElvisAMFClient::send( self::SERVICE, 'getUserDetails', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-		return $resp;
+		$client = new Elvis_BizClasses_Client( ELVIS_ENT_ADMIN_USER );
+		$stdClassUserDetails = $client->getUserDetails( $username );
+		return ElvisEntUserDetails::fromStdClass( $stdClassUserDetails );
 	}
 
 	/**

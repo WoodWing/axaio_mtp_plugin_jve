@@ -24,16 +24,19 @@ class UserFieldHandler extends ReadOnlyFieldHandler
 		require_once __DIR__.'/../../config.php'; // ELVIS_INTERNAL_USER_POSTFIX
 
 		$propertyName = $this->property->Name;
-		$username = $this->getEnterpriseValue( $elvisMetadata );
-		$fullName = $username;
+		$username = $this->getEnterpriseValue( $elvisMetadata ); // short- or full name
+		$fullName = null;
 
 		if( !empty( $username ) && !strpos( $username, ELVIS_INTERNAL_USER_POSTFIX ) ) {
-			require_once __DIR__.'/../../util/ElvisUserUtils.class.php';
-
-			$user = ElvisUserUtils::getUserByUsernameOrActingUser( $username, $this->replaceUnknownUserWithActingUser );
-			if( isset( $user ) && isset( $user->FullName ) ) {
-				$fullName = $user->FullName;
+			$bizUser = new Elvis_BizClasses_User();
+			if( $this->replaceUnknownUserWithActingUser ) {
+				$fullName = $bizUser->getFullNameOfUserOrActingUser( $username );
+			} else {
+				$fullName = $bizUser->getFullNameOfUser( $username );
 			}
+		}
+		if( !$fullName ) {
+			$fullName = $username;
 		}
 
 		$entMetadata->{$this->entMetadataCategory}->{$propertyName} = $fullName;

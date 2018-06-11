@@ -1493,6 +1493,38 @@ class DBUser extends DBBase
 	}
 
 	/**
+	 * Retrieve the full name of a given, given either the short name or the full name.
+	 *
+	 * @since 10.5.0
+	 * @param string $userShortOrFullName
+	 * @return string|null The full name.
+	 */
+	public static function getFullNameByShortOrFullName( string $userShortOrFullName )
+	{
+		$select = array( 'fullname' );
+		$where = '`user` = ? OR `fullname` = ?';
+		$params = array( strval( $userShortOrFullName ), strval( $userShortOrFullName ) );
+		$row = self::getRow( self::TABLENAME, $where, $select, $params );
+		return $row ? $row['fullname'] : null;
+	}
+
+	/**
+	 * Retrieve the short name of a given, given either the short name or the full name.
+	 *
+	 * @since 10.5.0
+	 * @param string $userShortOrFullName
+	 * @return string|null The short name.
+	 */
+	public static function getShortNameByShortOrFullName( string $userShortOrFullName )
+	{
+		$select = array( 'user' );
+		$where = '`user` = ? OR `fullname` = ?';
+		$params = array( strval( $userShortOrFullName ), strval( $userShortOrFullName ) );
+		$row = self::getRow( self::TABLENAME, $where, $select, $params );
+		return $row ? $row['user'] : null;
+	}
+
+	/**
 	 * Checks if an user belongs to the admin group of a certain brand.
 	 * @param $user
 	 * @param $pubid

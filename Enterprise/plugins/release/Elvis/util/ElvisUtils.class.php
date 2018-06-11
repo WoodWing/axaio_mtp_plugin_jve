@@ -288,32 +288,6 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Enrich user AdmUser object.
-	 *
-	 * @param AdmUser $user
-	 * @return AdmUser
-	 */
-	public static function enrichUser($user) {
-		//require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';
-		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
-		
-		$service = new ElvisContentSourceService();
-		$userDetails = $service->getUserDetails($user->Name);
-		
-		if ($userDetails) {
-			require_once __DIR__.'/../config.php'; // ELVIS_INTERNAL_USER_POSTFIX
-			$user->FullName = $userDetails->fullName;
-			$user->EmailAddress = $userDetails->email;
-			if (!$userDetails->ldapUser) {
-				$user->FullName .= ELVIS_INTERNAL_USER_POSTFIX;
-				$user->Deactivated = true;
-			}
-		}
-		
-		return $user;
-	}
-
-	/**
 	 * Returns a url from a Elvis hit given a specific rendition.
 	 *
 	 * @param ElvisEntHit $hit

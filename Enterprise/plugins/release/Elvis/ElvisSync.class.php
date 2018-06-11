@@ -404,7 +404,6 @@ class ElvisSync
 	private function lockOrUnLockObject( $update )
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/util/ElvisUserUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		if( !isset( $update->metadata['checkedOutBy'] ) ) {
@@ -418,15 +417,16 @@ class ElvisSync
 
 		$requestInfo = array();
 		$requestInfo[] = 'WorkflowMetaData';
-		$obj = BizObject::getObject( $alienId, $username, false, 'none', $requestInfo, null, true, null, null, false );
+		$obj = BizObject::getObject( $alienId, $username, false, 'none', $requestInfo, null,
+			true, null, null, false );
 
 		$lockedBy = $obj->MetaData->WorkflowMetaData->LockedBy;
 
 		if( !empty( $lockedBy ) ) {
 			// Object is currently locked in Enterprise
-			$userRow = DBUser::findUser( null, $lockedBy, $lockedBy );
-			$userObj = ElvisUserUtils::rowToUserObj( $userRow );
-			$lockedByIncorrectUserInEnterprise = ( !empty( $checkedOutBy ) && $checkedOutBy != $userObj->Name );
+			$bizUser = new Elvis_BizClasses_User();
+			$lockedByShortName = $bizUser->getShortNameOfUser( $lockedBy );
+			$lockedByIncorrectUserInEnterprise = ( !empty( $checkedOutBy ) && $checkedOutBy != $lockedByShortName );
 			$notLockedInElvis = empty( $checkedOutBy );
 
 			if( $notLockedInElvis || $lockedByIncorrectUserInEnterprise ) {
@@ -435,11 +435,13 @@ class ElvisSync
 			}
 			if( $lockedByIncorrectUserInEnterprise ) {
 				// Re-lock with correct user
-				BizObject::getObject( $alienId, $checkedOutBy, true, 'none', $requestInfo, null, true, null, null, false );
+				BizObject::getObject( $alienId, $checkedOutBy, true, 'none', $requestInfo, null,
+					true, null, null, false );
 			}
 		} else if( !empty( $checkedOutBy ) ) {
 			// Asset is locked in Elvis, lock it
-			BizObject::getObject( $alienId, $checkedOutBy, true, 'none', $requestInfo, null, true, null, null, false );
+			BizObject::getObject( $alienId, $checkedOutBy, true, 'none', $requestInfo, null,
+				true, null, null, false );
 		}
 	}
 
@@ -461,7 +463,8 @@ class ElvisSync
 		try {
 			$entMetadata = new MetaData();
 			$username = self::getUsername( $update->username );
-			$obj = BizObject::getObject( $alienId, $username, false, 'none', array( 'MetaData' ), null, false, null, null, false );
+			$obj = BizObject::getObject( $alienId, $username, false, 'none', array( 'MetaData' ), null,
+				false, null, null, false );
 			$metadataHandler->readByElvisMetadata( $obj, $update->metadata );
 			BizObject::setObjectProperties( $alienId, $username, $obj->MetaData, null );
 		} catch( BizException $e ) {
@@ -500,15 +503,15 @@ class ElvisSync
 	/**
 	 * Get user name
 	 *
-	 * @param string $username
-	 * @return null|string
+	 * @param string|null $username Short or full name of Enterprise or Elvis user.
+	 * @return string Short name of Enterprise user.
 	 */
 	private function getUsername( $username )
 	{
-		require_once __DIR__.'/util/ElvisUserUtils.class.php';
-
-		$user = ElvisUserUtils::getUserByUsernameOrActingUser( $username );
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'getUsername in: '.( empty( $username ) ? 'empty' : $username ).' out: '.( is_null( $user ) ? 'empty' : $user->Name ) );
-		return is_null( $user ) ? null : $user->Name;
+		$bizUser = new Elvis_BizClasses_User();
+		$userShortName = $bizUser->getShortNameOfUserOrActingUser( $username );
+		LogHandler::Log( 'ELVISSYNC', 'DEBUG',
+			__METHOD__.": Resolved username '{$username}' into short name '{$userShortName}'." );
+		return $userShortName;
 	}
 }

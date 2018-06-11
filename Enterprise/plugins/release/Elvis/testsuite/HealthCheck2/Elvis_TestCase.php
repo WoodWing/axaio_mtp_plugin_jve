@@ -397,14 +397,27 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 */
 	private function checkAdminUser()
 	{
-		$result = $this->logOn( ELVIS_ENT_ADMIN_USER, ELVIS_ENT_ADMIN_PASS );
-		if( !$result ) {
-			$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" could not log on to the Elvis Server.';
-			$help = 'Please check the user access configuration in Elvis and check the ELVIS_ENT_ADMIN_USER and '.
-				'ELVIS_ENT_ADMIN_PASS options in the '.self::CONFIG_FILES.' file.';
+		$user = null;
+		try {
+			$user = $this->getUserFromElvis( ELVIS_ENT_ADMIN_USER );
+		} catch( BizException $e ) {
+			$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" could not be found at Elvis Server.';
+			$help = 'Please check the user access configuration in Elvis and check the ELVIS_ENT_ADMIN_USER '.
+				'option in the '.self::CONFIG_FILES.' file.';
 			$this->setResult( 'ERROR', $message, $help );
 		}
-		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server admin user logon checked.' );
+		$result = !is_null( $user );
+
+		if( $result ) { // TODO: remove the if-part when dropping the ELVIS_ENT_ADMIN_PASS option
+			$result = $this->logOn( ELVIS_ENT_ADMIN_USER, ELVIS_ENT_ADMIN_PASS );
+			if( !$result ) {
+				$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" could not log on to the Elvis Server.';
+				$help = 'Please check the user access configuration in Elvis and check the ELVIS_ENT_ADMIN_USER and '.
+					'ELVIS_ENT_ADMIN_PASS options in the '.self::CONFIG_FILES.' file.';
+				$this->setResult( 'ERROR', $message, $help );
+			}
+		}
+		LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_ENT_ADMIN_USER option checked.' );
 		return $result;
 	}
 
@@ -417,15 +430,42 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 */
 	private function checkSuperUser()
 	{
-		$result = $this->logOn( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
-		if( !$result ) {
-			$message = 'The configured user "'.ELVIS_SUPER_USER.'" could not log on to the Elvis Server.';
-			$help = 'Please check the user access configuration in Elvis and check the ELVIS_SUPER_USER and '.
-				'ELVIS_SUPER_USER_PASS options in the '.self::CONFIG_FILES.' file.';
+		$user = null;
+		try {
+			$user = $this->getUserFromElvis( ELVIS_SUPER_USER );
+		} catch( BizException $e ) {
+			$message = 'The configured user "'.ELVIS_SUPER_USER.'" could not be found at Elvis Server.';
+			$help = 'Please check the user access configuration in Elvis and check the ELVIS_SUPER_USER '.
+				'option in the '.self::CONFIG_FILES.' file.';
 			$this->setResult( 'ERROR', $message, $help );
 		}
-		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server super user logon checked.' );
+		$result = !is_null( $user );
+
+		if( $result ) { // TODO: remove the if-part when dropping the ELVIS_SUPER_USER_PASS option
+			$result = $this->logOn( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
+			if( !$result ) {
+				$message = 'The configured user "'.ELVIS_SUPER_USER.'" could not log on to the Elvis Server.';
+				$help = 'Please check the user access configuration in Elvis and check the ELVIS_SUPER_USER and '.
+					'ELVIS_SUPER_USER_PASS options in the '.self::CONFIG_FILES.' file.';
+				$this->setResult( 'ERROR', $message, $help );
+			}
+		}
+		LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_SUPER_USER option checked.' );
 		return $result;
+	}
+
+	/**
+	 * Retrieve user info from Elvis Server.
+	 *
+	 * @param string $username
+	 * @return ElvisEntUserDetails
+	 */
+	private function getUserFromElvis( string $username ) : ElvisEntUserDetails
+	{
+		require_once __DIR__.'/../../logic/ElvisContentSourceService.php';
+
+		$service = new ElvisContentSourceService();
+		return $service->getUserDetails( $username );
 	}
 
 	/**

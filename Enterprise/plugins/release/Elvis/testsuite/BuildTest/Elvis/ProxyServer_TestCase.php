@@ -190,6 +190,20 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		BizSession::startSession( $this->workflowTicket );
 		BizSession::checkTicket( $this->workflowTicket );
 
+		$user = $this->getUserFromElvis( ELVIS_SUPER_USER );
+		$this->assertTrue( $user->enabled );
+		if( ELVIS_ENT_ADMIN_USER !== ELVIS_SUPER_USER ) {
+			$this->getUserFromElvis( ELVIS_ENT_ADMIN_USER );
+			$this->assertTrue( $user->enabled );
+		}
+		$this->assertBizException(
+			'S1056', // expect ERR_SUBJECT_NOTEXISTS
+			function() {
+				$john = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( 'John %timestamp%' );
+				$user = $this->getUserFromElvis( $john );
+			}
+		);
+
 		// Create image0
 		$this->images[0] = new WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData();
 		$this->images[0]->attachments[0] = new Attachment();
@@ -296,6 +310,20 @@ EOT;
 		$config = json_decode( $config );
 		$this->assertNotNull( $config );
 		return $config;
+	}
+
+	/**
+	 * Retrieve user info from Elvis Server.
+	 *
+	 * @param string $username
+	 * @return ElvisEntUserDetails
+	 */
+	private function getUserFromElvis( string $username ) : ElvisEntUserDetails
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+
+		$service = new ElvisContentSourceService();
+		return $service->getUserDetails( $username );
 	}
 
 	/**

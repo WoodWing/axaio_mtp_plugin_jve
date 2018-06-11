@@ -47,8 +47,6 @@ class ElvisEntHit extends AbstractRemoteObject
 	 */
 	public static function fromStdClass( stdClass $stdClassHit ) : ElvisEntHit
 	{
-		require_once __DIR__.'/../model/ElvisEntHit.php';
-
 		/** @var ElvisEntHit $hit */
 		$hit = WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntHit' );
 		$hit->metadata = (array)$hit->metadata;
