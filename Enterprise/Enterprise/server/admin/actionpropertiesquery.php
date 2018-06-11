@@ -310,10 +310,13 @@ class ActionPropertiesQueryAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$deleteCheckboxTooltipTitle = $isConfigurable ? BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") : 'Mandatory property is not allowed to be deleted, use Reset instead to clear all properties.'; // 10.x.x TODO: Localise the string
-			$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
+			$deleteCheckbox = '';
+			if( $isConfigurable ) {
+				$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
+				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") );
+			}
 			$detailTxt .= "<tr$clr>";
-			$detailTxt .= $this->composeCheckboxInATableCell( $deleteCheckbox, $deleteCheckboxTooltipTitle );
+			$detailTxt .= '<td align="center">' . $deleteCheckbox . '</td>';
 			$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
 			$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
 			$detailTxt .= '</tr>';
@@ -673,7 +676,7 @@ class ActionPropertiesQueryAdminApp
 
 
 	/**
-	 * To compose the checkbox in a table cell with the tooltip wrapper.
+	 * To place a checkbox in a tooltip wrapper.
 	 *
 	 * The tooltip wrapper is typically needed when the checkbox is set to disabled.
 	 * This is due to jquery-ui tooltip doesn't work on disabled elements ( disabled
@@ -687,14 +690,11 @@ class ActionPropertiesQueryAdminApp
 	 * @param string $checkbox
 	 * @return string
 	 */
-	private function composeCheckboxInATableCell( string $checkbox, string $title ):string
+	private function placeCheckboxInAToolTipWrapper( string $checkbox, string $title ):string
 	{
-		$detailTxt = '<td align="center" width="5">';
-		$detailTxt .= '<div class="tooltip-wrapper" title="'.$title.'" >';
+		$detailTxt = '<div class="tooltip-wrapper" title="'.$title.'" >';
 		$detailTxt .= $checkbox;
 		$detailTxt .= '</div>';
-		$detailTxt .= '</td>';
-		$detailTxt .= PHP_EOL;
 		return $detailTxt;
 	}
 }

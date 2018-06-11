@@ -23,8 +23,10 @@ function isThereAnyCheckboxesChecked()
     var countCheckBoxes = document.forms['propfilter'].recs.value;
     for(var i = 0; i < countCheckBoxes; i++) {
         var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
-        if( objCheckBox.checked ) {
-            return true;
+        if( objCheckBox !== undefined ) {
+            if( objCheckBox.checked ) {
+                return true;
+            }
         }
     }
     return false;
@@ -35,8 +37,10 @@ function checkDeleteCheckboxes()
     var countCheckBoxes = document.forms['propfilter'].recs.value;
     for(var i = 0; i < countCheckBoxes; i++) {
         var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
-        if( objCheckBox.disabled == false ) {
-            objCheckBox.checked = !(objCheckBox.checked)
+        if( objCheckBox !== undefined ) {
+            if( objCheckBox.disabled == false ) {
+                objCheckBox.checked = !(objCheckBox.checked)
+            }
         }
     }
     return false;
@@ -160,6 +164,9 @@ function SetCombos(sAction)
 		<table class="listbtnbar">
 			<tr>
 				<td>
+					<input style="<!--RESET_BUTTON-->"  type="submit" name="reset" value="<!--RES:BUT_RESET-->" onClick='return myconfirm( "reset" )'/>
+					<input style="<!--DELETE_BUTTON-->" type="submit" name="delete" value="<!--RES:ACT_DELETE_SELECTED-->" onClick='return myconfirm( "deleteAllSelected" )'/>
+					<input style="<!--UPDATE_BUTTON-->" type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
 					<input style="<!--ADD_BUTTON-->" type="submit" id="dialog_button" name="addButton" value="<!--RES:ACT_ADD-->" />
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="add" name="add" value="">
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
@@ -174,9 +181,6 @@ function SetCombos(sAction)
 							the configuration later.)
 						</p>
 					</div>
-					<input style="<!--UPDATE_BUTTON-->" type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
-					<input style="<!--DELETE_BUTTON-->" type="submit" name="delete" value="<!--RES:ACT_DELETE_SELECTED-->" onClick='return myconfirm( "deleteAllSelected" )'/>
-					<input style="<!--RESET_BUTTON-->"  type="submit" name="reset" value="<!--RES:BUT_RESET-->" onClick='return myconfirm( "reset" )'/>
 				</td>
 			</tr>
 		</table>
