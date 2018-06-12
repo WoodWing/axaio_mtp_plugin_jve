@@ -895,14 +895,20 @@ class Ww_Admin_Authorizations_App
 	{
 		$profiles = getProfiles();
 
+		require_once BASEDIR . '/server/utils/VersionUtils.class.php';
+		$serverVersion = VersionUtils::getVersionDigits( SERVERVERSION, 4 );
 
-		$txt = '<html><head><title>WoodWing InDesign and InCopy Solutions</title>';
-		$txt .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
-		$txt .= '<link rel="stylesheet" href="../../config/templates/woodwingmain.css" type="text/css" />';
-		$txt .= '<link rel="icon" href="../../config/images/favicon.ico" type="image/x-icon" />';
-		$txt .= '<link rel="shortcut icon" href="../../config/images/favicon.ico" type="image/x-icon" />';
-		$txt .= '</head>';
-		$txt .= '<body style="background-color: #FFFFFF">';
+		$txt = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'.PHP_EOL;
+		$txt .= '<html xmlns="http://www.w3.org/1999/xhtml">'.PHP_EOL;
+		$txt .= '<head><title>WoodWing Enterprise Server</title>'.PHP_EOL;
+		$txt .= '<meta http-equiv="content-type" content="text/html;charset=utf-8" />'.PHP_EOL;
+		$txt .= '<meta http-equiv="PRAGMA" content="NO-CACHE" />'.PHP_EOL;
+		$txt .= '<meta http-equiv="Expires" content="-1" />'.PHP_EOL;
+		$txt .= '<link rel="stylesheet" href="../../config/templates/woodwingmain.css?v='.$serverVersion.'" type="text/css" />'.PHP_EOL;
+		$txt .= '<link rel="icon" href="../../config/images/favicon.ico" type="image/x-icon" />'.PHP_EOL;
+		$txt .= '<link rel="shortcut icon" href="../../config/images/favicon.ico" type="image/x-icon" />'.PHP_EOL;
+		$txt .= '</head>'.PHP_EOL;
+		$txt .= '<body style="background-color: #FFFFFF">'.PHP_EOL;
 
 		// header
 		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
