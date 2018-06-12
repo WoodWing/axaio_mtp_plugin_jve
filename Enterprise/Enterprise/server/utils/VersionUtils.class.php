@@ -85,4 +85,30 @@ class VersionUtils
 		}
 		return $versionInfo;
 	}
+
+	/**
+	 * Compose a N-digit formatted version, given a human readable version string.
+	 *
+	 * For example, when requested for 2 digits, a <major>.<minor> string is returned.
+	 *
+	 * @since 10.5.0
+	 * @param string $version Human readable version. Format of given string should be: <major>.<minor>[.<patch>][ Build <nr>]
+	 * @param int $digits Number of digits to return in the range of 1-4.
+	 * @return string <major>[.<minor>[.<patch>[.<build>]]]
+	 */
+	public static function getVersionDigits( $version, $digits )
+	{
+		$versionInfo = self::getVersionInfo( SERVERVERSION );
+		$version = $versionInfo['major'];
+		if( $digits >= 2 ) {
+			$version .= '.'.$versionInfo['minor'];
+		}
+		if( $digits >= 3 ) {
+			$version .= '.'.$versionInfo['patch'];
+		}
+		if( $digits >= 4 ) {
+			$version .= '.'.$versionInfo['build'];
+		}
+		return $version;
+	}
 }
