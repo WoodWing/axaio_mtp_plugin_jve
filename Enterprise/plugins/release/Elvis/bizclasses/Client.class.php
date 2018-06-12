@@ -379,8 +379,7 @@ class Elvis_BizClasses_Client
 					$request->setUserShortName( ELVIS_SUPER_USER );
 					$response = $this->execute( $request );
 				} else {
-					throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
-						null, null, 'INFO' );
+					throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
 				}
 			}
 			if( $response->isForbiddenError() ) { // HTTP 403

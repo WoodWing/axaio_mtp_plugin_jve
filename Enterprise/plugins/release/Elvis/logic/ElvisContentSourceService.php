@@ -379,10 +379,10 @@ class ElvisContentSourceService
 	 */
 	public function getUserDetails( string $username ) : ElvisEntUserDetails
 	{
-		require_once __DIR__.'/../config.php'; // ELVIS_ENT_ADMIN_USER
+		require_once __DIR__.'/../config.php'; // ELVIS_SUPER_USER
 		require_once __DIR__.'/../model/ElvisEntUserDetails.php';
 
-		$client = new Elvis_BizClasses_Client( ELVIS_ENT_ADMIN_USER );
+		$client = new Elvis_BizClasses_Client( ELVIS_SUPER_USER );
 		$stdClassUserDetails = $client->getUserDetails( $username );
 		return ElvisEntUserDetails::fromStdClass( $stdClassUserDetails );
 	}

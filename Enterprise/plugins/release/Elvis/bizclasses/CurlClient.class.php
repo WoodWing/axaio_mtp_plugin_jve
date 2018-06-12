@@ -110,13 +110,17 @@ class Elvis_BizClasses_CurlClient
 		$responseHeaders = [];
 		$ch = curl_init();
 		if( !$ch ) {
-			throw new Elvis_BizClasses_Exception( 'Failed to create a CURL handle' );
+			throw new Elvis_BizClasses_Exception( 'Failed to connect with Elvis Server. Failed to create a cURL handle.' );
 		}
 		curl_setopt_array( $ch, self::getCurlOptions( $request, $curlOptions, $responseHeaders ) );
 		$startTime = microtime( true );
 		$body = curl_exec( $ch );
 		$duration = microtime( true ) - $startTime;
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		if( !$httpStatusCode ) { // e.g. when bad ELVIS_URL configured, the status code is zero
+			$curlError = 'cURL error: '.curl_error( $ch ).' (error code:'.curl_errno( $ch ).')';
+			throw new Elvis_BizClasses_Exception( 'Failed to connect with Elvis Server. '.$curlError );
+		}
 		$response = new Elvis_BizClasses_ClientResponse( $httpStatusCode, $body, $request->getExpectJson() );
 
 		if( LogHandler::debugMode() ) {
@@ -278,8 +282,11 @@ class Elvis_BizClasses_CurlClient
 		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
 		$request->setSubjectId( $shortUserName );
 		$response = self::plainRequest( $request, $curlOptions );
+		if( $response->isAuthenticationError() ) {
+			throw new Elvis_BizClasses_Exception( 'SCEntError_ElvisAccessTokenError', 'ERROR' );
+		}
 		if( $response->isError() ) {
-			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token', 'INFO' );
+			throw new Elvis_BizClasses_Exception( 'Failed to retrieve access token from Elvis Server. Details:'.$response->getErrorMessage(), 'ERROR' );
 		}
 		return $response->jsonBody()->access_token;
 	}

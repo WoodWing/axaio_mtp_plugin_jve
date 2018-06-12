@@ -76,7 +76,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 
 		// Check the defines that should exist and should be filled in (not empty).
 		$nonEmptyDefines = array(
-			'ELVIS_URL', 'ELVIS_CLIENT_URL',
+			'ELVIS_URL', 'ELVIS_CLIENT_URL', 'ELVIS_CLIENT_ID', 'ELVIS_CLIENT_SECRET',
 			'ELVIS_CONNECTION_TIMEOUT', 'ELVIS_CONNECTION_REATTEMPTS',
 			'ELVIS_ENT_ADMIN_USER', 'ELVIS_SUPER_USER',
 			'ELVIS_NAMEDQUERY', 'ELVIS_CREATE_COPY', 'IMAGE_RESTORE_LOCATION'
@@ -245,12 +245,18 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$serverInfo = $client->getElvisServerInfo();
 			$this->serverVersion = $serverInfo->version;
 		} catch ( BizException $e ) {
+			$help = "Possible causes:".
+				"<ul>".
+					"<li>The Elvis Server version is too old; Please check Elvis Server and the Compatibility Matrix.</li>".
+					"<li>Elvis Server is not running at the configured IP; Please check the ELVIS_URL option in the ".self::CONFIG_FILES." file.</li>".
+					"<li>Elvis Server is not listening at configured port; Please check the serverPort option in the node-config.properties.txt file.</li>".
+				"</ul>";
 			if( $e->getErrorCode() == 'S1036' ) {
-				$help = 'The Elvis Server version is probably too old (before 5.x). Please check Elvis Server and the Compatibility Matrix.';
 				$this->setResult( 'ERROR', 'Could not detect Elvis Server version.', $help );
+			} elseif( $e->getErrorCode() == 'S1144' ) { // suppress the long-winded common error message that is meant for end users
+				$this->setResult( 'ERROR', 'Could not connect to Elvis Server. '.$e->getDetail(), $help );
 			} else {
-				$help = 'Please check the ELVIS_URL option in the '.self::CONFIG_FILES.' file.';
-				$this->setResult( 'ERROR', 'Could not connect to Elvis Server.', $help );
+				$this->setResult( 'ERROR', $e->getMessage().' '.$e->getDetail(), $help );
 			}
 			$result = false;
 		}
@@ -401,10 +407,13 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		try {
 			$user = $this->getUserFromElvis( ELVIS_ENT_ADMIN_USER );
 		} catch( BizException $e ) {
-			$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" could not be found at Elvis Server.';
-			$help = 'Please check the user access configuration in Elvis and check the ELVIS_ENT_ADMIN_USER '.
-				'option in the '.self::CONFIG_FILES.' file.';
-			$this->setResult( 'ERROR', $message, $help );
+			if( !$this->handleComminicationErrors( $e, 'ELVIS_ENT_ADMIN_USER' ) ) {
+				$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" could not be found at Elvis Server.'.
+					' Reason: '.$e->getMessage().' Detail: '.$e->getDetail();
+				$help = 'Please check the user access configuration in Elvis and check the ELVIS_ENT_ADMIN_USER '.
+					'option in the '.self::CONFIG_FILES.' file.';
+				$this->setResult( 'ERROR', $message, $help );
+			}
 		}
 		$result = !is_null( $user );
 
@@ -434,10 +443,13 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		try {
 			$user = $this->getUserFromElvis( ELVIS_SUPER_USER );
 		} catch( BizException $e ) {
-			$message = 'The configured user "'.ELVIS_SUPER_USER.'" could not be found at Elvis Server.';
-			$help = 'Please check the user access configuration in Elvis and check the ELVIS_SUPER_USER '.
-				'option in the '.self::CONFIG_FILES.' file.';
-			$this->setResult( 'ERROR', $message, $help );
+			if( !$this->handleComminicationErrors( $e, 'ELVIS_SUPER_USER' ) ) {
+				$message = 'The configured user "'.ELVIS_SUPER_USER.'" could not be found at Elvis Server.'.
+					' Reason: '.$e->getMessage().' Detail: '.$e->getDetail();
+				$help = 'Please check the user access configuration in Elvis and check the ELVIS_SUPER_USER '.
+					'option in the '.self::CONFIG_FILES.' file.';
+				$this->setResult( 'ERROR', $message, $help );
+			}
 		}
 		$result = !is_null( $user );
 
@@ -452,6 +464,35 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		}
 		LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_SUPER_USER option checked.' );
 		return $result;
+	}
+
+	/**
+	 * Detect and report low-level communication errors.
+	 *
+	 * @param BizException $e
+	 * @param string $userDefine
+	 * @return bool Whether or not an error was detected and handled.
+	 * @since 10.5.0
+	 */
+	private function handleComminicationErrors( BizException $e, string $userDefine )
+	{
+		$handled = false;
+		$userName = constant( $userDefine );
+		if( $e->getDetail() == 'SCEntError_ElvisAccessTokenError' ) {
+			$help = "Possible causes:".
+				"<ul>".
+					"<li>Enterprise is not configured for Elvis; Please register Enterprise Server at Elvis Server and set ".
+						"the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options in the ".self::CONFIG_FILES." file.</li>".
+					"<li>The configured user named '{$userName}' is unknown to Elvis. Please check the {$userDefine} option in ".
+						"the ".self::CONFIG_FILES." file. Also check the internal-users.properties.txt file (provided by Elvis).'</li>".
+					"<li>The configured user is no super user in Elvis. Please make sure the ROLE_SUPERUSER option is set ".
+						"for the user in the internal-users.properties.txt file (provided by Elvis).</li>".
+				"</ul>";
+			$message = 'Failed to retrieve an access token from Elvis Server.';
+			$this->setResult( 'ERROR', $message, $help );
+			$handled = true;
+		}
+		return $handled;
 	}
 
 	/**
@@ -513,11 +554,11 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$options = ElvisSync::readLastOptions();
 			if( $options ) {
 				ElvisSync::validateOptions( $options );
-			} else {
+			} // else {
 				// The module always saves options, so when not options found it won't have ran ever before.
 				// There is no need to report at this point because below we detect and error when not running.
 				// We do NOT set $result to false here to allow detecting ElvisSync::isRunning below.
-			}
+			// }
 		} catch( BizException $e ) {
 			$this->setResult( 'ERROR', $e->getMessage().' '.$e->getDetail() );
 			$result = false;

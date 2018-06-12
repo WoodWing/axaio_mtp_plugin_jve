@@ -28,6 +28,18 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 
 	final public function runTest()
 	{
+		// Test if Elvis is compatible with Enterprise.
+		require_once __DIR__.'/../../../config.php';
+		$this->testElvisServerConnection();
+
+		// Check if the ELVIS_SUPER_USER option is configured and whether this user exists in Elvis.
+		$this->checkIfFallbackUserIsEnabledInElvis();
+
+		// Check if the TESTSUITE['User'] option is the same as ELVIS_SUPER_USER, as required by this test script.
+		$suiteOpts = unserialize( TESTSUITE );
+		$this->assertEquals( ELVIS_SUPER_USER, $suiteOpts['User'],
+			'Make sure the TESTSUITE["User"] option matches the ELVIS_SUPER_USER option.');
+
 		// LogOn test user through workflow interface
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$utils = new WW_Utils_TestSuite();
@@ -46,19 +58,10 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 		if( !is_null( $response ) ) {
 			$this->ticket = $response->Ticket;
 
-			// Test if Elvis is compatible with Enterprise.
-			require_once __DIR__.'/../../../config.php';
-			$this->testElvisServerConnection();
-
 			$vars = array();
 			$vars['BuildTest_Elvis'] = $utils->parseTestSuiteOptions( $this, $response );
 			$vars['BuildTest_Elvis']['ticket'] = $response->Ticket;
 			$this->setSessionVariables( $vars );
-
-			$suiteOpts = unserialize( TESTSUITE );
-			$this->assertEquals( ELVIS_ENT_ADMIN_USER, $suiteOpts['User'],
-				'Make sure the TESTSUITE["User"] option matches the ELVIS_ENT_ADMIN_USER option.');
-			$this->checkIfFallbackUserIsEnabledInElvis( $response->Ticket );
 		}
 	}
 
@@ -77,18 +80,14 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 
 	/**
 	 * Check if the configured ELVIS_SUPER_USER is enabled in Elvis.
-	 *
-	 * @param string $ticket
 	 */
-	private function checkIfFallbackUserIsEnabledInElvis( string $ticket )
+	private function checkIfFallbackUserIsEnabledInElvis()
 	{
 		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
 		require_once __DIR__.'/../../../config.php'; // ELVIS_SUPER_USER
 
-		BizSession::startSession( $ticket );
 		$service = new ElvisContentSourceService();
 		$userDetails = $service->getUserDetails( ELVIS_SUPER_USER );
 		$this->assertTrue( $userDetails->enabled );
-		BizSession::endSession();
 	}
 }

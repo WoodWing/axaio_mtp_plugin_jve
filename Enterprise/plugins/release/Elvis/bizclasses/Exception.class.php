@@ -50,7 +50,7 @@ class Elvis_BizClasses_Exception extends BizException
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/utils/VersionUtils.class.php';
-		$clientName = BizSession::getClientName();
+		$clientName = BizSession::isStarted() ? BizSession::getClientName() : '';
 		if( $clientName == 'Content Station' ) {
 			$csVersion = BizSession::getClientVersion();
 			if( VersionUtils::versionCompare( $csVersion, '10.0.0', '>=' ) ) {
