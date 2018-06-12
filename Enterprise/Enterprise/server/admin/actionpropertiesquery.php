@@ -22,9 +22,8 @@ $action  = isset($_REQUEST['action'])  ? $_REQUEST['action']  : 'Query'; 	// Int
 if( !array_key_exists($action, $actMap) ) { $action = '' ; }
 if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
 
-// @TODO: Uncomment the below to support the cookie().
-//$dum = '';
-//cookie('actionpropertiesquery', false, $action, $dum,    $dum, $dum, $dum, $dum, $dum);
+$dum = '';
+cookie('actionpropertiesquery', !(isset($_REQUEST['isqueryform']) && $_REQUEST['isqueryform']), $action, $dum, $dum, $dum, $dum, $dum, $dum );
 
 // Re-validate data retrieved from cookie! (XSS attacks)
 //if( !array_key_exists($action, $actMap) ) { $action = ''; }
@@ -94,7 +93,8 @@ class ActionPropertiesQueryAdminApp
 	 */
 	private function buildActionComboBox( $actMap )
 	{
-		$combo = '<select name="action" onchange="submit();">';
+		$combo = inputvar( 'isqueryform', '1', 'hidden' );
+		$combo .= '<select name="action" onchange="submit();">';
 		foreach( $actMap as $k => $sDisplayValue ) {
 			$selected = ($k == $this->action) ? 'selected="selected"' : '';
 			$combo .= '<option value="'.$k.'" '.$selected.'>'.formvar($sDisplayValue).'</option>';
