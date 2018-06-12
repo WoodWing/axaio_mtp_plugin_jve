@@ -411,14 +411,15 @@ class ActionPropertiesAdminApp
 	 */
 	private function listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt )
 	{
+		$highestOrderId = $rows ? max( array_column( $rows, 'orderid' )) + 1 : 1;
 		if( $this->isActionOnlyForFieldsDisplay( $this->action )) {
 			$detailTxt .= '<tr>';
-			$detailTxt .= '<td>'.inputvar('order', '', 'small').'</td>';
+			$detailTxt .= '<td>'.inputvar('order', $highestOrderId, 'small').'</td>';
 			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
 			$detailTxt .= '</tr>';
 			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
 		} else {
-			$detailTxt .= '<tr><td></td><td>'.inputvar('order', '', 'small').'</td>';
+			$detailTxt .= '<tr><td></td><td>'.inputvar('order', $highestOrderId, 'small').'</td>';
 			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
 			$detailTxt .= '<td align="center">'.inputvar('edit','', 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
 			$detailTxt .= '<td align="center">'.inputvar('mandatory','', 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
@@ -546,13 +547,7 @@ class ActionPropertiesAdminApp
 		$readonlyProps = BizProperty::getSpecialQueryPropIds();
 
 		$already = array();
-		$wiwiwUsages = null;
-		$usages = BizProperty::getPropertyUsages( $this->publ, $this->objType, $this->action,
-			false,  // BZ#6516: Do not return default/static properties here
-			true,  // BZ#14553: Request NOT to fall back at global definition levels. Specified level only.
-			null,
-			$wiwiwUsages, // $wiwiwUsages = null when it is not for Template and PublishForm.
-			false ); //
+		$usages = $this->preparePropertyUsages();
 		if( $usages ) foreach( $usages as $usage ) { // $onlyMultiSetProperties = false: Returns all properties regardless of single/multi-set properties support.
 			$already[] = $usage->Name;
 		}
@@ -647,16 +642,7 @@ class ActionPropertiesAdminApp
 		$detailTxt = '';
 		$multiObjAllowedActions = $multiObjAllowedActions = array_merge( array( '' ), BizWorkflow::getMultiObjectsAllowedActions() );
 		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
-
-		if( $usages ) {
- 			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
- 		} else {
-		   $rows = array();
-		   if( $this->mode == 'add' ) {
-			   $usages = $this->preInsertDefaultProperties();
-			   $rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
-		   }
-	   }
+		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
 
 		switch( $this->mode ) {
 			case 'view':
@@ -795,7 +781,37 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
-	 * Inserts a list of default properties ( with or without non-static properties ).
+	 * Returns list of property usages retrieved from the database.
+	 *
+	 * When there's no property usages found in the database and if it is first time
+	 * configuration, function will pre-insert all the default properties into database
+	 * and returns this set of default properties usages.
+	 *
+	 * @since 10.x.x
+	 * @return array List of usages or list can be empty if insertion properties into database has taken place but failed.
+	 */
+	private function preparePropertyUsages():array
+	{
+		$wiwiwUsages = null;
+		$usages = BizProperty::getPropertyUsages( $this->publ, $this->objType, $this->action,
+			false,  // BZ#6516: Do not return default/static properties here
+			true,  // BZ#14553: Request NOT to fall back at global definition levels. Specified level only.
+			null,
+			$wiwiwUsages, // $wiwiwUsages = null when it is not for Template and PublishForm.
+			false );
+
+		// Configuring for the first time?
+		if( !$usages ) {
+			if( $this->mode == 'add' ) {
+				$usages = $this->preInsertDefaultProperties();
+			}
+		}
+		return $usages;
+	}
+
+	/**
+	 * Inserts a list of default properties ( with or without non-static properties ) and
+	 * returns the list of the added property usages.
 	 *
 	 * On a fresh setup of Dialog Setup, list of default static properties will be pre-added
 	 * before the user can add a new property. On top of that, user can choose if some selective
@@ -805,8 +821,9 @@ class ActionPropertiesAdminApp
 	 * be added.
 	 *
 	 * @since 10.x.x
+	 * @return array List of usages or empty list if the insertion of the property usages into database fails.
 	 */
-	private function preInsertDefaultProperties():void
+	private function preInsertDefaultProperties():array
 	{
 		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
@@ -839,6 +856,7 @@ class ActionPropertiesAdminApp
 		}
 		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
-		DBActionproperty::insertActionsProperty( $fields, $listOfValues );
+		$result = DBActionproperty::insertActionsProperty( $fields, $listOfValues );
+		return $result ? $usages : array();
 	}
 }

@@ -139,9 +139,12 @@ class ActionPropertiesQueryAdminApp
 	}
 
 	/**
-	 * Compose Query default property usages and create Query actions properties.
+	 * Composes and creates Query default property usages and returns the list of property usages created.
+	 *
+	 * @since 10.x.x
+	 * @return array List of usages or empty list if the insertion of the property usages into database fails.
 	 */
-	private function composeAndInsertActionsProperty()
+	private function composeAndInsertActionsProperty():array
 	{
 		$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
 		$order = 5;
@@ -164,7 +167,8 @@ class ActionPropertiesQueryAdminApp
 		}
 		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
-		DBActionproperty::insertActionsProperty( $fields, $listOfValues );
+		$result = DBActionproperty::insertActionsProperty( $fields, $listOfValues );
+		return $result ? $usages : array();
 	}
 
 	/**
@@ -340,8 +344,9 @@ class ActionPropertiesQueryAdminApp
 	 */
 	private function listNewAndCurrentActionProperties( $props, $rows, $detailTxt )
 	{
+		$highestOrderId = $rows ? max( array_column( $rows, 'orderid' )) + 1 : 1;
 		$detailTxt .= '<tr>';
-		$detailTxt .= '<td>'.inputvar('order', '', 'small').'</td>';
+		$detailTxt .= '<td>'.inputvar('order', $highestOrderId, 'small').'</td>';
 		$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
 		$detailTxt .= '</tr>';
 		$detailTxt .= inputvar( 'insert', '1', 'hidden' );
@@ -349,7 +354,7 @@ class ActionPropertiesQueryAdminApp
 		$color = array (" bgcolor='#eeeeee'", '');
 		$flip = 0;
 		$exactBrandFound = $this->isExactBrandFound( $rows );
-		foreach( $rows as $row ) {
+		if ( $rows ) foreach( $rows as $row ) {
 			$dprop = $row['dispname'];
 			$prop = $row['property'];
 			$isCustomProperty = BizProperty::isCustomPropertyName( $prop );
@@ -441,13 +446,7 @@ class ActionPropertiesQueryAdminApp
 		$readonlyProps = BizProperty::getSpecialQueryPropIds();
 
 		$already = array();
-		$wiwiwUsages = null;
-		$usages = BizProperty::getPropertyUsages( $this->publ, $this->objType, $this->action,
-			false,  // BZ#6516: Do not return default/static properties here
-			true,  // BZ#14553: Request NOT to fall back at global definition levels. Specified level only.
-			null,
-			$wiwiwUsages, // $wiwiwUsages = null when it is not for Template and PublishForm.
-			false );
+		$usages = $this->preparePropertyUsages();
 		if( $usages ) foreach( $usages as $usage ) {
 			$already[] = $usage->Name;
 		}
@@ -527,19 +526,7 @@ class ActionPropertiesQueryAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		if( $usages ) {
-			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
-		} else {
-			$rows = array();
-			if( $this->mode == 'add' ) {
-				$rows = array();
-				$addDefaultDynamicFields = ( isset( $_REQUEST['addDefaultDynamic'] ) && strval( $_REQUEST['addDefaultDynamic'] ) == 'true' ) ? true : false;
-				if( $addDefaultDynamicFields == 'true' ) {
-					$this->composeAndInsertActionsProperty();
-					$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
-				}
-			}
-		}
+		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
 
 		switch( $this->mode ) {
 			case 'view':
@@ -696,5 +683,37 @@ class ActionPropertiesQueryAdminApp
 		$detailTxt .= $checkbox;
 		$detailTxt .= '</div>';
 		return $detailTxt;
+	}
+
+	/**
+	 * Returns list of property usages retrieved from the database.
+	 *
+	 * When there's no property usages found in the database and if it is first time
+	 * configuration, user will be prompted if default dynamic properties should be
+	 * added in advance. If user chooses 'Yes', function will pre-insert all the default
+	 * dynamic properties into database and returns this set of default dynamic properties usages.
+	 *
+	 * @since 10.x.x
+	 * @return array List of usages or list can be empty if insertion properties into database has taken place but failed.
+	 */
+	private function preparePropertyUsages():array
+	{
+		$wiwiwUsages = null;
+		$usages = BizProperty::getPropertyUsages( $this->publ, $this->objType, $this->action,
+			false,  // BZ#6516: Do not return default/static properties here
+			true,  // BZ#14553: Request NOT to fall back at global definition levels. Specified level only.
+			null,
+			$wiwiwUsages, // $wiwiwUsages = null when it is not for Template and PublishForm.
+			false );
+
+		if( !$usages ) {
+			if( $this->mode == 'add' ) {
+				$addDefaultDynamicFields = ( isset( $_REQUEST['addDefaultDynamic'] ) && strval( $_REQUEST['addDefaultDynamic'] ) == 'true' ) ? true : false;
+				if( $addDefaultDynamicFields == 'true' ) {
+					$usages = $this->composeAndInsertActionsProperty();
+				}
+			}
+		}
+		return $usages;
 	}
 }
