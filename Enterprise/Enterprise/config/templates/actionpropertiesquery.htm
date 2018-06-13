@@ -16,8 +16,38 @@ function myconfirm(code)
             txt = "Are you sure you want to reset? (This will delete all properties including the mandatory properties)."; // 10.x.x TODO: Localise the string
             break;
     }
-	return confirm(txt);
+	if( confirm( txt )) {
+        setModeAndSubmitForm();
+	} else {
+	    return false;
+	}
 }
+
+function setModeAndSubmitForm()
+{
+    var buttonTriggered = document.activeElement.id;
+    var form = document.forms.propfilter;
+    switch( buttonTriggered ) {
+		case 'resetButton':
+			form.resetProperties.value = "reset";
+            break;
+		case 'deleteButton':
+            form.deleteProperties.value = "delete";
+		    break;
+		case 'updateButton':
+            form.updateProperties.value = "update";
+		    break;
+		case 'addButton':
+		    form.addProperties.value = "add";
+		    break;
+		default: // view
+            form.resetProperties.value = null;
+            form.deleteProperties.value = null;
+            form.updateProperties.value = null;
+	}
+    form.submit();
+}
+
 function isThereAnyCheckboxesChecked()
 {
     var countCheckBoxes = document.forms['propfilter'].recs.value;
@@ -45,6 +75,14 @@ function checkDeleteCheckboxes()
     }
     return false;
 }
+
+function SetCombos(sAction)
+{
+    var f = document.forms.propfilter;
+    f.action.value = sAction;
+    f.submit();
+}
+
 $(document).ready(function() {
     // Drawing the dialog box.
     $(function dialogBox() {
@@ -60,13 +98,13 @@ $(document).ready(function() {
                     $("#add").val( "add" );
                     $("#addDefaultDynamic").val( "true" );
                     $( this ).dialog( "close" );
-                    $("form[name=propfilter]").submit(); // document.forms.propfilter.submit();
+                    document.forms.propfilter.submit(); // $("form[name=propfilter]").submit();
                 },
                 "No": function() {
                     $("#add").val( "add" );
                     $("#addDefaultDynamic").val( "false" );
                     $( this ).dialog( "close" );
-                    $("form[name=propfilter]").submit(); // document.forms.propfilter.submit();
+                    document.forms.propfilter.submit(); // $("form[name=propfilter]").submit();
                 }
             },
         }).parent().appendTo($("#propfilter"));
@@ -87,13 +125,12 @@ $(document).ready(function() {
     $( function() {
         $( document ).tooltip();
     } );
+
+    // Starting point: The action combo box
+    $( function() {
+        $("select[name=action]").focus();
+    });
 });
-function SetCombos(sAction)
-{
-	var f = document.forms.propfilter;
-	f.action.value = sAction;
-	f.submit();
-}
 </script>
 
 
@@ -128,7 +165,7 @@ function SetCombos(sAction)
 	</table>
 	
 	<!-- app body -->
-	<form name="propfilter" action="actionpropertiesquery.php" method="post">
+	<form name="propfilter" action="actionpropertiesquery.php" method="post" onsubmit="return false;">
 	<table class="listframe" width="100%"><tr><td>
 		<table class="listpane">
 			<tr>
@@ -164,10 +201,16 @@ function SetCombos(sAction)
 		<table class="listbtnbar">
 			<tr>
 				<td>
-					<input style="<!--RESET_BUTTON-->"  type="submit" name="reset" value="<!--RES:BUT_RESET-->" onClick='return myconfirm( "reset" )'/>
-					<input style="<!--DELETE_BUTTON-->" type="submit" name="delete" value="<!--RES:ACT_DELETE_SELECTED-->" onClick='return myconfirm( "deleteAllSelected" )'/>
-					<input style="<!--UPDATE_BUTTON-->" type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
-					<input style="<!--ADD_BUTTON-->" type="submit" id="dialog_button" name="addButton" value="<!--RES:ACT_ADD-->" />
+					<button style="<!--RESET_BUTTON-->" type="button" id="resetButton"  onClick='return myconfirm( "reset" )'><!--RES:BUT_RESET--></button>
+					<input type="hidden" id="resetProperties" name="resetProperties" value="">
+
+					<button style="<!--DELETE_BUTTON-->" type="button" id="deleteButton" onClick='return myconfirm( "deleteAllSelected" )'><!--RES:ACT_DELETE_SELECTED--></button>
+					<input type="hidden" id="deleteProperties" name="deleteProperties" value="">
+
+					<button style="<!--UPDATE_BUTTON-->" type="button" id="updateButton" onClick='setModeAndSubmitForm();'><!--RES:BUT_UPDATE--></button>
+					<input type="hidden" id="updateProperties" name="updateProperties" value="">
+
+					<button style="<!--ADD_BUTTON-->" type="button" id="dialog_button"><!--RES:ACT_ADD--></button>
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="add" name="add" value="">
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
 					<!--10.x.x TODO: Localise the string-->

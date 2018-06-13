@@ -414,7 +414,7 @@ class ActionPropertiesQueryAdminApp
 				$txt = str_replace("<!--ADD_BUTTON-->",  '', $txt );
 				$txt = str_replace("<!--UPDATE_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
 				$txt = str_replace("<!--DELETE_BUTTON-->",'', $txt );
-				$txt = str_replace("<!--RESET_BUTTON---->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
+				$txt = str_replace("<!--RESET_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
 				break;
 		}
 		return $txt;
@@ -567,15 +567,15 @@ class ActionPropertiesQueryAdminApp
 				break;
 		}
 
-		if( isset( $_REQUEST['update'] ) && $_REQUEST['update'] ) {
+		if( isset( $_REQUEST['updateProperties'] ) && $_REQUEST['updateProperties'] ) {
 			$this->mode = 'update';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
 			$insert = isset( $_REQUEST['insert'] ) ? (bool)$_REQUEST['insert'] : false;
-		} else if( isset( $_REQUEST['delete'] ) && $_REQUEST['delete'] ) {
+		} else if( isset( $_REQUEST['deleteProperties'] ) && $_REQUEST['deleteProperties'] ) {
 			$this->mode = 'delete';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
 			$insert = false;
-		} else if( isset( $_REQUEST['reset'] ) && $_REQUEST['reset'] ) {
+		} else if( isset( $_REQUEST['resetProperties'] ) && $_REQUEST['resetProperties'] ) {
 			$this->mode = 'reset';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
 			$insert = false;
