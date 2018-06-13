@@ -82,7 +82,9 @@ class AxaioMadeToPrintDispatcher {
 
             if (($refstatearticle != 0) || $refstateimage != 0) {
                 foreach (self::getPlacedChilds($layoutId) as $childId) {
+                    try {
                     $affectedObjects[] = BizObject::getObject($childId, AXAIO_MTP_USER, false, 'none', array('Targets', 'MetaData', 'Relations'), null, false);
+                    }catch(Exception $e){}
                 }
             }
             //Add the specific layout last, so it will be updated as last object
