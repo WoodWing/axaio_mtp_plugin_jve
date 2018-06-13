@@ -31,7 +31,7 @@ class AxaioMadeToPrint_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 
         require_once dirname(__FILE__) . '/config.php';
         require_once dirname(__FILE__) . '/AxaioMadeToPrintDispatcher.class.php';
-        $this->prevStatusId = AxaioMadeToPrintDispatcher::getObjectStatus( $req->ID );
+        $this->prevStatusId = AxaioMadeToPrintDispatcher::getObjectStatus( $req->Objects[0]->MetaData->BasicMetaData->ID );
 
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_AFTER with RUNMODE_AFTER when this hook is not needed.
