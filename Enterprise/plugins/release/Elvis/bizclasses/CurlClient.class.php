@@ -138,7 +138,7 @@ class Elvis_BizClasses_CurlClient
 		// Enable this to retrieve the HTTP headers sent out (after calling curl_exec)
 		$defaultCurlOptions[ CURLINFO_HEADER_OUT ] = 1;
 
-		$defaultCurlOptions[ CURLOPT_HTTPHEADER ] = self::getHttpHeaderOption( $request );
+		$defaultCurlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaderOption( $request );
 
 		if( $request->getHttpMethod() == Elvis_BizClasses_ClientRequest::HTTP_METHOD_POST ) {
 			$defaultCurlOptions[ CURLOPT_POST ] = 1;
@@ -168,7 +168,13 @@ class Elvis_BizClasses_CurlClient
 		return $allCurlOptions;
 	}
 
-	private static function getHttpHeaderOption( Elvis_BizClasses_ClientRequest $request )
+	/**
+	 * Compose CURLOPT_HTTPHEADER option from request headers.
+	 *
+	 * @param Elvis_BizClasses_ClientRequest $request
+	 * @return array indexed array of HTTP header lines.
+	 */
+	private static function composeHttpHeaderOption( Elvis_BizClasses_ClientRequest $request ): array
 	{
 		$option = array();
 		foreach( $request->getHeaders() as $name => $value ) {
