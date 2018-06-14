@@ -50,6 +50,12 @@ class Elvis_BizClasses_ProxyClient
 			}
 		);
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( $this->service, $this->shortUserName );
+		// Elvis has support for 'ETag' and so it returns it in the file download response headers. When the web browser
+		// requests for 'If-None-Match', here we pass on that header to Elvis to let it decide if the client already has
+		// the latest file version. If so, it returns HTTP 304 without file, else HTTP 200 with file.
+		if( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
+			$request->setHeader('If-None-Match', $_SERVER['HTTP_IF_NONE_MATCH']);
+		}
 		$client = new Elvis_BizClasses_CurlClient();
 		$client->setCurlOptions( $curlOptions );
 		return $client->execute( $request );

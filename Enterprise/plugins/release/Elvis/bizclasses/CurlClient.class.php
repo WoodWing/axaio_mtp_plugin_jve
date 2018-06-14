@@ -54,10 +54,10 @@ class Elvis_BizClasses_CurlClient
 	private function executeForUser( Elvis_BizClasses_ClientRequest $request, string $userShortName ) : Elvis_BizClasses_ClientResponse
 	{
 		$curlOptions = $this->curlOptions;
-		$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::getAccessToken( $userShortName ) );
+		$request->setHeader( 'Authorization', 'Bearer '.self::getAccessToken( $userShortName ) );
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isAuthenticationError() ) {
-			$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( self::requestAndSaveAccessToken( $userShortName ) );
+			$request->setHeader( 'Authorization', 'Bearer '.self::requestAndSaveAccessToken( $userShortName ) );
 			$response = self::plainRequest( $request, $curlOptions );
 		}
 		return $response;
@@ -72,29 +72,7 @@ class Elvis_BizClasses_CurlClient
 	private function executeUnauthorized( Elvis_BizClasses_ClientRequest $request )
 	{
 		$curlOptions = $this->curlOptions;
-		$curlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaders( null );
 		return self::plainRequest( $request, $curlOptions );
-	}
-
-	/**
-	 * Compose a list HTTP headers to send along with the request.
-	 *
-	 * @param string|null $accessToken
-	 * @return array HTTP headers
-	 */
-	private static function composeHttpHeaders( $accessToken ) : array
-	{
-		$headerOptions = array();
-		// Elvis has support for 'ETag' and so it returns it in the file download response headers. When the web browser
-		// requests for 'If-None-Match', here we pass on that header to Elvis to let it decide if the client already has
-		// the latest file version. If so, it returns HTTP 304 without file, else HTTP 200 with file.
-		if( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ) {
-			$headerOptions[] = 'If-None-Match: '.$_SERVER['HTTP_IF_NONE_MATCH'];
-		}
-		if( $accessToken ) {
-			$headerOptions = array_merge( $headerOptions, array( 'Authorization: Bearer '.$accessToken ) );
-		}
-		return $headerOptions;
 	}
 
 	/**
@@ -160,6 +138,8 @@ class Elvis_BizClasses_CurlClient
 		// Enable this to retrieve the HTTP headers sent out (after calling curl_exec)
 		$defaultCurlOptions[ CURLINFO_HEADER_OUT ] = 1;
 
+		$defaultCurlOptions[ CURLOPT_HTTPHEADER ] = self::getHttpHeaderOption( $request );
+
 		if( $request->getHttpMethod() == Elvis_BizClasses_ClientRequest::HTTP_METHOD_POST ) {
 			$defaultCurlOptions[ CURLOPT_POST ] = 1;
 			$defaultCurlOptions[ CURLOPT_POSTFIELDS ] = $request->getPostParams();
@@ -186,6 +166,15 @@ class Elvis_BizClasses_CurlClient
 		self::addSaveHeaderFunction( $allCurlOptions, $headers );
 
 		return $allCurlOptions;
+	}
+
+	private static function getHttpHeaderOption( Elvis_BizClasses_ClientRequest $request )
+	{
+		$option = array();
+		foreach( $request->getHeaders() as $name => $value ) {
+			$option[] = $name.': '.$value;
+		}
+		return $option;
 	}
 
 	/**

@@ -50,6 +50,9 @@ class Elvis_BizClasses_ClientRequest
 	/** @var bool */
 	private $notFoundIsSevere = false;
 
+	/** @var array */
+	private $headers = array();
+
 	/**
 	 * Compose a new request class for which no authorization is required.
 	 *
@@ -445,5 +448,26 @@ class Elvis_BizClasses_ClientRequest
 			$description .= ' for id: '.$this->getSubjectId();
 		}
 		return $description;
+	}
+
+	/**
+	 * Get all request headers.
+	 *
+	 * @return array key value pairs of headers.
+	 */
+	public function getHeaders(): array
+	{
+		return $this->headers;
+	}
+
+	/**
+	 * Set header value.
+	 *
+	 * @param string $name
+	 * @param string $value
+	 */
+	public function setHeader( string $name, string $value ): void
+	{
+		$this->headers[$name] = $value;
 	}
 }
