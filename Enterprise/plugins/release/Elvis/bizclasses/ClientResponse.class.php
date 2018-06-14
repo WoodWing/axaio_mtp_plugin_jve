@@ -144,7 +144,7 @@ class Elvis_BizClasses_ClientResponse
 			throw new Elvis_BizClasses_Exception( 'Invalid response body' );
 		}
 		$decoded = json_decode( $this->body );
-		if( !$decoded ) {
+		if( is_null( $decoded ) ) {
 			throw new Elvis_BizClasses_Exception( 'Invalid response body' );
 		}
 		return $decoded;

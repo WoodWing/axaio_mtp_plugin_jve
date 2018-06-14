@@ -33,4 +33,19 @@ class ElvisEntUpdate extends AbstractRemoteObject
 	const UPDATE_METADATA = "UPDATE_METADATA";
 
 	const DELETE = "DELETE";
+
+	/**
+	 * Convert a stdClass object into an ElvisEntUpdate object.
+	 *
+	 * REST responses from Elvis server are JSON decoded and result into stdClass.
+	 * This function can be called to convert it to the real data class ElvisEntUpdate.
+	 *
+	 * @since 10.5.0
+	 * @param stdClass $stdClassHit
+	 * @return ElvisEntUpdate
+	 */
+	public static function fromStdClass( stdClass $stdClassHit ) : ElvisEntUpdate
+	{
+		return WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntUpdate' );
+	}
 }

@@ -232,7 +232,7 @@ class MetadataHandler
 	 *
 	 * @return string[] metadata to return
 	 */
-	public function getMetadataToReturn()
+	public function getMetadataToReturn() : array
 	{
 		if( !isset( $this->metadataToReturn ) ) {
 			$this->initFieldHandlers();

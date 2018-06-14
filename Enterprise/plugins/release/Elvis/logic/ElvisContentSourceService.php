@@ -88,7 +88,7 @@ class ElvisContentSourceService
 	 * @since 10.5.0
 	 * @param string $assetId
 	 */
-	public function checkout( $assetId )
+	public function checkout( $assetId ) : void
 	{
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$client->checkout( $assetId );
@@ -99,7 +99,7 @@ class ElvisContentSourceService
 	 *
 	 * @param string $assetId
 	 */
-	public function undoCheckout( $assetId )
+	public function undoCheckout( $assetId ) : void
 	{
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$client->undoCheckout( $assetId );
@@ -183,7 +183,7 @@ class ElvisContentSourceService
 	 * @param array $metadata Metadata to be updated in Elvis
 	 * @throws BizException
 	 */
-	public function updateWorkflowMetadata( $assetIds, $metadata )
+	public function updateWorkflowMetadata( $assetIds, $metadata ) : void
 	{
 		try {
 			if( !empty( $metadata ) ) {
@@ -204,7 +204,7 @@ class ElvisContentSourceService
 	 * @param SabreAMF_ArrayCollection <UpdateObjectOperation> $updateOperations
 	 * @throws BizException
 	 */
-	public function updateObjects( $updateOperations )
+	public function updateObjects( $updateOperations ) : void
 	{
 		ElvisAMFClient::registerClass( ElvisUpdateObjectOperation::getName() );
 		ElvisAMFClient::registerClass( ElvisPage::getName() );
@@ -228,7 +228,7 @@ class ElvisContentSourceService
 	 * @param ElvisDeleteObjectOperation[] $deleteOperations
 	 * @throws BizException
 	 */
-	public function deleteObjects( array $deleteOperations )
+	public function deleteObjects( array $deleteOperations ) : void
 	{
 		if( true ) {
 			ElvisAMFClient::registerClass( ElvisDeleteObjectOperation::getName() );
@@ -256,7 +256,7 @@ class ElvisContentSourceService
 	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
 	 * @throws BizException
 	 */
-	public function registerShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity )
+	public function registerShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity ) : void
 	{
 		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
 
@@ -280,7 +280,7 @@ class ElvisContentSourceService
 	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
 	 * @throws BizException
 	 */
-	public function unregisterShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity )
+	public function unregisterShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity ) : void
 	{
 		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
 
@@ -312,63 +312,43 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Returns asset updates waiting in the queue, using long-polling
+	 * Return asset updates that are waiting in the Elvis queue, using long-polling.
 	 *
-	 * @param string $enterpriseSystemId The id identifying the Enterprise server
 	 * @param int $operationTimeout The operation timeout of the asset updates in seconds.
-	 * @return ElvisEntUpdate[] Updates
-	 * @throws BizException
+	 * @return ElvisEntUpdate[]
 	 */
-	public function retrieveAssetUpdates( $enterpriseSystemId, $operationTimeout )
+	public function retrieveAssetUpdates( int $operationTimeout ) : array
 	{
-		ElvisAMFClient::registerClass( ElvisEntUpdate::getName() );
-		ElvisAMFClient::registerClass( BasicMap::getName() );
+		require_once __DIR__.'/../model/ElvisEntUpdate.php';
 
-		try {
-			$params = array( $enterpriseSystemId, $operationTimeout );
-
-			// We will max wait the configured timeout + 60 seconds before we expect the AMF call to return
-			$operationTimeout = $operationTimeout + 60;
-			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveAssetUpdates', $params, $operationTimeout );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-		return $resp;
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$updatesStdClasses = $client->retrieveAssetUpdates( BizSession::getEnterpriseSystemId(), $operationTimeout );
+		return array_map( array( 'ElvisEntUpdate', 'fromStdClass' ), $updatesStdClasses );
 	}
 
 	/**
-	 * Confirm updates so they can be removed from the queue
+	 * Confirm asset updates so they can be removed from the queue in Elvis.
 	 *
-	 * @param string $enterpriseSystemId The id identifying the Enterprise server
-	 * @param string[] $updateIds List of update ids to confirm
-	 * @throws BizException
+	 * @param string[] $updateIds List of update ids to confirm.
 	 */
-	public function confirmAssetUpdates( $enterpriseSystemId, $updateIds )
+	public function confirmAssetUpdates( array $updateIds ) : void
 	{
-		try {
-			$params = array( $enterpriseSystemId, $updateIds );
-			ElvisAMFClient::send( self::SERVICE, 'confirmAssetUpdates', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
+		$enterpriseSystemId = BizSession::getEnterpriseSystemId();
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$client->confirmAssetUpdates( $enterpriseSystemId, $updateIds );
 	}
 
 	/**
-	 * Configures which metadata fields the associated Enterprise server is
-	 * interested in. Only updates for these fields will be send to Enterprise
+	 * Configure which metadata fields the associated Enterprise server is interested in.
+	 * Only updates for these fields will be send to Enterprise.
 	 *
-	 * @param string $enterpriseSystemId The id identifying the Enterprise server
 	 * @param string[] List of Elvis field names
-	 * @throws BizException
 	 */
-	public function configureMetadataFields( $enterpriseSystemId, $fields )
+	public function configureMetadataFields( array $fields ) : void
 	{
-		try {
-			$params = array( $enterpriseSystemId, $fields );
-			ElvisAMFClient::send( self::SERVICE, 'configureMetadataFields', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
+		$enterpriseSystemId = BizSession::getEnterpriseSystemId();
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$client->configureMetadataFields( $enterpriseSystemId, $fields );
 	}
 
 	/**
@@ -394,7 +374,7 @@ class ElvisContentSourceService
 	 * @return string File URL
 	 * @throws BizException
 	 */
-	public function exportOriginalForAsset( $assetId )
+	public function exportOriginalForAsset( string $assetId ) : string
 	{
 		try {
 			$params = array( $assetId, HTTP_FILE_TRANSFER_REMOTE_URL, BizSession::getTicket() );

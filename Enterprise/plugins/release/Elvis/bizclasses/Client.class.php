@@ -360,6 +360,58 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
+	 * Return asset updates that are waiting in the Elvis queue, using long-polling.
+	 *
+	 * @param string $enterpriseSystemId
+	 * @param int $operationTimeout The operation timeout of the asset updates in seconds.
+	 * @return stdClass[] representation of ElvisEntUpdate[]
+	 */
+	public function retrieveAssetUpdates( string $enterpriseSystemId, int $operationTimeout )
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/retrieveAssetUpdates', $this->shortUserName );
+		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
+		$request->addQueryParam( 'timeout', strval( $operationTimeout ) );
+		$request->setExpectJson();
+
+		$response = $this->execute( $request );
+		return $response->jsonBody();
+	}
+
+	/**
+	 * Confirm asset updates so they can be removed from the queue in Elvis.
+	 *
+	 * @param string $enterpriseSystemId
+	 * @param string[] $updateIds List of update ids to confirm.
+	 */
+	public function confirmAssetUpdates( string $enterpriseSystemId, array $updateIds )
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/confirmAssetUpdates', $this->shortUserName );
+		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
+		$request->addCsvQueryParam( 'updateIds', $updateIds );
+
+		$this->execute( $request );
+	}
+
+	/**
+	 * Configure which metadata fields the associated Enterprise server is interested in.
+	 * Only updates for these fields will be send to Enterprise.
+	 *
+	 * @param string $enterpriseSystemId The id identifying the Enterprise server
+	 * @param string[] List of Elvis field names
+	 */
+	public function configureMetadataFields( string $enterpriseSystemId, array $fields )
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/configureMetadataFields', $this->shortUserName );
+		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
+		$request->addCsvQueryParam( 'fields', $fields );
+
+		$this->execute( $request );
+	}
+
+	/**
 	 * Execute a service request against Elvis server for the session user or ELVIS_SUPER_USER.
 	 *
 	 * @param Elvis_BizClasses_ClientRequest $request

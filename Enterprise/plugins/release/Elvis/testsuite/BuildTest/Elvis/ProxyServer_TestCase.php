@@ -67,6 +67,9 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	/** @var WW_TestSuite_Setup_WorkflowFactory */
 	private $workflowFactory;
 
+	/** @var Elvis_TestSuite_BuildTest_Elvis_SyncUtils */
+	private $elvisSyncUtils;
+
 	/** @var string Session ticket of the admin user setting up the brand, workflow and access rights. */
 	private $adminTicket;
 
@@ -189,6 +192,10 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		// $service->update(). For that we need a valid session.
 		BizSession::startSession( $this->workflowTicket );
 		BizSession::checkTicket( $this->workflowTicket );
+
+		$this->elvisSyncUtils = new Elvis_TestSuite_BuildTest_Elvis_SyncUtils();
+		$this->elvisSyncUtils->emptyElvisQueue();
+		$this->assertEquals( 0, $this->elvisSyncUtils->countAssetUpdates() );
 
 		$user = $this->getUserFromElvis( ELVIS_SUPER_USER );
 		$this->assertTrue( $user->enabled );
@@ -512,6 +519,20 @@ EOT;
 		$this->assertInstanceOf( 'ElvisEntHit', $hit );
 		$this->assertNotNull( $hit->id );
 		$this->images[0]->assetHit = $hit;
+		$this->syncUpdatesFromElvisQueueToEnterprise( 1 );
+	}
+
+	/**
+	 * Retrieve a certain number of asset updates from the Elvis queue and sync them to Enterprise objects.
+	 *
+	 * @param int $expectedUpdateCount
+	 */
+	private function syncUpdatesFromElvisQueueToEnterprise( $expectedUpdateCount )
+	{
+		// TODO: uncomment the line below [PD-62]
+		// $this->assertEquals( $expectedUpdateCount, $this->elvisSyncUtils->countAssetUpdates() );
+		$this->elvisSyncUtils->callSyncPhpModule( $this, $expectedUpdateCount );
+		$this->assertEquals( 0, $this->elvisSyncUtils->countAssetUpdates() );
 	}
 
 	/**
@@ -762,6 +783,9 @@ EOT;
 			try {
 				$this->workflowFactory->teardownTestData();
 			} catch( BizException $e ) {}
+		}
+		if( $this->elvisSyncUtils ) {
+			$this->elvisSyncUtils->emptyElvisQueue();
 		}
 		BizSession::endSession();
 	}

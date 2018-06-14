@@ -1,5 +1,10 @@
 <?php
 /**
+ * Reflect changes made in Elvis to shadow objects in Enterprise. This includes property changes and object deletions.
+ *
+ * Called periodically by sync.php. Reads changes from the Elvis queue and performs updates/deletes to object in Enterprise.
+ * It runs for a configurable amount of time. A semaphore is created to avoid running more than one sync process in parallel.
+ *
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
@@ -8,23 +13,30 @@ require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
 class ElvisSync
 {
-	/** @var int $maxExecTime */
+	/** @var int */
 	private $maxExecTime;
-	/** @var int $maxTimeoutPerRun */
+
+	/** @var int */
 	private $maxTimeoutPerRun;
-	/** @var  float $syncStartTime */
+
+	/** @var int */
+	private $maxUpdates;
+
+	/** @var float */
 	private $syncStartTime;
-	/** @var  ElvisContentSourceService $elvisContentSourceService */
+
+	/** @var ElvisContentSourceService */
 	private $elvisContentSourceService;
-	/** @var  string $enterpriseSystemId */
-	private $enterpriseSystemId;
-	/** @var string $adminUsername */
+
+	/** @var string */
 	private $adminUsername;
-	/** @var string $adminPassword */
+
+	/** @var string */
 	private $adminPassword;
 
 	/** @const SEMAPHORE_ENTITY_ID Name of semaphore used to make sure only one sync module runs at the same time. */
 	const SEMAPHORE_ENTITY_ID = 'ElvisSync';
+
 	/** @const DB_CONFIG_OPTIONS Name of the DB configuration option to store execution time options passed to this module. */
 	const DB_CONFIG_OPTIONS = 'ElvisSync_Options';
 
@@ -43,16 +55,20 @@ class ElvisSync
 
 		// Good or bad, always save the options in DB to enable the Health Check to report errors too.
 		// This is important since it is hard to fetch errors through the configured Crontab/Scheduler.
-		$lastOptions = self::readLastOptions();
-		if( array_diff_assoc( $options, $lastOptions ) ) {
-			// Only save when options are changed because DB updates are expensive.
-			self::saveLastOptions( $options );
+		if( $options['production'] ) { // avoid automated tests influencing the Health Check validation
+			$lastOptions = self::readLastOptions();
+			if( array_diff_assoc( $options, $lastOptions ) ) {
+				// Only save when options are changed because DB updates are expensive.
+				self::saveLastOptions( $options );
+			}
 		}
 
 		// Validate options before accepting them from caller.
 		self::validateOptions( $options );
 		$this->maxExecTime = $options['maxexectime'];
 		$this->maxTimeoutPerRun = $options['maxtimeoutperrun'];
+		$this->maxUpdates = $options['maxupdates'];
+		$this->stopWhenQueueEmpty = $options['stopwhenemptyqueue'];
 	}
 
 	/**
@@ -60,7 +76,7 @@ class ElvisSync
 	 *
 	 * @throws BizException
 	 */
-	public function startSync()
+	public function startSync() : void
 	{
 		$semaphoreId = null;
 		$ticket = null;
@@ -84,7 +100,7 @@ class ElvisSync
 			$this->pushMetadataConfig();
 
 			// 4. Retrieve and apply updates while timeout is not exceeded
-			$this->runUpdates( $semaphoreId );
+			$this->processRunsOfUpdates( $semaphoreId );
 
 			// 5. Log off
 			$this->logOff( $ticket );
@@ -126,9 +142,9 @@ class ElvisSync
 	/**
 	 * Release semaphore
 	 *
-	 * @param $semaphoreId
+	 * @param int $semaphoreId
 	 */
-	private function releaseSempahore( $semaphoreId )
+	private function releaseSempahore( int $semaphoreId ) : void
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 
@@ -143,7 +159,7 @@ class ElvisSync
 	 * @param int $timeout Max seconds to wait when not running to see if it comes up again.
 	 * @return bool
 	 */
-	static public function isRunning( $timeout )
+	static public function isRunning( int $timeout ) : bool
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$startTime = microtime( true );
@@ -154,14 +170,13 @@ class ElvisSync
 		return !$expired;
 	}
 
-
 	/**
 	 * Saves the last used configured execution time options into the DB (smart_config.php table).
 	 *
 	 * @since 10.2.0
 	 * @return array The options. Empty when never saved before.
 	 */
-	static public function readLastOptions()
+	static public function readLastOptions() : array
 	{
 		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
 		$serializedOptions = DBConfig::getValue( self::DB_CONFIG_OPTIONS );
@@ -175,7 +190,7 @@ class ElvisSync
 	 * @param array $options
 	 * @return bool
 	 */
-	static private function saveLastOptions( array $options )
+	static private function saveLastOptions( array $options ) : bool
 	{
 		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
 		$serializedOptions = serialize( $options );
@@ -191,7 +206,7 @@ class ElvisSync
 	 * @param array $options
 	 * @throws BizException
 	 */
-	static public function validateOptions( $options )
+	static public function validateOptions( array $options ) : void
 	{
 		$message = 'Wrong argument given for sync.php.';
 		$tip = 'Please check your Crontab/Scheduler settings.';
@@ -199,12 +214,16 @@ class ElvisSync
 			$detail = "The 'maxexectime' parameter is set to {$options['maxexectime']} but should be in range [60-600].";
 			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
 		}
-		if( $options['maxtimeoutperrun'] < 5 || $options['maxtimeoutperrun'] > 20 ) {
-			$detail = "The 'maxtimeoutperrun' parameter is set to {$options['maxtimeoutperrun']} but should be in range [5-20].";
+		if( $options['maxtimeoutperrun'] < 1 || $options['maxtimeoutperrun'] > 20 ) {
+			$detail = "The 'maxtimeoutperrun' parameter is set to {$options['maxtimeoutperrun']} but should be in range [1-20].";
 			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
 		}
 		if( $options['maxtimeoutperrun'] > $options['maxexectime'] ) { // can not happen, but just in case we adjust the allowed ranges above
 			$detail = "The 'maxtimeoutperrun' parameter is set higher than the 'maxexectime' parameter which is not allowed.";
+			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
+		}
+		if( $options['maxupdates'] < 1 ) {
+			$detail = "The 'maxupdates' parameter is set to {$options['maxupdates']} but should be greater than zero.";
 			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
 		}
 	}
@@ -215,7 +234,7 @@ class ElvisSync
 	 * @return string Ticket
 	 * @throws BizException
 	 */
-	private function logOn()
+	private function logOn() : string
 	{
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		require_once BASEDIR.'/server/services/wfl/WflLogOnService.class.php';
@@ -256,7 +275,6 @@ class ElvisSync
 			BizSession::setServiceName( 'ElvisSync' );
 
 			$this->elvisContentSourceService = new ElvisContentSourceService();
-			$this->enterpriseSystemId = BizSession::getEnterpriseSystemId();
 
 			return $ticket;
 
@@ -271,7 +289,7 @@ class ElvisSync
 	 *
 	 * @param string $ticket
 	 */
-	private function logOff( $ticket )
+	private function logOff( string $ticket ) : void
 	{
 		require_once BASEDIR.'/server/services/wfl/WflLogOffService.class.php';
 
@@ -280,7 +298,6 @@ class ElvisSync
 		try {
 			$service = new WflLogOffService();
 			$service->execute( new WflLogOffRequest( $ticket, false, null, null ) );
-			//setLogCookie('ticket', '');
 		} catch( BizException $e ) {
 			// FIXME: Error handling, probably ignore if it fails here
 		}
@@ -289,7 +306,7 @@ class ElvisSync
 	/**
 	 * Push metadata configuration
 	 */
-	private function pushMetadataConfig()
+	private function pushMetadataConfig() : void
 	{
 		require_once __DIR__.'/model/MetadataHandler.class.php';
 
@@ -297,35 +314,43 @@ class ElvisSync
 
 		$metadataHandler = new MetadataHandler();
 		$fields = $metadataHandler->getMetadataToReturn();
-		$this->elvisContentSourceService->configureMetadataFields( $this->enterpriseSystemId, $fields );
+		$this->elvisContentSourceService->configureMetadataFields( $fields );
 	}
 
 	/**
 	 * Retrieve and apply updates while timeout is not exceeded
 	 *
-	 * @param integer $semaphoreId
+	 * @param int $semaphoreId
 	 */
-	private function runUpdates( $semaphoreId )
+	private function processRunsOfUpdates( int $semaphoreId ) : void
 	{
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'runUpdates' );
 
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 
-		// We could have a small or large timeoffset depending on the time it took to obtain the lock
+		// We could have a small or large time offset depending on the time it took to obtain the lock
 		$timeOffeset = microtime( true ) - $this->syncStartTime;
 
 		// Time remaining for the complete update
 		$timeRemaining = $this->maxExecTime - $timeOffeset;
 
-		// Run the job while we have enough time remaining (at least more than a second)
-		while( $timeRemaining > 1 ) {
+		// Max allowed number of runs remaining.
+		$updateCountRemaining = $this->maxUpdates;
+
+		// Run updates as long as there is more than one second remaining and the max count is not reached yet.
+		while( $timeRemaining > 1 && $updateCountRemaining > 0 ) {
 			$startTime = microtime( true );
 
-			// Timeout is equal to configured maxtimeoutperrun or if there is less time, to $timeRemaining
+			// Timeout is equal to configured 'maxtimeoutperrun' or if there is less time, to $timeRemaining
 			$timeout = intval( min( $this->maxTimeoutPerRun, $timeRemaining ) );
 
-			// Run the update
-			$this->runUpdate( $timeout );
+			// Run the updates
+			$updateCount = $this->runUpdates( $timeout, $updateCountRemaining );
+			if( $this->stopWhenQueueEmpty && $updateCount === 0 ) {
+				$updateCountRemaining = 0;
+			} else {
+				$updateCountRemaining -= $updateCount;
+			}
 
 			// Keep everything alive
 			BizSemaphore::refreshSession( $semaphoreId );
@@ -335,31 +360,42 @@ class ElvisSync
 	}
 
 	/**
-	 * Run update
+	 * Retrieve updates from the Elvis queue and perform them in Enterprise.
 	 *
-	 * @param integer $timeout
+	 * @param int $timeout
+	 * @param int $maxUpdateCount
+	 * @return int Number of updates processed.
 	 */
-	private function runUpdate( $timeout )
+	private function runUpdates( int $timeout, int $maxUpdateCount ) : int
 	{
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'runUpdate with timeout of '.$timeout.' seconds' );
 
 		// Get updates from Elvis
-		$updates = $this->elvisContentSourceService->retrieveAssetUpdates( $this->enterpriseSystemId, $timeout );
+		$updates = $this->elvisContentSourceService->retrieveAssetUpdates( $timeout );
 
 		// Perform updates in Enterprise
 		$updateIds = $this->performUpdates( $updates );
 
+		// When received too many updates, slice it down to the maximum allowed update count.
+		if( count( $updateIds ) > $maxUpdateCount ) {
+			$updateIds = array_slice( $updateIds, 0, $maxUpdateCount );
+		}
+
 		// Confirm updates to Elvis, removing them from the queue
-		$this->elvisContentSourceService->confirmAssetUpdates( $this->enterpriseSystemId, $updateIds );
+		if( $updateIds ) {
+			$this->elvisContentSourceService->confirmAssetUpdates( $updateIds );
+		}
+
+		return count( $updateIds );
 	}
 
 	/**
 	 * Perform updates
 	 *
 	 * @param ElvisEntUpdate[] $updates
-	 * @return array Update ids
+	 * @return string[] Update ids
 	 */
-	private function performUpdates( $updates )
+	private function performUpdates( array $updates ) : array
 	{
 		require_once __DIR__.'/model/MetadataHandler.class.php';
 
@@ -401,7 +437,7 @@ class ElvisSync
 	 * @param ElvisEntUpdate $update
 	 * @throws BizException
 	 */
-	private function lockOrUnLockObject( $update )
+	private function lockOrUnLockObject( ElvisEntUpdate $update ) : void
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
@@ -452,7 +488,7 @@ class ElvisSync
 	 * @param MetadataHandler $metadataHandler
 	 * @return bool
 	 */
-	private function updateObjectProperties( $update, $metadataHandler )
+	private function updateObjectProperties( ElvisEntUpdate $update, MetadataHandler $metadataHandler ) : bool
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once __DIR__.'/model/MetadataHandler.class.php';
@@ -471,7 +507,6 @@ class ElvisSync
 			LogHandler::Log( 'ELVISSYNC', 'ERROR', 'An error occurred while updating object properties for : '.$alienId.'. Details: '.$e->getMessage() );
 			return false;
 		}
-
 		return true;
 	}
 
@@ -481,7 +516,7 @@ class ElvisSync
 	 * @param ElvisEntUpdate $update
 	 * @return bool
 	 */
-	private function deleteObject( $update )
+	private function deleteObject( ElvisEntUpdate $update ) : bool
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizDeletedObject.class.php';
@@ -496,7 +531,6 @@ class ElvisSync
 			LogHandler::Log( 'ELVISSYNC', 'ERROR', 'An error occurred while deleting object: '.$alienId.'. Details: '.$e->getMessage() );
 			return false;
 		}
-
 		return true;
 	}
 
@@ -504,7 +538,7 @@ class ElvisSync
 	 * Get user name
 	 *
 	 * @param string|null $username Short or full name of Enterprise or Elvis user.
-	 * @return string Short name of Enterprise user.
+	 * @return string|null Short name of Enterprise user.
 	 */
 	private function getUsername( $username )
 	{
