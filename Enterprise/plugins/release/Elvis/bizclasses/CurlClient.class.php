@@ -106,7 +106,8 @@ class Elvis_BizClasses_CurlClient
 			$service = $request->composeServicePath(); // relative path, no query params
 			$requestData = curl_getinfo( $ch, CURLINFO_HEADER_OUT ).PHP_EOL.
 				'QUERY params:'.PHP_EOL.LogHandler::prettyPrint( $request->getQueryParams() ).PHP_EOL.
-				'POST params:'.PHP_EOL.LogHandler::prettyPrint( $request->getPostParams() ).PHP_EOL;
+				'POST params:'.PHP_EOL.LogHandler::prettyPrint( $request->getPostParams() ).PHP_EOL.
+				'BODY:'.PHP_EOL.$request->getBody().PHP_EOL;
 			$logService = 'Elvis_'.str_replace( '/', '_', $service );
 			LogHandler::logService( $logService, $requestData, true, 'JSON' );
 			LogHandler::logService( $logService, join( '', $responseHeaders ).PHP_EOL.$response->body(), $response->isError() ? null : false, 'JSON' );
@@ -140,15 +141,12 @@ class Elvis_BizClasses_CurlClient
 
 		$defaultCurlOptions[ CURLOPT_HTTPHEADER ] = self::composeHttpHeaderOption( $request );
 
+		if( $request->hasBody() ) {
+			$defaultCurlOptions[ CURLOPT_POSTFIELDS ] = $request->getBody();
+		}
+
 		if( $request->getHttpMethod() == Elvis_BizClasses_ClientRequest::HTTP_METHOD_POST ) {
-			$defaultCurlOptions[ CURLOPT_POST ] = 1;
-			$defaultCurlOptions[ CURLOPT_POSTFIELDS ] = $request->getPostParams();
-			$fileToUpload = $request->getFileToUpload();
-			if( $fileToUpload ) {
-				$defaultCurlOptions[ CURLOPT_SAFE_UPLOAD ] = true;
-				$defaultCurlOptions[ CURLOPT_POSTFIELDS ]['Filedata'] =
-					new CURLFile( $fileToUpload->FilePath, $fileToUpload->Type );
-			}
+			$defaultCurlOptions = self::composePostCurlOptions( $request ) + $defaultCurlOptions;
 		}
 
 		if( $request->getExpectJson() || $request->getExpectRawData() ) {
@@ -181,6 +179,27 @@ class Elvis_BizClasses_CurlClient
 			$option[] = $name.': '.$value;
 		}
 		return $option;
+	}
+
+	/**
+	 * Compose POST options.
+	 *
+	 * @param Elvis_BizClasses_ClientRequest $request
+	 * @return array associative array with cURL options.
+	 */
+	private static function composePostCurlOptions( Elvis_BizClasses_ClientRequest $request ): array
+	{
+		$curlOptions[ CURLOPT_POST ] = 1;
+		if( !$request->hasBody() ) {
+			$curlOptions[ CURLOPT_POSTFIELDS ] = $request->getPostParams();
+			$fileToUpload = $request->getFileToUpload();
+			if( $fileToUpload ) {
+				$curlOptions[ CURLOPT_SAFE_UPLOAD ] = true;
+				$curlOptions[ CURLOPT_POSTFIELDS ]['Filedata'] =
+					new CURLFile( $fileToUpload->FilePath, $fileToUpload->Type );
+			}
+		}
+		return $curlOptions;
 	}
 
 	/**

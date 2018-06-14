@@ -184,13 +184,12 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			} else {
 				throw new BizException( 'ERR_INVALID_PROPERTY', 'Server', 'Unable to find the production zone property.' );
 			}
-		} else { // Register shadow object in Elvis.
+		} else {
+			LogHandler::Log( 'ELVIS', 'DEBUG', 'Register shadow object in Elvis for assetId:'.$assetId );
 			$hit = $service->retrieve( $assetId );
 			$systemId = BizSession::getEnterpriseSystemId();
-			if( $systemId ) {
-				require_once __DIR__.'/logic/ElvisObjectManager.php';
-				ElvisObjectManager::registerShadowObject( $assetId, $systemId ); // Throws BizException if not possible (e.g. already linked)
-			}
+			$shadowObjectIdentity = new Elvis_DataClasses_ShadowObjectIdentity( $systemId, $assetId );
+			$service->registerShadowObjects( $shadowObjectIdentity );
 		}
 
 		if( !$destObject ) {
@@ -442,7 +441,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 					LogHandler::Log( 'ELVIS', 'WARN', 'Unable to unregister asset in Elvis: '.$exception );
 				}
 			} else {
-				ElvisObjectManager::registerShadowObject( $assetId, $systemId );
+				require_once __DIR__.'/logic/ElvisContentSourceService.php';
+				$service = new ElvisContentSourceService();
+				$shadowObjectIdentity = new Elvis_DataClasses_ShadowObjectIdentity( $systemId, $assetId );
+				$service->registerShadowObjects( $shadowObjectIdentity );
 			}
 		}
 	}

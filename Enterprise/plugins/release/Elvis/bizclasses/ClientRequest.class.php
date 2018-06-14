@@ -50,6 +50,9 @@ class Elvis_BizClasses_ClientRequest
 	/** @var bool */
 	private $notFoundIsSevere = false;
 
+	/** @var string|null request body, can be for POST, GET, etc. When null, no body is set. */
+	private $body = null;
+
 	/** @var array */
 	private $headers = array();
 
@@ -99,7 +102,6 @@ class Elvis_BizClasses_ClientRequest
 	public function setUserShortName( string $userShortName )
 	{
 		$this->userShortName = $userShortName;
-		$this->userShortName = ELVIS_SUPER_USER; // TODO: remove this hack once we can get rid of fallback user
 	}
 
 	/**
@@ -469,5 +471,31 @@ class Elvis_BizClasses_ClientRequest
 	public function setHeader( string $name, string $value ): void
 	{
 		$this->headers[$name] = $value;
+	}
+
+	/**
+	 * @return bool true when body is set, false otherwise.
+	 */
+	public function hasBody(): bool
+	{
+		return isset( $this->body );
+	}
+
+	/**
+	 * @return null|string body content, null when body isn't set.
+	 */
+	public function getBody(): ?string
+	{
+		return $this->body;
+	}
+
+	/**
+	 * Set request body to use for GET, POST, PUT, etc. requests.
+	 *
+	 * @param string $body
+	 */
+	public function setBody( string $body ): void
+	{
+		$this->body = $body;
 	}
 }

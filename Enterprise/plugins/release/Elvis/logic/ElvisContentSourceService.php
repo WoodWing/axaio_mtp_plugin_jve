@@ -253,25 +253,13 @@ class ElvisContentSourceService
 	/**
 	 * Link a shadow object to an Elvis asset.
 	 *
-	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
+	 * @param Elvis_DataClasses_ShadowObjectIdentity $shadowObjectIdentity
 	 * @throws BizException
 	 */
-	public function registerShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity ) : void
+	public function registerShadowObjects( Elvis_DataClasses_ShadowObjectIdentity $shadowObjectIdentity ): void
 	{
-		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
-
-		if( true ) {
-			ElvisAMFClient::registerClass( ElvisShadowObjectIdentity::getName() );
-			try {
-				$params = array( $shadowObjectIdentity );
-				ElvisAMFClient::send( self::SERVICE, 'registerShadowObject', $params );
-			} catch( ElvisCSException $e ) {
-				throw $e->toBizException();
-			}
-		} else { // TODO: replace the entire function body with the else-part below [PD-60]
-			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-			$client->registerShadowObjects( $shadowObjectIdentity );
-		}
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$client->registerShadowObjects( $shadowObjectIdentity );
 	}
 
 	/**
