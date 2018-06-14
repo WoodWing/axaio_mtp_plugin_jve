@@ -1672,7 +1672,7 @@
   <Term key="OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS">Objektien määrä tällä {STATE}:</Term>
   <Term key="OBJ_N_OBJ_DELETED_FOUND_ISS_MSG">Kyseiseen virheeseen liittyviä kohteita ja poistettuja kohteita ei ole poistettu pysyvästi.</Term>
   <Term key="OBJ_ON">Lähtien</Term>
-  <Term key="OBJ_ORIGINAL_ID">ID of original</Term>
+  <Term key="OBJ_ORIGINAL_ID">Lähde ID</Term>
   <Term key="OBJ_OTHER">Muut</Term>
   <Term key="OBJ_OTHER_FILE">Toinen tiedosto</Term>
   <Term key="OBJ_OUTPUT_PATH_SCRIPTS">Tulostepolun komentosarjat</Term>
