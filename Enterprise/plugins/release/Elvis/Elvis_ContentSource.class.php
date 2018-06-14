@@ -428,22 +428,21 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		}
 		
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/logic/ElvisObjectManager.php';
 
 		// Only remove the system id in Elvis when the asset is completely removed in Enterprise (removed from the trash)
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$systemId = BizSession::getEnterpriseSystemId();
 		if( $assetId && $systemId ) {
+			require_once __DIR__.'/logic/ElvisContentSourceService.php';
+			$service = new ElvisContentSourceService();
+			$shadowObjectIdentity = new Elvis_DataClasses_ShadowObjectIdentity( $systemId, $assetId );
 			if( !$restore ) {
 				try {
-					ElvisObjectManager::unregisterShadowObject( $assetId, $systemId );
+					$service->unregisterShadowObjects( $shadowObjectIdentity );
 				} catch( Exception $exception ) {
 					LogHandler::Log( 'ELVIS', 'WARN', 'Unable to unregister asset in Elvis: '.$exception );
 				}
 			} else {
-				require_once __DIR__.'/logic/ElvisContentSourceService.php';
-				$service = new ElvisContentSourceService();
-				$shadowObjectIdentity = new Elvis_DataClasses_ShadowObjectIdentity( $systemId, $assetId );
 				$service->registerShadowObjects( $shadowObjectIdentity );
 			}
 		}

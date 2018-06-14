@@ -265,38 +265,13 @@ class ElvisContentSourceService
 	/**
 	 * Un-link a shadow object from an Elvis asset.
 	 *
-	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
+	 * @param Elvis_DataClasses_ShadowObjectIdentity $shadowObjectIdentity
 	 * @throws BizException
 	 */
-	public function unregisterShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity ) : void
+	public function unregisterShadowObjects( Elvis_DataClasses_ShadowObjectIdentity $shadowObjectIdentity ): void
 	{
-		require_once __DIR__.'/../model/shadowobject/ElvisShadowObjectIdentity.class.php';
-
-		if( true ) {
-			ElvisAMFClient::registerClass( ElvisShadowObjectIdentity::getName() );
-			try {
-				$params = array( $shadowObjectIdentity );
-				ElvisAMFClient::send( self::SERVICE, 'unregisterShadowObject', $params );
-			} catch( ElvisCSException $e ) {
-				// Ignore asset not found exception
-				// May result in an asset flagged as used in Enterprise while it was deleted
-				// Also ignore "Linked to Other System" error.
-				// Both errors should be non fatal when trying to delete a shadow object (otherwise you wouldn't be able to
-				// remove a useless Elvis shadow object).
-				if( $e instanceof ElvisCSNotFoundException ) {
-					LogHandler::Log( 'ELVIS', 'WARN', 'Unable to remove Enterprise system id from metadata for '.$shadowObjectIdentity->assetId.'. '.
-						'Either the asset was removed from Elvis or the user does not have view permissions for this asset.' );
-				} else if( $e instanceof ElvisCSLinkedToOtherSystemException ) {
-					LogHandler::Log( 'ELVIS', 'WARN', 'Unable to remove Enterprise system id from metadata for '.$shadowObjectIdentity->assetId.'. '.
-						'The asset is linked to another Enterprise System and should not exist in this system.' );
-				} else {
-					throw $e->toBizException();
-				}
-			}
-		} else { // TODO: replace the entire function body with the else-part below [PD-60]
-			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-			$client->unregisterShadowObjects( $shadowObjectIdentity );
-		}
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$client->unregisterShadowObjects( $shadowObjectIdentity );
 	}
 
 	/**

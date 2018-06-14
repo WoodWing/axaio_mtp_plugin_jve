@@ -299,15 +299,17 @@ class Elvis_BizClasses_Client
 	/**
 	 * Un-link a shadow object from an Elvis asset.
 	 *
-	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
+	 * @param Elvis_DataClasses_ShadowObjectIdentity $shadowObjectIdentity
 	 */
-	public function unregisterShadowObjects( ElvisShadowObjectIdentity $shadowObjectIdentity )
+	public function unregisterShadowObjects( Elvis_DataClasses_ShadowObjectIdentity $shadowObjectIdentity )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/unregisterShadowObject', $this->shortUserName );
+			'private-api/contentsource/unregister-shadow-object', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $shadowObjectIdentity->assetId );
-		$request->addQueryParamAsJson( 'shadowObjectIdentity', $shadowObjectIdentity );
+		$request->setBody( json_encode( $shadowObjectIdentity ) );
+		$request->setHttpPostMethod();
+		$request->setHeader( 'Content-Type', 'application/json' );
 
 		$response = $this->execute( $request );
 	}
