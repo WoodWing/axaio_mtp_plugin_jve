@@ -102,6 +102,7 @@ class Elvis_BizClasses_ClientRequest
 	public function setUserShortName( string $userShortName )
 	{
 		$this->userShortName = $userShortName;
+		$this->userShortName = ELVIS_SUPER_USER; // TODO: remove this hack once we can get rid of fallback user
 	}
 
 	/**
