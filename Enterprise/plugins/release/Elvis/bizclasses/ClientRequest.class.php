@@ -475,6 +475,8 @@ class Elvis_BizClasses_ClientRequest
 	}
 
 	/**
+	 * Return whether or not request has a body.
+	 *
 	 * @return bool true when body is set, false otherwise.
 	 */
 	public function hasBody(): bool
@@ -483,6 +485,8 @@ class Elvis_BizClasses_ClientRequest
 	}
 
 	/**
+	 * Retrieve request body.
+	 *
 	 * @return null|string body content, null when body isn't set.
 	 */
 	public function getBody(): ?string
