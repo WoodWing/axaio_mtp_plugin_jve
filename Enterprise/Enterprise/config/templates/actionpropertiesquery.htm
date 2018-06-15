@@ -24,10 +24,8 @@ function isThereAnyCheckboxesChecked()
     var countCheckBoxes = document.forms['propfilter'].recs.value;
     for(var i = 0; i < countCheckBoxes; i++) {
         var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
-        if( objCheckBox !== undefined ) {
-            if( objCheckBox.checked ) {
-                return true;
-            }
+        if( objCheckBox !== undefined && objCheckBox.checked ) {
+			return true;
         }
     }
     return false;
