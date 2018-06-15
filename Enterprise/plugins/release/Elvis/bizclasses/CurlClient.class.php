@@ -225,24 +225,18 @@ class Elvis_BizClasses_CurlClient
 	}
 
 	/**
-	 * Get POST request cURL options with Content-Type: application/x-www-form-urlencoded.
+	 * Compose POST body for Content-Type: application/x-www-form-urlencoded.
 	 *
-	 * @param array $post
-	 * @param array $curlOptions
-	 * @return array with cURL options
+	 * @param array $post assosiative array with name value map
+	 * @return string POST body
 	 */
-	private static function postUrlEncodedOptions( array $post, array $curlOptions ) : array
+	private static function composeUrlEncodedPostBody( array $post ): string
 	{
 		$urlEncodedFields = array();
 		foreach( $post as $key => $value ) {
 			$urlEncodedFields[] = urlencode( $key ).'='.urlencode( $value );
 		}
-		$curlOptions = $curlOptions + array(
-				CURLOPT_POST => 1,
-				CURLOPT_RETURNTRANSFER => 1,
-				CURLOPT_POSTFIELDS => join( '&', $urlEncodedFields )
-			);
-		return $curlOptions;
+		return join( '&', $urlEncodedFields );
 	}
 
 	/**
@@ -288,13 +282,18 @@ class Elvis_BizClasses_CurlClient
 			'grant_type' => 'client_credentials',
 			'impersonator_id' => $shortUserName,
 		);
-		$curlOptions = self::postUrlEncodedOptions( $post, array(
+		$curlOptions = array(
 			CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
 			CURLOPT_USERPWD => ELVIS_CLIENT_ID.':'.ELVIS_CLIENT_SECRET
-		) );
+		);
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'oauth/token', $shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
 		$request->setSubjectId( $shortUserName );
+		$request->setHttpPostMethod();
+		$request->setHeader( 'Content-Type', 'application/x-www-form-urlencoded' );
+		$request->setBody( self::composeUrlEncodedPostBody( $post ) );
+		$request->setExpectJson();
+
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isAuthenticationError() ) {
 			throw new Elvis_BizClasses_Exception( 'SCEntError_ElvisAccessTokenError', 'ERROR' );
