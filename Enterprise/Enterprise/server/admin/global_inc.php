@@ -12,14 +12,28 @@ function formvar( $var )
 	return htmlentities( $var, ENT_QUOTES, 'UTF-8' );
 }
 
-function inputvar( $name, $value, $type = null, $domain = null, $nullallowed = true, $title = null, $disabled = false )
+/**
+ * Creates HTML input element.
+ *
+ * @param string $name
+ * @param string $value
+ * @param string|null $type
+ * @param array|null $domain
+ * @param bool $nullallowed
+ * @param string|null $title
+ * @param bool $disabled
+ * @param string|null $id
+ * @return string
+ */
+function inputvar( $name, $value, $type = null, $domain = null, $nullallowed = true, $title = null, $disabled = false, $id = null )
 {
+	$id = $id ? ' id="'.$id.'" ' : '';
 	switch ($type) {
 		case 'checkbox':
 			$title = $title ? 'title="'.$title.'" ' : '';
-			return '<input type="checkbox" '.$title .'name="'.$name.'" '.(trim($value)?'checked="checked"':'').($disabled?' disabled':'').'/>';
+			return '<input type="checkbox" '.$title . ' '. $id . 'name="'.$name.'" '.(trim($value)?'checked="checked"':'').($disabled?' disabled':'').'/>';
 		case 'combo':
-			$combo = '<select name="'.$name.'"'.($disabled?' disabled':'').'>';
+			$combo = '<select '.$id.' name="'.$name.'"'.($disabled?' disabled':'').'>';
 			if ($nullallowed) {
 				$txt = '';
 				if ($nullallowed !== true) $txt = "<".$nullallowed.">";
@@ -31,11 +45,11 @@ function inputvar( $name, $value, $type = null, $domain = null, $nullallowed = t
 			$combo .= '</select>';
 			return $combo;
 		case 'small':
-			return '<input maxlength="8" size="5" name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
+			return '<input maxlength="8" size="5" '.$id.' name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
 		case 'area':
-			return '<textarea name="'.$name.'" rows="5" cols="30"'.($disabled?' disabled':'').'>'.formvar($value).'</textarea>';
+			return '<textarea '.$id.' name="'.$name.'" rows="5" cols="30"'.($disabled?' disabled':'').'>'.formvar($value).'</textarea>';
 		case 'date':
-			$temp = '<nobr><input name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
+			$temp = '<nobr><input '.$id.' name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
 			$calgif = '../../config/images/cal_16.gif';
 			$langpatdate = LANGPATDATE;
 			$dateformat = $langpatdate{0} . $langpatdate{2} . $langpatdate{4};
@@ -48,11 +62,11 @@ function inputvar( $name, $value, $type = null, $domain = null, $nullallowed = t
 			$field->setValue($value);
 			return $field->drawBody();
 		case 'shortname':
-			return '<input maxlength="40" name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
+			return '<input maxlength="40" '.$id.' name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
 		case 'hidden':
-			return '<input type="hidden" name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
+			return '<input type="hidden" '.$id.' name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
 	}
 
 	// default	
-	return '<input maxlength="255" name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
+	return '<input maxlength="255" '.$id.' name="'.$name.'" value="'.formvar($value).'"'.($disabled?' disabled':'').'/>';
 }

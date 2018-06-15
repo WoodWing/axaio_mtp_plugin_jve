@@ -414,12 +414,12 @@ class ActionPropertiesAdminApp
 		$highestOrderId = $rows ? max( array_column( $rows, 'orderid' )) + 1 : 1;
 		if( $this->isActionOnlyForFieldsDisplay( $this->action )) {
 			$detailTxt .= '<tr>';
-			$detailTxt .= '<td>'.inputvar('order', $highestOrderId, 'small').'</td>';
+			$detailTxt .= '<td>'.inputvar('order', $highestOrderId, 'small', null, true, null, false, 'order' ).'</td>';
 			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
 			$detailTxt .= '</tr>';
 			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
 		} else {
-			$detailTxt .= '<tr><td></td><td>'.inputvar('order', $highestOrderId, 'small').'</td>';
+			$detailTxt .= '<tr><td></td><td>'.inputvar('order', $highestOrderId, 'small', null, true, null, false, 'order' ).'</td>';
 			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
 			$detailTxt .= '<td align="center">'.inputvar('edit','', 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
 			$detailTxt .= '<td align="center">'.inputvar('mandatory','', 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
@@ -673,19 +673,19 @@ class ActionPropertiesAdminApp
 	 */
 	public function processRequestData()
 	{
-		if( isset( $_REQUEST['updateProperties'] ) && $_REQUEST['updateProperties'] ) {
+		if( isset( $_REQUEST['updateProperties'] ) && $_REQUEST['updateProperties'] == 'update' ) {
 			$this->mode = 'update';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
 			$insert = isset( $_REQUEST['insert'] ) ? (bool)$_REQUEST['insert'] : false;
-		} else if( isset( $_REQUEST['deleteProperties'] ) && $_REQUEST['deleteProperties'] ) {
+		} else if( isset( $_REQUEST['deleteProperties'] ) && $_REQUEST['deleteProperties'] == 'delete' ) {
 			$this->mode = 'delete';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
 			$insert = false;
-		} else if( isset( $_REQUEST['resetProperties'] ) && $_REQUEST['resetProperties'] ) {
+		} else if( isset( $_REQUEST['resetProperties'] ) && $_REQUEST['resetProperties'] == 'reset' ) {
 			$this->mode = 'reset';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
 			$insert = false;
-		} else if( isset( $_REQUEST['add'] ) && $_REQUEST['add'] ) {
+		} else if( isset( $_REQUEST['addProperties'] ) && $_REQUEST['addProperties'] == 'add' ) {
 			$this->mode = 'add';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
 			$insert = isset( $_REQUEST['insert'] ) ? (bool)$_REQUEST['insert'] : false;
