@@ -179,23 +179,15 @@ class ElvisContentSourceService
 	 *
 	 * Does nothing if $metadata is empty.
 	 *
-	 * @param string|string[] $assetIds Ids of assets in Elvis
+	 * @param string[] $assetIds Ids of assets in Elvis
 	 * @param array $metadata Metadata to be updated in Elvis
 	 * @throws BizException
 	 */
-	public function updateWorkflowMetadata( $assetIds, $metadata ) : void
+	public function updateWorkflowMetadata( array $assetIds, array $metadata ): void
 	{
-		try {
-			if( !empty( $metadata ) ) {
-				if( is_string( $assetIds ) ) {
-					$assetIds = array( $assetIds );
-				}
-				$params = array( $assetIds, $metadata );
-				ElvisAMFClient::send( self::SERVICE, 'updateWorkflowMetadata', $params );
-			}
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
+		if( empty( $metadata ) ) return;
+		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+		$client->updateWorkflowMetadata( $assetIds, $metadata );
 	}
 
 	/**

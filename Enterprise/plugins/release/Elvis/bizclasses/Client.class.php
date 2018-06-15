@@ -416,6 +416,24 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
+	 * Update Enterprise specific workflow metadata of Elvis assets.
+	 *
+	 * @param array $assetIds indexed array with Elvis asset ids.
+	 * @param array $metadata assosiative array with metadata field names and values
+	 * @throws BizException
+	 */
+	public function updateWorkflowMetadata( array $assetIds, array $metadata )
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/update-workflow-metadata', $this->shortUserName );
+		$request->setHttpPutMethod();
+		$request->setHeader( 'Content-Type', 'application/json' );
+		$request->setBody( json_encode( array( 'assetIds' => $assetIds, 'metadata' => $metadata ) ) );
+
+		$this->execute( $request );
+	}
+
+	/**
 	 * Execute a service request against Elvis server for the session user or ELVIS_SUPER_USER.
 	 *
 	 * @param Elvis_BizClasses_ClientRequest $request

@@ -138,7 +138,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$elvisMetadata['sceModifier'] = $objprops['Modifier'];
 
 			$service = new ElvisContentSourceService();
-			$service->updateWorkflowMetadata( $assetId, $elvisMetadata );
+			$service->updateWorkflowMetadata( array( $assetId ), $elvisMetadata );
 		}
 	}
 
@@ -348,12 +348,12 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$elvisMetadata['sceModifier'] = $object->MetaData->WorkflowMetaData->Modifier;
 			$elvisMetadata['sceArchivedInEnterprise'] = "false";
 
-			$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
+			$service->updateWorkflowMetadata( array( $elvisId ), $elvisMetadata );
 			$this->getMetadataHandler()->update( $elvisId, $object->MetaData );
 		} else {
 			$elvisMetadata = array();
 			$elvisMetadata['sceArchivedInEnterprise'] = "true";
-			$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
+			$service->updateWorkflowMetadata( array( $elvisId ), $elvisMetadata );
 		}
 	}
 

@@ -145,7 +145,9 @@ class Elvis_BizClasses_CurlClient
 			$defaultCurlOptions[ CURLOPT_POSTFIELDS ] = $request->getBody();
 		}
 
-		if( $request->getHttpMethod() == Elvis_BizClasses_ClientRequest::HTTP_METHOD_POST ) {
+		$httpMethod = $request->getHttpMethod();
+		$defaultCurlOptions[ CURLOPT_CUSTOMREQUEST ] = $httpMethod;
+		if( $httpMethod == Elvis_BizClasses_ClientRequest::HTTP_METHOD_POST ) {
 			$defaultCurlOptions = self::composePostCurlOptions( $request ) + $defaultCurlOptions;
 		}
 

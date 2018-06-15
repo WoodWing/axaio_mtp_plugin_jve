@@ -10,6 +10,7 @@ class Elvis_BizClasses_ClientRequest
 {
 	const HTTP_METHOD_GET = 'GET';
 	const HTTP_METHOD_POST = 'POST';
+	const HTTP_METHOD_PUT = 'PUT';
 
 	/** @var array */
 	private $pathParams;
@@ -343,6 +344,14 @@ class Elvis_BizClasses_ClientRequest
 	public function setHttpPostMethod()
 	{
 		$this->httpMethod = self::HTTP_METHOD_POST;
+	}
+
+	/**
+	 * Define the HTTP PUT method for the request.
+	 */
+	public function setHttpPutMethod()
+	{
+		$this->httpMethod = self::HTTP_METHOD_PUT;
 	}
 
 	/**
