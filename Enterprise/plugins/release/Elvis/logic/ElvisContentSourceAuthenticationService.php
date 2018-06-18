@@ -41,25 +41,4 @@ class ElvisContentSourceAuthenticationService
 			throw $e->toBizException();
 		}
 	}
-	
-	/**
-	 * Get the version of Elvis running in Content Station. 
-	 * This is a non-secured call as Content Station requests this before login.
-	 * 
-	 * @return string|null Version
-	 */
-	public function getContentStationClientVersion()
-	{
-		require_once __DIR__.'/ElvisAMFClient.php';
-		try {
-			return ElvisAMFClient::send(self::SERVICE, 'getContentStationClientVersion', null );
-		} catch (Exception $e) {
-			// This call should not throw exceptions, necessary for loading the Enterprise
-			// access profiles configuration. Downloading the Elvis client will still fail.
-			LogHandler::log('ELVIS', 'WARN', "Unable to retrieve content station client version:\n" .
-				$e->getMessage());
-			return null;
-		}
-	}
-	
 }

@@ -31,7 +31,6 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 	{
 		$interfaces = array(
 			'ContentSource_EnterpriseConnector',
-			'SysGetSubApplications_EnterpriseConnector',
 			'Version_EnterpriseConnector',
 			'AdminProperties_EnterpriseConnector',
 			'AdmCreatePublications_EnterpriseConnector',

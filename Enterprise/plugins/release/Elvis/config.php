@@ -317,7 +317,6 @@ if( defined( 'ELVIS_FIELD_HANDLERS' ) ) { // Warn incomplete migrations.
 define('ELVIS_CONTENTSOURCEID', 'ELVIS');
 define('ELVIS_CONTENTSOURCEPREFIX', '_ELVIS_');
 define('ELVIS_ENTERPRISE_VERSIONPREFIX', '0.');
-define('ELVIS_CLIENT_PACKAGE_PATH', '/install/clients/ElvisContentStation.xml');
 define('ELVIS_INTERNAL_USER_POSTFIX', ' (Elvis internal user)');
 define('ELVIS_CONTENTSOURCE_PUBLIC_PROXYURL', SERVERURL_ROOT.INETROOT.'/config/plugins/Elvis/restproxyindex.php');
 define('ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL', LOCALURL_ROOT.INETROOT.'/config/plugins/Elvis/restproxyindex.php');
