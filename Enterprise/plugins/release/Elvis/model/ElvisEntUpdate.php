@@ -46,6 +46,8 @@ class ElvisEntUpdate extends AbstractRemoteObject
 	 */
 	public static function fromStdClass( stdClass $stdClassHit ) : ElvisEntUpdate
 	{
-		return WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntUpdate' );
+		$update = WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntUpdate' );
+		$update->metadata = (array)$update->metadata;
+		return $update;
 	}
 }

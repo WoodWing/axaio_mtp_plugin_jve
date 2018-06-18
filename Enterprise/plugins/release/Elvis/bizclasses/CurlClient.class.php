@@ -36,10 +36,10 @@ class Elvis_BizClasses_CurlClient
 	public function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
 		$userShortName = $request->getUserShortName();
-		if( $userShortName ) {
-			$response = self::executeForUser( $request, $userShortName );
+		if( $userShortName && is_null( $request->getHeader( 'Authorization' ) ) ) {
+			$response = $this->executeForUser( $request, $userShortName );
 		} else {
-			$response = self::executeUnauthorized( $request );
+			$response = $this->executeUnauthorized( $request );
 		}
 		return $response;
 	}
@@ -92,7 +92,18 @@ class Elvis_BizClasses_CurlClient
 		}
 		curl_setopt_array( $ch, self::getCurlOptions( $request, $curlOptions, $responseHeaders ) );
 		$startTime = microtime( true );
-		$body = curl_exec( $ch );
+		if( isset( $curlOptions[ CURLOPT_WRITEFUNCTION ] ) ) {
+			$body = curl_exec( $ch );
+			$garbage = null;
+		} else {
+			ob_start();
+			$body = curl_exec( $ch );
+			$garbage = ob_get_contents();
+			ob_end_clean();
+		}
+		if( $garbage ) {
+			LogHandler::Log( 'ELVIS', 'ERROR', 'Found garbage data in output: '.$garbage );
+		}
 		$duration = microtime( true ) - $startTime;
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		if( !$httpStatusCode ) { // e.g. when bad ELVIS_URL configured, the status code is zero
@@ -153,6 +164,8 @@ class Elvis_BizClasses_CurlClient
 
 		if( $request->getExpectJson() || $request->getExpectRawData() ) {
 			$defaultCurlOptions[ CURLOPT_RETURNTRANSFER ] = 1;
+		} else {
+			$defaultCurlOptions[ CURLOPT_RETURNTRANSFER ] = 0;
 		}
 
 		// Hidden options, in case customer wants to overrule some settings.
@@ -229,7 +242,7 @@ class Elvis_BizClasses_CurlClient
 	/**
 	 * Compose POST body for Content-Type: application/x-www-form-urlencoded.
 	 *
-	 * @param array $post assosiative array with name value map
+	 * @param array $post associative array with name value map
 	 * @return string POST body
 	 */
 	private static function composeUrlEncodedPostBody( array $post ): string

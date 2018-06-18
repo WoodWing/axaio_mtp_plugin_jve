@@ -9,14 +9,14 @@
 class Elvis_BizClasses_Client
 {
 	/** @var string|null */
-	private $shortUserName;
+	protected $shortUserName;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param string|null $shortUserName For who requests should be authorized. NULL to use unauthorized requests.
 	 */
-	public function __construct( $shortUserName )
+	public function __construct( ?string $shortUserName )
 	{
 		$this->shortUserName = $shortUserName;
 	}
@@ -56,7 +56,7 @@ class Elvis_BizClasses_Client
 	 * @param bool $undoCheckout
 	 * @return stdClass representation of ElvisEntHit
 	 */
-	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, $fileToUpload, bool $undoCheckout ) : stdClass
+	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, ?Attachment $fileToUpload, bool $undoCheckout ) : stdClass
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
 			'services/update', $this->shortUserName );
@@ -82,7 +82,7 @@ class Elvis_BizClasses_Client
 	 * @param string[] $assetIds
 	 * @param array $metadata Changed asset metadata
 	 */
-	public function updateBulk( array $assetIds, $metadata )
+	public function updateBulk( array $assetIds, array $metadata )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
 			'services/updatebulk', $this->shortUserName );
@@ -106,7 +106,9 @@ class Elvis_BizClasses_Client
 			'services/checkout', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
+		$request->setHttpPostMethod();
 		$request->addPathParam( $assetId );
+		$request->setExpectJson();
 
 		$this->execute( $request );
 	}
@@ -122,7 +124,9 @@ class Elvis_BizClasses_Client
 			'services/undocheckout', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
+		$request->setHttpPostMethod();
 		$request->addPathParam( $assetId );
+		$request->setExpectJson();
 
 		$this->execute( $request );
 	}
@@ -440,7 +444,7 @@ class Elvis_BizClasses_Client
 	 * @return Elvis_BizClasses_ClientResponse
 	 * @throws BizException
 	 */
-	private function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
+	protected function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API '.$request->getDescription() );
 
@@ -471,7 +475,7 @@ class Elvis_BizClasses_Client
 							null, array( $request->getSubjectEntity() ), $severity );
 					}
 				} else {
-					throw new BizException( 'ERR_NOT_FOUND', 'Client', $detail, // S1029
+					throw new BizException( 'ERR_NOTFOUND', 'Client', $detail, // S1029
 						null, null, $severity );
 				}
 			}

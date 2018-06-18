@@ -35,8 +35,13 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 		// Check if the ELVIS_SUPER_USER option is configured and whether this user exists in Elvis.
 		$this->checkIfFallbackUserIsEnabledInElvis();
 
-		// Check if the TESTSUITE['User'] option is the same as ELVIS_SUPER_USER, as required by this test script.
+		// Check if the test user exists in Elvis.
 		$suiteOpts = unserialize( TESTSUITE );
+		$this->assertTrue( isset($suiteOpts['ElvisUser']) && $suiteOpts['ElvisUser'] );
+		$this->assertTrue( isset( $suiteOpts['ElvisPassword'] ) );
+		$this->checkIfTestUserIsEnabledInElvis( $suiteOpts['ElvisUser'] );
+
+		// Check if the TESTSUITE['User'] option is the same as ELVIS_SUPER_USER, as required by this test script.
 		$this->assertEquals( ELVIS_SUPER_USER, $suiteOpts['User'],
 			'Make sure the TESTSUITE["User"] option matches the ELVIS_SUPER_USER option.');
 
@@ -59,7 +64,6 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 			$this->ticket = $response->Ticket;
 
 			$vars = array();
-			$vars['BuildTest_Elvis'] = $utils->parseTestSuiteOptions( $this, $response );
 			$vars['BuildTest_Elvis']['ticket'] = $response->Ticket;
 			$this->setSessionVariables( $vars );
 		}
@@ -88,6 +92,21 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 
 		$service = new ElvisContentSourceService();
 		$userDetails = $service->getUserDetails( ELVIS_SUPER_USER );
+		$this->assertTrue( $userDetails->enabled );
+	}
+
+	/**
+	 * Check if the given Elvis test is enabled in Elvis.
+	 *
+	 * @param string $username
+	 */
+	private function checkIfTestUserIsEnabledInElvis( $username )
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../config.php'; // ELVIS_SUPER_USER
+
+		$service = new ElvisContentSourceService();
+		$userDetails = $service->getUserDetails( $username );
 		$this->assertTrue( $userDetails->enabled );
 	}
 }

@@ -1926,7 +1926,7 @@ class WW_Utils_TestSuite
 	 */
 	public function removeUserMemberships( TestCase $testCase, $ticket, $userId, $groupId )
 	{
-		require_once BASEDIR.'/server/services/adm/AdmAddUsersToGroupService.class.php';
+		require_once BASEDIR.'/server/services/adm/AdmRemoveUsersFromGroupService.class.php';
 		$request = new AdmRemoveUsersFromGroupRequest();
 		$request->Ticket = $ticket;
 		$request->GroupId = $groupId;

@@ -484,6 +484,17 @@ class Elvis_BizClasses_ClientRequest
 	}
 
 	/**
+	 * Get header value.
+	 *
+	 * @param string $name
+	 * @return string|null String value when found, or NULL when not found.
+	 */
+	public function getHeader( string $name ): ?string
+	{
+		return isset( $this->headers[$name] ) ? $this->headers[$name] : null;
+	}
+
+	/**
 	 * Return whether or not request has a body.
 	 *
 	 * @return bool true when body is set, false otherwise.

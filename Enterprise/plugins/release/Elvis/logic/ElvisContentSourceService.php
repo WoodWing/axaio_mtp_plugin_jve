@@ -34,8 +34,31 @@ class ElvisContentSourceService
 {
 	const SERVICE = 'contentSourceService';
 
-	public function __construct()
+	/** @var string */
+	private $shortUserName;
+
+	/** @var Elvis_BizClasses_Client $client */
+	private $client;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string|null $shortUserName Username to use for authorization with Elvis, or NULL to use the session user.
+	 * @param Elvis_BizClasses_Client|null $client
+	 */
+	public function __construct( ?string $shortUserName = null, ?Elvis_BizClasses_Client $client = null )
 	{
+		if( is_null( $shortUserName ) ) {
+			$this->shortUserName = BizSession::isStarted() ? BizSession::getShortUserName() : null;
+		} else {
+			$this->shortUserName = $shortUserName;
+		}
+		if( is_null( $client ) ) {
+			$this->client = new Elvis_BizClasses_Client( $this->shortUserName );
+		} else {
+			$this->client = $client;
+		}
+
 		// Register all possible exceptions for conversion from AMF objects
 		ElvisAMFClient::registerClass( ElvisCSException::getName() );
 		ElvisAMFClient::registerClass( ElvisCSNotFoundException::getName() );
@@ -52,13 +75,12 @@ class ElvisContentSourceService
 	 * @param Attachment|null $fileToUpload
 	 * @return ElvisEntHit
 	 */
-	public function create( array $metadata, $fileToUpload ) : ElvisEntHit
+	public function create( array $metadata, ?Attachment $fileToUpload ) : ElvisEntHit
 	{
 		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$metadataToReturn = $this->getMetadataToReturn();
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$stdClassHit = $client->create( (object)$metadata, $metadataToReturn, $fileToUpload );
+		$stdClassHit = $this->client->create( (object)$metadata, $metadataToReturn, $fileToUpload );
 		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}
 
@@ -72,13 +94,12 @@ class ElvisContentSourceService
 	 * @param bool $undoCheckout
 	 * @return ElvisEntHit
 	 */
-	public function update( string $assetId, array $metadata, $fileToUpload, bool $undoCheckout ) : ElvisEntHit
+	public function update( string $assetId, array $metadata, ?Attachment $fileToUpload, bool $undoCheckout ) : ElvisEntHit
 	{
 		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$metadataToReturn = $this->getMetadataToReturn();
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$stdClassHit = $client->update( $assetId, (object)$metadata, $metadataToReturn, $fileToUpload, $undoCheckout );
+		$stdClassHit = $this->client->update( $assetId, (object)$metadata, $metadataToReturn, $fileToUpload, $undoCheckout );
 		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}
 
@@ -88,10 +109,9 @@ class ElvisContentSourceService
 	 * @since 10.5.0
 	 * @param string $assetId
 	 */
-	public function checkout( $assetId ) : void
+	public function checkout( string $assetId ) : void
 	{
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$client->checkout( $assetId );
+		$this->client->checkout( $assetId );
 	}
 
 	/**
@@ -99,10 +119,9 @@ class ElvisContentSourceService
 	 *
 	 * @param string $assetId
 	 */
-	public function undoCheckout( $assetId ) : void
+	public function undoCheckout( string $assetId ) : void
 	{
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$client->undoCheckout( $assetId );
+		$this->client->undoCheckout( $assetId );
 	}
 
 	/**
@@ -117,8 +136,7 @@ class ElvisContentSourceService
 		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$metadataToReturn = $this->getMetadataToReturn();
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$stdClassHit = $client->retrieve( $assetId, $checkOut, $metadataToReturn );
+		$stdClassHit = $this->client->retrieve( $assetId, $checkOut, $metadataToReturn );
 		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}
 
@@ -150,8 +168,7 @@ class ElvisContentSourceService
 	 */
 	public function copy( string $assetId, string $name ) : string
 	{
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		return $client->copy( $assetId, $name );
+		return $this->client->copy( $assetId, $name );
 	}
 
 	/**
@@ -169,8 +186,7 @@ class ElvisContentSourceService
 	{
 		require_once __DIR__.'/../model/ElvisEntHit.php';
 
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$stdClassHit = $client->copyTo( $assetId, $destFolderPath, $name, $entSystemId );
+		$stdClassHit = $this->client->copyTo( $assetId, $destFolderPath, $name, $entSystemId );
 		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}
 
@@ -186,8 +202,7 @@ class ElvisContentSourceService
 	public function updateWorkflowMetadata( array $assetIds, array $metadata ): void
 	{
 		if( empty( $metadata ) ) return;
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$client->updateWorkflowMetadata( $assetIds, $metadata );
+		$this->client->updateWorkflowMetadata( $assetIds, $metadata );
 	}
 
 	/**
@@ -237,8 +252,7 @@ class ElvisContentSourceService
 						// [java.lang.String] to required type [java.util.List]; nested exception is java.lang.IllegalStateException:
 						// Cannot convert value of type [java.lang.String] to required type [com.ds.acm.api.contentsource.model.operation.DeleteObjectOperation]:
 						// no matching editors or conversion strategy found","errorcode":500}
-			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-			$client->deleteObjects( $deleteOperations );
+				$this->client->deleteObjects( $deleteOperations );
 		}
 	}
 
@@ -250,8 +264,7 @@ class ElvisContentSourceService
 	 */
 	public function registerShadowObjects( Elvis_DataClasses_ShadowObjectIdentity $shadowObjectIdentity ): void
 	{
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$client->registerShadowObjects( $shadowObjectIdentity );
+		$this->client->registerShadowObjects( $shadowObjectIdentity );
 	}
 
 	/**
@@ -262,8 +275,7 @@ class ElvisContentSourceService
 	 */
 	public function unregisterShadowObjects( Elvis_DataClasses_ShadowObjectIdentity $shadowObjectIdentity ): void
 	{
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$client->unregisterShadowObjects( $shadowObjectIdentity );
+		$this->client->unregisterShadowObjects( $shadowObjectIdentity );
 	}
 
 	/**
@@ -276,8 +288,7 @@ class ElvisContentSourceService
 	{
 		require_once __DIR__.'/../model/ElvisEntUpdate.php';
 
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$updatesStdClasses = $client->retrieveAssetUpdates( BizSession::getEnterpriseSystemId(), $operationTimeout );
+		$updatesStdClasses = $this->client->retrieveAssetUpdates( BizSession::getEnterpriseSystemId(), $operationTimeout );
 		return array_map( array( 'ElvisEntUpdate', 'fromStdClass' ), $updatesStdClasses );
 	}
 
@@ -289,8 +300,7 @@ class ElvisContentSourceService
 	public function confirmAssetUpdates( array $updateIds ) : void
 	{
 		$enterpriseSystemId = BizSession::getEnterpriseSystemId();
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$client->confirmAssetUpdates( $enterpriseSystemId, $updateIds );
+		$this->client->confirmAssetUpdates( $enterpriseSystemId, $updateIds );
 	}
 
 	/**
@@ -302,8 +312,7 @@ class ElvisContentSourceService
 	public function configureMetadataFields( array $fields ) : void
 	{
 		$enterpriseSystemId = BizSession::getEnterpriseSystemId();
-		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
-		$client->configureMetadataFields( $enterpriseSystemId, $fields );
+		$this->client->configureMetadataFields( $enterpriseSystemId, $fields );
 	}
 
 	/**
