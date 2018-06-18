@@ -55,7 +55,7 @@ class ActionPropertiesQueryAdminApp
 	private $publ = null;
 	private $objType = null;
 	private $action = null;
-	private $onlyAllObjectType = null;
+	private $propertyObjectTypeApplicableToAction = null;
 	private $mode = null;
 	private $sAll = null;
 	private $sysProps = null;
@@ -473,7 +473,7 @@ class ActionPropertiesQueryAdminApp
 		// get customfields
 		$cust = array();
 		$trans = array();
-		$propObjs = BizProperty::getProperties( $this->publ, $this->objType, null, null, false, false, $this->onlyAllObjectType );
+		$propObjs = BizProperty::getProperties( $this->publ, $this->objType, null, null, false, false, $this->propertyObjectTypeApplicableToAction );
 
 		require_once BASEDIR.'/server/bizclasses/BizCustomField.class.php';
 		$excludedPropTypes = BizCustomField::getExcludedObjectFields();
@@ -526,8 +526,7 @@ class ActionPropertiesQueryAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
-
+		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->propertyObjectTypeApplicableToAction );
 		switch( $this->mode ) {
 			case 'view':
 			case 'update':
@@ -560,10 +559,12 @@ class ActionPropertiesQueryAdminApp
 			case 'QueryOutInCopy':
 			case 'QueryOutContentStation':
 			case 'QueryOutPlanning':
-				$this->onlyAllObjectType = false; // Set to false, to include also specific object type
+				// Doesn't matter the property/custom-property Type definition level. Possible properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_Image_RouteTo, All_Article_CustomProp and etc.
+				$this->propertyObjectTypeApplicableToAction = false;
 				break;
 			case 'Query': // 'Query Parameters'
-				$this->onlyAllObjectType = true;
+				// Only property/custom-property at the "All" Type level. Possible properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_All_CustomProp and etc.
+				$this->propertyObjectTypeApplicableToAction = true;
 				break;
 		}
 

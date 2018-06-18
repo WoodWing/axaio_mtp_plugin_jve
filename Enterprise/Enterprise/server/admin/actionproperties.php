@@ -713,7 +713,7 @@ class ActionPropertiesAdminApp
 	/**
 	 * Check if the exact brand is found from the first join return value
 	 *
-	 * @param $rows
+	 * @param array $rows
 	 * @return bool
 	 */
 	private function isExactBrandFound( $rows )
