@@ -55,7 +55,6 @@ class ActionPropertiesQueryAdminApp
 	private $publ = null;
 	private $objType = null;
 	private $action = null;
-	private $propertyObjectTypeApplicableToAction = null;
 	private $mode = null;
 	private $sAll = null;
 	private $sysProps = null;
@@ -473,7 +472,7 @@ class ActionPropertiesQueryAdminApp
 		// get customfields
 		$cust = array();
 		$trans = array();
-		$propObjs = BizProperty::getProperties( $this->publ, $this->objType, null, null, false, false, $this->propertyObjectTypeApplicableToAction );
+		$propObjs = BizProperty::getProperties( $this->publ, $this->objType, null, null, false, false, $this->isPropertySupportedOnlyAtAllObjectTypeLevel() );
 
 		require_once BASEDIR.'/server/bizclasses/BizCustomField.class.php';
 		$excludedPropTypes = BizCustomField::getExcludedObjectFields();
@@ -526,7 +525,7 @@ class ActionPropertiesQueryAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->propertyObjectTypeApplicableToAction );
+		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->isPropertySupportedOnlyAtAllObjectTypeLevel() );
 		switch( $this->mode ) {
 			case 'view':
 			case 'update':
@@ -552,22 +551,6 @@ class ActionPropertiesQueryAdminApp
 	 */
 	public function processRequestData()
 	{
-		switch( $this->action )
-		{
-			case 'QueryOut': // 'Query Result Columns'
-			case 'QueryOutInDesign':
-			case 'QueryOutInCopy':
-			case 'QueryOutContentStation':
-			case 'QueryOutPlanning':
-				// Doesn't matter the property/custom-property Type definition level. Possible properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_Image_RouteTo, All_Article_CustomProp and etc.
-				$this->propertyObjectTypeApplicableToAction = false;
-				break;
-			case 'Query': // 'Query Parameters'
-				// Only property/custom-property at the "All" Type level. Possible properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_All_CustomProp and etc.
-				$this->propertyObjectTypeApplicableToAction = true;
-				break;
-		}
-
 		if( isset( $_REQUEST['updateProperties'] ) && $_REQUEST['updateProperties'] == 'update' ) {
 			$this->mode = 'update';
 			$numberOfRecords = isset( $_REQUEST['recs'] ) ? intval( $_REQUEST['recs'] ) : 0;
@@ -603,6 +586,48 @@ class ActionPropertiesQueryAdminApp
 		if( $this->mode == 'reset' ) {
 			$this->deleteAllActionProperty( $numberOfRecords );
 		}
+	}
+
+	/**
+	 * To determine if the property is supported only at object type level 'ALL' or also at '<specific>' object type level.
+	 *
+	 * The properties ( whether they are static, dynamic or custom ), can be adjusted or defined at 'ALL' object type level
+	 * or '<specific>' object type level in the MetaData page.
+	 * Depending on the Query action ( 'Query Parameters', 'Query Result Columns' and etc ), some action(s) can only use
+	 * the properties defined at 'ALL' object type level and '<specific>' object type level; while some can only use the
+	 * properties that are defined at 'ALL' object type level.
+	 *
+	 * The list of which actions can use which type of properties are listed below.
+	 * 1) Actions that can use propertes defined at 'ALL' and '<specific> object type level:
+	 * 'Query Result Columns'
+	 * 'Query Result Columns for Content Station'
+	 * 'Query Result Columns for InCopy'
+	 * 'Query Result Columns for InDesign'
+	 * 'Query Result Columns for Planning'
+	 * Possible example properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_Image_RouteTo, All_Article_CustomProp and etc.
+	 *
+	 * 2) Actions that can use properties that are defined only at 'ALL' object type level:
+	 * 'Query Parameters'
+	 * Possible example properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_All_CustomProp and etc.
+	 *
+	 * @since 10.x.x
+	 * @return bool
+	 */
+	private function isPropertySupportedOnlyAtAllObjectTypeLevel()
+	{
+		switch( $this->action ) {
+			case 'QueryOut': // 'Query Result Columns'
+			case 'QueryOutInDesign':
+			case 'QueryOutInCopy':
+			case 'QueryOutContentStation':
+			case 'QueryOutPlanning':
+				$propertyObjectTypeApplicableToAction = false;
+			break;
+			case 'Query': // 'Query Parameters'
+				$propertyObjectTypeApplicableToAction = true;
+				break;
+		}
+		return $propertyObjectTypeApplicableToAction;
 	}
 
 	/**
