@@ -11,7 +11,7 @@
 
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
-class WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData
+class WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_ImageData
 {
 	/** @var ElvisEntHit */
 	public $assetHit;
@@ -29,10 +29,10 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData
 	public $attachment;
 }
 
-class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
+class WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_TestCase  extends TestCase
 {
-	public function getDisplayName() { return 'Elvis proxy server'; }
-	public function getTestGoals()   { return 'Validates wether the Elvis integration and the Elvis proxy server are operating properly.'; }
+	public function getDisplayName() { return 'Shadow images in dossiers'; }
+	public function getTestGoals()   { return 'Validates whether the Elvis integration and the Elvis proxy server are operating properly with shadow images created in dossiers.'; }
 	public function getPrio()        { return 500; }
 
 	public function getTestMethods()
@@ -112,7 +112,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 	/** @var Object */
 	private $dossierObject;
 
-	/** @var WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData[] */
+	/** @var WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_ImageData[] */
 	private $images = array();
 
 	/** @var string[] */
@@ -256,7 +256,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		$this->testSuiteUtils->createUserMemberships( $this, $this->adminTicket, $this->adminUserId, $this->editorsGroupId );
 
 		// Create image0
-		$this->images[0] = new WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData();
+		$this->images[0] = new WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_ImageData();
 		$this->images[0]->attachments[0] = new Attachment();
 		$this->images[0]->attachments[0]->Rendition = 'native';
 		$this->images[0]->attachments[0]->Type = 'image/png';
@@ -269,14 +269,14 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServer_TestCase  extends TestCase
 		$this->images[0]->attachments[1]->FilePath = __DIR__.'/testdata/image0_v2.png';
 
 		// Create image1
-		$this->images[1] = new WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData();
+		$this->images[1] = new WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_ImageData();
 		$this->images[1]->attachments[0] = new Attachment();
 		$this->images[1]->attachments[0]->Rendition = 'native';
 		$this->images[1]->attachments[0]->Type = 'image/jpg';
 		$this->images[1]->attachments[0]->FilePath = __DIR__.'/testdata/image1_v1.jpg';
 
 		// Copy image1 to image2
-		$this->images[2] = new WW_TestSuite_BuildTest_Elvis_ProxyServer_ImageData();
+		$this->images[2] = new WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_ImageData();
 	}
 
 	/**
