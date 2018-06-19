@@ -176,21 +176,22 @@ class Elvis_BizClasses_Client
 	 *
 	 * @param string $assetId
 	 * @param string $name
-	 * @return string Id of the copied asset.
+	 * @return stdClass object with property id of the copied asset.
 	 */
-	public function copy( string $assetId, string $name ) : string
+	public function copy( string $assetId, string $name ): stdClass
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
 			'private-api/contentsource/copy', $this->shortUserName );
 		$request->setSubjectId( $assetId );
 		$request->setSubjectName( $name );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
-		$request->addQueryParam( 'assetId', $assetId );
-		$request->addQueryParam( 'name', $name );
-		$request->setExpectRawData();
+		$request->setHttpPostMethod();
+		$request->addPostParam( 'assetId', $assetId );
+		$request->addPostParam( 'name', $name );
+		$request->setExpectJson();
 
 		$response = $this->execute( $request );
-		return $response->body();
+		return $response->jsonBody();
 	}
 
 	/**
@@ -204,15 +205,20 @@ class Elvis_BizClasses_Client
 	 * @param string $entSystemId Enterprise system id.
 	 * @return stdClass representation of an ElvisEntHit of the copied Elvis asset.
 	 */
-	public function copyTo( string $assetId, string $destFolderPath, string $name, string $entSystemId ) : stdClass
+	public function copyTo( string $assetId, string $destFolderPath, ?string $name, string $entSystemId ): stdClass
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/copyTo', $this->shortUserName );
+			'private-api/contentsource/copy-to', $this->shortUserName );
 		$request->setSubjectId( $assetId );
-		$request->setSubjectName( $name );
+		if( $name ) {
+			$request->setSubjectName( $name );
+			$request->addPostParam( 'name', $name );
+		}
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
-		$request->addQueryParam( 'assetId', $assetId );
-		$request->addQueryParam( 'name', $name );
+		$request->setHttpPostMethod();
+		$request->addPostParam( 'sourceAssetId', $assetId );
+		$request->addPostParam( 'destFolderPath', $destFolderPath );
+		$request->addPostParam( 'enterpriseSystemId', $entSystemId );
 		$request->setExpectJson();
 
 		$response = $this->execute( $request );

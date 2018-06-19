@@ -168,7 +168,7 @@ class ElvisContentSourceService
 	 */
 	public function copy( string $assetId, string $name ) : string
 	{
-		return $this->client->copy( $assetId, $name );
+		return $this->client->copy( $assetId, $name )->id;
 	}
 
 	/**
@@ -182,7 +182,7 @@ class ElvisContentSourceService
 	 * @param string $entSystemId Enterprise system id.
 	 * @return ElvisEntHit The copied Elvis asset.
 	 */
-	public function copyTo( string $assetId, string $destFolderPath, string $name, string $entSystemId ) : ElvisEntHit
+	public function copyTo( string $assetId, string $destFolderPath, ?string $name, string $entSystemId ): ElvisEntHit
 	{
 		require_once __DIR__.'/../model/ElvisEntHit.php';
 
