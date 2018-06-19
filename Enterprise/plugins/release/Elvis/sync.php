@@ -16,7 +16,7 @@
 // Automated test example:
 //    Run once only, process 5 updates from the queue, and use the default maximum process time of 600 seconds
 //       with a long-poll wait time towards Elvis of 1 second.
-//    URL: http://localhost/Enterprise/config/plugins/Elvis/sync.php?maxupdates=5&maxtimeoutperrun=1&production=false&stopwhenemptyqueue=true
+//    URL: http://localhost/Enterprise/config/plugins/Elvis/sync.php?maxupdates=5&maxtimeoutperrun=1&production=false
 
 
 if( file_exists(__DIR__.'/../../config.php') ) {
@@ -50,9 +50,6 @@ if( isset($_GET['maxupdates']) ) {
 if( isset($_GET['production']) ) {
 	$options['production'] = $_GET['production'] === 'true';
 }
-if( isset($_GET['stopwhenemptyqueue']) ) {
-	$options['stopwhenemptyqueue'] = $_GET['stopwhenemptyqueue'] === 'true';
-}
 
 // Use default values for params that were not provided.
 $defaults = array(
@@ -60,7 +57,6 @@ $defaults = array(
 	'maxtimeoutperrun' => 15, // 15 seconds poll time to Elvis
 	'maxupdates' => PHP_INT_MAX, // maximum number of updates to process from the queue (introduced since 10.5.0)
 	'production' => true, // true for production, false for automated testing (introduced since 10.5.0)
-	'stopwhenemptyqueue' => false, // true to stop processing as soon as the queue has no more updates (introduced since 10.5.0)
 );
 $options = array_merge( $defaults, $options );
 

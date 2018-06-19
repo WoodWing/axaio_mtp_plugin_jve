@@ -19,7 +19,7 @@ class Elvis_TestSuite_BuildTest_Elvis_SyncUtils
 	{
 		$result = true;
 		try {
-			$maxExecTime = 60;
+			$maxExecTime = 10;
 			$client = new Zend\Http\Client();
 			$client->setUri( LOCALURL_ROOT.INETROOT.'/config/plugins/Elvis/sync.php' );
 			$client->setMethod( Zend\Http\Request::METHOD_GET );
@@ -28,7 +28,6 @@ class Elvis_TestSuite_BuildTest_Elvis_SyncUtils
 				'maxtimeoutperrun' => 1, // Number of seconds waiting at Elvis side reading updates from the queue (for each run of updates).
 				'maxupdates' => $maxUpdates,
 				'production' => 'false',
-				'stopwhenemptyqueue' => 'true',
 				//'XDEBUG_SESSION_START' => 'PHPSTORM',
 				// L> To debug a job, uncomment the above and clear the TESTSUITE['SoapUrlDebugParams'] option.
 			) );

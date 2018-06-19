@@ -68,7 +68,6 @@ class ElvisSync
 		$this->maxExecTime = $options['maxexectime'];
 		$this->maxTimeoutPerRun = $options['maxtimeoutperrun'];
 		$this->maxUpdates = $options['maxupdates'];
-		$this->stopWhenQueueEmpty = $options['stopwhenemptyqueue'];
 	}
 
 	/**
@@ -210,8 +209,9 @@ class ElvisSync
 	{
 		$message = 'Wrong argument given for sync.php.';
 		$tip = 'Please check your Crontab/Scheduler settings.';
-		if( $options['maxexectime'] < 60 || $options['maxexectime'] > 600 ) {
-			$detail = "The 'maxexectime' parameter is set to {$options['maxexectime']} but should be in range [60-600].";
+		$minMaxExecTime = $options['production'] ? 60 : 1;
+		if( $options['maxexectime'] < $minMaxExecTime || $options['maxexectime'] > 600 ) {
+			$detail = "The 'maxexectime' parameter is set to {$options['maxexectime']} but should be in range ['.$minMaxExecTime.'-600].";
 			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
 		}
 		if( $options['maxtimeoutperrun'] < 1 || $options['maxtimeoutperrun'] > 20 ) {
@@ -346,11 +346,7 @@ class ElvisSync
 
 			// Run the updates
 			$updateCount = $this->runUpdates( $timeout, $updateCountRemaining );
-			if( $this->stopWhenQueueEmpty && $updateCount === 0 ) {
-				$updateCountRemaining = 0;
-			} else {
-				$updateCountRemaining -= $updateCount;
-			}
+			$updateCountRemaining -= $updateCount;
 
 			// Keep everything alive
 			BizSemaphore::refreshSession( $semaphoreId );
