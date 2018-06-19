@@ -197,29 +197,65 @@ class ActionPropertiesAdminApp
 	{
 		for( $i=0; $i < $numberOfRecords; $i++ ) {
 			$prop = $_REQUEST["prop$i"];            // Name of action property. Always set.
-			if( !$this->isConfigurableField( $prop )) {
-				continue; // Don't bother to update fields that are not configurable by the end-user.
+			$id = intval($_REQUEST["id$i"]);  // Record id. Used in POST and GET requests.
+			$isConfigurableField = $this->isConfigurableField( $prop );
+			if( $isConfigurableField ) {
+				$this->updateConfigurableActionProperty( $id, $i, $prop );
 			}
-			$id = intval($_REQUEST["id$i"]);        // Record id. Used in POST and GET requests.
-			$order = intval($_REQUEST["order$i"]);  // Sorting order field. Zero when not filled.
-			$edit = isset($_REQUEST["edit$i"]) ? $_REQUEST["edit$i"] : '';
-			$mandatory = isset($_REQUEST["mandatory$i"]) ? $_REQUEST["mandatory$i"] : '';
-			$restricted = isset($_REQUEST["restricted$i"]) ? $_REQUEST["restricted$i"] : '';
-			$multipleObjects = isset($_REQUEST["multipleobjects$i"]) ? $_REQUEST["multipleobjects$i"] : '';
-			// Validate data retrieved from form (XSS attacks)
-			if( in_array($prop, $this->sysProps) ) {
-				$edit = '';
+			if( !$isConfigurableField ) {
+				$this->updateNonConfigurableActionPropertySortOrder( $id, $i );
 			}
-			$edit = $edit ? 'on' : '';
-			$mandatory = $mandatory ? 'on' : '';
-			$restricted = $restricted ? 'on' : '';
-			$multipleObjects = $multipleObjects ? 'on' : '';
-			//echo 'DEBUG: order=['. $order .'] prop=['. $prop .'] edit=['. $edit .'] mandatory=['. $mandatory .'] restricted=['. $restricted .']</br>';
-			$values = array('publication' => $this->publ, 'orderid' => $order, 'property' => $prop, 'edit' => $edit,
-				'mandatory' => $mandatory,	'restricted' => $restricted,
-				'multipleobjects' => $multipleObjects );
-			DBActionproperty::updateActionproperty( $id, $values );
 		}
+	}
+
+	/**
+	 * Update action property that can be configured by the end-user.
+	 *
+	 * @since 10.x.x
+	 * @param integer $id
+	 * @param integer $counter
+	 * @param string $prop
+	 */
+	private function updateConfigurableActionProperty( int $id, int $counter, string $prop ):void
+	{
+		require_once BASEDIR .'/server/dbclasses/DBActionproperty.class.php';
+
+		$order = intval($_REQUEST["order$counter"]);  // Sorting order field. Zero when not filled.
+		$edit = isset($_REQUEST["edit$counter"]) ? $_REQUEST["edit$counter"] : '';
+		$mandatory = isset($_REQUEST["mandatory$counter"]) ? $_REQUEST["mandatory$counter"] : '';
+		$restricted = isset($_REQUEST["restricted$counter"]) ? $_REQUEST["restricted$counter"] : '';
+		$multipleObjects = isset($_REQUEST["multipleobjects$counter"]) ? $_REQUEST["multipleobjects$counter"] : '';
+		// Validate data retrieved from form (XSS attacks)
+		if( in_array($prop, $this->sysProps) ) {
+			$edit = '';
+		}
+		$edit = $edit ? 'on' : '';
+		$mandatory = $mandatory ? 'on' : '';
+		$restricted = $restricted ? 'on' : '';
+		$multipleObjects = $multipleObjects ? 'on' : '';
+		//echo 'DEBUG: order=['. $order .'] prop=['. $prop .'] edit=['. $edit .'] mandatory=['. $mandatory .'] restricted=['. $restricted .']</br>';
+		$values = array('publication' => $this->publ, 'orderid' => $order, 'property' => $prop, 'edit' => $edit,
+			'mandatory' => $mandatory,	'restricted' => $restricted,
+			'multipleobjects' => $multipleObjects );
+		DBActionproperty::updateActionproperty( $id, $values );
+	}
+
+	/**
+	 * Update non-configurable action property's order.
+	 *
+	 * For non-configurable action properties, only its order in the dialog list can be adjusted.
+	 *
+	 * @since 10.x.x
+	 * @param integer $id
+	 * @param integer $counter
+	 */
+	private function updateNonConfigurableActionPropertySortOrder( int $id, int $counter ):void
+	{
+		require_once BASEDIR .'/server/dbclasses/DBActionproperty.class.php';
+		$id = intval($_REQUEST["id$counter"]);
+		$order = intval($_REQUEST["order$counter"]);  // Sorting order field. Zero when not filled.
+		$values = array( 'orderid' => $order );
+		DBActionproperty::updateActionproperty( $id, $values );
 	}
 
 	/**
