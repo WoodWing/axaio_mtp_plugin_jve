@@ -141,10 +141,11 @@ $serverVersion = VersionUtils::getVersionDigits( SERVERVERSION, 4 );
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-    <meta http-equiv="PRAGMA" content="NO-CACHE" />
-    <meta http-equiv="Expires" content="-1" />
-	<title>WoodWing Enterprise Server</title>
+    <title>WoodWing Enterprise</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 	<link href="../../config/templates/woodwingmain.css?v=<?php echo $serverVersion; ?>" rel="stylesheet" type="text/css" media="all" />
 	<link rel="icon" href="../../config/images/favicon.ico" type="image/x-icon" />
 	<link rel="shortcut icon" href="../../config/images/favicon.ico" type="image/x-icon" />

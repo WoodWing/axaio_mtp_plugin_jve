@@ -900,10 +900,12 @@ class Ww_Admin_Authorizations_App
 
 		$txt = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'.PHP_EOL;
 		$txt .= '<html xmlns="http://www.w3.org/1999/xhtml">'.PHP_EOL;
-		$txt .= '<head><title>WoodWing Enterprise Server</title>'.PHP_EOL;
-		$txt .= '<meta http-equiv="content-type" content="text/html;charset=utf-8" />'.PHP_EOL;
-		$txt .= '<meta http-equiv="PRAGMA" content="NO-CACHE" />'.PHP_EOL;
-		$txt .= '<meta http-equiv="Expires" content="-1" />'.PHP_EOL;
+		$txt .= '<head>'.PHP_EOL;
+		$txt .= '<title>WoodWing Enterprise</title>'.PHP_EOL;
+		$txt .= '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />'.PHP_EOL;
+		$txt .= '<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />'.PHP_EOL;
+		$txt .= '<meta http-equiv="Pragma" content="no-cache" />'.PHP_EOL;
+		$txt .= '<meta http-equiv="Expires" content="0" />'.PHP_EOL;
 		$txt .= '<link rel="stylesheet" href="../../config/templates/woodwingmain.css?v='.$serverVersion.'" type="text/css" />'.PHP_EOL;
 		$txt .= '<link rel="icon" href="../../config/images/favicon.ico" type="image/x-icon" />'.PHP_EOL;
 		$txt .= '<link rel="shortcut icon" href="../../config/images/favicon.ico" type="image/x-icon" />'.PHP_EOL;

@@ -105,10 +105,11 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title>Enterprise - Test page</title>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <meta http-equiv="PRAGMA" content="NO-CACHE" />
-        <meta http-equiv="Expires" content="-1" />
+        <title>Enterprise - Test page</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
 		<link rel="stylesheet" href="../../config/templates/woodwingmain.css" type="text/css" />
 		<link rel="icon" href="../../config/images/favicon.ico" type="image/x-icon" />
 		<link rel="shortcut icon" href="../../config/images/favicon.ico" type="image/x-icon" />
