@@ -576,6 +576,7 @@ class ActionPropertiesAdminApp
 	public function buildCurrentActionProperties( $txt )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
+		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
 		$staticProps   = BizProperty::getStaticPropIds();
 		$dynamicProps  = BizProperty::getDynamicPropIds();
 		$xmpProps      = BizProperty::getXmpPropIds();
@@ -676,8 +677,7 @@ class ActionPropertiesAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		$multiObjAllowedActions = $multiObjAllowedActions = array_merge( array( '' ), BizWorkflow::getMultiObjectsAllowedActions() );
-		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
+		$showMultiObj = in_array( $this->action, BizProperty::getMultiObjectsAllowedActions() );
 		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
 
 		switch( $this->mode ) {

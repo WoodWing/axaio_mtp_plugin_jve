@@ -3583,7 +3583,7 @@ class BizWorkflow
     }
 
 	/**
-	 * Returns a list of actions that support Multiple objects
+	 * Returns a list of actions that support Multiple objects from the Workflow world.
 	 *
 	 * @since 10.x.x
 	 * @return string[]

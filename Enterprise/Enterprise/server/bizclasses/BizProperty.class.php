@@ -276,18 +276,19 @@ class BizProperty
 	 *
 	 * @since 10.x.x
 	 * @param string $property
-	 * @param string[] $refreshProps
+	 * @param bool $isMultipleObjectsSupported
 	 * @return PropertyUsage
 	 */
-	private static function composePropUsage( $property, $refreshProps )
+	private static function composePropUsage( $property, $isMultipleObjectsSupported )
 	{
+		$refreshProps = array_flip( self::getDefaultRefreshPropIds() );
 		$propUsage = new PropertyUsage();
 		$propUsage->Name = $property;
 		$propUsage->Editable = true;
 		$propUsage->Mandatory = false;
 		$propUsage->Restricted = false;
 		$propUsage->RefreshOnChange = isset( $refreshProps[$property] );
-		$propUsage->MultipleObjects = self::isMultipleObjectsSupportedPropUsage( $property );
+		$propUsage->MultipleObjects = $isMultipleObjectsSupported;
 		return $propUsage;
 	}
 
@@ -302,9 +303,6 @@ class BizProperty
 	public static function defaultPropertyUsageWhenNoUsagesAvailable( $action, $onlyStatic )
 	{
 		$usages = array();
-		$refreshProps = array_flip( self::getDefaultRefreshPropIds() );
-		$targetProps = array_flip( self::getTargetRelatedPropIds() );
-
 		switch( $action ) {
 			case 'Query':
 				$props = self::getDefaultDialogQueryPropIds();
@@ -321,17 +319,9 @@ class BizProperty
 				break;
 		}
 		if( $props ) foreach( $props as $prop ) {
-			$propUsage = self::composePropUsage( $prop, $refreshProps );
-
-			if (($prop == 'RouteTo') || ($prop == 'Comment') || //'Route to' and 'Comment'are not mandatory
-				($prop == 'Issue') || isset($targetProps[$prop]) || // BZ#16792
-				($prop == 'Dossier') ) { // BZ#17831
-				// nothing to do; use default
-			} elseif( $action == 'SendTo' ) {
-				$propUsage = self::handleEditableAndMandatorySettingsForActionSendTo( $prop, $propUsage );
-			} else {
-				$propUsage->Mandatory = true;
-			}
+			$isMultipleObjectsSupported = self::isMultipleObjectsSupportedProp( $prop, $action );
+			$propUsage = self::composePropUsage( $prop, $isMultipleObjectsSupported );
+			$propUsage = self::adjustComposedPropUsage( $action, $prop, $propUsage );
 			$usages[$prop] = $propUsage;
 		}
 		return $usages;
@@ -347,8 +337,6 @@ class BizProperty
 	 */
 	private static function defaultPropertyUsageWhenUsagesAvailable( $usages, $action )
 	{
-		$refreshProps = array_flip( self::getDefaultRefreshPropIds() );
-		$targetProps = array_flip( self::getTargetRelatedPropIds() );
 		// Pre-insert static props (when missing) in the right order.
 		// Trick to insert key-value pairs on top: reverse the order, add them at end and reverse them again.
 		$staticProps = self::getStaticPropIds();
@@ -358,18 +346,57 @@ class BizProperty
 		}
 		$usages = array_reverse( $usages, true );
 		if( $staticProps ) foreach( $staticProps as $staticProp ) {
-			$propUsage = array_key_exists( $staticProp, $usages ) ? $usages[$staticProp] : self::composePropUsage( $staticProp, $refreshProps );
-			if ($action == 'SendTo') {
-				$propUsage = self::handleEditableAndMandatorySettingsForActionSendTo( $staticProp, $propUsage );
-			} else if( ($staticProp == 'Issue') || isset( $targetProps[$staticProp] ) ) { // BZ#16792
-				// nothing to do; use default
-			} else {
-				$propUsage->Mandatory = true;
-			}
+			$isMultipleObjectsSupported = self::isMultipleObjectsSupportedProp( $staticProp, $action );
+			$propUsage = array_key_exists( $staticProp, $usages ) ? $usages[$staticProp] : self::composePropUsage( $staticProp, $isMultipleObjectsSupported );
+			$propUsage = self::adjustComposedPropUsage( $action, $staticProp, $propUsage );
 			$usages[$staticProp] = $propUsage;
 		}
 		$usages = array_reverse( $usages, true );
 		return $usages;
+	}
+
+	/**
+	 * To adjust the necessary PropertyUsage properties(elements).
+	 *
+	 * Some properties usage need further adjustment depending on its action
+	 * or the property itself.
+	 *
+	 * @since 10.x.x
+	 * @param string $action
+	 * @param string $property
+	 * @param PropertyUsage $propUsage
+	 * @return PropertyUsage
+	 */
+	private static function adjustComposedPropUsage( string $action, string $property, PropertyUsage $propUsage ):PropertyUsage
+	{
+		if( self::noAdjustmentNeededForPropUsage( $property )) {
+			// nothing to do; use default
+		} else if( $action == 'SendTo' ) {
+			$propUsage = self::handleEditableAndMandatorySettingsForActionSendTo( $property, $propUsage );
+		} else {
+			$propUsage->Mandatory = true;
+		}
+		return $propUsage;
+	}
+
+	/**
+	 * Returns list of properties that don't need further adjustment on PropertyUsage
+	 * returned by BizProperty::composePropUsage().
+	 *
+	 * @since 10.x.x
+	 * @param string $property
+	 * @return bool Returns true when no adjustment needed, false otherwise.
+	 */
+	private static function noAdjustmentNeededForPropUsage( string $property ):bool
+	{
+		$noAdjustmentNeeded = false;
+		$targetProps = array_flip( self::getTargetRelatedPropIds() );
+		if (( $property == 'RouteTo' ) || ( $property == 'Comment' ) || //'Route to' and 'Comment'are not mandatory
+			( $property == 'Issue') || isset( $targetProps[$property] ) || // BZ#16792
+			( $property == 'Dossier')) { // BZ#17831
+			$noAdjustmentNeeded = true;
+		}
+		return $noAdjustmentNeeded;
 	}
 
 	/**
@@ -379,15 +406,31 @@ class BizProperty
 	 * However, there's an exception, 'State' and 'Category' are allowed to be edited, including for
 	 * multi-set-properties.
 	 *
+	 * Another exception is that, for 'RouteTo' and 'Comment', although they are not static properties,
+	 * these two properties are returned by the BizProperty::getDefaultDialogDynamicPropIds() and these
+	 * two properties are supported in the multi-set properties dialog, therefore they are also covered
+	 * in this function.
+	 *
 	 * @since 10.x.x
 	 * @param string $property
+	 * @param string $action
 	 * @return bool
 	 */
-	private static function isMultipleObjectsSupportedPropUsage( $property )
+	private static function isMultipleObjectsSupportedProp( string $property, string $action ):bool
 	{
-		return ( $property == 'State' || $property == 'Category' ) ? true : false;
+		switch( $property ) {
+			case 'State':
+			case 'Category':
+			case 'RouteTo':
+			case 'Comment':
+				$multiObjectsSupported = in_array( $action, self::getMultiObjectsAllowedActions() ) ? true : false;
+				break;
+			default:
+				$multiObjectsSupported = false;
+				break;
+		}
+		return $multiObjectsSupported;
 	}
-
 
 	/**
 	 * The complete list of PropertyInfo, typically used in GetDialog and QueryObjects services
@@ -2994,5 +3037,20 @@ class BizProperty
 			}
 		}
 		return $filteredUsages;
+	}
+
+	/**
+	 * Returns a list of actions that support Multiple objects.
+	 *
+	 * An empty string '' is also returned in the list which represent ALL actions.
+	 * Compared to BizWorkflow::getMultiObjectsAllowedActions(), this function is
+	 * typically needed from the configuration world like the DialogSetup.
+	 *
+	 * @since 10.x.x
+	 * @return string[]
+	 */
+	public static function getMultiObjectsAllowedActions():array
+	{
+		return array_merge( array( '' ), BizWorkflow::getMultiObjectsAllowedActions() );
 	}
 }
