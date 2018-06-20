@@ -300,9 +300,8 @@ class Elvis_BizClasses_Client
 			'private-api/contentsource/register-shadow-object', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $shadowObjectIdentity->assetId );
-		$request->setBody( json_encode( $shadowObjectIdentity ) );
+		$request->setJsonBody( $shadowObjectIdentity );
 		$request->setHttpPostMethod();
-		$request->setHeader( 'Content-Type', 'application/json' );
 
 		$response = $this->execute( $request );
 	}
@@ -318,9 +317,8 @@ class Elvis_BizClasses_Client
 			'private-api/contentsource/unregister-shadow-object', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $shadowObjectIdentity->assetId );
-		$request->setBody( json_encode( $shadowObjectIdentity ) );
+		$request->setJsonBody( $shadowObjectIdentity );
 		$request->setHttpPostMethod();
-		$request->setHeader( 'Content-Type', 'application/json' );
 
 		$response = $this->execute( $request );
 	}
@@ -438,8 +436,7 @@ class Elvis_BizClasses_Client
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
 			'private-api/contentsource/update-workflow-metadata', $this->shortUserName );
 		$request->setHttpPutMethod();
-		$request->setHeader( 'Content-Type', 'application/json' );
-		$request->setBody( json_encode( array( 'assetIds' => $assetIds, 'metadata' => $metadata ) ) );
+		$request->setJsonBody( (object)[ 'assetIds' => $assetIds, 'metadata' => $metadata ] );
 
 		$this->execute( $request );
 	}

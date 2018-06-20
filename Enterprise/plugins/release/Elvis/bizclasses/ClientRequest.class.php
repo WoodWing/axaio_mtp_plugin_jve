@@ -523,4 +523,15 @@ class Elvis_BizClasses_ClientRequest
 	{
 		$this->body = $body;
 	}
+
+	/**
+	 * Set JSON request body. Correct request headers will be set too.
+	 *
+	 * @param mixed $body
+	 */
+	public function setJsonBody( $body ): void
+	{
+		$this->setBody( json_encode( $body ) );
+		$this->setHeader( 'Content-Type', 'application/json' );
+	}
 }
