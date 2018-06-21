@@ -9,7 +9,7 @@
 class Elvis_BizClasses_Client
 {
 	/** @var string|null */
-	protected $shortUserName;
+	private $shortUserName;
 
 	/**
 	 * Constructor.

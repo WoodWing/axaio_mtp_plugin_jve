@@ -11,6 +11,25 @@ class Elvis_BizClasses_TestClient extends Elvis_BizClasses_Client
 	/** @var string */
 	private $authToken;
 
+	/** @var string|null */
+	private $shortUserName;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string|null $shortUserName For who requests should be authorized. NULL to use unauthorized requests.
+	 * @throws BizException
+	 */
+	public function __construct( ?string $shortUserName )
+	{
+		if( is_null( $shortUserName ) ) {
+			$detail = 'No shortUserName set while calling '.__METHOD__.'().';
+			throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
+		}
+		$this->shortUserName = $shortUserName;
+		parent::__construct( $shortUserName );
+	}
+
 	/**
 	 * Logon the user to Elvis.
 	 *
@@ -20,11 +39,6 @@ class Elvis_BizClasses_TestClient extends Elvis_BizClasses_Client
 	 */
 	public function login( string $userPassword )
 	{
-		if( is_null( $this->shortUserName ) ) {
-			$detail = 'No shortUserName set while calling '.__METHOD__.'().';
-			throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
-		}
-
 		$request = Elvis_BizClasses_ClientRequest::newUnauthorizedRequest(
 			'services/apilogin' );
 		$request->setHttpPostMethod();
