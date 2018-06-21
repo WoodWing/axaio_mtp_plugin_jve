@@ -343,7 +343,7 @@ class ActionPropertiesQueryAdminApp
 	 */
 	private function listNewAndCurrentActionProperties( $props, $rows, $detailTxt )
 	{
-		$highestOrderId = $rows ? max( array_column( $rows, 'orderid' )) + 1 : 1;
+		$highestOrderId = $rows ? max( array_column( $rows, 'orderid' )) + 5 : 5;
 		$detailTxt .= '<tr>';
 		$detailTxt .= '<td>'.inputvar( 'order', $highestOrderId, 'small', null, true, null, false, 'order' ).'</td>';
 		$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
