@@ -99,7 +99,7 @@ class ElvisSync
 			$this->pushMetadataConfig();
 
 			// 4. Retrieve and apply updates while timeout is not exceeded
-			$this->processRunsOfUpdates( $semaphoreId );
+			$this->runUpdates( $semaphoreId );
 
 			// 5. Log off
 			$this->logOff( $ticket );
@@ -322,9 +322,9 @@ class ElvisSync
 	 *
 	 * @param int $semaphoreId
 	 */
-	private function processRunsOfUpdates( int $semaphoreId ) : void
+	private function runUpdates( int $semaphoreId ) : void
 	{
-		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'runUpdates' );
+		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'runUpdates with semaphore '.$semaphoreId );
 
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 
@@ -345,7 +345,7 @@ class ElvisSync
 			$timeout = intval( min( $this->maxTimeoutPerRun, $timeRemaining ) );
 
 			// Run the updates
-			$updateCount = $this->runUpdates( $timeout, $updateCountRemaining );
+			$updateCount = $this->getAndRunUpdates( $timeout, $updateCountRemaining );
 			$updateCountRemaining -= $updateCount;
 
 			// Keep everything alive
@@ -362,20 +362,21 @@ class ElvisSync
 	 * @param int $maxUpdateCount
 	 * @return int Number of updates processed.
 	 */
-	private function runUpdates( int $timeout, int $maxUpdateCount ) : int
+	private function getAndRunUpdates( int $timeout, int $maxUpdateCount ) : int
 	{
-		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'runUpdate with timeout of '.$timeout.' seconds' );
+		LogHandler::Log( 'ELVISSYNC', 'DEBUG',
+			'getAndRunUpdates with timeout of '.$timeout.' seconds and max update count of '.$maxUpdateCount );
 
 		// Get updates from Elvis
 		$updates = $this->elvisContentSourceService->retrieveAssetUpdates( $timeout );
 
+		// When received too many updates, slice it down to the maximum allowed update count.
+		if( count( $updates ) > $maxUpdateCount ) {
+			$updates = array_slice( $updates, 0, $maxUpdateCount );
+		}
+
 		// Perform updates in Enterprise
 		$updateIds = $this->performUpdates( $updates );
-
-		// When received too many updates, slice it down to the maximum allowed update count.
-		if( count( $updateIds ) > $maxUpdateCount ) {
-			$updateIds = array_slice( $updateIds, 0, $maxUpdateCount );
-		}
 
 		// Confirm updates to Elvis, removing them from the queue
 		if( $updateIds ) {
@@ -395,7 +396,7 @@ class ElvisSync
 	{
 		require_once __DIR__.'/model/MetadataHandler.class.php';
 
-		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'PerformUpdates' );
+		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'performUpdates for '.count( $updates ).' updates.' );
 
 		$updateIds = array();
 		$metadataHandler = new MetadataHandler();
