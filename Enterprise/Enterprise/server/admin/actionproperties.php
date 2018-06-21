@@ -447,7 +447,7 @@ class ActionPropertiesAdminApp
 	 */
 	private function listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt )
 	{
-		$highestOrderId = $rows ? max( array_column( $rows, 'orderid' )) + 1 : 1;
+		$highestOrderId = $rows ? max( array_column( $rows, 'orderid' )) + 5 : 5;
 		if( $this->isActionOnlyForFieldsDisplay( $this->action )) {
 			$detailTxt .= '<tr>';
 			$detailTxt .= '<td>'.inputvar('order', $highestOrderId, 'small', null, true, null, false, 'order' ).'</td>';
