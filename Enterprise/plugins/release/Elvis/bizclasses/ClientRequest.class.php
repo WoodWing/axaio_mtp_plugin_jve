@@ -11,6 +11,7 @@ class Elvis_BizClasses_ClientRequest
 	const HTTP_METHOD_GET = 'GET';
 	const HTTP_METHOD_POST = 'POST';
 	const HTTP_METHOD_PUT = 'PUT';
+	const HTTP_METHOD_DELETE = 'DELETE';
 
 	/** @var array */
 	private $pathParams;
@@ -327,7 +328,7 @@ class Elvis_BizClasses_ClientRequest
 	public function composeServiceUrl(): string
 	{
 		$queryParamsUrl = '';
-		if( $this->queryParams && $this->httpMethod == self::HTTP_METHOD_GET ) {
+		if( $this->queryParams ) {
 			$separator = '?';
 			foreach( $this->queryParams as $name => $value ) {
 				$queryParamsUrl .= $separator.$name.'='.$value;
@@ -352,6 +353,14 @@ class Elvis_BizClasses_ClientRequest
 	public function setHttpPutMethod()
 	{
 		$this->httpMethod = self::HTTP_METHOD_PUT;
+	}
+
+	/**
+	 * Define the HTTP DELETE method for the request.
+	 */
+	public function setHttpDeleteMethod()
+	{
+		$this->httpMethod = self::HTTP_METHOD_DELETE;
 	}
 
 	/**

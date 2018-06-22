@@ -383,7 +383,7 @@ class Elvis_BizClasses_Client
 	public function retrieveAssetUpdates( string $enterpriseSystemId, int $operationTimeout )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/retrieveAssetUpdates', $this->shortUserName );
+			'private-api/contentsource/asset-update', $this->shortUserName );
 		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
 		$request->addQueryParam( 'timeout', strval( $operationTimeout ) );
 		$request->setExpectJson();
@@ -401,7 +401,8 @@ class Elvis_BizClasses_Client
 	public function confirmAssetUpdates( string $enterpriseSystemId, array $updateIds )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/confirmAssetUpdates', $this->shortUserName );
+			'private-api/contentsource/asset-update', $this->shortUserName );
+		$request->setHttpDeleteMethod();
 		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
 		$request->addCsvQueryParam( 'updateIds', $updateIds );
 
