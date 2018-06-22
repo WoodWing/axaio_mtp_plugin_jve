@@ -189,7 +189,7 @@ class BizProperty
 	 * @since 10.5.0
 	 * @return string[]
 	 */
-	public static function getDefaultDialogQueryPropIds()
+	public static function getDefaultQueryPropIds()
 	{
 		return array( 'Name', 'RouteTo', 'Comment' );
 	}
@@ -305,7 +305,7 @@ class BizProperty
 		$usages = array();
 		switch( $action ) {
 			case 'Query':
-				$props = self::getDefaultDialogQueryPropIds();
+				$props = self::getDefaultQueryPropIds();
 				break;
 			case 'QueryOut':
 			case 'QueryOutContentStation':
