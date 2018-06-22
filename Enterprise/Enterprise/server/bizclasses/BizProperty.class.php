@@ -3051,6 +3051,7 @@ class BizProperty
 	 */
 	public static function getMultiObjectsAllowedActions():array
 	{
+		require_once BASEDIR .'/server/bizclasses/BizWorkflow.class.php';
 		return array_merge( array( '' ), BizWorkflow::getMultiObjectsAllowedActions() );
 	}
 }
