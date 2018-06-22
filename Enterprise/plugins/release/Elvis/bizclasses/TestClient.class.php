@@ -17,15 +17,11 @@ class Elvis_BizClasses_TestClient extends Elvis_BizClasses_Client
 	/**
 	 * Constructor.
 	 *
-	 * @param string|null $shortUserName For who requests should be authorized. NULL to use unauthorized requests.
+	 * @param string $shortUserName For who requests should be authorized.
 	 * @throws BizException
 	 */
-	public function __construct( ?string $shortUserName )
+	public function __construct( string $shortUserName )
 	{
-		if( is_null( $shortUserName ) ) {
-			$detail = 'No shortUserName set while calling '.__METHOD__.'().';
-			throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
-		}
 		$this->shortUserName = $shortUserName;
 		parent::__construct( $shortUserName );
 	}
