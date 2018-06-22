@@ -37,49 +37,51 @@ class WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_TestCase  extends Test
 
 	public function getTestMethods()
 	{
-		return 'Mimic Elvis client uploading images and Content Station creating shadow images and downloading images over the Elvis proxy:'.
-		'<ul>'.
-			'<li>Setup a brand, a user and access rights.</li>'.
+		return <<<EOT
+Mimic Elvis client uploading images and Content Station creating shadow images and downloading images over the Elvis proxy:
+<ul>
+	<li>Setup a brand, a user and access rights.</li>
 
-			'<li>Test workflow with image shadow objects and using the Elvis proxy:<ul>'.
-				'<li>Lookup the Elvis proxy entry. (Check ContentSourceProxyLinks_ELVIS in LogOnResponse->ServerInfo->FeatureSet.)</li>'.
-				'<li>Upload an image0 to Elvis server (no shadow object created yet).</li>'.
-				'<li>Create a dossier in Enterprise (CreateObjects).</li>'.
-				'<li>Add the image0 to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>'.
-				'<li>Get metadata of image0 for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>'.
-				'<li>Download Elvis image0 via the Elvis proxy server.</li>'.
-			'</ul></li>'.
+	<li>Test workflow with image shadow objects and using the Elvis proxy:<ul>
+		<li>Lookup the Elvis proxy entry. (Check ContentSourceProxyLinks_ELVIS in LogOnResponse->ServerInfo->FeatureSet.)</li>
+		<li>Upload an image0 to Elvis server (no shadow object created yet).</li>
+		<li>Create a dossier in Enterprise (CreateObjects).</li>
+		<li>Add the image0 to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>
+		<li>Get metadata of image0 for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>
+		<li>Download Elvis image0 via the Elvis proxy server.</li>
+	</ul></li>
 
-			'<li>Test version history of image shadow objects:<ul>'.
-				'<li>Retrieve the object version history for the Elvis shadow image0 object for which no versions are available yet.</li>'.
-				'<li>Act with a different test user who uploads a new version for image0 directly to Elvis server.</li>'.
-				'<li>Retrieve the object version history for the Elvis shadow image0 object for which one version should be available now.</li>'.
-				'<li>Test downloading the Elvis image (native file) via the Elvis proxy server. Expect HTTP 200.</li>'.
-				'<li>Promote an old version of image0 to the head version directly at Elvis server.</li>'.
-				'<li>Retrieve the object version history for the Elvis shadow image0 object for which two versions should be available now.</li>'.
-				'<li>Restore an old version of image0 via Enterprise.</li>'.
-				'<li>Retrieve the object version history for the Elvis shadow image0 object for which three versions should be available now.</li>'.
-				'<li>Unlock image0.</li>'.
-			'</ul></li>'.
+	<li>Test version history of image shadow objects:<ul>
+		<li>Retrieve the object version history for the Elvis shadow image0 object for which no versions are available yet.</li>
+		<li>Act with a different test user who uploads a new version for image0 directly to Elvis server.</li>
+		<li>Retrieve the object version history for the Elvis shadow image0 object for which one version should be available now.</li>
+		<li>Test downloading the Elvis image (native file) via the Elvis proxy server. Expect HTTP 200.</li>
+		<li>Promote an old version of image0 to the head version directly at Elvis server.</li>
+		<li>Retrieve the object version history for the Elvis shadow image0 object for which two versions should be available now.</li>
+		<li>Restore an old version of image0 via Enterprise.</li>
+		<li>Retrieve the object version history for the Elvis shadow image0 object for which three versions should be available now.</li>
+		<li>Unlock image0.</li>
+	</ul></li>
 
-			'<li>Test security of the Elvis proxy.</li>'.
-			'<li>Test error handling of the Elvis proxy.</li>'.
+	<li>Test security of the Elvis proxy.</li>
+	<li>Test error handling of the Elvis proxy.</li>
 
-			'<li>Test bulk operations with image shadow objects:<ul>'.
-				'<li>Attempt download image preview via the Elvis proxy server with invalid ticket. Expect HTTP 403.</li>'.
-				'<li>Attempt download image preview via the Elvis proxy server with non-existing object id. Expect HTTP 404.</li>'.
-				'<li>Attempt download image via the Elvis proxy server with unsupported file rendition. Expect HTTP 400.</li>'.
-			'</ul></li>'.
+	<li>Test bulk operations with image shadow objects:<ul>
+		<li>Attempt download image preview via the Elvis proxy server with invalid ticket. Expect HTTP 403.</li>
+		<li>Attempt download image preview via the Elvis proxy server with non-existing object id. Expect HTTP 404.</li>
+		<li>Attempt download image via the Elvis proxy server with unsupported file rendition. Expect HTTP 400.</li>
+	</ul></li>
 
-			'<li>Test copy operation on shadow image:<ul>'.
-				'<li>Add the image1 to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>'.
-				'<li>Get metadata of image1 for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>'.
-				'<li>Set the Description property with some multibyte UTF-8 chars for both images at once. (MultiSetObjectProperties, which calls updateBulk)</li>'.
-				'<li>Retrieve the metadata of both images directly from Elvis server and validate the description fields.</li>'.
-			'</ul></li>'.
+	<li>Test copy operation on shadow image:<ul>
+		<li>Add the image1 to the dossier to simulate D&D operation in CS which creates a shadow image object in Enterprise (CreateObjectRelations).</li>
+		<li>Get metadata of image1 for an Elvis shadow image and lookup download URL. (Check GetObjectsResponse->Files[0]->ContentSourceProxyLink.)</li>
+		<li>Set the Description property with some multibyte UTF-8 chars for both images at once. (MultiSetObjectProperties, which calls updateBulk)</li>
+		<li>Retrieve the metadata of both images directly from Elvis server and validate the description fields.</li>
+	</ul></li>
 
-			'<li>Cleanup the brand, user and access rights.</li>'.
-		'</ul>';
+	<li>Cleanup the brand, user and access rights.</li>
+</ul>
+EOT;
 	}
 
 	/** @var WW_Utils_TestSuite */
@@ -114,15 +116,6 @@ class WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_TestCase  extends Test
 
 	/** @var WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_ImageData[] */
 	private $images = array();
-
-	/** @var string[] */
-	private $lockedObjectIds = array();
-
-	/** @var BizTransferServer */
-	private $transferServer;
-
-	/** @var Attachment[] Files copied to the transfer server folder. */
-	private $transferServerFiles = array();
 
 	/** @var int */
 	private $adminUserId;
@@ -206,9 +199,6 @@ class WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_TestCase  extends Test
 		$this->assertTrue( array_key_exists( 'ElvisPassword', $suiteOpts ) );
 		$this->assertTrue( !empty( $suiteOpts['ElvisUser'] ) );
 
-		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
-		$this->transferServer = new BizTransferServer();
-
 		require_once BASEDIR.'/server/wwtest/testsuite/Setup/WorkflowFactory.class.php';
 		$this->workflowFactory = new WW_TestSuite_Setup_WorkflowFactory( $this, $this->adminTicket, $this->testSuiteUtils );
 		$this->workflowFactory->setConfig( $this->getWorkflowConfig() );
@@ -216,7 +206,7 @@ class WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_TestCase  extends Test
 
 		$this->testSuiteUtils->setRequestComposer(
 			function( WflLogOnRequest $req ) {
-				$req->ClientAppName = 'WW_TestSuite_BuildTest_Elvis';
+				$req->ClientAppName = __CLASS__;
 				$req->ClientAppVersion = '1.0.0 build 0';
 				$req->RequestInfo = array( 'Publications', 'ServerInfo' );
 				$req->User = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( 'John %timestamp%' );
@@ -488,7 +478,6 @@ EOT;
 		$this->assertInstanceOf( 'Object', $imageObject );
 		$this->images[ $imageIndex ]->entObject = $imageObject;
 
-		$this->lockedObjectIds[] = $imageObject->MetaData->BasicMetaData->ID;
 		$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
 		switch( ELVIS_CREATE_COPY ) {
 			case 'Shadow_Only':
@@ -839,12 +828,6 @@ EOT;
 		$this->deleteObjects();
 		if( $this->workflowTicket ) {
 			$this->testSuiteUtils->wflLogOff( $this, $this->workflowTicket );
-		}
-		if( $this->transferServerFiles ) {
-			foreach( $this->transferServerFiles as $file ) {
-				$this->transferServer->deleteFile( $file->FilePath );
-			}
-			unset( $this->transferServerFiles );
 		}
 		if( $this->adminUserId && $this->editorsGroupId ) {
 			$this->testSuiteUtils->removeUserMemberships( $this, $this->adminTicket, $this->adminUserId, $this->editorsGroupId );
