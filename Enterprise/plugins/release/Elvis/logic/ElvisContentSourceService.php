@@ -129,13 +129,17 @@ class ElvisContentSourceService
 	 *
 	 * @param string $assetId
 	 * @param bool $checkOut
+	 * @param array $extraFields Aside to the standard fields, more fields can be requested e.g. for testing purposes.
 	 * @return ElvisEntHit
 	 */
-	public function retrieve( string $assetId, bool $checkOut = false ) : ElvisEntHit
+	public function retrieve( string $assetId, bool $checkOut = false, array $extraFields = array() ) : ElvisEntHit
 	{
 		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$metadataToReturn = $this->getMetadataToReturn();
+		if( $extraFields ) {
+			$metadataToReturn = array_merge( $metadataToReturn, $extraFields );
+		}
 		$stdClassHit = $this->client->retrieve( $assetId, $checkOut, $metadataToReturn );
 		return ElvisEntHit::fromStdClass( $stdClassHit );
 	}

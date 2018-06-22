@@ -77,6 +77,28 @@ class Elvis_BizClasses_TestClient extends Elvis_BizClasses_Client
 	}
 
 	/**
+	 * Delete an asset from Elvis.
+	 *
+	 * @param string $assetId
+	 * @return mixed
+	 */
+	public function deleteAsset( string $assetId )
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'services/remove', $this->shortUserName );
+		$request->setHttpPostMethod();
+		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
+		$request->setSubjectId( $assetId );
+		$request->addCsvPostParam( 'ids', array( $assetId ) );
+		$request->setExpectJson();
+
+		$response = $this->execute( $request );
+		$json = $response->jsonBody();
+		return $json->processedCount == 1;
+		// Note: This API does not throw HTTP fault codes, but simply provides the count of successful deletions.
+	}
+
+	/**
 	 * @inheritdoc
 	 */
 	protected function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
