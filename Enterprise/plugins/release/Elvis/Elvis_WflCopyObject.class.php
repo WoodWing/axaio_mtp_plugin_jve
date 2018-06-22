@@ -32,7 +32,7 @@ class Elvis_WflCopyObject extends WflCopyObject_EnterpriseConnector
 
 		$respObjects = array( $copiedObject );
 		// Get object shadow relations from the response objects
-		$newShadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( $respObjects );
+		$newShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $respObjects );
 
 		// If array contains anything, it means the copied object has shadow relations and needs to send an update to Elvis
 		if( !empty( $newShadowRelations ) ) {

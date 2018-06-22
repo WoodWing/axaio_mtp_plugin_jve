@@ -429,7 +429,6 @@ class Elvis_BizClasses_Client
 	 *
 	 * @param array $assetIds indexed array with Elvis asset ids.
 	 * @param array $metadata assosiative array with metadata field names and values
-	 * @throws BizException
 	 */
 	public function updateWorkflowMetadata( array $assetIds, array $metadata )
 	{

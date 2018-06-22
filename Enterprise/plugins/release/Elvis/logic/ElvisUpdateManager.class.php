@@ -9,29 +9,27 @@
 class ElvisUpdateManager
 {
 	/**
-	 * Sends an updateObject message to Elvis based on the passed object.
-	 * Only sends updated placed relations for ids in $elvisShadowIds.
-	 * Objects for which no shadow ids are found are turned into a DeleteObjects
-	 * operation.
+	 * Send an updateObject message to Elvis, given an object.
+	 *
+	 * Objects for which no shadow id can be found, send a deleteObjects message to Elvis.
 	 *
 	 * $shadowObjectRelations is a 3-D array with the following composition:
-	 * $shadowObjectRelations[layoutId][shadowObjectId][Type] = List of relations.
-	 * Retrieved from objects relations if null.
+	 *    $shadowObjectRelations[ParentId][ChildId][Type] = List of relations.
+	 * This function retrieves these relations from $objects if $shadowObjectRelations == null.
 	 *
-	 * @param Object[] $objects Array of objects
-	 * @param array|null $shadowObjectRelations Refer to function header.
-	 * @throws BizException
+	 * @param Object[] $objects
+	 * @param array|null $shadowObjectRelations See function header.
 	 */
 	public static function sendUpdateObjects( array $objects, $shadowObjectRelations )
 	{
 		require_once __DIR__.'/../util/ElvisObjectRelationUtils.class.php';
 
-		// Retrieve shadow relations from objects if not specified
+		// Retrieve all placed relations with Elvis shadow objects.
 		if( is_null( $shadowObjectRelations ) ) {
-			$shadowObjectRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( $objects );
+			$shadowObjectRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $objects );
 		}
 
-		// Convert objects for which we don't have any shadow relations left into DeleteObject operations
+		// Send deleteObjects operation for which we don't have any placed relations with shadow objects.
 		$deletedObjects = array();
 		foreach( $objects as $key => $object ) {
 			if( empty( $shadowObjectRelations[$object->MetaData->BasicMetaData->ID] ) ) {
@@ -43,14 +41,10 @@ class ElvisUpdateManager
 			self::sendDeleteObjects( $deletedObjects );
 		}
 
-		// Build layout update objects message for Elvis
+		// Send the updateObjects message.
 		$operations = self::composeElvisUpdateObjects( $objects, $shadowObjectRelations );
-
 		if( !is_null( $operations ) ) {
-			// Send the created message
 			require_once __DIR__.'/../logic/ElvisContentSourceService.php';
-			require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
-
 			$service = new ElvisContentSourceService();
 			$service->updateObjects( $operations );
 		}
@@ -86,7 +80,6 @@ class ElvisUpdateManager
 	 * Composes DeleteObject operations and communicates it to Elvis.
 	 *
 	 * @param Object[] $objects List of objects for which shadow relations need to be deleted from Elvis.
-	 * @throws BizException
 	 */
 	public static function sendDeleteObjects( array $objects )
 	{
@@ -113,7 +106,7 @@ class ElvisUpdateManager
 		$objects = array();
 		if( $objectIds ) foreach( $objectIds as $objectId ) {
 			$objects[] = BizObject::getObject( $objectId, BizSession::getShortUserName(), false, 'none',
-				null, null, true, $areas );
+				array( 'MetaData', 'Relations' ), null, true, $areas );
 		}
 
 		self::sendDeleteObjects( $objects );

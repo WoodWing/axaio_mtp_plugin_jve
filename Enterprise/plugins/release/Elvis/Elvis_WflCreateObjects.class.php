@@ -25,7 +25,7 @@ class Elvis_WflCreateObjects extends WflCreateObjects_EnterpriseConnector
 		require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
 
 		// Get shadow relations per layout/dossier of created objects, retrieved from response objects
-		$createdPlacedShadowObjects = ElvisObjectRelationUtils::getShadowRelationsFromObjects( $resp->Objects );
+		$createdPlacedShadowObjects = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $resp->Objects );
 
 		if( !empty( $createdPlacedShadowObjects ) ) {
 			// Tell Elvis to update relation information for found shadow objects on the created layouts

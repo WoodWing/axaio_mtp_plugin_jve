@@ -30,7 +30,7 @@ class Elvis_WflDeleteObjectRelations extends WflDeleteObjectRelations_Enterprise
 			$childIds[] = $relation->Child;
 		}
 		$shadowIds = ElvisObjectUtils::filterElvisShadowObjects( $childIds );
-		$this->changedLayoutIds = ElvisObjectRelationUtils::getLayoutIdsForShadowIds( $shadowIds );
+		$this->changedLayoutIds = ElvisObjectRelationUtils::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
 	} 
 
 	final public function runAfter( WflDeleteObjectRelationsRequest $req, WflDeleteObjectRelationsResponse &$resp )

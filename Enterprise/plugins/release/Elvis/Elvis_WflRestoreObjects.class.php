@@ -38,14 +38,14 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 
 		// Get restored shadow relations per layout/dossier, retrieved from DB.
 		$reqLayoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs ); // Only interested in placements of layouts
-		$restoredPlacedShadowObjects = ElvisObjectRelationUtils::getCurrentShadowRelationsFromObjectIds( $reqLayoutIds );
+		$restoredPlacedShadowObjects = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $reqLayoutIds );
 
 		// Collect changed layouts due restored elvis shadow objects
 		$shadowIds = ElvisObjectUtils::filterElvisShadowObjects( $req->IDs );
-		$layoutIds = ElvisObjectRelationUtils::getLayoutIdsForShadowIds( $shadowIds );
+		$layoutIds = ElvisObjectRelationUtils::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
 
 		if( $layoutIds ) {
-			$shadowRelations = ElvisObjectRelationUtils::getCurrentShadowRelationsFromObjectIds( $layoutIds );
+			$shadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
 			if( $shadowRelations ) {
 				// Add additional layouts which need updating
 				$restoredPlacedShadowObjects += $shadowRelations;

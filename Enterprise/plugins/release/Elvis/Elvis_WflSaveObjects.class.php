@@ -52,7 +52,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 		ElvisUtils::setUnlock( $req->Unlock );
 
 		// Get shadow relations per layout from request objects
-		$this->newShadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( $req->Objects );
+		$this->newShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $req->Objects );
 
 		// Get current old shadow relations per layout, retrieved from DB.
 		$reqObjectIds = ElvisObjectUtils::filterRelevantIdsFromObjects( $req->Objects );
@@ -61,7 +61,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 			$user = BizSession::getShortUserName();
 			$this->oldObjects[$objId] = BizObject::getObject( $objId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
 		}
-		$this->oldShadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( $this->oldObjects );
+		$this->oldShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $this->oldObjects );
 		$this->oldStatuses = ElvisObjectUtils::getObjectsStatuses( $reqObjectIds );
 
 		// For heavy debugging:

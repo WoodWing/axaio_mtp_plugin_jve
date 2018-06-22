@@ -11,13 +11,14 @@ class ElvisObjectRelationUtils
 	/**
 	 * Get all placed Elvis shadow object relations returned per requested parent and child id.
 	 *
-	 * Relations are retrieved from database, in contrast to getShadowRelationsFromObjects which
-	 * retrieves them from the passed objects.
+	 * When the object is not a parent or not of Elvis interest, no relations are resolved.
+	 * Relations are retrieved from database (in contrast to getPlacedShadowRelationsFromParentObjects which
+	 * retrieves them from the provided objects).
 	 *
-	 * @param string[] $reqLayoutIds List of layout ids to check.
-	 * @return array $placedShadowObjectRelations 3d array with keys set as [LayoutId][ChildId][Type]
+	 * @param string[] $objectIds List of object ids to check.
+	 * @return array $placedShadowObjectRelations 3d array with keys set as [ParentId][ChildId][Type]
 	 */
-	public static function getCurrentShadowRelationsFromObjectIds( array $reqLayoutIds )
+	public static function getPlacedShadowRelationsFromParentObjectIds( array $objectIds ) : array
 	{
 		require_once __DIR__.'/ElvisObjectUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
@@ -25,7 +26,7 @@ class ElvisObjectRelationUtils
 		$placedShadowObjectRelations = array();
 
 		// Walk through layout relations
-		$layoutsRelations = BizRelation::getPlacementsByRelationalParentIds( $reqLayoutIds );
+		$layoutsRelations = BizRelation::getPlacementsByRelationalParentIds( $objectIds );
 		if( $layoutsRelations ) foreach( $layoutsRelations as $layoutId => $relations ) {
 			// Gather all relations of the layout
 			if( $relations ) foreach( $relations as $relation ) {
@@ -41,46 +42,47 @@ class ElvisObjectRelationUtils
 	}
 
 	/**
-	 * Retrieves all Elvis shadow relations for placed and contained objects from the passed objects.
+	 * For each given parent object, resolve the placed relations with Elvis shadow objects.
 	 *
-	 * Relations are retrieved from objects (and might be incomplete if the relations are incomplete).
-	 * Each passed object should at least contain the Relations with a valid child, parent and type.
-	 * If the metadata object type is not set, it will retrieve the type from the parent id of the tested relation.
+	 * Each passed object should at least contain Relations with a valid child, parent and type.
+	 * When the object is not a parent or not of Elvis interest, no relations are resolved.
 	 *
-	 * @param Object[]|null $objects List of objects potentially containing shadow relations
+	 * @param Object[]|null $objects List of objects to check.
 	 * @param string $area Optional area for getting object type if object information is incomplete
-	 * @return array $shadowRelations 3d array with keys set as [LayoutId][ChildId][Type]
+	 * @return array $shadowRelations 3d array with keys set as [ParentId][ChildId][Type]
 	 */
-	public static function getShadowRelationsFromObjects( $objects, $area = 'Workflow' )
+	public static function getPlacedShadowRelationsFromParentObjects( $objects, $area = 'Workflow' ) : array
 	{
 		require_once __DIR__.'/ElvisObjectUtils.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 
-		// Collect the objects placed on a layout.
-		$reqPlacedObjectIds = array();
-		$reqRelations = array();
+		// Collect the objects placed on a Layout or PublishForm.
+		$placedObjectIds = array();
+		$placedRelations = array();
 		if( $objects ) foreach( $objects as $object ) {
-			$objType = isset( $object->MetaData->BasicMetaData->Type ) ? $object->MetaData->BasicMetaData->Type : null;
+			$objectId = $object->MetaData->BasicMetaData->ID;
+			if( isset( $object->MetaData->BasicMetaData->Type ) ) {
+				$objectType = $object->MetaData->BasicMetaData->Type;
+			} else {
+				require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+				$objectType = DBObject::getObjectType( $objectId, $area );
+			}
 			if( $object->Relations ) foreach( $object->Relations as $relation ) {
-				$objectId = $relation->Parent;
-				if( ElvisObjectUtils::isObjectTypeOfElvisInterest( !is_null( $objType ) ? $objType : DBObject::getObjectType( $objectId, $area ) ) ) {
-//					if( $relation->Type == 'Placed' || $relation->Type == 'Contained' ) { // To be uncommented when Dossier is supported.
-					if( $relation->Type == 'Placed' ) {
-						$reqPlacedObjectIds[] = $relation->Child;
-						$reqRelations[$objectId][$relation->Child][$relation->Type] = $relation;
-					}
+				if( $relation->Type == 'Placed' && $objectId == $relation->Parent &&
+					ElvisObjectUtils::isParentObjectTypeOfElvisInterest( $objectType ) ) {
+					$placedObjectIds[] = $relation->Child;
+					$placedRelations[ $relation->Parent ][ $relation->Child ][ $relation->Type ] = $relation;
 				}
 			}
 		}
 
 		// Filter the placed objects (and their placements) that originate from Elvis only (=shadow objects).
 		$shadowRelations = array();
-		if( $reqPlacedObjectIds ) {
-			$placedShadowObjectIds = ElvisObjectUtils::filterElvisShadowObjects( $reqPlacedObjectIds );
+		if( $placedObjectIds ) {
+			$placedShadowObjectIds = ElvisObjectUtils::filterElvisShadowObjects( $placedObjectIds );
 			if( $placedShadowObjectIds ) foreach( $placedShadowObjectIds as $placedShadowObjectId ) {
-				if( $reqRelations ) foreach( $reqRelations as $objectId => $reqChildRelations ) {
+				if( $placedRelations ) foreach( $placedRelations as $objectId => $reqChildRelations ) {
 					if( array_key_exists( $placedShadowObjectId, $reqChildRelations ) ) {
-						$shadowRelations[$objectId][$placedShadowObjectId] = $reqRelations[$objectId][$placedShadowObjectId];
+						$shadowRelations[$objectId][$placedShadowObjectId] = $placedRelations[$objectId][$placedShadowObjectId];
 					}
 				}
 			}
@@ -90,27 +92,28 @@ class ElvisObjectRelationUtils
 	}
 
 	/**
-	 * Collects layout ids on which the input shadow ids are placed.
+	 * Return parent objects (ids), that are relevant for Elvis, on which the given Elvis shadow objects (ids) are placed.
 	 *
-	 * @param $shadowIds
-	 * @return int[]
+	 * @param string[] $shadowIds
+	 * @return string[] Parent object ids.
 	 */
-	public static function getLayoutIdsForShadowIds( $shadowIds )
+	public static function getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds ) : array
 	{
 		require_once __DIR__.'/ElvisObjectUtils.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizRelation.class.php';
 
 		// Find deleted Elvis assets. For each deleted asset, we need to collect the layouts.
-		$objRelations = array();
+		$placedRelations = array();
 		foreach( $shadowIds as $shadowId ) {
-			$objRelations = array_merge( $objRelations, BizRelation::getObjectRelations( $shadowId, null, false, null) );
+			$placedRelations = array_merge( $placedRelations, BizRelation::getObjectRelations( $shadowId, null,
+				false, 'parents', false, false, 'Placed' ) );
 		}
 
-		// Collect layout ids and send updates for each layout
-		$layoutIds = array();
-		foreach( $objRelations as $relation ) {
-			$layoutIds[] = $relation->Parent;
+		// Return the parent ids that are relevant for Elvis.
+		$parentIds = array();
+		foreach( $placedRelations as $relation ) {
+			$parentIds[] = $relation->Parent;
 		}
-		return ElvisObjectUtils::filterRelevantIdsFromObjectIds( array_unique( $layoutIds ) );
+		return ElvisObjectUtils::filterRelevantIdsFromObjectIds( array_unique( $parentIds ) );
 	}
 }

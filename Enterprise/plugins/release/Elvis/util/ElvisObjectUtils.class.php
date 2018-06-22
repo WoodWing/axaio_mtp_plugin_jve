@@ -10,12 +10,12 @@ class ElvisObjectUtils
 {
 
 	/**
-	 * Given a list of object ids, function filters out Elvis shadow objects and return them.
+	 * Given a list of object ids, return only the Elvis shadow object ids.
 	 *
-	 * @param int[]|null $objectIds
-	 * @return int[] List of Elvis shadow object ids.
+	 * @param string[]|null $objectIds
+	 * @return string[] List of Elvis shadow object ids.
 	 */
-	public static function filterElvisShadowObjects( $objectIds )
+	public static function filterElvisShadowObjects( $objectIds ) : array
 	{
 		require_once BASEDIR .'/server/dbclasses/DBBase.class.php';
 		require_once __DIR__.'/../config.php';
@@ -49,7 +49,7 @@ class ElvisObjectUtils
 	 * @param Target[] $oldTargets List of old Targets but it is assumed that there's only one Target in the list.
 	 * @return bool
 	 */
-	public static function compareLayoutTargets( array $newTargets, array $oldTargets )
+	public static function compareLayoutTargets( array $newTargets, array $oldTargets ) : bool
 	{
 		$targetsChanged = false;
 
@@ -91,12 +91,15 @@ class ElvisObjectUtils
 	}
 
 	/**
-	 * Tests if object based on type should be tested for shadow relations.
+	 * Determine whether the given object type is a parent for which the placed Elvis shadow objects should be checked.
+	 *
+	 * For the current implementation, relations are tracked in Elvis for Layouts and Publish Forms only. So when anything
+	 * happens to their placed Elvis shadow objects in Enterprise, it should be synchronized with Elvis.
 	 *
 	 * @param string $objectType Object type to be tested
 	 * @return bool True if of interest to Elvis
 	 */
-	public static function isObjectTypeOfElvisInterest( $objectType )
+	public static function isParentObjectTypeOfElvisInterest( $objectType ) : bool
 	{
 		static $objTypes = array(
 			'Layout' => true,
@@ -106,16 +109,16 @@ class ElvisObjectUtils
 	}
 
 	/**
-	 * Filters objectIds from input Objects array on types interesting for Elvis.
+	 * Return object ids that are parents, not archived and relevant for Elvis, given a list of object ids.
 	 *
-	 * @param Object[] $objects List of objects to be filtered
-	 * @return string[] $reqObjectIds Filtered object ids
+	 * @param Object[]|null $objects List of objects to be filtered
+	 * @return string[] Filtered object ids
 	 */
-	public static function filterRelevantIdsFromObjects( $objects )
+	public static function filterRelevantIdsFromObjects( $objects ) : array
 	{
 		$reqObjectIds = array();
 		if( $objects ) foreach( $objects as $object ) {
-			if( self::isObjectTypeOfElvisInterest( $object->MetaData->BasicMetaData->Type ) &&
+			if( self::isParentObjectTypeOfElvisInterest( $object->MetaData->BasicMetaData->Type ) &&
 					!self::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
 				$reqObjectIds[] = $object->MetaData->BasicMetaData->ID;
 			}
@@ -124,32 +127,32 @@ class ElvisObjectUtils
 	}
 
 	/**
-	 * Filters objectIds based on types interesting for Elvis from input object ids.
+	 * Return object ids that are parents and relevant for Elvis, given a list of object ids.
 	 *
-	 * @param string[] $objectIds List of object ids to filter on layout types
+	 * @param string[] $objectIds List of object ids check.
 	 * @param string $area Area used for retrieving the object type. All object ids should be from the same area.
-	 * @return int[] $reqObjectIds Filtered object ids
+	 * @return string[] Relevant parent object ids.
 	 */
-	public static function filterRelevantIdsFromObjectIds( $objectIds, $area = 'Workflow' )
+	public static function filterRelevantIdsFromObjectIds( $objectIds, $area = 'Workflow' ) : array
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 
-		$reqObjectIds = array();
+		$relevantParentIds = array();
 		if( $objectIds ) foreach( $objectIds as $id ) {
-			if( self::isObjectTypeOfElvisInterest( DBObject::getObjectType( $id, $area ) ) ) {
-				$reqObjectIds[] = $id;
+			if( self::isParentObjectTypeOfElvisInterest( DBObject::getObjectType( $id, $area ) ) ) {
+				$relevantParentIds[] = $id;
 			}
 		}
-		return $reqObjectIds;
+		return $relevantParentIds;
 	}
 
 	/**
-	 * Returns the current config of a status for an object id.
+	 * Return the status definition for the current object status of a given object id.
 	 *
-	 * @param string $objectId The id of the object
-	 * @return null|AdmStatus The retrieved status config
+	 * @param string $objectId
+	 * @return null|AdmStatus The status definition.
 	 */
-	public static function getObjectStatusCfg( $objectId )
+	public static function getObjectStatusCfg( $objectId ) : ?AdmStatus
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
@@ -164,7 +167,7 @@ class ElvisObjectUtils
 	 * @param string[]|null $objectIds List of object ids for which to retrieve statuses.
 	 * @return AdmStatus[] Status configs per object id (if found).
 	 */
-	public static function getObjectsStatuses( $objectIds )
+	public static function getObjectsStatuses( $objectIds ) : array
 	{
 		$statuses = array();
 		if( $objectIds ) foreach( $objectIds as $objId ) {
@@ -179,7 +182,7 @@ class ElvisObjectUtils
 	 * @param string $statusName Status name to be tested.
 	 * @return bool True if archived, otherwise false.
 	 */
-	public static function isArchivedStatus( $statusName )
+	public static function isArchivedStatus( $statusName ) : bool
 	{
 		require_once __DIR__.'/../config.php';
 
@@ -205,7 +208,7 @@ class ElvisObjectUtils
 	 * @param string $newStatusName The name of the new status.
 	 * @return bool True if new status is unarchived and old status was archived.
 	 */
-	public static function statusChangedToUnarchived( $oldStatusName, $newStatusName )
+	public static function statusChangedToUnarchived( $oldStatusName, $newStatusName ) : bool
 	{
 		return self::isArchivedStatus( $oldStatusName ) && !self::isArchivedStatus( $newStatusName );
 	}
@@ -214,7 +217,7 @@ class ElvisObjectUtils
 	 * Compare the object's version between Enterprise and Elvis, if the Elvis object's version contain newer version,
 	 * perform update on the same object in Enterprise with the latest version from Elvis.
 	 *
-	 * @param $objects
+	 * @param Object[] $objects
 	 */
 	public static function updateObjectsVersion( $objects )
 	{
@@ -256,11 +259,11 @@ class ElvisObjectUtils
 	 * In Enterprise, the shadow object's status hasn't changed between version 0.2 and 0.5,
 	 * therefore the logic is to replace the 0.3 and 0.4 version status with the last previous version.
 	 *
-	 * @param int $shadowId Enterprise shadow object id
+	 * @param string $shadowId Enterprise shadow object id
 	 * @param array $elvisAssetVersions List of shadow object version retrieve from Elvis
 	 * @return array
 	 */
-	public static function setVersionStatusFromEnterprise( $shadowId, array $elvisAssetVersions )
+	public static function setVersionStatusFromEnterprise( $shadowId, array $elvisAssetVersions ) : array
 	{
 		require_once BASEDIR.'/server/bizclasses/BizVersion.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
@@ -311,7 +314,6 @@ class ElvisObjectUtils
 	 *
 	 * @since 10.1.1
 	 * @param PubPublishedDossier[]|null $publishedDossiers
-	 * @throws BizException
 	 */
 	static public function updatePublisFormPlacementsForPublishDossierOperation( $publishedDossiers )
 	{
@@ -337,7 +339,7 @@ class ElvisObjectUtils
 					$publishForm = BizObject::getObject( $pubPublishFormId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
 					if( $publishForm ) {
 						require_once __DIR__.'/ElvisObjectRelationUtils.class.php';
-						$shadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( array( $publishForm ) );
+						$shadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( array( $publishForm ) );
 						if( $shadowRelations ) {
 							require_once __DIR__.'/../logic/ElvisUpdateManager.class.php';
 							ElvisUpdateManager::sendUpdateObjects( array( $publishForm ), $shadowRelations );

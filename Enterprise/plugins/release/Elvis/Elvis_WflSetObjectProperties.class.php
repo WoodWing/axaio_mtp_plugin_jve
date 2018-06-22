@@ -39,7 +39,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 			$objectType = DBObject::getObjectType( $objectId, 'Workflow' );
 		}
-		if( ElvisObjectUtils::isObjectTypeOfElvisInterest( $objectType ) ) {
+		if( ElvisObjectUtils::isParentObjectTypeOfElvisInterest( $objectType ) ) {
 			$object = BizObject::getObject( $objectId, $user, false, 'none', array( 'Targets' ), null, true );
 
 			// Compare if targets changed. If Targets is null, no change.
@@ -88,7 +88,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 				$object = BizObject::getObject( $objectId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
 
 				// Find shadow relations from object
-				$updatedShadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( array( $object ) );
+				$updatedShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( array( $object ) );
 				if( !empty( $updatedShadowRelations ) ) {
 					$updatedObjects[] = $object;
 				}

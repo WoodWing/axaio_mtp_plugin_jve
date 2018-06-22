@@ -14,22 +14,13 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 	final public function getPrio()     { return self::PRIO_DEFAULT; }
 	final public function getRunMode()  { return self::RUNMODE_BEFOREAFTER; }
 
-	/**
-	 * @var null|integer[layoutId][childId][Type] List of elvis object relations, placed on layouts (that were in DB before delete),
-	 *                that originate from Elvis (=shadow objects).
-	 */
+	/** @var null|array Placed object relations of Elvis interest, that were in DB before delete. */
 	private $deletedShadowRelations = null;
 
-	/**
-	 * @var null|integer[layoutId][childId][Type] List of changed elvis object relations, placed on layouts,
-	 *                that originate from Elvis (=shadow objects).
-	 */
+	/** @var null|array Placed object relations of Elvis interest, that were changed. */
 	private $updatedShadowRelations = null;
 
-	/**
-	 * @var null|integer[layoutId][childId][Type] List of changed elvis object relations, were placed on layouts no longer having shadow objects,
-	 *                that originate from Elvis (=shadow objects).
-	 */
+	/** @var null|array Placed object relations of Elvis interest, that no longer have an Elvis child shadow object. */
 	private $deletedWorkflowShadowRelations = null;
 
 	/**
@@ -53,14 +44,14 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 
 			// Get current shadow relations placed on the layouts or dossiers, retrieved from DB.
 			$reqLayoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs, $req->Areas[0] );
-			$this->deletedShadowRelations = ElvisObjectRelationUtils::getCurrentShadowRelationsFromObjectIds( $reqLayoutIds );
+			$this->deletedShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $reqLayoutIds );
 
 			// Find deleted Elvis assets. For each deleted asset, we need to collect the layouts.
 			$shadowIds = ElvisObjectUtils::filterElvisShadowObjects( $req->IDs );
-			$layoutIds = ElvisObjectRelationUtils::getLayoutIdsForShadowIds( $shadowIds );
+			$layoutIds = ElvisObjectRelationUtils::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
 
 			if( $layoutIds ) {
-				$layoutShadowRelations = ElvisObjectRelationUtils::getCurrentShadowRelationsFromObjectIds( $layoutIds );
+				$layoutShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
 				if( $layoutShadowRelations ) foreach( $layoutShadowRelations as $layoutId => $shadowRelations ) {
 					// No need to check relations if already deleted above
 					if( array_key_exists( $layoutId, $this->deletedShadowRelations ) ) {

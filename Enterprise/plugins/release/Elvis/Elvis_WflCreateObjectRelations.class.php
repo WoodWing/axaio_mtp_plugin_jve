@@ -86,7 +86,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 
 				if( $layoutIds ) {
 					// Collect shadow relations if any are found and send the updated placements to Elvis
-					$newShadowRelations = ElvisObjectRelationUtils::getCurrentShadowRelationsFromObjectIds( $layoutIds );
+					$newShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
 
 					if( $newShadowRelations ) {
 						ElvisUpdateManager::sendUpdateObjectsByIds( $layoutIds, $newShadowRelations );
