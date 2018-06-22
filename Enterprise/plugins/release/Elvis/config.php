@@ -299,6 +299,14 @@ if( !function_exists( 'Elvis_Config_GetFieldHanders' ) ) {
 		$cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest", 1 );
 		*/
 
+		// Instead of editing the above, allow customizations adding more handlers (or overruling one/more of the built-in
+		// handlers) in a way that is easier maintain. For that a global function named Elvis_Config_GetAdditionalFieldHanders
+		// should be defined in the in config_overrule.php file that returns a list of file handlers to be merged/overruled.
+		if( function_exists( 'Elvis_Config_GetAdditionalFieldHanders' ) ) {
+			$extraFieldHanders = Elvis_Config_GetAdditionalFieldHanders();
+			$cfgFieldHandlers = array_merge( $cfgFieldHandlers, $extraFieldHanders );
+		}
+
 		return $cfgFieldHandlers;
 	}
 }
