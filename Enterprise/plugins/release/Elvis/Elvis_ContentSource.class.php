@@ -11,17 +11,16 @@ require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_Enterp
 
 class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 {
-	/** @var MetadataHandler */
+	/** @var Elvis_BizClasses_Metadata */
 	private $metadataHandler;
 
 	/**
-	 * @return MetadataHandler
+	 * @return Elvis_BizClasses_Metadata
 	 */
 	private function getMetadataHandler()
 	{
-		require_once __DIR__.'/model/MetadataHandler.class.php';
 		if( !isset($this->metadataHandler) ) {
-			$this->metadataHandler = new MetadataHandler();
+			$this->metadataHandler = new Elvis_BizClasses_Metadata();
 		}
 		return $this->metadataHandler;
 	}
@@ -456,8 +455,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::listShadowObjectVersions called for alienId:' . $alienId .
 														'; shadowId:' . $shadowId . '; rendition:' . $rendition );
 
-		require_once __DIR__.'/model/VersionHandler.class.php';
-		$versionHandler = new VersionHandler();
+		$versionHandler = new Elvis_BizClasses_Version();
 		$elvisAssetVersions = $versionHandler->listVersions( $alienId, $rendition );
 
 		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
@@ -473,8 +471,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObjectVersion called for alienId:' . $alienId .
 														'; shadowId:' . $shadowId . '; version:' . $version . '; rendition:' . $rendition);
 
-		require_once __DIR__.'/model/VersionHandler.class.php';
-		$versionHandler = new VersionHandler();
+		$versionHandler = new Elvis_BizClasses_Version();
 		return $versionHandler->retrieveVersion( $alienId, $version, $rendition );
 	}
 
@@ -486,8 +483,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::restoreShadowObjectVersion called for alienId:' . $alienId .
 														'; shadowId:' . $shadowId . '; version:' . $version);
 
-		require_once __DIR__.'/model/VersionHandler.class.php';
-		$versionHandler = new VersionHandler();
+		$versionHandler = new Elvis_BizClasses_Version();
 		$versionHandler->promoteVersion( $alienId, $version );
 		return true;
 	}

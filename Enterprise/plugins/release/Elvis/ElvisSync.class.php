@@ -308,11 +308,9 @@ class ElvisSync
 	 */
 	private function pushMetadataConfig() : void
 	{
-		require_once __DIR__.'/model/MetadataHandler.class.php';
-
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'pushMetadataConfig' );
 
-		$metadataHandler = new MetadataHandler();
+		$metadataHandler = new Elvis_BizClasses_Metadata();
 		$fields = $metadataHandler->getMetadataToReturn();
 		$this->elvisContentSourceService->configureMetadataFields( $fields );
 	}
@@ -394,12 +392,10 @@ class ElvisSync
 	 */
 	private function performUpdates( array $updates ) : array
 	{
-		require_once __DIR__.'/model/MetadataHandler.class.php';
-
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'performUpdates for '.count( $updates ).' updates.' );
 
 		$updateIds = array();
-		$metadataHandler = new MetadataHandler();
+		$metadataHandler = new Elvis_BizClasses_Metadata();
 		foreach( $updates as $update ) {
 			array_push( $updateIds, $update->id );
 			switch( $update->operation ) {
@@ -482,13 +478,12 @@ class ElvisSync
 	 * Update object properties
 	 *
 	 * @param ElvisEntUpdate $update
-	 * @param MetadataHandler $metadataHandler
+	 * @param Elvis_BizClasses_Metadata $metadataHandler
 	 * @return bool
 	 */
-	private function updateObjectProperties( ElvisEntUpdate $update, MetadataHandler $metadataHandler ) : bool
+	private function updateObjectProperties( ElvisEntUpdate $update, Elvis_BizClasses_Metadata $metadataHandler ) : bool
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/model/MetadataHandler.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		$alienId = ElvisUtils::getAlienIdFromAssetId( $update->assetId );

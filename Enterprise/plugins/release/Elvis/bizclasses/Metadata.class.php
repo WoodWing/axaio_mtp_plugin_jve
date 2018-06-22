@@ -1,5 +1,5 @@
 <?php
-class MetadataHandler
+class Elvis_BizClasses_Metadata
 {
 	/** @var ReadWriteFieldHandler[] */
 	private $fieldHandlers;
@@ -10,7 +10,7 @@ class MetadataHandler
 	/** @var  string[] Elvis field names */
 	private $metadataToReturn;
 
-	/** @var string Can be used to set handler type name ( the context ) that is calling MetaData handler, e.g 'VersionHandler', 'UserFieldHandler' and etc. */
+	/** @var string Can be used to set handler type name ( the context ) that is calling MetaData handler, e.g 'VersionHandler' */
 	private $handlerName;
 
 	/**
@@ -165,18 +165,18 @@ class MetadataHandler
 	private function initFieldHandlers()
 	{
 		require_once __DIR__.'/../config.php';
-		require_once __DIR__.'/fieldHandler/ContentSourceFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/CopyrightMarkedFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/NameFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/KeywordsFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/ReadOnlyFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/ReadWriteFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/ShadowIdFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/TypeFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/FormatFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/VersionFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/WriteOnlyFieldHandler.class.php';
-		require_once __DIR__.'/fieldHandler/UserFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/ContentSourceFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/CopyrightMarkedFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/NameFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/KeywordsFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/ReadOnlyFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/ReadWriteFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/ShadowIdFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/TypeFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/FormatFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/VersionFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/WriteOnlyFieldHandler.class.php';
+		require_once __DIR__.'/../model/fieldHandler/UserFieldHandler.class.php';
 		if( isset( $this->fieldHandlers ) ) {
 			return;
 		}

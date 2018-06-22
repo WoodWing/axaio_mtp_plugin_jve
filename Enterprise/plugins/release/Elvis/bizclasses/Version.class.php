@@ -3,7 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-class VersionHandler
+class Elvis_BizClasses_Version
 {
 	/**
 	 * Retrieve version info of an asset (from Elvis server) for a provided asset id.
@@ -76,8 +76,7 @@ class VersionHandler
 	 */
 	private function fillVersionInfo( ElvisEntHit $hit, string $rendition ) : VersionInfo
 	{
-		require_once __DIR__.'/MetadataHandler.class.php';
-		$metadataHandler = new MetadataHandler();
+		$metadataHandler = new Elvis_BizClasses_Metadata();
 		$object = new Object();
 		$metadataHandler->setHandlerName( 'VersionHandler' );
 		$metadataHandler->read( $object, $hit->metadata );

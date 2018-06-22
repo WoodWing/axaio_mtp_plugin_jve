@@ -7,8 +7,6 @@
  */
 
 require_once __DIR__.'/ElvisAMFClient.php';
-require_once __DIR__.'/../model/ElvisSearchResponse.php';
-require_once __DIR__.'/../model/ElvisFormattedValue.php';
 require_once __DIR__.'/../model/BasicMap.php';
 require_once __DIR__.'/../model/ElvisEntHit.php';
 require_once __DIR__.'/../model/ElvisEntUpdate.php';
@@ -152,9 +150,7 @@ class ElvisContentSourceService
 	 */
 	private function getMetadataToReturn() : array
 	{
-		require_once __DIR__.'/../model/MetadataHandler.class.php';
-
-		$metadataHandler = new MetadataHandler();
+		$metadataHandler = new Elvis_BizClasses_Metadata();
 		$metadataToReturn = $metadataHandler->getMetadataToReturn();
 		$metadataToReturn[] = 'filename'; // needed to determine mimetype on receive thumb/preview/origin
 		$metadataToReturn[] = 'sceId';

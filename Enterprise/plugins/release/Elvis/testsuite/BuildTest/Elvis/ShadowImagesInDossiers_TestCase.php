@@ -605,9 +605,8 @@ EOT;
 	 */
 	private function promoteElvisImageVersion()
 	{
-		require_once __DIR__.'/../../../model/VersionHandler.class.php';
-		$handler = new VersionHandler();
-		$handler->promoteVersion( $this->images[0]->assetHit->id, '0.1' );
+		$versionHandler = new Elvis_BizClasses_Version();
+		$versionHandler->promoteVersion( $this->images[0]->assetHit->id, '0.1' );
 	}
 
 	/**
