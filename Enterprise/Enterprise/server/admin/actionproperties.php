@@ -211,7 +211,7 @@ class ActionPropertiesAdminApp
 	/**
 	 * Update action property that can be configured by the end-user.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param integer $id
 	 * @param integer $counter
 	 * @param string $prop
@@ -245,7 +245,7 @@ class ActionPropertiesAdminApp
 	 *
 	 * For non-configurable action properties, only its order in the dialog list can be adjusted.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param integer $id
 	 * @param integer $counter
 	 */
@@ -769,7 +769,7 @@ class ActionPropertiesAdminApp
 	 *
 	 * For certain properties, they are the mandatory fields and therefore user cannot edit nor remove them.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $prop
 	 * @return bool Returns true when the property can be configured from the UI, false otherwise.
 	 */
@@ -784,7 +784,7 @@ class ActionPropertiesAdminApp
 	/**
 	 * To check if the fields to be displayed for the action is only meant for displayed and not adjustable.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $action
 	 * @return bool
 	 */
@@ -803,7 +803,7 @@ class ActionPropertiesAdminApp
 	 * For non-disabled checkbox, this function can still be called, CSS is catered
 	 * to take care of the disabled checkbox.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $title
 	 * @param string $checkbox
 	 * @return string
@@ -823,7 +823,7 @@ class ActionPropertiesAdminApp
 	 * configuration, function will pre-insert all the default properties into database
 	 * and returns this set of default properties usages.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return array List of usages or list can be empty if insertion properties into database has taken place but failed.
 	 */
 	private function preparePropertyUsages():array
@@ -856,7 +856,7 @@ class ActionPropertiesAdminApp
 	 * properties will be added into database; otherwise, only the default static properties will
 	 * be added.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return array List of usages or empty list if the insertion of the property usages into database fails.
 	 */
 	private function preInsertDefaultProperties():array

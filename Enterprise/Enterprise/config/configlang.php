@@ -58,7 +58,7 @@ function getPropertyTypeMap()
 /**
  * Returns a list of localised action types that falls under workflow actions.
  *
- * @since 10.x.x Renamed from ﻿getActionTypeMap to ﻿getWorkflowActionTypeMap.
+ * @since 10.5.0 Renamed from ﻿getActionTypeMap to ﻿getWorkflowActionTypeMap.
  * @return string[]
  */
 function getWorkflowActionTypeMap()
@@ -81,7 +81,7 @@ function getWorkflowActionTypeMap()
  *
  * Used in Query Setup page.
  *
- * @since 10.x.x
+ * @since 10.5.0
  * @return string[]
  */
 function getQueryActionTypeMap()

@@ -164,7 +164,7 @@ class BizQueryBase
 	/**
 	 * Returns a list of mandatory properties for query column results.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return string[]
 	 */
 	public static function getMandatoryQueryResultColumnFields()

@@ -140,7 +140,7 @@ class ActionPropertiesQueryAdminApp
 	/**
 	 * Composes and creates Query default property usages and returns the list of property usages created.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return array List of usages or empty list if the insertion of the property usages into database fails.
 	 */
 	private function composeAndInsertActionsProperty():array
@@ -610,7 +610,7 @@ class ActionPropertiesQueryAdminApp
 	 * 'Query Parameters'
 	 * Possible example properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_All_CustomProp and etc.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return bool
 	 */
 	private function isPropertySupportedOnlyAtAllObjectTypeLevel()
@@ -653,7 +653,7 @@ class ActionPropertiesQueryAdminApp
 	 *
 	 * For certain properties, they are the mandatory fields and therefore user cannot edit nor remove them.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $prop
 	 * @return bool Returns true when the property can be configured from the UI, false otherwise.
 	 */
@@ -698,7 +698,7 @@ class ActionPropertiesQueryAdminApp
 	 * For non-disabled checkbox, this function can still be called, CSS is catered
 	 * to take care of the disabled checkbox.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $title
 	 * @param string $checkbox
 	 * @return string
@@ -719,7 +719,7 @@ class ActionPropertiesQueryAdminApp
 	 * added in advance. If user chooses 'Yes', function will pre-insert all the default
 	 * dynamic properties into database and returns this set of default dynamic properties usages.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return array List of usages or list can be empty if insertion properties into database has taken place but failed.
 	 */
 	private function preparePropertyUsages():array

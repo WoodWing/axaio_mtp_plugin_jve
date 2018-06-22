@@ -175,7 +175,7 @@ class BizProperty
 	 * Returns list of properties that can be partially customized (renamed only) that are used in workflow dialogs
 	 * when no customizations are done.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return string[]
 	 */
 	public static function getDefaultDialogDynamicPropIds()
@@ -186,7 +186,7 @@ class BizProperty
 	/**
 	 * Returns a list of default properties that can be used as query parameters.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return string[]
 	 */
 	public static function getDefaultDialogQueryPropIds()
@@ -274,7 +274,7 @@ class BizProperty
 	/**
 	 * Compose PropertyUsage object.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $property
 	 * @param bool $isMultipleObjectsSupported
 	 * @return PropertyUsage
@@ -295,7 +295,7 @@ class BizProperty
 	/**
 	 * Returns usages list with default property(ies) on an empty usages ( no setup in Dialog/Query Setup page yet).
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $action
 	 * @param bool $onlyStatic
 	 * @return mixed
@@ -330,7 +330,7 @@ class BizProperty
 	/**
 	 * Enrich usages list with default property(ies) on top of the already defined usages from DialogSetup page.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param array $usages
 	 * @param string $action
 	 * @return string[]
@@ -361,7 +361,7 @@ class BizProperty
 	 * Some properties usage need further adjustment depending on its action
 	 * or the property itself.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $action
 	 * @param string $property
 	 * @param PropertyUsage $propUsage
@@ -383,7 +383,7 @@ class BizProperty
 	 * Returns list of properties that don't need further adjustment on PropertyUsage
 	 * returned by BizProperty::composePropUsage().
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $property
 	 * @return bool Returns true when no adjustment needed, false otherwise.
 	 */
@@ -411,7 +411,7 @@ class BizProperty
 	 * two properties are supported in the multi-set properties dialog, therefore they are also covered
 	 * in this function.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $property
 	 * @param string $action
 	 * @return bool
@@ -2983,7 +2983,7 @@ class BizProperty
 	 *
 	 * Also refer to BZ#8836 for more information.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $staticProp
 	 * @param PropertyUsage $propUsage
 	 * @return PropertyUsage
@@ -3001,7 +3001,7 @@ class BizProperty
 			case 'Editions':
 			case 'Category':
 				$propUsage->Editable = false;
-				// 10.x.x: 'Mandatory' setting should be set to true, however, in order not to break the current design, set it to false for now.
+				// 10.5.0: 'Mandatory' setting should be set to true, however, in order not to break the current design, set it to false for now.
 				// The reason this setting is not causing problem so far, is due to client will always pre-filled this field in the Dialog and since
 				// it is a non-editable field, user can never modify it to make it empty.
 				$propUsage->Mandatory = false; // Should be set to true, read above.
@@ -3017,11 +3017,11 @@ class BizProperty
 	 * Filter out non-workflow properties ( mainly custom properties ) when action is 'SendTo'.
 	 *
 	 * See more in BZ#20061.
-	 * Since 10.x.x, static properties can also be included in the $usages list. This is due to
+	 * Since 10.5.0, static properties can also be included in the $usages list. This is due to
 	 * that the static properties can also now be stored in the database. Hence, when static
 	 * properties are found, they will not be removed/filtered-out.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string[] $usages
 	 * @param string[] $staticProps
 	 * @return string[]
@@ -3032,7 +3032,7 @@ class BizProperty
 		$wflProps = self::getWorkflowPropIds();
 		if( $usages ) foreach( $usages as $usage ) {
 			if( in_array( $usage->Name, $wflProps ) || // BZ#20061
-				in_array( $usage->Name, $staticProps )) { // 10.x.x: $usages can also be static properties that are retrieved from DB
+				in_array( $usage->Name, $staticProps )) { // 10.5.0: $usages can also be static properties that are retrieved from DB
 				$filteredUsages[$usage->Name] = $usage;
 			}
 		}
@@ -3046,7 +3046,7 @@ class BizProperty
 	 * Compared to BizWorkflow::getMultiObjectsAllowedActions(), this function is
 	 * typically needed from the configuration world like the DialogSetup.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return string[]
 	 */
 	public static function getMultiObjectsAllowedActions():array

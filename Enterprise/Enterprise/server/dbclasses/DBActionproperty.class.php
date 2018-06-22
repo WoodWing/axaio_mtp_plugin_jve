@@ -46,7 +46,7 @@ class DBActionproperty extends DBBase
 	/**
 	 * Same as insertActionproperty() but this function inserts multiple records at one call.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string[] $columns The list of DB field names.
 	 * @param array $values List of array list which contains the DB fields ( $columns ) values.
 	 * @return bool
@@ -89,7 +89,7 @@ class DBActionproperty extends DBBase
 	/**
 	 * Returns list of workflow actions by publication and object type.
 	 *
-	 * @since 10.x.x Renamed from ﻿listActionpropertyGroups to listWorkflowActionPropertyGroups.
+	 * @since 10.5.0 Renamed from ﻿listActionpropertyGroups to listWorkflowActionPropertyGroups.
 	 * @return array with results.
 	 */
 	static public function listWorkflowActionPropertyGroups()
@@ -114,7 +114,7 @@ class DBActionproperty extends DBBase
 	 *
 	 * Unlike For query actions, the query actions cannot be grouped by object type nor publication.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return string[]
 	 */
 	public static function listQueryActionPropertyGroups()

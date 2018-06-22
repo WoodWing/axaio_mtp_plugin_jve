@@ -1,5 +1,5 @@
 /**
- * @since 10.x.x
+ * @since 10.5.0
  * To overrule config/jquery-ui/jquery-ui-1.12.1.custom.css.
  * This fragment cannot be placed in config/templates/woodwingmain.css because the loading sequence is as follow:
  * - woodwingmain.css

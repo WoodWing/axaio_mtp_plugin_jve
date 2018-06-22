@@ -2380,7 +2380,7 @@ class BizWorkflow
 	/**
 	 * Removes the unwanted PropertyUsage objects for property Dossier.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @param string $action
 	 * @param string $objType
 	 * @param string $defaultDossier
@@ -2411,7 +2411,7 @@ class BizWorkflow
 	 * Adds/removes the given PropertyInfo and PropertyUsage objects with 'Dossier' property details.
 	 * This depends if supported by client, which is indicated by the $defaultDossier param.
 	 *
-	 * @since 10.x.x Renamed the function from fixDossierPropertyUsage to handleDossiersForDialog.
+	 * @since 10.5.0 Renamed the function from fixDossierPropertyUsage to handleDossiersForDialog.
 	 * @param int $pub Publication Id.
 	 * @param int $iss Issue Id.
 	 * @param int $catId Category Id.
@@ -3585,7 +3585,7 @@ class BizWorkflow
 	/**
 	 * Returns a list of actions that support Multiple objects from the Workflow world.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 * @return string[]
 	 */
 	public static function getMultiObjectsAllowedActions()
