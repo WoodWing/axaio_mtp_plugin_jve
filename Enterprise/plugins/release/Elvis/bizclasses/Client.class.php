@@ -330,7 +330,7 @@ class Elvis_BizClasses_Client
 	 * Can only be requested by users with admin permissions.
 	 *
 	 * @param string $username The username of the user to request the info for.
-	 * @return stdClass representation of ElvisEntUserDetails that contains the detailed user information.
+	 * @return stdClass representation of Elvis_DataClasses_EntUserDetails that contains the detailed user information.
 	 * @throws BizException
 	 */
 	public function getUserDetails( string $username ) : stdClass

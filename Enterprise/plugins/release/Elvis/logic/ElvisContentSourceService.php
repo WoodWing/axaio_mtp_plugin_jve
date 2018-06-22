@@ -9,7 +9,6 @@
 require_once __DIR__.'/ElvisAMFClient.php';
 require_once __DIR__.'/../model/BasicMap.php';
 require_once __DIR__.'/../model/ElvisEntUpdate.php';
-require_once __DIR__.'/../model/ElvisEntUserDetails.php';
 require_once __DIR__.'/../model/ElvisCSException.php';
 require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
 require_once __DIR__.'/../model/ElvisCSAlreadyExistsException.php';
@@ -310,16 +309,15 @@ class ElvisContentSourceService
 	 * Retrieve detailed user information.
 	 *
 	 * @param string $username The username of the user to request the info for.
-	 * @return ElvisEntUserDetails The user information.
+	 * @return Elvis_DataClasses_EntUserDetails The user information.
 	 */
-	public function getUserDetails( string $username ) : ElvisEntUserDetails
+	public function getUserDetails( string $username ) : Elvis_DataClasses_EntUserDetails
 	{
 		require_once __DIR__.'/../config.php'; // ELVIS_SUPER_USER
-		require_once __DIR__.'/../model/ElvisEntUserDetails.php';
 
 		$client = new Elvis_BizClasses_Client( ELVIS_SUPER_USER );
 		$stdClassUserDetails = $client->getUserDetails( $username );
-		return ElvisEntUserDetails::fromStdClass( $stdClassUserDetails );
+		return Elvis_DataClasses_EntUserDetails::fromStdClass( $stdClassUserDetails );
 	}
 
 	/**

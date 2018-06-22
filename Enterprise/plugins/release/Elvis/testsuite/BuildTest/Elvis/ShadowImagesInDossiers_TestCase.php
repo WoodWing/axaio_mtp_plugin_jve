@@ -357,9 +357,9 @@ EOT;
 	 * Retrieve user info from Elvis Server.
 	 *
 	 * @param string $username
-	 * @return ElvisEntUserDetails
+	 * @return Elvis_DataClasses_EntUserDetails
 	 */
-	private function getUserFromElvis( string $username ) : ElvisEntUserDetails
+	private function getUserFromElvis( string $username ) : Elvis_DataClasses_EntUserDetails
 	{
 		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
 
