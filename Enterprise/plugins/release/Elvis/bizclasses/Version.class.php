@@ -15,12 +15,11 @@ class Elvis_BizClasses_Version
 	public function listVersions( string $alienId, string $rendition ) : array
 	{
 		require_once __DIR__.'/../util/ElvisUtils.class.php';
-		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHits = $client->listVersions( $assetId );
-		$hits = array_map( array( 'ElvisEntHit', 'fromStdClass' ), $stdClassHits );
+		$hits = array_map( array( 'Elvis_DataClasses_EntHit', 'fromStdClass' ), $stdClassHits );
 
 		$versions = array();
 		foreach( $hits as $hit ) {
@@ -41,13 +40,12 @@ class Elvis_BizClasses_Version
 	public function retrieveVersion( string $alienId, string $version, string $rendition ) : VersionInfo
 	{
 		require_once __DIR__.'/../util/ElvisUtils.class.php';
-		require_once __DIR__.'/../model/ElvisEntHit.php';
 
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$assetVersion = ElvisUtils::getElvisVersionNumber( $version );
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->retrieveVersion( $assetId, $assetVersion );
-		$hit = ElvisEntHit::fromStdClass( $stdClassHit );
+		$hit = Elvis_DataClasses_EntHit::fromStdClass( $stdClassHit );
 		return $this->fillVersionInfo( $hit, $rendition );
 	}
 
@@ -70,11 +68,11 @@ class Elvis_BizClasses_Version
 	/**
 	 * Compose a VersionInfo object based on provided hit and rendition.
 	 *
-	 * @param ElvisEntHit $hit
+	 * @param Elvis_DataClasses_EntHit $hit
 	 * @param string $rendition
 	 * @return VersionInfo
 	 */
-	private function fillVersionInfo( ElvisEntHit $hit, string $rendition ) : VersionInfo
+	private function fillVersionInfo( Elvis_DataClasses_EntHit $hit, string $rendition ) : VersionInfo
 	{
 		$metadataHandler = new Elvis_BizClasses_Metadata();
 		$object = new Object();

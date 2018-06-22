@@ -624,11 +624,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	/**
 	 * Compose Attachments from an Elvis hit based for given file renditions.
 	 *
-	 * @param ElvisEntHit $hit
+	 * @param Elvis_DataClasses_EntHit $hit
 	 * @param string[] $renditions
 	 * @return Attachment[]
 	 */
-	private function getFiles( ElvisEntHit $hit, array $renditions ) : array
+	private function getFiles( Elvis_DataClasses_EntHit $hit, array $renditions ) : array
 	{
 		if( $this->isContentSourceFileLinksRequested() ) {
 			$fileLinkType = 'ContentSourceFileLink';
@@ -651,7 +651,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 	/**
 	 * @param Object $smartObject Object of MetaData that will filled
-	 * @param ElvisEntHit $hit returned from elvis server
+	 * @param Elvis_DataClasses_EntHit $hit returned from elvis server
 	 */
 	private function fillMetadata( $smartObject, $hit )
 	{

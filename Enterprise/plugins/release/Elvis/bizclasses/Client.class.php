@@ -27,7 +27,7 @@ class Elvis_BizClasses_Client
 	 * @param stdClass $metadata Metadata to be updated in Elvis
 	 * @param string[] $metadataToReturn
 	 * @param Attachment|null $fileToUpload
-	 * @return stdClass representation of ElvisEntHit
+	 * @return stdClass representation of Elvis_DataClasses_EntHit
 	 */
 	public function create( stdClass $metadata, array $metadataToReturn, $fileToUpload ) : stdClass
 	{
@@ -54,7 +54,7 @@ class Elvis_BizClasses_Client
 	 * @param string[] $metadataToReturn
 	 * @param Attachment|null $fileToUpload
 	 * @param bool $undoCheckout
-	 * @return stdClass representation of ElvisEntHit
+	 * @return stdClass representation of Elvis_DataClasses_EntHit
 	 */
 	public function update( string $assetId, stdClass $metadata, array $metadataToReturn, ?Attachment $fileToUpload, bool $undoCheckout ) : stdClass
 	{
@@ -137,7 +137,7 @@ class Elvis_BizClasses_Client
 	 * @param string $assetId
 	 * @param bool $checkOut
 	 * @param string[] $metadataToReturn
-	 * @return stdClass representation of ElvisEntHit
+	 * @return stdClass representation of Elvis_DataClasses_EntHit
 	 * @throws BizException
 	 */
 	public function retrieve( string $assetId, bool $checkOut, array $metadataToReturn ) : stdClass
@@ -203,7 +203,7 @@ class Elvis_BizClasses_Client
 	 * @param string $destFolderPath Path on Elvis where the asset will be copied to.
 	 * @param string|null $name The name of the asset. If not set, the value remains empty and Elvis uses the asset filename.
 	 * @param string $entSystemId Enterprise system id.
-	 * @return stdClass representation of an ElvisEntHit of the copied Elvis asset.
+	 * @return stdClass representation of an Elvis_DataClasses_EntHit of the copied Elvis asset.
 	 */
 	public function copyTo( string $assetId, string $destFolderPath, ?string $name, string $entSystemId ): stdClass
 	{
@@ -229,7 +229,7 @@ class Elvis_BizClasses_Client
 	 * Retrieve versions of an asset from the Elvis server.
 	 *
 	 * @param string $assetId
-	 * @return stdClass[] representation of ElvisEntHit[]
+	 * @return stdClass[] representation of Elvis_DataClasses_EntHit[]
 	 * @throws BizException
 	 */
 	public function listVersions( string $assetId ) : array
@@ -255,7 +255,7 @@ class Elvis_BizClasses_Client
 	 *
 	 * @param string $assetId
 	 * @param string $version
-	 * @return stdClass representation of ElvisEntHit
+	 * @return stdClass representation of Elvis_DataClasses_EntHit
 	 */
 	public function retrieveVersion( string $assetId, string $version ) : stdClass
 	{

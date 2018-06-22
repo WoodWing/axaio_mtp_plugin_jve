@@ -80,13 +80,13 @@ class ElvisUtils {
 	 * While copying, the Elvis session id is sent through cookies to authorize the download URL.
 	 * This is done through input stream options.
 	 *
-	 * @param ElvisEntHit $hit Elvis search result (where the URL can be extracted from).
+	 * @param Elvis_DataClasses_EntHit $hit Elvis search result (where the URL can be extracted from).
 	 * @param string $rendition File rendition to download.
 	 * @param string $fileLinkType 'FileUrl', 'ContentSourceFileLink' or 'ContentSourceProxyLink'
 	 * @return Attachment|null The file attachment, or null when not found.
 	 * @throws BizException
 	 */
-	public static function getAttachment( ElvisEntHit $hit, string $rendition, string $fileLinkType )
+	public static function getAttachment( Elvis_DataClasses_EntHit $hit, string $rendition, string $fileLinkType )
 	{
 		$attachment = null;
 		$url = self::getUrlFromRendition( $hit, $rendition );
@@ -290,7 +290,7 @@ class ElvisUtils {
 	/**
 	 * Returns a url from a Elvis hit given a specific rendition.
 	 *
-	 * @param ElvisEntHit $hit
+	 * @param Elvis_DataClasses_EntHit $hit
 	 * @param string $rendition
 	 * @return string|null download url if a url is set for a rendition, else null.
 	 */
@@ -352,7 +352,7 @@ class ElvisUtils {
 	/**
 	 * Extracts the mime type from the hit
 	 *
-	 * @param ElvisEntHit $hit
+	 * @param Elvis_DataClasses_EntHit $hit
 	 * @param string $url
 	 * @param string $rendition
 	 * @return string|null Resolved mime type, else NULL.

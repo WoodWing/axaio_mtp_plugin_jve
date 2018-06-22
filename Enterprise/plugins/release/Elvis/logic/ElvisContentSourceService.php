@@ -8,7 +8,6 @@
 
 require_once __DIR__.'/ElvisAMFClient.php';
 require_once __DIR__.'/../model/BasicMap.php';
-require_once __DIR__.'/../model/ElvisEntHit.php';
 require_once __DIR__.'/../model/ElvisEntUpdate.php';
 require_once __DIR__.'/../model/ElvisEntUserDetails.php';
 require_once __DIR__.'/../model/ElvisCSException.php';
@@ -71,15 +70,13 @@ class ElvisContentSourceService
 	 * @since 10.5.0
 	 * @param array $metadata Metadata to be updated in Elvis
 	 * @param Attachment|null $fileToUpload
-	 * @return ElvisEntHit
+	 * @return Elvis_DataClasses_EntHit
 	 */
-	public function create( array $metadata, ?Attachment $fileToUpload ) : ElvisEntHit
+	public function create( array $metadata, ?Attachment $fileToUpload ) : Elvis_DataClasses_EntHit
 	{
-		require_once __DIR__.'/../model/ElvisEntHit.php';
-
 		$metadataToReturn = $this->getMetadataToReturn();
 		$stdClassHit = $this->client->create( (object)$metadata, $metadataToReturn, $fileToUpload );
-		return ElvisEntHit::fromStdClass( $stdClassHit );
+		return Elvis_DataClasses_EntHit::fromStdClass( $stdClassHit );
 	}
 
 	/**
@@ -90,15 +87,13 @@ class ElvisContentSourceService
 	 * @param array $metadata Metadata to be updated in Elvis
 	 * @param Attachment|null $fileToUpload
 	 * @param bool $undoCheckout
-	 * @return ElvisEntHit
+	 * @return Elvis_DataClasses_EntHit
 	 */
-	public function update( string $assetId, array $metadata, ?Attachment $fileToUpload, bool $undoCheckout ) : ElvisEntHit
+	public function update( string $assetId, array $metadata, ?Attachment $fileToUpload, bool $undoCheckout ) : Elvis_DataClasses_EntHit
 	{
-		require_once __DIR__.'/../model/ElvisEntHit.php';
-
 		$metadataToReturn = $this->getMetadataToReturn();
 		$stdClassHit = $this->client->update( $assetId, (object)$metadata, $metadataToReturn, $fileToUpload, $undoCheckout );
-		return ElvisEntHit::fromStdClass( $stdClassHit );
+		return Elvis_DataClasses_EntHit::fromStdClass( $stdClassHit );
 	}
 
 	/**
@@ -128,18 +123,16 @@ class ElvisContentSourceService
 	 * @param string $assetId
 	 * @param bool $checkOut
 	 * @param array $extraFields Aside to the standard fields, more fields can be requested e.g. for testing purposes.
-	 * @return ElvisEntHit
+	 * @return Elvis_DataClasses_EntHit
 	 */
-	public function retrieve( string $assetId, bool $checkOut = false, array $extraFields = array() ) : ElvisEntHit
+	public function retrieve( string $assetId, bool $checkOut = false, array $extraFields = array() ) : Elvis_DataClasses_EntHit
 	{
-		require_once __DIR__.'/../model/ElvisEntHit.php';
-
 		$metadataToReturn = $this->getMetadataToReturn();
 		if( $extraFields ) {
 			$metadataToReturn = array_merge( $metadataToReturn, $extraFields );
 		}
 		$stdClassHit = $this->client->retrieve( $assetId, $checkOut, $metadataToReturn );
-		return ElvisEntHit::fromStdClass( $stdClassHit );
+		return Elvis_DataClasses_EntHit::fromStdClass( $stdClassHit );
 	}
 
 	/**
@@ -180,14 +173,12 @@ class ElvisContentSourceService
 	 * @param string $destFolderPath Path on Elvis where the asset will be copied to.
 	 * @param string|null $name The name of the asset. If not set, the value remains empty and Elvis uses the asset filename.
 	 * @param string $entSystemId Enterprise system id.
-	 * @return ElvisEntHit The copied Elvis asset.
+	 * @return Elvis_DataClasses_EntHit The copied Elvis asset.
 	 */
-	public function copyTo( string $assetId, string $destFolderPath, ?string $name, string $entSystemId ): ElvisEntHit
+	public function copyTo( string $assetId, string $destFolderPath, ?string $name, string $entSystemId ): Elvis_DataClasses_EntHit
 	{
-		require_once __DIR__.'/../model/ElvisEntHit.php';
-
 		$stdClassHit = $this->client->copyTo( $assetId, $destFolderPath, $name, $entSystemId );
-		return ElvisEntHit::fromStdClass( $stdClassHit );
+		return Elvis_DataClasses_EntHit::fromStdClass( $stdClassHit );
 	}
 
 	/**

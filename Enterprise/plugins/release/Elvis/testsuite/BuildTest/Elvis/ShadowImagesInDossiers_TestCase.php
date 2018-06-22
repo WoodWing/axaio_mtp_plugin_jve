@@ -13,7 +13,7 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_ImageData
 {
-	/** @var ElvisEntHit */
+	/** @var Elvis_DataClasses_EntHit */
 	public $assetHit;
 
 	/** @var Object */
@@ -420,7 +420,7 @@ EOT;
 		$service = new ElvisContentSourceService();
 		$metadata = array();
 		$hit = $service->create( $metadata, $this->images[ $imageIndex ]->attachments[0] );
-		$this->assertInstanceOf( 'ElvisEntHit', $hit );
+		$this->assertInstanceOf( 'Elvis_DataClasses_EntHit', $hit );
 		$this->assertNotNull( $hit->id );
 		$this->images[ $imageIndex ]->assetHit = $hit;
 	}
@@ -569,7 +569,7 @@ EOT;
 		$metadata = array();
 		$hit = $service->update( $this->images[0]->assetHit->id, $metadata, $this->images[0]->attachments[1], true ); // check-in
 			// L> note that the update() operates through our $client that is authorized with our $this->elvisTestUserName
-		$this->assertInstanceOf( 'ElvisEntHit', $hit );
+		$this->assertInstanceOf( 'Elvis_DataClasses_EntHit', $hit );
 		$this->assertNotNull( $hit->id );
 		$this->images[0]->assetHit = $hit;
 
@@ -805,7 +805,7 @@ EOT;
 		$imageObject = $this->images[ $imageIndex ]->entObject;
 		$service = new ElvisContentSourceService();
 		$hit = $service->retrieve( $imageObject->MetaData->BasicMetaData->DocumentID, false );
-		$this->assertInstanceOf( 'ElvisEntHit', $hit );
+		$this->assertInstanceOf( 'Elvis_DataClasses_EntHit', $hit );
 		$this->assertNotNull( $hit->id );
 		$this->images[ $imageIndex ]->assetHit = $hit;
 	}

@@ -1,22 +1,13 @@
 <?php
 /**
- * @copyright  WoodWing Software bv. All Rights Reserved.
+ * EntHit data class.
  *
- * Simplified version of com.ds.acm.logic.xmlservice.search.model.EntHit
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ * @since 10.5.0
  */
 
-require_once __DIR__.'/AbstractRemoteObject.php';
-
-class ElvisEntHit extends AbstractRemoteObject
+class Elvis_DataClasses_EntHit
 {
-	/**
-	 * Return the fully qualified name of the Java class
-	 */
-	public static function getJavaClassName()
-	{
-		return 'com.ds.acm.api.contentsource.model.EntHit';
-	}
-
 	/** @var string $id */
 	public $id;
 
@@ -36,19 +27,19 @@ class ElvisEntHit extends AbstractRemoteObject
 	public $permissions;
 
 	/**
-	 * Convert a stdClass object into an ElvisEntHit object.
+	 * Convert a stdClass object into an Elvis_DataClasses_EntHit object.
 	 *
 	 * REST responses from Elvis server are JSON decoded and result into stdClass.
-	 * This function can be called to convert it to the real data class ElvisEntHit.
+	 * This function can be called to convert it to the real data class Elvis_DataClasses_EntHit.
 	 *
 	 * @since 10.5.0
 	 * @param stdClass $stdClassHit
-	 * @return ElvisEntHit
+	 * @return Elvis_DataClasses_EntHit
 	 */
-	public static function fromStdClass( stdClass $stdClassHit ) : ElvisEntHit
+	public static function fromStdClass( stdClass $stdClassHit ) : Elvis_DataClasses_EntHit
 	{
-		/** @var ElvisEntHit $hit */
-		$hit = WW_Utils_PHPClass::typeCast( $stdClassHit, 'ElvisEntHit' );
+		/** @var Elvis_DataClasses_EntHit $hit */
+		$hit = WW_Utils_PHPClass::typeCast( $stdClassHit, 'Elvis_DataClasses_EntHit' );
 		$hit->metadata = (array)$hit->metadata;
 		if( isset( $hit->id ) ) {
 			$hit->metadata[ 'id' ] = $hit->id;

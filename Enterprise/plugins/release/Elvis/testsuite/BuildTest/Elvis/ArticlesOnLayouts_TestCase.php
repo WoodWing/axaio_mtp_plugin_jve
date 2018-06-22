@@ -67,7 +67,7 @@ EOT;
 	/** @var string */
 	private $imageShadowId;
 
-	/** @var ElvisEntHit */
+	/** @var Elvis_DataClasses_EntHit */
 	private $imageHit;
 
 	/** @var string[] */
@@ -383,7 +383,7 @@ EOT;
 		$service = new ElvisContentSourceService();
 		$metadata = array();
 		$hit = $service->create( $metadata, $attachment );
-		$this->assertInstanceOf( 'ElvisEntHit', $hit );
+		$this->assertInstanceOf( 'Elvis_DataClasses_EntHit', $hit );
 		$this->assertNotNull( $hit->id );
 		$this->imageAssetId = $hit->id;
 	}
