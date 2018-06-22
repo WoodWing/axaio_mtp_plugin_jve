@@ -336,7 +336,7 @@ class Elvis_BizClasses_Client
 	public function getUserDetails( string $username ) : stdClass
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/getUserDetails', $this->shortUserName );
+			'private-api/contentsource/user-detail', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
 		$request->setSubjectName( $username );
 		$request->addQueryParam( 'username', $username );
