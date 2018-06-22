@@ -260,7 +260,7 @@ class Elvis_BizClasses_Client
 	public function retrieveVersion( string $assetId, string $version ) : stdClass
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/retrieveVersion', $this->shortUserName );
+			'private-api/contentsource/version', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $assetId );
 		$request->addQueryParam( 'assetId', $assetId );
@@ -280,11 +280,12 @@ class Elvis_BizClasses_Client
 	public function promoteVersion( string $assetId, string $version )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/promoteVersion', $this->shortUserName );
+			'private-api/contentsource/version/promote', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $assetId );
-		$request->addQueryParam( 'assetId', $assetId );
-		$request->addQueryParam( 'version', $version );
+		$request->setHttpPostMethod();
+		$request->addPostParam( 'assetId', $assetId );
+		$request->addPostParam( 'version', $version );
 
 		$response = $this->execute( $request );
 	}
@@ -382,7 +383,7 @@ class Elvis_BizClasses_Client
 	public function retrieveAssetUpdates( string $enterpriseSystemId, int $operationTimeout )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/retrieveAssetUpdates', $this->shortUserName );
+			'private-api/contentsource/asset-update', $this->shortUserName );
 		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
 		$request->addQueryParam( 'timeout', strval( $operationTimeout ) );
 		$request->setExpectJson();
@@ -400,7 +401,8 @@ class Elvis_BizClasses_Client
 	public function confirmAssetUpdates( string $enterpriseSystemId, array $updateIds )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/confirmAssetUpdates', $this->shortUserName );
+			'private-api/contentsource/asset-update', $this->shortUserName );
+		$request->setHttpDeleteMethod();
 		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
 		$request->addCsvQueryParam( 'updateIds', $updateIds );
 
