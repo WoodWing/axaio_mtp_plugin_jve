@@ -11,7 +11,7 @@ class ElvisUpdateManager
 	/**
 	 * Send an updateObject message to Elvis, given an object.
 	 *
-	 * Objects for which no shadow id can be found, send a deleteObjects message to Elvis.
+	 * Objects for which no relation with shadows can be found, request Elvis to break relations between its assets.
 	 *
 	 * $shadowObjectRelations is a 3-D array with the following composition:
 	 *    $shadowObjectRelations[ParentId][ChildId][Type] = List of relations.
@@ -29,7 +29,7 @@ class ElvisUpdateManager
 			$shadowObjectRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $objects );
 		}
 
-		// Send deleteObjects operation for which we don't have any placed relations with shadow objects.
+		// Request Elvis to break relations between assets for which we don't have any placed relations with shadow objects.
 		$deletedObjects = array();
 		foreach( $objects as $key => $object ) {
 			if( empty( $shadowObjectRelations[$object->MetaData->BasicMetaData->ID] ) ) {
@@ -38,7 +38,7 @@ class ElvisUpdateManager
 			}
 		}
 		if( $deletedObjects ) {
-			self::sendDeleteObjects( $deletedObjects );
+			self::deleteAssetRelationsForObjects( $deletedObjects );
 		}
 
 		// Send the updateObjects message.
@@ -77,18 +77,21 @@ class ElvisUpdateManager
 	}
 
 	/**
-	 * Composes DeleteObject operations and communicates it to Elvis.
+	 * Request Elvis to delete relations with child assets (given a list of shadow child objects).
+	 *
+	 * For example, when a shadow image is removed from a layout, relations will be removed from Enterprise
+	 * side. This function is then called to let Elvis remove the corresponding relations for its assets.
 	 *
 	 * @param Object[] $objects List of objects for which shadow relations need to be deleted from Elvis.
 	 */
-	public static function sendDeleteObjects( array $objects )
+	public static function deleteAssetRelationsForObjects( array $objects )
 	{
 		if( $objects ) {
-			$operations = self::composeElvisDeleteObjects( $objects );
+			$operations = self::composeElvisDeleteObjectRelations( $objects );
 			if( $operations ) {
 				require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 				$service = new ElvisContentSourceService();
-				$service->deleteObjects( $operations );
+				$service->deleteAssetRelations( $operations );
 			}
 		}
 	}
@@ -109,7 +112,7 @@ class ElvisUpdateManager
 				array( 'MetaData', 'Relations' ), null, true, $areas );
 		}
 
-		self::sendDeleteObjects( $objects );
+		self::deleteAssetRelationsForObjects( $objects );
 	}
 
 	/**
@@ -124,10 +127,6 @@ class ElvisUpdateManager
 	 */
 	private static function composeElvisUpdateObjects( $objects, array $shadowObjectRelationsPerLayout )
 	{
-		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
-		require_once __DIR__.'/../model/relation/operation/ElvisUpdateObjectOperation.php';
-		require_once __DIR__.'/../model/relation/operation/ElvisObjectRelation.php';
-
 		// Enterprise System Id can be null, so use boolean 'false' instead, to indicate if it is already cached or not.
 		static $enterpriseSystemId = false;
 		if ( $enterpriseSystemId === false ) {
@@ -141,20 +140,20 @@ class ElvisUpdateManager
 				continue;
 			}
 
-			$operation = new ElvisUpdateObjectOperation();
+			$operation = new Elvis_DataClasses_UpdateObjectOperation();
 			$operation->enterpriseSystemId = strval( $enterpriseSystemId );
 
-			$operation->object = new ElvisObjectDescriptor();
+			$operation->object = new Elvis_DataClasses_ObjectDescriptor();
 			$objId = $object->MetaData->BasicMetaData->ID;
 			$operation->object->id = strval( $objId );
 			$operation->object->name = strval( $object->MetaData->BasicMetaData->Name );
 			$operation->object->type = strval( $object->MetaData->BasicMetaData->Type );
 
-			$elvisPublication = new ElvisEntityDescriptor();
+			$elvisPublication = new Elvis_DataClasses_EntityDescriptor();
 			$elvisPublication->id = strval( $object->MetaData->BasicMetaData->Publication->Id );
 			$elvisPublication->name = strval( $object->MetaData->BasicMetaData->Publication->Name );
 
-			$elvisCategory = new ElvisEntityDescriptor();
+			$elvisCategory = new Elvis_DataClasses_EntityDescriptor();
 			$elvisCategory->id = strval( $object->MetaData->BasicMetaData->Category->Id );
 			$elvisCategory->name = strval( $object->MetaData->BasicMetaData->Category->Name );
 
@@ -180,7 +179,7 @@ class ElvisUpdateManager
 			if( $object->Relations ) foreach( $object->Relations as $shadowRelation ) {
 				// Only add the relation if it is a shadow relation
 				if( array_key_exists( $shadowRelation->Child, $shadowObjectRelations )) {
-					$elvisRelation = ElvisObjectRelationFactory::create();
+					$elvisRelation = new Elvis_DataClasses_ObjectRelation();
 					$elvisRelation->type = strval( $shadowRelation->Type );
 
 					require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
@@ -304,14 +303,10 @@ class ElvisUpdateManager
 	 *
 	 * @param Object $object The parent workflow object (e.g. layout) on which shadow objects are placed.
 	 * @param null|Placement[] $shadowPlacements List of shadow object placements.
-	 * @return null|ElvisPlacement[]
+	 * @return null|Elvis_DataClasses_Placement[]
 	 */
-	private static function composeElvisPlacements( /** @noinspection PhpLanguageLevelInspection */
-		Object $object, $shadowPlacements )
+	private static function composeElvisPlacements( Object $object, $shadowPlacements )
 	{
-		require_once __DIR__.'/../model/relation/operation/ElvisPlacement.php';
-		require_once __DIR__.'/../model/relation/operation/ElvisPage.php';
-		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
 		require_once __DIR__.'/../util/ElvisPlacementUtils.class.php';
 
 		$elvisPlacements = null;
@@ -331,7 +326,7 @@ class ElvisUpdateManager
 
 			$elvisPlacements = array();
 			if( $entPlacements ) foreach( $entPlacements as $entPlacement ) {
-				$elvisPlacement = ElvisPlacementFactory::create();
+				$elvisPlacement = new Elvis_DataClasses_Placement();
 				$elvisPlacement->width  = floatval( $entPlacement->Width );
 				$elvisPlacement->height  = floatval( $entPlacement->Height );
 				if( $isPublishForm ) {
@@ -348,14 +343,14 @@ class ElvisUpdateManager
 								'templateid' => $templateId, 'publishsystem' => $publishSystem, 'objtype' => 'PublishForm' ) );
 							if( $entProperties ) {
 								$entProperty = reset( $entProperties );
-								$elvisPlacement->widget = new ElvisEntityDescriptor();
+								$elvisPlacement->widget = new Elvis_DataClasses_EntityDescriptor();
 								$elvisPlacement->widget->id = $entPlacement->FormWidgetId;
 								$elvisPlacement->widget->name = $entProperty->DisplayName;
 							}
 						}
 					}
 				} else { // layout
-					$elvisPlacement->page = new ElvisPage();
+					$elvisPlacement->page = new Elvis_DataClasses_Page();
 					$elvisPlacement->page->number = strval( $entPlacement->PageNumber ); // Human readable.
 					if( $object->Pages ) foreach( $object->Pages as $page ) {
 						if( $page->PageNumber == $entPlacement->PageNumber ) {
@@ -370,7 +365,7 @@ class ElvisUpdateManager
 					$elvisPlacement->onMasterPage = (boolean)ElvisPlacementUtils::isPlacedOnMasterPage( $entPlacement );
 					$elvisPlacement->editions = array();
 					if( isset( $entPlacement->Editions ) ) foreach( $entPlacement->Editions as $edition ) {
-						$elvisEdition = new ElvisEntityDescriptor();
+						$elvisEdition = new Elvis_DataClasses_EntityDescriptor();
 						$elvisEdition->id = strval( $edition->Id );
 						$elvisEdition->name = strval( $edition->Name );
 
@@ -395,34 +390,31 @@ class ElvisUpdateManager
 	 * When null is given, null is returned. When empty is given, empty is returned.
 	 *
 	 * @param null|Target[] $objTargets List of object targets.
-	 * @return null|ElvisTarget[]
+	 * @return null|Elvis_DataClasses_Target[]
 	 */
 	private static function composeElvisTargets( $objTargets )
 	{
-		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
-		require_once __DIR__.'/../model/relation/operation/ElvisTarget.php';
-
 		$elvisTargets = null;
 		if( $objTargets ) {
 			$elvisTargets = array();
 			foreach( $objTargets as $objTarget ) {
-				$elvisPubChannel = new ElvisEntityDescriptor();
+				$elvisPubChannel = new Elvis_DataClasses_EntityDescriptor();
 				$elvisPubChannel->id = strval( $objTarget->PubChannel->Id );
 				$elvisPubChannel->name = strval( $objTarget->PubChannel->Name );
 
-				$elvisIssue = new ElvisEntityDescriptor();
+				$elvisIssue = new Elvis_DataClasses_EntityDescriptor();
 				$elvisIssue->id = strval( $objTarget->Issue->Id );
 				$elvisIssue->name = strval( $objTarget->Issue->Name );
 
 				$elvisEditions = array();
 				if( $objTarget->Editions ) foreach( $objTarget->Editions as $objEdition ) {
-					$elvisEdition = new ElvisEntityDescriptor();
+					$elvisEdition = new Elvis_DataClasses_EntityDescriptor();
 					$elvisEdition->id = strval( $objEdition->Id );
 					$elvisEdition->name = strval( $objEdition->Name );
 					$elvisEditions[] = $elvisEdition;
 				}
 
-				$elvisTarget = new ElvisTarget();
+				$elvisTarget = new Elvis_DataClasses_Target();
 				$elvisTarget->pubChannel = $elvisPubChannel;
 				$elvisTarget->issue = $elvisIssue;
 				$elvisTarget->editions = $elvisEditions;
@@ -436,13 +428,10 @@ class ElvisUpdateManager
 	 * Composed DeleteObjectOperation to be communicated with Elvis server.
 	 *
 	 * @param Object[] $objects List of Layout object.
-	 * @return ElvisDeleteObjectOperation[]
+	 * @return Elvis_DataClasses_DeleteObjectRelationOperation[]
 	 */
-	public static function composeElvisDeleteObjects( array $objects ) : array
+	public static function composeElvisDeleteObjectRelations( array $objects ) : array
 	{
-		require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
-		require_once __DIR__.'/../model/relation/operation/ElvisEntityDescriptor.php';
-		require_once __DIR__.'/../model/relation/operation/ElvisDeleteObjectOperation.php';
 		require_once __DIR__.'/../util/ElvisObjectUtils.class.php';
 
 		$operations = array();
@@ -450,9 +439,9 @@ class ElvisUpdateManager
 			if( ElvisObjectUtils::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
 				continue; // Never update objects in archived state
 			}
-			$operation = new ElvisDeleteObjectOperation();
+			$operation = new Elvis_DataClasses_DeleteObjectRelationOperation();
 			$operation->enterpriseSystemId = strval( BizSession::getEnterpriseSystemId() );
-			$operation->object = new ElvisObjectDescriptor();
+			$operation->object = new Elvis_DataClasses_ObjectDescriptor();
 			$operation->object->id = strval( $object->MetaData->BasicMetaData->ID );
 			$operation->object->name = strval( $object->MetaData->BasicMetaData->Name );
 			$operation->object->type = strval( $object->MetaData->BasicMetaData->Type );

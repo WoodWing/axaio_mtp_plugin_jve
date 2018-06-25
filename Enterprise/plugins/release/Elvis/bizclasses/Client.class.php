@@ -157,16 +157,20 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
-	 * Delete given assets.
+	 * Request Elvis to delete relations with child assets.
 	 *
-	 * @param ElvisDeleteObjectOperation[] $deleteOperations
+	 * For example, when a shadow image is removed from a layout, relations will be removed from Enterprise
+	 * side. This function is then called to let Elvis remove the corresponding relations for its assets.
+	 *
+	 * @param Elvis_DataClasses_DeleteObjectRelationOperation[] $deleteOperations
 	 */
-	public function deleteObjects( array $deleteOperations )
+	public function deleteAssetRelations( array $deleteOperations ) : void
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/deleteObjects', $this->shortUserName );
+			'private-api/contentsource/delete-asset-relations', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
-		$request->addQueryParamAsJson( 'deleteOperations', $deleteOperations );
+		$request->setHttpDeleteMethod();
+		$request->setJsonBody( $deleteOperations );
 
 		$this->execute( $request );
 	}
@@ -378,7 +382,7 @@ class Elvis_BizClasses_Client
 	 *
 	 * @param string $enterpriseSystemId
 	 * @param int $operationTimeout The operation timeout of the asset updates in seconds.
-	 * @return stdClass[] representation of ElvisEntUpdate[]
+	 * @return stdClass[] representation of Elvis_DataClasses_AssetUpdate[]
 	 */
 	public function retrieveAssetUpdates( string $enterpriseSystemId, int $operationTimeout )
 	{
@@ -430,7 +434,7 @@ class Elvis_BizClasses_Client
 	 * Update Enterprise specific workflow metadata of Elvis assets.
 	 *
 	 * @param array $assetIds indexed array with Elvis asset ids.
-	 * @param array $metadata assosiative array with metadata field names and values
+	 * @param array $metadata associative array with metadata field names and values
 	 */
 	public function updateWorkflowMetadata( array $assetIds, array $metadata )
 	{
@@ -438,6 +442,21 @@ class Elvis_BizClasses_Client
 			'private-api/contentsource/update-workflow-metadata', $this->shortUserName );
 		$request->setHttpPutMethod();
 		$request->setJsonBody( (object)[ 'assetIds' => $assetIds, 'metadata' => $metadata ] );
+
+		$this->execute( $request );
+	}
+
+	/**
+	 * Update Enterprise specific workflow metadata of Elvis assets.
+	 *
+	 * @param Elvis_DataClasses_UpdateObjectOperation[] $updateOperations
+	 */
+	public function updateObjects( array $updateOperations )
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/update-objects', $this->shortUserName );
+		$request->setHttpPutMethod();
+		$request->setJsonBody( $updateOperations );
 
 		$this->execute( $request );
 	}

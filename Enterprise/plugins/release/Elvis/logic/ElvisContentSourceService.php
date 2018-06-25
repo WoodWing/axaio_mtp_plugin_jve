@@ -7,20 +7,11 @@
  */
 
 require_once __DIR__.'/ElvisAMFClient.php';
-require_once __DIR__.'/../model/BasicMap.php';
-require_once __DIR__.'/../model/ElvisEntUpdate.php';
 require_once __DIR__.'/../model/ElvisCSException.php';
 require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
 require_once __DIR__.'/../model/ElvisCSAlreadyExistsException.php';
 require_once __DIR__.'/../model/ElvisCSLinkedToOtherSystemException.php';
 require_once __DIR__.'/../model/ElvisCSAccessDeniedException.php';
-require_once __DIR__.'/../model/relation/operation/ElvisUpdateObjectOperation.php';
-require_once __DIR__.'/../model/relation/operation/ElvisDeleteObjectOperation.php';
-require_once __DIR__.'/../model/relation/operation/ElvisObjectRelation.php';
-require_once __DIR__.'/../model/relation/operation/ElvisPlacement.php';
-require_once __DIR__.'/../model/relation/operation/ElvisPage.php';
-require_once __DIR__.'/../model/relation/operation/ElvisTarget.php';
-require_once __DIR__.'/../model/relation/operation/ElvisObjectDescriptor.php';
 
 /**
  * Interface used by the WoodWing Content Source plugin to perform asset
@@ -196,54 +187,30 @@ class ElvisContentSourceService
 	}
 
 	/**
-	 * Updates given objects.
+	 * Updates given assets.
 	 *
-	 * @param SabreAMF_ArrayCollection <UpdateObjectOperation> $updateOperations
+	 * @param ElvisUpdateObjectOperation[] $updateOperations
 	 * @throws BizException
 	 */
-	public function updateObjects( $updateOperations ) : void
+	public function updateObjects( array $updateOperations ) : void
 	{
-		ElvisAMFClient::registerClass( ElvisUpdateObjectOperation::getName() );
-		ElvisAMFClient::registerClass( ElvisPage::getName() );
-		ElvisAMFClient::registerClass( ElvisPlacement::getName() );
-		ElvisAMFClient::registerClass( ElvisTarget::getName() );
-		ElvisAMFClient::registerClass( ElvisEntityDescriptor::getName() );
-		ElvisAMFClient::registerClass( ElvisObjectDescriptor::getName() );
-		ElvisAMFClient::registerClass( ElvisObjectRelation::getName() );
-
-		try {
-			$params = array( $updateOperations );
-			ElvisAMFClient::send( self::SERVICE, 'updateObjects', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
+		if( empty( $updateOperations ) ) return;
+		$this->client->updateObjects( $updateOperations );
 	}
 
 	/**
-	 * Delete given assets.
+	 * Request Elvis to delete relations with child assets.
 	 *
-	 * @param ElvisDeleteObjectOperation[] $deleteOperations
+	 * For example, when a shadow image is removed from a layout, relations will be removed from Enterprise
+	 * side. This function is then called to let Elvis remove the corresponding relations for its assets.
+	 *
+	 * @param Elvis_DataClasses_DeleteObjectRelationOperation[] $deleteOperations
 	 * @throws BizException
 	 */
-	public function deleteObjects( array $deleteOperations ) : void
+	public function deleteAssetRelations( array $deleteOperations ) : void
 	{
-		if( true ) {
-			ElvisAMFClient::registerClass( ElvisDeleteObjectOperation::getName() );
-			ElvisAMFClient::registerClass( ElvisObjectDescriptor::getName() );
-
-			try {
-				$params = array( $deleteOperations );
-				ElvisAMFClient::send( self::SERVICE, 'deleteObjects', $params );
-			} catch( ElvisCSException $e ) {
-				throw $e->toBizException();
-			}
-		} else { // TODO: replace the entire function body with the else-part below once this problem is solved:
-						// {"errorname":"MethodArgumentConversionNotSupportedException","message":"Failed to convert value of type
-						// [java.lang.String] to required type [java.util.List]; nested exception is java.lang.IllegalStateException:
-						// Cannot convert value of type [java.lang.String] to required type [com.ds.acm.api.contentsource.model.operation.DeleteObjectOperation]:
-						// no matching editors or conversion strategy found","errorcode":500}
-				$this->client->deleteObjects( $deleteOperations );
-		}
+		if( empty( $deleteOperations ) ) return;
+		$this->client->deleteAssetRelations( $deleteOperations );
 	}
 
 	/**
@@ -272,14 +239,12 @@ class ElvisContentSourceService
 	 * Return asset updates that are waiting in the Elvis queue, using long-polling.
 	 *
 	 * @param int $operationTimeout The operation timeout of the asset updates in seconds.
-	 * @return ElvisEntUpdate[]
+	 * @return Elvis_DataClasses_AssetUpdate[]
 	 */
 	public function retrieveAssetUpdates( int $operationTimeout ) : array
 	{
-		require_once __DIR__.'/../model/ElvisEntUpdate.php';
-
 		$updatesStdClasses = $this->client->retrieveAssetUpdates( BizSession::getEnterpriseSystemId(), $operationTimeout );
-		return array_map( array( 'ElvisEntUpdate', 'fromStdClass' ), $updatesStdClasses );
+		return array_map( array( 'Elvis_DataClasses_AssetUpdate', 'fromStdClass' ), $updatesStdClasses );
 	}
 
 	/**

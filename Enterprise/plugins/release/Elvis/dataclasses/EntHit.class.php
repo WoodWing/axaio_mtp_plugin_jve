@@ -1,6 +1,6 @@
 <?php
 /**
- * EntHit data class.
+ * Data class used between Elvis-Enterprise communication.
  *
  * @copyright  WoodWing Software bv. All Rights Reserved.
  * @since 10.5.0

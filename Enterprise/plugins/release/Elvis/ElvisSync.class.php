@@ -387,7 +387,7 @@ class ElvisSync
 	/**
 	 * Perform updates
 	 *
-	 * @param ElvisEntUpdate[] $updates
+	 * @param Elvis_DataClasses_AssetUpdate[] $updates
 	 * @return string[] Update ids
 	 */
 	private function performUpdates( array $updates ) : array
@@ -427,10 +427,10 @@ class ElvisSync
 	/**
 	 * Lock of unlock object
 	 *
-	 * @param ElvisEntUpdate $update
+	 * @param Elvis_DataClasses_AssetUpdate $update
 	 * @throws BizException
 	 */
-	private function lockOrUnLockObject( ElvisEntUpdate $update ) : void
+	private function lockOrUnLockObject( Elvis_DataClasses_AssetUpdate $update ) : void
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
@@ -477,11 +477,11 @@ class ElvisSync
 	/**
 	 * Update object properties
 	 *
-	 * @param ElvisEntUpdate $update
+	 * @param Elvis_DataClasses_AssetUpdate $update
 	 * @param Elvis_BizClasses_Metadata $metadataHandler
 	 * @return bool
 	 */
-	private function updateObjectProperties( ElvisEntUpdate $update, Elvis_BizClasses_Metadata $metadataHandler ) : bool
+	private function updateObjectProperties( Elvis_DataClasses_AssetUpdate $update, Elvis_BizClasses_Metadata $metadataHandler ) : bool
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
@@ -505,10 +505,10 @@ class ElvisSync
 	/**
 	 * Delete object
 	 *
-	 * @param ElvisEntUpdate $update
+	 * @param Elvis_DataClasses_AssetUpdate $update
 	 * @return bool
 	 */
-	private function deleteObject( ElvisEntUpdate $update ) : bool
+	private function deleteObject( Elvis_DataClasses_AssetUpdate $update ) : bool
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizDeletedObject.class.php';
