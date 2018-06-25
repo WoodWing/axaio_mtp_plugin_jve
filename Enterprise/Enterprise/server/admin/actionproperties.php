@@ -863,7 +863,7 @@ class ActionPropertiesAdminApp
 	{
 		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
-		$addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
+		$addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) && strval( $_REQUEST['addDefaultDynamic'] ) == 'true' ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
 		if( $addDefaultDynamicFields == 'true' ) {
 			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
 		} else {

@@ -172,7 +172,10 @@ class BizProperty
 	}
 
 	/**
-	 * List of properties that are used in workflow dialogs when no customizations are done.
+	 * Returns a list of properties that are needed for a Dialog.
+	 *
+	 * The list returned can be just a list of static properties when $onlyStatic = true
+	 * or a list of static properties with commonly used dynamic properties when $onlyStatic = false.
 	 *
 	 * @param bool $onlyStatic True to return only default static fields, False for default static and dynamic fields.
 	 * @return string[] Internal property names (ids) as used in workflow WSDL.
@@ -184,8 +187,7 @@ class BizProperty
 	}
 
 	/**
-	 * Returns list of properties that can be partially customized (renamed only) that are used in workflow dialogs
-	 * when no customizations are done.
+	 * Returns a list of commonly used dynamic properties needed for a Dialog.
 	 *
 	 * @since 10.5.0
 	 * @return string[]
