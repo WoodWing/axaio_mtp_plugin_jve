@@ -122,19 +122,31 @@ class BizProperty
 	 * $areas indicates whether it is in Workflow(where non-deleted objects reside) or Trash(where deleted objects reside) area. Properties vary according to the area.
 	 * For an example: Property such as 'Modifier' and 'Modified' are not needed in Trash area but 'Deleter' and 'Deleted' are more appropriate.
 	 *
+	 * @since 10.5.0 $onlyStatic parameter is added.
+	 * When passed in as true, only static mandatory properties are returned.
+	 * When passed in as false, all static mandatory properties and dynamic properties are returned. This is the old behaviour.
+	 *
 	 * @param array $areas
+	 * @param bool $onlyStatic
 	 * @return array of string  Internal property names (ids) as used in workflow WSDL.
 	 */
-	public static function getStandardQueryPropIds( $areas = array('Workflow'))
+	public static function getStandardQueryPropIds( $areas = array('Workflow'), $onlyStatic = false )
 	{
-		$ret = array('ID','Type','Name','State','RouteTo','LockedBy','PlacedOn', 'PlacedOnPage',
-			'FileSize', 'LengthWords','LengthChars','LengthLines','Comment','Slugline', 'PageRange', 'Flag', 'FlagMsg',
-			'Publication','Issues','Category', 'Editions');
-		if( in_array('Workflow',$areas) ) { // workflow
-			$ret = array_merge( $ret,  array( 'Modifier','Modified','PlannedPageRange','Deadline', 'DeadlineSoft', 'UnreadMessageCount'));
+		require_once BASEDIR .'/server/bizclasses/BizQueryBase.class.php';
+		if( $onlyStatic ) {
+			$ret = BizQueryBase::getMandatoryQueryResultColumnFields();
 		}
-		if( in_array('Trash',$areas) ) { // Trash Can
-			$ret = array_merge( $ret,  array( 'Deleted','Deletor'));
+		if( !$onlyStatic ){
+			$ret = array_merge( BizQueryBase::getMandatoryQueryResultColumnFields(),
+				array( 'State','RouteTo','LockedBy','PlacedOn', 'PlacedOnPage',
+					'FileSize', 'LengthWords','LengthChars','LengthLines','Comment','Slugline', 'PageRange', 'Flag', 'FlagMsg',
+					'Publication','Issues','Category', 'Editions' ));
+			if( in_array('Workflow',$areas) ) { // workflow
+				$ret = array_merge( $ret,  array( 'Modifier','Modified','PlannedPageRange','Deadline', 'DeadlineSoft', 'UnreadMessageCount'));
+			}
+			if( in_array('Trash',$areas) ) { // Trash Can
+				$ret = array_merge( $ret,  array( 'Deleted','Deletor'));
+			}
 		}
 		return $ret;
 	}
@@ -187,11 +199,35 @@ class BizProperty
 	 * Returns a list of default properties that can be used as query parameters.
 	 *
 	 * @since 10.5.0
+	 * @param bool $onlyStatic True to return only default static properties, False for default static and dynamic properties.
 	 * @return string[]
 	 */
-	public static function getDefaultQueryPropIds()
+	public static function getDefaultQueryPropIds( $onlyStatic ):array
 	{
-		return array( 'Name', 'RouteTo', 'Comment' );
+		return $onlyStatic ? self::getStaticQueryPropIds() :
+					array_merge( self::getStaticQueryPropIds(), self::getDefaultQueryDynamicPropIds() );
+	}
+
+	/**
+	 * Returns a list of properties that are mandatory.
+	 *
+	 * @since 10.5.0
+	 * @return array
+	 */
+	public static function getStaticQueryPropIds():array
+	{
+		return array( 'Name' );
+	}
+
+	/**
+	 * Returns a list of properties that are regularly used but not mandatory.
+	 *
+	 * @since 10.5.0
+	 * @return array
+	 */
+	public static function getDefaultQueryDynamicPropIds():array
+	{
+		return array( 'RouteTo', 'Comment' );
 	}
 
 	/**
@@ -298,21 +334,21 @@ class BizProperty
 	 * @since 10.5.0
 	 * @param string $action
 	 * @param bool $onlyStatic
-	 * @return mixed
+	 * @return string[]
 	 */
-	public static function defaultPropertyUsageWhenNoUsagesAvailable( $action, $onlyStatic )
+	public static function defaultPropertyUsageWhenNoUsagesAvailable( $action, $onlyStatic ):array
 	{
 		$usages = array();
 		switch( $action ) {
 			case 'Query':
-				$props = self::getDefaultQueryPropIds();
+				$props = self::getDefaultQueryPropIds( $onlyStatic );
 				break;
 			case 'QueryOut':
 			case 'QueryOutContentStation':
 			case 'QueryOutInDesign':
 			case 'QueryOutInCopy':
 			case 'QueryOutPlanning':
-				$props = self::getStandardQueryPropIds();
+				$props = self::getStandardQueryPropIds( array( 'Workflow' ), $onlyStatic );
 				break;
 			default:
 				$props = self::getDefaultDialogPropIds( $onlyStatic );

@@ -145,7 +145,12 @@ class ActionPropertiesQueryAdminApp
 	 */
 	private function composeAndInsertActionsProperty():array
 	{
-		$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
+		$addDefaultDynamicFields = ( isset( $_REQUEST['addDefaultDynamic'] ) && strval( $_REQUEST['addDefaultDynamic'] ) == 'true' ) ? true : false;
+		if( $addDefaultDynamicFields == 'true' ) {
+			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
+		} else {
+			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
+		}
 		$order = 5;
 		$listOfValues = array();
 		if( $usages ) foreach( $usages as $usage ) {
@@ -734,10 +739,7 @@ class ActionPropertiesQueryAdminApp
 
 		if( !$usages ) {
 			if( $this->mode == 'add' ) {
-				$addDefaultDynamicFields = ( isset( $_REQUEST['addDefaultDynamic'] ) && strval( $_REQUEST['addDefaultDynamic'] ) == 'true' ) ? true : false;
-				if( $addDefaultDynamicFields == 'true' ) {
-					$usages = $this->composeAndInsertActionsProperty();
-				}
+				$usages = $this->composeAndInsertActionsProperty();
 			}
 		}
 		return $usages;
