@@ -1303,7 +1303,7 @@
   <Term key="LIC_INTERNET_CONNECTION_TEST">インターネット接続テスト</Term>
   <Term key="LIC_INVALID_DATA">ライセンス情報が無効になりました。システム構成を元に戻すかライセンスを削除してください。</Term>
   <Term key="LIC_INVALID_NUMBER">無効な数字</Term>
-  <Term key="LIC_INVALID_PRODUCT_LICENSE">この製品用の有効なライセンスがありません。</Term>
+  <Term key="LIC_INVALID_PRODUCT_LICENSE">有効なライセンスがありません。</Term>
   <Term key="LIC_INVALID_SERIAL_LICENSE">このシリアル番号のライセンスは無効です。</Term>
   <Term key="LIC_INVALID_STATUS">無効</Term>
   <Term key="LIC_INVALID_STATUS_TO_RECLAIM">Invalid status to reclaim.</Term>
@@ -1315,7 +1315,7 @@
   <Term key="LIC_LICENSE_EXPIRES">ライセンスは間もなく期限切れになります。</Term>
   <Term key="LIC_LICENSE_INSTALLED">ライセンスのインストールは成功しました。</Term>
   <Term key="LIC_LICENSE_INSTALLED_AND_LIMITREACHED">ライセンスのインストールに成功しました。しかし制限に達しています。</Term>
-  <Term key="LIC_LICENSE_NOT_VALID_YET">ライセンスはまだ有効ではありません。</Term>
+  <Term key="LIC_LICENSE_NOT_VALID_YET">ライセンスはまだ有効になっていません。</Term>
   <Term key="LIC_LICENSE_REMOVED">ライセンスの解除に成功しました。</Term>
   <Term key="LIC_LICENSE_STATUS">ライセンスステータス</Term>
   <Term key="LIC_LICENSE_SUPPORT">ライセンスサポート</Term>
@@ -1390,13 +1390,13 @@
   <Term key="LIC_SUPPORT_DESK_WILL_GIVE_ACTIVATION_CODE">サポートデスクからインストールに必要なライセンス認証コードが送られてきたら次に進みます。</Term>
   <Term key="LIC_SYNCHRONIZE">同期</Term>
   <Term key="LIC_SYNC_LICENSES">ライセンスを同期</Term>
-  <Term key="LIC_TEMPLICENSE_RECLAIM_OR_GET">一時ライセンスです。ライセンスを回復するか取得してください。</Term>
+  <Term key="LIC_TEMPLICENSE_RECLAIM_OR_GET">トライアルライセンスです。ライセンスを再取得するか、もしくは新規作成してください。</Term>
   <Term key="LIC_TESTING_INTERNET_ACCESS">インターネットへの接続テストを実行しています...</Term>
   <Term key="LIC_THE_SERIAL">シリアル番号</Term>
   <Term key="LIC_TICKETS_OF_USER">Connections of user</Term>
   <Term key="LIC_TWO_OR_MORE_SYSTEMS">Two or more systems (next to each other).</Term>
   <Term key="LIC_UNABLE_TO_REGISTER_CONNECTIONS_FOR_SERIAL">このシリアル番号で認証することはできません。</Term>
-  <Term key="LIC_UNKNOWN_ERROR">未知のエラー</Term>
+  <Term key="LIC_UNKNOWN_ERROR">ライセンス：未知のエラー</Term>
   <Term key="LIC_UNKNOWN_ERR_DECRYPT">解読時に原因不明のエラーが発生しました。</Term>
   <Term key="LIC_UNKNOWN_PRODUCT">現在のソフトウェアを製品リスト上で見つけることができませんでした。</Term>
   <Term key="LIC_UNREGISTER">認証を解除</Term>
@@ -1404,7 +1404,7 @@
   <Term key="LIC_UNREGISTER_OTHERS_FIRST">Enterpriseサーバの認証を解除する前に、他のアプリケーションの認証を解除してください。</Term>
   <Term key="LIC_UPDATE_TEMPLICENSE">テンポラリライセンスを更新する必要があります。</Term>
   <Term key="LIC_USAGE">使用状況</Term>
-  <Term key="LIC_USAGE_LIMIT_REACHED">ライセンスの利用は限界に達しました。</Term>
+  <Term key="LIC_USAGE_LIMIT_REACHED">ライセンスは利用制限に達しました。</Term>
   <Term key="LIC_USE_SUPPORT_FORM_TO_SEND_LICENSEINFO">EnterpriseからWoodWingのサポートへ自動的にライセンス情報を送る場合、このフォームに入力してください。</Term>
   <Term key="LIC_VALIDATE_SERIAL_TO_ACTIVATE">WoodWing製品のライセンス認証を行うためには認証サーバがシリアル番号を確認する必要があります。</Term>
   <Term key="LIC_WARN_TO_UNREGISTER_FIRST">できるだけ最初にライセンス認証を解除してください。ライセンスが未認証でない限りWoodWing認証サーバーへの通知は行われず、システムトラブルなどの問題が発生した場合に同時接続数や同時利用ユーザ数のライセンス数に不整合が生じ、ライセンスが足りなくなる問題が発生することがあります。</Term>
