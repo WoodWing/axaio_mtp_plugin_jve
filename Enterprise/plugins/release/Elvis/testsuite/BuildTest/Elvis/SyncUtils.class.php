@@ -80,4 +80,16 @@ class Elvis_TestSuite_BuildTest_Elvis_SyncUtils
 		$service = new ElvisContentSourceService();
 		return count( $service->retrieveAssetUpdates( 1 ) );
 	}
+
+	/**
+	 * Push the metadata configuration to Elvis, so Elvis keeps track of those metadata fields we're interested in.
+	 */
+	public function pushMetadataConfig()
+	{
+		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		$service = new ElvisContentSourceService();
+		$metadataHandler = new Elvis_BizClasses_Metadata();
+		$fields = $metadataHandler->getMetadataToReturn();
+		$service->configureMetadataFields( $fields );
+	}
 }
