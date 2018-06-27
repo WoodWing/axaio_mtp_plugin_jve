@@ -342,18 +342,11 @@ class Elvis_BizClasses_Client
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
 			'private-api/contentsource/user-detail', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
-		$request->setSubjectName( $username );
+		$request->setSubjectId( $username );
 		$request->addQueryParam( 'username', $username );
 		$request->setExpectJson();
 
 		$response = $this->execute( $request );
-
-		// >>> Elvis returns HTTP 200 with empty body when user does not exist, but expected is HTTP 404 so here we detect.
-		if( !$response->body() ) {
-			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', '', // S1056
-				null, array( $request->getSubjectEntity(), $request->getSubjectId(), 'INFO' ) );
-		}
-		// <<<
 
 		return $response->jsonBody();
 	}
