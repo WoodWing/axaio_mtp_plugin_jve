@@ -573,6 +573,7 @@ class BizObject
 		$newObject->MetaData->BasicMetaData->DocumentID = null; // to be resolved by SC
 		$newObject->MetaData->BasicMetaData->Name = $object->MetaData->BasicMetaData->Name;
 		$newObject->MetaData->BasicMetaData->Type = $object->MetaData->BasicMetaData->Type;
+		$newObject->MetaData->BasicMetaData->Category = $object->MetaData->BasicMetaData->Category;
 		$newObject->MetaData->BasicMetaData->ContentSource = null;
 		$newObject->MetaData->WorkflowMetaData = new WorkflowMetaData(); // clear wfl props
 		$newObject->MetaData->WorkflowMetaData->State = $object->MetaData->WorkflowMetaData->State;
@@ -3471,7 +3472,7 @@ class BizObject
 									'Library' => true,
 									'ArticleTemplate' => true,
 									);
-		if( isset($uniqueIssueTypes[$type])) { // Names must be unique within in the issue (for certain types). 
+		if( isset($uniqueIssueTypes[$type])) { // Names must be unique within in the issue (for certain types).
 			if ( $targets ) { // Names must be unique on (target)issue level.
 				$issueIds = array();
 				foreach( $targets as $target ) { // preparation: collect the issue ids
@@ -3479,14 +3480,14 @@ class BizObject
 						$issueIds[] = $target->Issue->Id;
 					}
 				}
-				if( $issueIds ) { 
+				if( $issueIds ) {
 					require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 					if( self::objectNameExists( $issueIds, $proposedName, $type, $id ) ) {
 						if( $restore || $applyAutoNaming === true ) { // When autonaming is true or restoring an object, unique name will be generated.
 							$proposedName = self::getUniqueObjectName( $id, $proposedName, $issueIds, $type, $restore );
 						} else {
 							throw new BizException( 'ERR_NAME_EXISTS', 'Client', $proposedName );
-						}	
+						}
 					}
 				}
 			}
@@ -3497,7 +3498,7 @@ class BizObject
 					if ( $relation->Type == 'Contained' ) {
 						$proposedName = DBObject::getUniqueNameForChildren( $relation->Parent, $proposedName, $type, $id );
 					}
-				}		
+				}
 			} else { // Existing object
 				require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
 				if ( !DBObjectRelation::getObjectRelations( $id, 'parents', null, false )) {
@@ -3642,7 +3643,7 @@ class BizObject
 			BizEnterpriseEvent::createMultiObjectEvent( $lockedObjectIds, $metaDataValues );
 		}
 
-		// Return the ids of those objects that we locked by us and for which the caller 
+		// Return the ids of those objects that we locked by us and for which the caller
 		// has the latest version.
 		return array_keys( $lockedObjectIds );
 	}
@@ -3854,8 +3855,8 @@ class BizObject
 		DBElement::saveElements( $id, $objectelements );
 
 		// Before delete+create object relations, make sure to remove all InDesignArticles
-		// since this does a cascade delete of their object->placements, which may be 
-		// referenced through the relation->placements as well; Doing this after would 
+		// since this does a cascade delete of their object->placements, which may be
+		// referenced through the relation->placements as well; Doing this after would
 		// destroy the InDesignArticle placements set through the relations.
 		if( !$create && !is_null($object->InDesignArticles) ) {
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
@@ -6103,8 +6104,8 @@ class BizObject
 	 */
 	static public function createSemaphoreForSaveLayout( $layoutId )
 	{
-		// Take 2 minutes because layouts can be quite large and they need to be copied 
-		// from the transfer server folder to the filestore. Note that the (DIME) file upload 
+		// Take 2 minutes because layouts can be quite large and they need to be copied
+		// from the transfer server folder to the filestore. Note that the (DIME) file upload
 		// time should NOT be taken into account here since that is already completed
 		// at the time the services is executed.
 		$lifeTime = 120;

@@ -439,9 +439,14 @@ class MadeToPrintDispatcher
 
 	/**
 	 * Pushes layouts into the MadeToPrint queue when configured trigger statuses are reached.
+	 *
 	 * When a layouts pushed into the queue, it will get processed by MadeToPrint later on.
 	 * The passed object can be a layout or a placed article/image.
 	 * When passing article/image, it will push the layouts on which they are placed.
+	 * Since 10.4.2, when passing in an article/image, function checks if the placed object
+	 * is placed far too many times(50 times) on a layout, and if it placed too many times,
+	 * the layout will not be pushed to the queue.
+	 *
 	 * A Made to Print job should not be created by during the processing of an InDesign Server Automation job.
 	 * The reason is this job is doing some post processing after an user has save/changed a layout. The Axaio MTP is
 	 * already called during that initial action. See EN-87051.
@@ -457,16 +462,16 @@ class MadeToPrintDispatcher
 		}
 
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		require_once BASEDIR. '/server/bizclasses/BizRelation.class.php';
+		$layoutIds = array();
 		$objType = DBObject::getObjectType( $objectId );
 		if( $objType == 'Layout' ) {
 			$layoutIds = array( $objectId );
-		} elseif( $objType == 'Article' || $objType == 'Image' ) {
+		} elseif( self::isArticleOrImageAndNotPlacedManifolds( $objectId, $objType ) ) {
 			$layoutIds = self::getParentLayouts( $objectId );
-		} else { // ignore unsupported object types
-			$layoutIds = array();
 		}
 
-		foreach( $layoutIds as $layoutId ){
+		if( $layoutIds ) foreach( $layoutIds as $layoutId ){
 			$layPubId = $layIssueId = $layStatusId = 0;
 			$layEditions = array();
 			if( self::getLayoutDetails( $layoutId, $layPubId, $layIssueId, $layStatusId, $layEditions ) ) {
@@ -477,12 +482,36 @@ class MadeToPrintDispatcher
 		}
 	}
 
-	/*
+	/**
+	 * To check if the passed in $objType is an article or an image, and if it is, it further checks
+	 * if it is placed far too many times(more than 50 times) on any layout.
+	 *
+	 * @since 10.4.2
+	 * @param int $objId
+	 * @param string $objType
+	 * @return bool True when $objType is an article or an image and it's not placed more than 50 times in any layout.
+	 */
+	private static function isArticleOrImageAndNotPlacedManifolds( int $objId, string $objType ):bool
+	{
+		$result = false;
+		if( $objType == 'Article' || $objType == 'Image' ) {
+			if( !BizRelation::isAnyChildPlacedExceedAllowedThreshold( array( $objId ), 50 )) {
+				$result = true;
+			}
+		}
+		return $result;
+	}
+
+
+	/**
 	 * Checks if the layout and its children all match the configured 'trigger' statuses.
 	 *
-	 * @param int $layoutId     Id of the layout
-	 * @param int $layStatusId  Status id of the layout
-	 * @return boolean Whether or not all triggers are matching
+	 * Function returns true when the layout and all its children match the configured 'trigger' statuses,
+	 * false when any of the objects has not reached the 'trigger' status.
+	 *
+	 * @param int $layoutId
+	 * @param int $layStatusId
+	 * @return bool
 	 */
 	private static function checkTriggerStatuses( $layoutId, $layStatusId )
 	{
@@ -492,7 +521,7 @@ class MadeToPrintDispatcher
 		}
 		$childIds = self::getPlacedChilds( $layoutId );
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		foreach( $childIds as $childId ){
+		if( $childIds ) foreach( $childIds as $childId ) {
 			$objType = DBObject::getObjectType( $childId );
 			if( $objType == 'Article' ) {
 				if($mtpConfig['arttriggerstate'] != 0 ) {
@@ -545,7 +574,7 @@ class MadeToPrintDispatcher
 		$dbobjectrel = $dbDriver->tablename("objectrelations");
 		$parents = array();
 		$sql = 'SELECT `parent` FROM '.$dbobjectrel.' WHERE `child`= ? AND `type` = ? ';
-		$params = array( $objectId, 'Placed' );
+		$params = array( intval( $objectId ), 'Placed' );
 		$sth = $dbDriver->query($sql, $params );
 		while(($res = $dbDriver->fetch($sth))){
 			array_push($parents, $res['parent']);
