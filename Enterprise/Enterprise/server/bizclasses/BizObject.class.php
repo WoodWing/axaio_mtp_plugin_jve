@@ -6229,7 +6229,7 @@ class BizObject
 	 * @return integer[] List of object ids which can be locked by the user.
 	 * @throws BizException
 	 */
-	private static function checkAccessRightOnObjectLock( string $user, array $objectIds ): array
+	public static function checkAccessRightOnObjectLock( string $user, array $objectIds ): array
 	{
 		$checkedObjects = array();
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
