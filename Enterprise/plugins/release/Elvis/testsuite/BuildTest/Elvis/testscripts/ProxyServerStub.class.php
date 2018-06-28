@@ -13,7 +13,7 @@ class WW_TestSuite_BuildTest_Elvis_ProxyServerStub extends Elvis_BizClasses_Prox
 	 *
 	 * @inheritdoc
 	 */
-	public function isValidPreviewArgsParam( string $previewArgs )
+	public function isValidPreviewArgsParam( string $previewArgs ) : bool
 	{
 		return parent::isValidPreviewArgsParam( $previewArgs );
 	}

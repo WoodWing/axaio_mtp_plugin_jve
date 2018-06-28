@@ -57,6 +57,8 @@ class Elvis_BizClasses_ProxyServer
 
 	/**
 	 * Validate the HTTP request params and populate $this->httpParams.
+	 *
+	 * @throws Elvis_BizClasses_ProxyServerHttpException
 	 */
 	private function parseHttpParams()
 	{
@@ -81,6 +83,10 @@ class Elvis_BizClasses_ProxyServer
 
 		// Accept the assetid param (Elvis asset id).
 		if( isset( $requestParams['assetid'] ) ) {
+			if( !$this->isValidAssetId( $requestParams['assetid'] ) ) {
+				$message = 'The "assetid" param is not valid.';
+				throw new Elvis_BizClasses_ProxyServerHttpException( $message, 400 );
+			}
 			$this->httpParams['assetid'] = $requestParams['assetid'];
 		}
 
@@ -303,7 +309,7 @@ class Elvis_BizClasses_ProxyServer
 	 * @param string $previewArgs
 	 * @return bool
 	 */
-	protected function isValidPreviewArgsParam( string $previewArgs )
+	protected function isValidPreviewArgsParam( string $previewArgs ) : bool
 	{
 		// Do not accept % to avoid double encoding attacks https://www.owasp.org/index.php/Double_Encoding
 		// Do not accept / to avoid accessing other assets through relative paths, for example:
@@ -316,5 +322,17 @@ class Elvis_BizClasses_ProxyServer
 			'.'  // used for file extension
 		);
 		return $previewArgs && ctype_alnum( str_replace( $allowedSymbols, '', $previewArgs ) );
+	}
+
+	/**
+	 * Check whether the given asset id has a valid format.
+	 *
+	 * @param string $assetId
+	 * @return bool
+	 */
+	private function isValidAssetId( string $assetId ) : bool
+	{
+		$allowedSymbols = array( '-', '_' );
+		return $assetId && ctype_alnum( str_replace( $allowedSymbols, '', $assetId ) );
 	}
 }
