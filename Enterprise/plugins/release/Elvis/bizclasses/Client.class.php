@@ -458,6 +458,22 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
+	 * Calls the fieldinfo web service over the Elvis JSON REST interface.
+	 *
+	 * @return mixed
+	 * @throws BizException
+	 */
+	public function fieldInfo()
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/field-info', $this->shortUserName );
+		$request->setExpectJson();
+
+		$response = $this->execute( $request );
+		return $response->jsonBody();
+	}
+
+	/**
 	 * Execute a service request against Elvis server for the session user or ELVIS_SUPER_USER.
 	 *
 	 * @param Elvis_BizClasses_ClientRequest $request

@@ -122,8 +122,8 @@ class Elvis_BizClasses_Metadata
 		// Determine the Elvis fields the user is allowed to edit.
 		$editableFields = ElvisSessionUtil::getEditableFields();
 		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
-			require_once __DIR__.'/../logic/ElvisRESTClient.php';
-			$fieldInfos = ElvisRESTClient::fieldInfo();
+			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
+			$fieldInfos = $client->fieldInfo();
 			if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
 				if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
 					( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )

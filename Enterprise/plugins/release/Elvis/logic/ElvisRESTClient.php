@@ -221,16 +221,4 @@ class ElvisRESTClient extends ElvisClient
 		$client = new ElvisRESTClient();
 		$client->send( 'services/logout' );
 	}
-
-	/**
-	 * Calls the fieldinfo web service over the Elvis JSON REST interface.
-	 *
-	 * @return mixed
-	 * @throws BizException
-	 */
-	public static function fieldInfo()
-	{
-		$client = new ElvisRESTClient();
-		return $client->send( 'services/fieldinfo' );
-	}
 }
