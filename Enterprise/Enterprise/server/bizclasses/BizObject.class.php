@@ -3014,7 +3014,6 @@ class BizObject
 		}
 
 		// Create a new dossier for this newly copied object or assign it to a selected dossier (If applicable)
-		// @TODO: Is this fragment of code in used? Needs to be revised.
 		if (! is_null($relations)) {
 			foreach ($relations as $relation){
 				//Since it is Dossier - Object relation, the Object will always be the child while the Dossier being the Parent.
@@ -3056,8 +3055,7 @@ class BizObject
 					self::copyObjectLabelsForRelation($relation->Parent, $relation->Child, $newLabels);
 				}
 			}
-
-			BizRelation::createObjectRelations( $relations, $user, $id, false );
+			BizRelation::createObjectRelations( $relations, $user, $id, true );
 		}
 
 		// Copy also all relations to image-objects
