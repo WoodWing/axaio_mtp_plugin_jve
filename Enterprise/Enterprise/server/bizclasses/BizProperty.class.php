@@ -132,6 +132,7 @@ class BizProperty
 	 */
 	public static function getStandardQueryPropIds( $areas = array('Workflow'), $onlyStatic = false )
 	{
+		$ret = array();
 		require_once BASEDIR .'/server/bizclasses/BizQueryBase.class.php';
 		if( $onlyStatic ) {
 			$ret = BizQueryBase::getMandatoryQueryResultColumnFields();
