@@ -225,6 +225,7 @@ EOT;
 
 		$this->elvisSyncUtils = new Elvis_TestSuite_BuildTest_Elvis_SyncUtils();
 		$this->elvisSyncUtils->emptyElvisQueue();
+		$this->elvisSyncUtils->pushMetadataConfig();
 		$this->assertEquals( 0, $this->elvisSyncUtils->countAssetUpdates() );
 
 		$user = $this->getUserFromElvis( ELVIS_SUPER_USER );

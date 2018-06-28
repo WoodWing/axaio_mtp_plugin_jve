@@ -342,18 +342,11 @@ class Elvis_BizClasses_Client
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
 			'private-api/contentsource/user-detail', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
-		$request->setSubjectName( $username );
+		$request->setSubjectId( $username );
 		$request->addQueryParam( 'username', $username );
 		$request->setExpectJson();
 
 		$response = $this->execute( $request );
-
-		// >>> Elvis returns HTTP 200 with empty body when user does not exist, but expected is HTTP 404 so here we detect.
-		if( !$response->body() ) {
-			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', '', // S1056
-				null, array( $request->getSubjectEntity(), $request->getSubjectId(), 'INFO' ) );
-		}
-		// <<<
 
 		return $response->jsonBody();
 	}
@@ -423,9 +416,12 @@ class Elvis_BizClasses_Client
 	public function configureMetadataFields( string $enterpriseSystemId, array $fields )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/configureMetadataFields', $this->shortUserName );
-		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
-		$request->addCsvQueryParam( 'fields', $fields );
+			'private-api/contentsource/configure-metadata-fields', $this->shortUserName );
+		$request->setJsonBody( (object)[
+			'enterpriseSystemId' => $enterpriseSystemId,
+			'fields' => $fields
+		] );
+		$request->setHttpPostMethod();
 
 		$this->execute( $request );
 	}
