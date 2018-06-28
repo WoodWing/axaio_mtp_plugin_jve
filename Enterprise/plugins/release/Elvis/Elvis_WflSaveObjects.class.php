@@ -139,7 +139,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 
 		if( !empty( $changedRequestObjects ) ) {
 			// For each layout-image relation for which placements have been changed, update Elvis.
-			ElvisUpdateManager::sendUpdateObjects( $changedRequestObjects, $this->newShadowRelations );
+			ElvisUpdateManager::updateOrDeleteAssetRelations( $changedRequestObjects, $this->newShadowRelations );
 		}
 
 		// Perform update on enterprise object's version when newer version is found on shadow object from Elvis

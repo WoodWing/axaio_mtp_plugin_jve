@@ -89,7 +89,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 					$newShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
 
 					if( $newShadowRelations ) {
-						ElvisUpdateManager::sendUpdateObjectsByIds( $layoutIds, $newShadowRelations );
+						ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $layoutIds, $newShadowRelations );
 					}
 				}
 

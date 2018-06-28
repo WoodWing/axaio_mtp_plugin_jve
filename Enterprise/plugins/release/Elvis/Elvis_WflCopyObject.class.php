@@ -36,7 +36,7 @@ class Elvis_WflCopyObject extends WflCopyObject_EnterpriseConnector
 
 		// If array contains anything, it means the copied object has shadow relations and needs to send an update to Elvis
 		if( !empty( $newShadowRelations ) ) {
-			ElvisUpdateManager::sendUpdateObjects( $respObjects, $newShadowRelations );
+			ElvisUpdateManager::updateOrDeleteAssetRelations( $respObjects, $newShadowRelations );
 		}
 	}
 	

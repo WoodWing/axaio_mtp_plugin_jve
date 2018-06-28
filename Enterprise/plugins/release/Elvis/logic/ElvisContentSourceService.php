@@ -192,10 +192,10 @@ class ElvisContentSourceService
 	 * @param ElvisUpdateObjectOperation[] $updateOperations
 	 * @throws BizException
 	 */
-	public function updateObjects( array $updateOperations ) : void
+	public function updateAssetRelations( array $updateOperations ) : void
 	{
 		if( empty( $updateOperations ) ) return;
-		$this->client->updateObjects( $updateOperations );
+		$this->client->updateAssetRelations( $updateOperations );
 	}
 
 	/**

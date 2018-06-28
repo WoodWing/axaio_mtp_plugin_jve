@@ -30,7 +30,7 @@ class Elvis_WflCreateObjects extends WflCreateObjects_EnterpriseConnector
 		if( !empty( $createdPlacedShadowObjects ) ) {
 			// Tell Elvis to update relation information for found shadow objects on the created layouts
 			$changedLayoutIds = array_keys( $createdPlacedShadowObjects );
-			ElvisUpdateManager::sendUpdateObjectsByIds( $changedLayoutIds, $createdPlacedShadowObjects );
+			ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $changedLayoutIds, $createdPlacedShadowObjects );
 		}
 	} 
 	

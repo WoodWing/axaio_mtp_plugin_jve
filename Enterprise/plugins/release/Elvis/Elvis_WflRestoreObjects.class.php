@@ -54,7 +54,7 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 
 		if( !empty( $restoredPlacedShadowObjects ) ) {
 			$changedLayoutIds = array_keys( $restoredPlacedShadowObjects );
-			ElvisUpdateManager::sendUpdateObjectsByIds( $changedLayoutIds, $restoredPlacedShadowObjects );
+			ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $changedLayoutIds, $restoredPlacedShadowObjects );
 		}
 	} 
 

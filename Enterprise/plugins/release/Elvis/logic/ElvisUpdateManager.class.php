@@ -20,7 +20,7 @@ class ElvisUpdateManager
 	 * @param Object[] $objects
 	 * @param array|null $shadowObjectRelations See function header.
 	 */
-	public static function sendUpdateObjects( array $objects, $shadowObjectRelations )
+	public static function updateOrDeleteAssetRelations( array $objects, $shadowObjectRelations )
 	{
 		require_once __DIR__.'/../util/ElvisObjectRelationUtils.class.php';
 
@@ -42,11 +42,11 @@ class ElvisUpdateManager
 		}
 
 		// Send the updateObjects message.
-		$operations = self::composeElvisUpdateObjects( $objects, $shadowObjectRelations );
+		$operations = self::composeElvisUpdateAssetRelationsOperations( $objects, $shadowObjectRelations );
 		if( !is_null( $operations ) ) {
 			require_once __DIR__.'/../logic/ElvisContentSourceService.php';
 			$service = new ElvisContentSourceService();
-			$service->updateObjects( $operations );
+			$service->updateAssetRelations( $operations );
 		}
 	}
 
@@ -61,7 +61,7 @@ class ElvisUpdateManager
 	 * @param array|null $shadowObjectRelations Refer to function header.
 	 * @param string[]|null $areas 'Workflow' or 'Trash', the area where layout($objectId) is residing, when null, area is set to 'Workflow'.
 	 */
-	public static function sendUpdateObjectsByIds( $objectIds, $shadowObjectRelations, $areas = null )
+	public static function updateOrDeleteAssetRelationsByObjectIds( $objectIds, $shadowObjectRelations, $areas = null )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
@@ -72,7 +72,7 @@ class ElvisUpdateManager
 		}
 
 		if( $objects ) {
-			self::sendUpdateObjects( $objects, $shadowObjectRelations );
+			self::updateOrDeleteAssetRelations( $objects, $shadowObjectRelations );
 		}
 	}
 
@@ -97,12 +97,16 @@ class ElvisUpdateManager
 	}
 
 	/**
-	 * Gets needed object information an calls sendDeleteObjects
+	 * Get parent objects (and their relations) from Enterprise of objects that are about to be removed from Enterprise.
+	 * Request Elvis to remove asset relations that are recorded for shadow child objects placed on the parent object.
 	 *
-	 * @param int[]|null $objectIds Object Id of the Layout
+	 * For example, when deleting a layout, for the Elvis shadow images that are placed on it, request Elvis to remove
+	 * the relational information from the corresponding image assets.
+	 *
+	 * @param int[]|null $objectIds Object ids of Layout or Publish Form.
 	 * @param string[]|null $areas 'Workflow' or 'Trash', the area where layout($objectId) is residing, when null, area is set to 'Workflow'.
 	 */
-	public static function sendDeleteObjectsByIds( $objectIds, $areas = null )
+	public static function deleteAssetRelationsByObjectIds( $objectIds, $areas = null )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
@@ -111,21 +115,20 @@ class ElvisUpdateManager
 			$objects[] = BizObject::getObject( $objectId, BizSession::getShortUserName(), false, 'none',
 				array( 'MetaData', 'Relations' ), null, true, $areas );
 		}
-
 		self::deleteAssetRelationsForObjects( $objects );
 	}
 
 	/**
-	 * Composed UpdateObjectOperation to be communicated with Elvis server.
+	 * Compose operations to update asset relations, to be communicated with Elvis server.
 	 *
-	 * $shadowObjectRelationsPerLayout is an array with the following composition:
-	 * $shadowObjectRelationsPerLayout[layoutId][ChildId][Type] = List of relations for shadow child
+	 * $shadowObjectRelationsPerParent is an array with the following composition:
+	 * $shadowObjectRelationsPerParent[ParentId][ChildId][Type] = List of relations for shadow child
 	 *
-	 * @param Object[]|null $objects List of Layout object.
-	 * @param Relation[] $shadowObjectRelationsPerLayout Refer to function header.
+	 * @param Object[]|null $objects List of parent objects (e.g. Layouts or Publish Forms).
+	 * @param Relation[] $shadowObjectRelationsPerParent Refer to function header.
 	 * @return ElvisUpdateObjectOperation[]
 	 */
-	private static function composeElvisUpdateObjects( $objects, array $shadowObjectRelationsPerLayout )
+	private static function composeElvisUpdateAssetRelationsOperations( $objects, array $shadowObjectRelationsPerParent )
 	{
 		// Enterprise System Id can be null, so use boolean 'false' instead, to indicate if it is already cached or not.
 		static $enterpriseSystemId = false;
@@ -174,7 +177,7 @@ class ElvisUpdateManager
 			}
 
 			// Handle the relations
-			$shadowObjectRelations = $shadowObjectRelationsPerLayout[$objId];
+			$shadowObjectRelations = $shadowObjectRelationsPerParent[$objId];
 			$elvisRelations = null;
 			if( $object->Relations ) foreach( $object->Relations as $shadowRelation ) {
 				// Only add the relation if it is a shadow relation

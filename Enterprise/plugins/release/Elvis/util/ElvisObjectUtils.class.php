@@ -342,7 +342,7 @@ class ElvisObjectUtils
 						$shadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( array( $publishForm ) );
 						if( $shadowRelations ) {
 							require_once __DIR__.'/../logic/ElvisUpdateManager.class.php';
-							ElvisUpdateManager::sendUpdateObjects( array( $publishForm ), $shadowRelations );
+							ElvisUpdateManager::updateOrDeleteAssetRelations( array( $publishForm ), $shadowRelations );
 						}
 					}
 				}

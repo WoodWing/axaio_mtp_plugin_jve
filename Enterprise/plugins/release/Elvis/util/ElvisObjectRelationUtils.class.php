@@ -26,16 +26,16 @@ class ElvisObjectRelationUtils
 		$placedShadowObjectRelations = array();
 
 		// Walk through layout relations
-		$layoutsRelations = BizRelation::getPlacementsByRelationalParentIds( $objectIds );
-		if( $layoutsRelations ) foreach( $layoutsRelations as $layoutId => $relations ) {
+		$parentsRelations = BizRelation::getPlacementsByRelationalParentIds( $objectIds );
+		if( $parentsRelations ) foreach( $parentsRelations as $parentId => $relations ) {
 			// Gather all relations of the layout
 			if( $relations ) foreach( $relations as $relation ) {
-				$placedShadowObjectRelations[$layoutId][$relation->Child][$relation->Type] = $relation;
+				$placedShadowObjectRelations[$parentId][$relation->Child][$relation->Type] = $relation;
 			}
 
 			// Filter the relations on Elvis shadow objects
-			$elvisShadowIds = ElvisObjectUtils::filterElvisShadowObjects( array_keys( $placedShadowObjectRelations[$layoutId] ) );
-			$placedShadowObjectRelations[$layoutId] = array_intersect_key( $placedShadowObjectRelations[$layoutId], array_flip($elvisShadowIds) );
+			$elvisShadowIds = ElvisObjectUtils::filterElvisShadowObjects( array_keys( $placedShadowObjectRelations[$parentId] ) );
+			$placedShadowObjectRelations[$parentId] = array_intersect_key( $placedShadowObjectRelations[$parentId], array_flip($elvisShadowIds) );
 		}
 
 		return $placedShadowObjectRelations;

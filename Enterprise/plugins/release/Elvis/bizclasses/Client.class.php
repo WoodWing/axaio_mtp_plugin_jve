@@ -157,25 +157,6 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
-	 * Request Elvis to delete relations with child assets.
-	 *
-	 * For example, when a shadow image is removed from a layout, relations will be removed from Enterprise
-	 * side. This function is then called to let Elvis remove the corresponding relations for its assets.
-	 *
-	 * @param Elvis_DataClasses_DeleteObjectRelationOperation[] $deleteOperations
-	 */
-	public function deleteAssetRelations( array $deleteOperations ) : void
-	{
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/delete-asset-relations', $this->shortUserName );
-		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
-		$request->setHttpDeleteMethod();
-		$request->setJsonBody( $deleteOperations );
-
-		$this->execute( $request );
-	}
-
-	/**
 	 * Copy an asset.
 	 *
 	 * @param string $assetId
@@ -447,12 +428,31 @@ class Elvis_BizClasses_Client
 	 *
 	 * @param Elvis_DataClasses_UpdateObjectOperation[] $updateOperations
 	 */
-	public function updateObjects( array $updateOperations )
+	public function updateAssetRelations( array $updateOperations )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/update-objects', $this->shortUserName );
+				'private-api/contentsource/update-asset-relations', $this->shortUserName );
 		$request->setHttpPutMethod();
 		$request->setJsonBody( $updateOperations );
+
+		$this->execute( $request );
+	}
+
+	/**
+	 * Request Elvis to delete relations with child assets.
+	 *
+	 * For example, when a shadow image is removed from a layout, relations will be removed from Enterprise
+	 * side. This function is then called to let Elvis remove the corresponding relations for its assets.
+	 *
+	 * @param Elvis_DataClasses_DeleteObjectRelationOperation[] $deleteOperations
+	 */
+	public function deleteAssetRelations( array $deleteOperations ) : void
+	{
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
+			'private-api/contentsource/delete-asset-relations', $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize('OBJECTS' ) );
+		$request->setHttpDeleteMethod();
+		$request->setJsonBody( $deleteOperations );
 
 		$this->execute( $request );
 	}

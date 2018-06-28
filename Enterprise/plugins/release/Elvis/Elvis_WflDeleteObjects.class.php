@@ -48,14 +48,14 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 
 			// Find deleted Elvis assets. For each deleted asset, we need to collect the layouts.
 			$shadowIds = ElvisObjectUtils::filterElvisShadowObjects( $req->IDs );
-			$layoutIds = ElvisObjectRelationUtils::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
+			$parentIds = ElvisObjectRelationUtils::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
 
-			if( $layoutIds ) {
-				$layoutShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
-				if( $layoutShadowRelations ) foreach( $layoutShadowRelations as $layoutId => $shadowRelations ) {
+			if( $parentIds ) {
+				$parentShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $parentIds );
+				if( $parentShadowRelations ) foreach( $parentShadowRelations as $parentId => $shadowRelations ) {
 					// No need to check relations if already deleted above
-					if( array_key_exists( $layoutId, $this->deletedShadowRelations ) ) {
-						unset( $layoutShadowRelations[$layoutId] );
+					if( array_key_exists( $parentId, $this->deletedShadowRelations ) ) {
+						unset( $parentShadowRelations[$parentId] );
 						continue;
 					}
 					// Remove to be deleted relations
@@ -64,23 +64,23 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 							continue;
 						}
 						if( in_array( $childId, $shadowIds ) ) {
-							unset( $layoutShadowRelations[$layoutId][$childId]['Placed'] );
-							if( empty( $layoutShadowRelations[$layoutId][$childId] ) ) {
-								unset( $layoutShadowRelations[$layoutId][$childId] );
+							unset( $parentShadowRelations[$parentId][$childId]['Placed'] );
+							if( empty( $parentShadowRelations[$parentId][$childId] ) ) {
+								unset( $parentShadowRelations[$parentId][$childId] );
 							}
 						}
 					}
 					// Move to deleted workflow shadow relations in case empty
-					if( empty( $layoutShadowRelations[$layoutId] ) ) {
+					if( empty( $parentShadowRelations[$parentId] ) ) {
 						if( is_null( $this->deletedWorkflowShadowRelations ) ) {
 							$this->deletedWorkflowShadowRelations = array();
 						}
-						$this->deletedWorkflowShadowRelations[$layoutId] = $layoutShadowRelations[$layoutId];
-						unset( $layoutShadowRelations[$layoutId] );
+						$this->deletedWorkflowShadowRelations[$parentId] = $parentShadowRelations[$parentId];
+						unset( $parentShadowRelations[$parentId] );
 					}
 				}
-				if( $layoutShadowRelations ) {
-					$this->updatedShadowRelations = $layoutShadowRelations;
+				if( $parentShadowRelations ) {
+					$this->updatedShadowRelations = $parentShadowRelations;
 				}
 			}
 		}
@@ -102,19 +102,19 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 		if( !empty( $this->deletedShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the following deleted layouts
 			$deletedIds = array_keys( $this->deletedShadowRelations );
-			ElvisUpdateManager::sendDeleteObjectsByIds( $deletedIds, array( 'Trash' ) );
+			ElvisUpdateManager::deleteAssetRelationsByObjectIds( $deletedIds, array( 'Trash' ) );
 		}
 
 		if( !empty( $this->deletedWorkflowShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the found updated shadow objects for the layouts
 			$deletedIds = array_keys( $this->deletedWorkflowShadowRelations );
-			ElvisUpdateManager::sendDeleteObjectsByIds( $deletedIds );
+			ElvisUpdateManager::deleteAssetRelationsByObjectIds( $deletedIds );
 		}
 
 		if( !empty( $this->updatedShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the following layouts without shadow relations
 			$updatedIds = array_keys( $this->updatedShadowRelations );
-			ElvisUpdateManager::sendUpdateObjectsByIds( $updatedIds, $this->updatedShadowRelations );
+			ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $updatedIds, $this->updatedShadowRelations );
 		}
 	} 
 

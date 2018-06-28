@@ -97,7 +97,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 
 		// Update Elvis when there's changes in Layout Target and the layout has Elvis shadow child objects.
 		if( $updatedObjects && $updatedShadowRelations ) {
-			ElvisUpdateManager::sendUpdateObjects( $updatedObjects, $updatedShadowRelations );
+			ElvisUpdateManager::updateOrDeleteAssetRelations( $updatedObjects, $updatedShadowRelations );
 		}
 	}
 	
