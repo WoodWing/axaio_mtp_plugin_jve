@@ -416,9 +416,12 @@ class Elvis_BizClasses_Client
 	public function configureMetadataFields( string $enterpriseSystemId, array $fields )
 	{
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'private-api/contentsource/configureMetadataFields', $this->shortUserName );
-		$request->addQueryParam( 'enterpriseSystemId', $enterpriseSystemId );
-		$request->addCsvQueryParam( 'fields', $fields );
+			'private-api/contentsource/configure-metadata-fields', $this->shortUserName );
+		$request->setJsonBody( (object)[
+			'enterpriseSystemId' => $enterpriseSystemId,
+			'fields' => $fields
+		] );
+		$request->setHttpPostMethod();
 
 		$this->execute( $request );
 	}
