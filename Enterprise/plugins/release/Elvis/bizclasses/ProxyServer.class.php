@@ -79,6 +79,11 @@ class Elvis_BizClasses_ProxyServer
 			$this->httpParams['objectid'] = intval( $requestParams['objectid'] );
 		}
 
+		// Accept the assetid param (Elvis asset id).
+		if( isset( $requestParams['assetid'] ) ) {
+			$this->httpParams['assetid'] = $requestParams['assetid'];
+		}
+
 		// Accept the rendition param (file rendition).
 		if( isset( $requestParams['rendition'] ) ) {
 			$this->httpParams['rendition'] = $requestParams['rendition'];
@@ -119,8 +124,12 @@ class Elvis_BizClasses_ProxyServer
 			case 'POST':
 				$this->preparePhpForStreaming();
 				$this->validateTicketAndStartSession();
-				$this->checkObjectReadAccess();
-				$this->resolveElvisAssetId();
+				if( isset( $this->httpParams['assetid'] ) ) {
+					$this->elvisAssetId = $this->httpParams['assetid'];
+				} else {
+					$this->checkObjectReadAccess();
+					$this->resolveElvisAssetId();
+				}
 				$this->proxyRequestToElvisServer();
 				break;
 			default:

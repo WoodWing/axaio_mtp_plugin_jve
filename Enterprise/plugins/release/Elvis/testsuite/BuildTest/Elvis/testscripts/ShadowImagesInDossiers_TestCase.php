@@ -33,7 +33,7 @@ class WW_TestSuite_BuildTest_Elvis_ShadowImagesInDossiers_TestCase  extends Test
 {
 	public function getDisplayName() { return 'Shadow images in dossiers'; }
 	public function getTestGoals()   { return 'Validates whether the Elvis integration and the Elvis proxy server are operating properly with shadow images created in dossiers.'; }
-	public function getPrio()        { return 500; }
+	public function getPrio()        { return 0; }
 
 	public function getTestMethods()
 	{
@@ -126,7 +126,7 @@ EOT;
 	/**
 	 * @inheritdoc
 	 */
-	final public function runTest()
+	public function runTest()
 	{
 		try {
 			$this->setupTestData();
@@ -135,7 +135,7 @@ EOT;
 			$this->lookupProxyEntryInLogOnResponse();
 			$this->createEntDossier();
 			$this->createShadowImageObject( 0 );
-			$this->retrieveImageWithDownloadUrl( 0 );
+			$this->retrieveImageWithDownloadUrl( 0, false );
 			$this->testDownloadImageViaProxyServer();
 
 			// Test version history of image shadow objects.
@@ -144,8 +144,10 @@ EOT;
 			$this->testListOneVersionsOfImage();
 			$this->promoteElvisImageVersion(); // through Elvis
 			$this->testListTwoVersionsOfImage();
-			$this->restoreImageObjectVersion(); // through Enterprise
-			$this->testListThreeVersionsOfImage();
+			if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
+				$this->restoreImageObjectVersion(); // through Enterprise
+				$this->testListThreeVersionsOfImage();
+			}
 			$this->unlockImageObject();
 
 			// Test security of the Elvis proxy.
@@ -158,15 +160,17 @@ EOT;
 
 			// Test bulk operations with image shadow objects.
 			$this->createShadowImageObject( 1 );
-			$this->retrieveImageWithDownloadUrl( 1 );
+			$this->retrieveImageWithDownloadUrl( 1, false );
 			$this->multiSetImageDescriptionProperties();
 			$this->validateImageDescriptionFieldsAtElvis();
 
 			// Test copy operation on shadow image.
-			$this->copyShadowImageObject();
-			$this->retrieveElvisImage( 2 );
-			$this->retrieveImageWithDownloadUrl( 2 );
-			$this->testCopiedShadowImage();
+			if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
+				$this->copyShadowImageObject();
+				$this->retrieveElvisImage( 2 );
+				$this->retrieveImageWithDownloadUrl( 2, true );
+				$this->testCopiedShadowImage();
+			}
 
 		} catch( BizException $e ) {
 		}
@@ -178,12 +182,7 @@ EOT;
 	 */
 	private function setupTestData()
 	{
-		require_once __DIR__.'/../../../config.php';
-		$this->assertTrue( in_array(ELVIS_CREATE_COPY, array( 'Shadow_Only', 'Copy_To_Production_Zone' ) ),
-			'For the ELVIS_CREATE_COPY option, only the values "Shadow_Only" and "Copy_To_Production_Zone" '.
-			'are supported for this test. Please adjust the configuration and retry.' );
-
-		require_once __DIR__.'/../../../config.php';
+		require_once __DIR__.'/../../../../config.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->testSuiteUtils = new WW_Utils_TestSuite();
 		$this->testSuiteUtils->initTest( 'JSON' );
@@ -361,7 +360,7 @@ EOT;
 	 */
 	private function getUserFromElvis( string $username ) : Elvis_DataClasses_EntUserDetails
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
 
 		$service = new ElvisContentSourceService();
 		return $service->getUserDetails( $username );
@@ -416,7 +415,7 @@ EOT;
 	 */
 	private function createElvisImage( int $imageIndex )
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
 		$service = new ElvisContentSourceService();
 		$metadata = array();
 		$hit = $service->create( $metadata, $this->images[ $imageIndex ]->attachments[0] );
@@ -432,7 +431,7 @@ EOT;
 	 */
 	private function addElvisImageToEntDossier( int $imageIndex )
 	{
-		require_once __DIR__.'/../../../util/ElvisUtils.class.php';
+		require_once __DIR__.'/../../../../util/ElvisUtils.class.php';
 
 		$relation = new Relation();
 		$relation->Parent = $this->dossierObject->MetaData->BasicMetaData->ID;
@@ -458,8 +457,9 @@ EOT;
 	 * Expect the Elvis proxy download URL in the GetObjects response.
 	 *
 	 * @param int $imageIndex
+	 * @param bool $afterMakingCopyInEnterprise
 	 */
-	private function retrieveImageWithDownloadUrl( int $imageIndex )
+	private function retrieveImageWithDownloadUrl( int $imageIndex, $afterMakingCopyInEnterprise )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest();
@@ -478,24 +478,51 @@ EOT;
 		$this->assertInstanceOf( 'Object', $imageObject );
 		$this->images[ $imageIndex ]->entObject = $imageObject;
 
-		$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
 		switch( ELVIS_CREATE_COPY ) {
 			case 'Shadow_Only':
+				$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
 				$this->assertEquals( $this->images[ $imageIndex ]->assetHit->id, $imageObject->MetaData->BasicMetaData->DocumentID );
 				break;
 			case 'Copy_To_Production_Zone':
-				$this->assertNotEquals( $this->images[ $imageIndex ]->assetHit->id, $imageObject->MetaData->BasicMetaData->DocumentID );
-				$this->images[ $imageIndex ]->assetHit->id = $imageObject->MetaData->BasicMetaData->DocumentID;
+				$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
+				if( $afterMakingCopyInEnterprise ) {
+					$this->assertEquals( $this->images[ $imageIndex ]->assetHit->id, $imageObject->MetaData->BasicMetaData->DocumentID );
+				} else {
+					// Since there is made a copy in Elvis, our assetHit should still refer to the original asset (so not to the copy).
+					// Here check if that is correct. Only then let assetHit refer to the copied asset in Elvis, which is the one
+					// that corresponds with the shadow object.
+					$this->assertNotEquals( $this->images[ $imageIndex ]->assetHit->id, $imageObject->MetaData->BasicMetaData->DocumentID );
+					$this->retrieveElvisImage( $imageIndex ); // set $this->images[ $imageIndex ]->assetHit
+				}
 				break;
+			case 'Hard_Copy_To_Enterprise':
+				$this->assertNotEquals( $this->images[ $imageIndex ]->assetHit->id, $imageObject->MetaData->BasicMetaData->DocumentID );
+				$this->assertEquals( '', $imageObject->MetaData->BasicMetaData->ContentSource );
+				break;
+			default:
+				$this->throwError( 'Unsupported value provided for ELVIS_CREATE_COPY option: '.ELVIS_CREATE_COPY );
 		}
 
 		$file = reset( $imageObject->Files );
 		$this->assertEquals( 'native', $file->Rendition );
-		$this->assertNull( $file->FileUrl );
-		$this->assertNull( $file->ContentSourceFileLink );
-		$this->assertNotNull( $file->ContentSourceProxyLink );
 
-		$this->images[ $imageIndex ]->proxyDownloadLink = $file->ContentSourceProxyLink;
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Shadow_Only':
+			case 'Copy_To_Production_Zone':
+				$this->assertNull( $file->FileUrl );
+				$this->assertNull( $file->ContentSourceFileLink );
+				$this->assertNotNull( $file->ContentSourceProxyLink );
+				$this->images[ $imageIndex ]->proxyDownloadLink = $file->ContentSourceProxyLink;
+				break;
+			case 'Hard_Copy_To_Enterprise':
+				$this->assertNotNull( $file->FileUrl );
+				$this->assertNull( $file->ContentSourceFileLink );
+				$this->assertNull( $file->ContentSourceProxyLink );
+				$this->images[ $imageIndex ]->proxyDownloadLink = null;
+				break;
+			default:
+				$this->throwError( 'Unsupported value provided for ELVIS_CREATE_COPY option: '.ELVIS_CREATE_COPY );
+		}
 	}
 
 	/**
@@ -503,10 +530,19 @@ EOT;
 	 */
 	private function testDownloadImageViaProxyServer()
 	{
-		$imageContents = file_get_contents( $this->images[0]->proxyDownloadLink.'&ticket='.$this->workflowTicket );
-		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
-		$this->assertEquals( 200, $this->getHttpStatusCode( $http_response_header ) );
-		$this->assertGreaterThan( 0, strlen( $imageContents ) );
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Shadow_Only':
+				/** @noinspection PhpMissingBreakStatementInspection */
+			case 'Copy_To_Production_Zone':
+				$imageContents = file_get_contents( $this->images[0]->proxyDownloadLink.'&ticket='.$this->workflowTicket );
+				$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
+				$this->assertEquals( 200, $this->getHttpStatusCode( $http_response_header ) );
+				$this->assertGreaterThan( 0, strlen( $imageContents ) );
+			case 'Hard_Copy_To_Enterprise':
+				break;
+			default:
+				$this->throwError( 'Unsupported value provided for ELVIS_CREATE_COPY option: '.ELVIS_CREATE_COPY );
+		}
 	}
 
 	/**
@@ -514,8 +550,9 @@ EOT;
 	 */
 	private function testListZeroVersionsOfImage()
 	{
+		$expectedCount = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? 1 : 0;
 		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
-		$this->assertCount( 0, $versions ); // no versions created yet
+		$this->assertCount( $expectedCount, $versions ); // no versions created yet
 	}
 
 	/**
@@ -560,7 +597,7 @@ EOT;
 	 */
 	private function updateElvisImage()
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
 
 		$client = new Elvis_BizClasses_TestClient( $this->elvisTestUserName );
 		$service = new ElvisContentSourceService( $this->elvisTestUserName, $client ); // the service starts using our client
@@ -576,7 +613,9 @@ EOT;
 		$this->assertTrue( $client->logout() );
 
 		// Expect 2 (!) updates; one for the file upload and one for the metadata changes.
-		$this->syncUpdatesFromElvisQueueToEnterprise( 2 );
+		if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
+			$this->syncUpdatesFromElvisQueueToEnterprise( 2 );
+		}
 	}
 
 	/**
@@ -615,7 +654,8 @@ EOT;
 	private function testListTwoVersionsOfImage()
 	{
 		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
-		$this->assertCount( 2, $versions );
+		$expectedCount = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? 1 : 2;
+		$this->assertCount( $expectedCount, $versions );
 	}
 
 	/**
@@ -706,7 +746,8 @@ EOT;
 			'&rendition=foo';
 		@file_get_contents( $url.'&ticket='.$this->workflowTicket );
 		$this->assertNotNull( $http_response_header ); // this special variable is set by file_get_contents()
-		$this->assertEquals( 400, $this->getHttpStatusCode( $http_response_header ) );
+		$expectedCode = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? 404 : 400;
+		$this->assertEquals( $expectedCode, $this->getHttpStatusCode( $http_response_header ) );
 	}
 
 	/**
@@ -756,12 +797,14 @@ EOT;
 	 */
 	private function validateImageDescriptionFieldsAtElvis()
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
 		$service = new ElvisContentSourceService();
 		foreach( $this->images as $image ) {
 			if( $image->assetHit ) {
 				$hit = $service->retrieve( $image->assetHit->id );
-				$this->assertEquals( '東京', $hit->metadata['description'] );
+				$actualDescription = isset( $hit->metadata['description'] ) ? $hit->metadata['description'] : '';
+				$expectedDescription = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? '' : '東京';
+				$this->assertEquals( $expectedDescription, $actualDescription );
 			}
 		}
 	}
@@ -800,7 +843,7 @@ EOT;
 	 */
 	private function retrieveElvisImage( int $imageIndex )
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
 
 		$imageObject = $this->images[ $imageIndex ]->entObject;
 		$service = new ElvisContentSourceService();

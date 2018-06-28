@@ -42,7 +42,6 @@ switch( $command ) {
 		LogHandler::Log( 'wwtest', 'INFO', 'Starting wwtest' );
 		$testSuite = $_REQUEST['testSuite'];
 		require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteFactory.class.php';
-		require_once BASEDIR.'/server/utils/ZendOpcache.php';
 		WW_Utils_ZendOpcache::clearOPcache();
 		header( 'Content-Type: text/xml' );
 		print TestSuiteFactory::getTestsAsXml( $testSuite );

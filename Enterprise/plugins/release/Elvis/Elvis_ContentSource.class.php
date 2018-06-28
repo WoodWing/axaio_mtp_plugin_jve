@@ -213,9 +213,13 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * @inheritdoc
+	 * Make a hard copy of an Elvis asset to an Enterprise object. Do not created a shadow link between both.
+	 *
+	 * @param string $alienId
+	 * @param Object $destObject
+	 * @return Object
 	 */
-	final public function createCopyObject( $alienId, $destObject )
+	public function createCopyObject( $alienId, $destObject )
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once __DIR__.'/logic/ElvisContentSourceService.php';
@@ -226,9 +230,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$service = new ElvisContentSourceService();
 		$hit = $service->retrieve( $assetId );
 
-		// Export original asset file to Enterprise
-		$fileUrl = $service->exportOriginalForAsset( $assetId );
-		
 		if( !$destObject ) {
 			$destObject = new Object();
 			$destObject->MetaData = new MetaData();
@@ -240,8 +241,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$destObject->MetaData->BasicMetaData->DocumentID = null;
 		$destObject->MetaData->BasicMetaData->ContentSource = null;
 		
-		$destObject->Files = array( self::createAttachment( $fileUrl, $destObject->MetaData->ContentMetaData->Format ) );
-		$destObject->Files = array_merge( $destObject->Files, $this->getFiles( $hit, array( 'preview', 'thumb' ) ) );
+		$destObject->Files = $this->getFiles( $hit, array( 'native', 'preview', 'thumb' ) );
 
 		return $destObject;
 	}

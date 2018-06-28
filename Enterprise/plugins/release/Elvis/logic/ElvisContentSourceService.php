@@ -284,22 +284,4 @@ class ElvisContentSourceService
 		$stdClassUserDetails = $client->getUserDetails( $username );
 		return Elvis_DataClasses_EntUserDetails::fromStdClass( $stdClassUserDetails );
 	}
-
-	/**
-	 * Export the original for a given asset.
-	 *
-	 * @param string $assetId
-	 * @return string File URL
-	 * @throws BizException
-	 */
-	public function exportOriginalForAsset( string $assetId ) : string
-	{
-		try {
-			$params = array( $assetId, HTTP_FILE_TRANSFER_REMOTE_URL, BizSession::getTicket() );
-			$resp = ElvisAMFClient::send( self::SERVICE, 'exportOriginal', $params );
-		} catch( ElvisCSException $e ) {
-			throw $e->toBizException();
-		}
-		return $resp;
-	}
 }

@@ -11,11 +11,11 @@
 
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
-class WW_TestSuite_BuildTest_Elvis_ArticlesOnLayouts_TestCase  extends TestCase
+class WW_TestSuite_BuildTest_Elvis_ShadowImagesOnLayouts_TestCase  extends TestCase
 {
-	public function getDisplayName() { return 'Articles on layouts'; }
-	public function getTestGoals()   { return 'Validates whether the Elvis integration is operating properly with articles placed on layouts.'; }
-	public function getPrio()        { return 550; }
+	public function getDisplayName() { return 'Shadow images on layouts'; }
+	public function getTestGoals()   { return 'Validates whether the Elvis integration is operating properly with images placed on layouts.'; }
+	public function getPrio()        { return 0; }
 
 	public function getTestMethods()
 	{
@@ -85,7 +85,7 @@ EOT;
 	/**
 	 * @inheritdoc
 	 */
-	final public function runTest() : void
+	public function runTest() : void
 	{
 		try {
 			$this->setupTestData();
@@ -135,12 +135,7 @@ EOT;
 	 */
 	private function setupTestData() : void
 	{
-		require_once __DIR__.'/../../../config.php';
-		$this->assertTrue( in_array(ELVIS_CREATE_COPY, array( 'Shadow_Only', 'Copy_To_Production_Zone' ) ),
-			'For the ELVIS_CREATE_COPY option, only the values "Shadow_Only" and "Copy_To_Production_Zone" '.
-			'are supported for this test. Please adjust the configuration and retry.' );
-
-		require_once __DIR__.'/../../../config.php';
+		require_once __DIR__.'/../../../../config.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->testSuiteUtils = new WW_Utils_TestSuite();
 		$this->testSuiteUtils->initTest( 'JSON' );
@@ -379,7 +374,7 @@ EOT;
 		$attachment->Type = 'image/jpeg';
 		$attachment->FilePath = __DIR__.'/testdata/image1_v1.jpg';
 
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
 		$service = new ElvisContentSourceService();
 		$metadata = array();
 		$hit = $service->create( $metadata, $attachment );
@@ -393,7 +388,7 @@ EOT;
 	 */
 	private function placeElvisImageOnPage4() : void
 	{
-		require_once __DIR__.'/../../../util/ElvisUtils.class.php';
+		require_once __DIR__.'/../../../../util/ElvisUtils.class.php';
 
 		$relation = new Relation();
 		$relation->Parent = $this->layoutObject->MetaData->BasicMetaData->ID;
@@ -474,7 +469,21 @@ EOT;
 		$this->assertInstanceOf( 'Object', $imageObject );
 		$this->imageObject = $imageObject;
 
-		$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Copy_To_Production_Zone':
+				$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
+				require_once __DIR__.'/../../../../util/ElvisUtils.class.php';
+				$this->imageAssetId = ElvisUtils::getAssetIdFromAlienId( $this->imageObject->MetaData->BasicMetaData->DocumentID );
+				break;
+			case 'Shadow_Only':
+				$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
+				break;
+			case 'Hard_Copy_To_Enterprise':
+				$this->assertEquals( '', $imageObject->MetaData->BasicMetaData->ContentSource );
+				break;
+			default:
+				$this->throwError( 'Unsupported value provided for ELVIS_CREATE_COPY option: '.ELVIS_CREATE_COPY );
+		}
 	}
 
 	/**
@@ -502,7 +511,7 @@ EOT;
 	 */
 	private function retrieveImageInfoFromElvis() : void
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
+		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
 		$service = new ElvisContentSourceService();
 		$metadata = array();
 		$extraFields = array(
@@ -533,28 +542,39 @@ EOT;
 		$this->assertEquals( ELVIS_SUPER_USER, $metadata['assetCreator'] );
 		$this->assertEquals( ELVIS_SUPER_USER, $metadata['assetFileModifier'] );
 
-		$this->assertEquals( BizSession::getEnterpriseSystemId(), $metadata['sceSystemId'] );
-		$this->assertEquals( 'true', strtolower( $metadata['sceUsed'] ) );
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Shadow_Only':
+			case 'Copy_To_Production_Zone':
+				$this->assertEquals( BizSession::getEnterpriseSystemId(), $metadata['sceSystemId'] );
+				$this->assertEquals( 'true', strtolower( $metadata['sceUsed'] ) );
 
-		$this->assertEquals( $this->layoutObject->MetaData->BasicMetaData->Name, $metadata['sceLayout'][0] );
-		$this->assertEquals( $this->layoutObject->MetaData->BasicMetaData->ID, $metadata['sceLayoutId'][0] );
-		$this->assertEquals( 'pag'.$pageNr, $metadata['scePage'][0] );
-		$this->assertEquals( 'true', strtolower( $metadata['scePlaced'] ) );
+				$this->assertEquals( $this->layoutObject->MetaData->BasicMetaData->Name, $metadata['sceLayout'][0] );
+				$this->assertEquals( $this->layoutObject->MetaData->BasicMetaData->ID, $metadata['sceLayoutId'][0] );
+				$this->assertEquals( 'pag'.$pageNr, $metadata['scePage'][0] );
+				$this->assertEquals( 'true', strtolower( $metadata['scePlaced'] ) );
 
-		$config = $this->workflowFactory->getPublicationConfig();
-		$this->assertEquals( $config->getPublicationName( 'PubTest2 %timestamp%' ), $metadata['scePublication'] );
-		$this->assertEquals( $config->getPublicationId( 'PubTest2 %timestamp%' ), $metadata['scePublicationId'] );
-		$this->assertEquals( 'People', $metadata['sceCategory'] );
-		$categoryId = $config->getCategoryId( 'PubTest2 %timestamp%', 'People' );
-		$this->assertEquals( $categoryId, $metadata['sceCategoryId'] );
-		$this->assertEquals( 'Print', $metadata['sceChannel'][0] );
-		$this->assertEquals( $config->getPubChannelId( 'PubTest2 %timestamp%', 'Print' ), $metadata['sceChannelId'][0] );
-		$this->assertEquals( 'Week 45', $metadata['sceIssue'][0] );
-		$this->assertEquals( $config->getIssueId( 'PubTest2 %timestamp%', 'Print', 'Week 45' ), $metadata['sceIssueId'][0] );
-		$this->assertEquals( 'North', $metadata['sceEdition'][0] );
-		$this->assertEquals( $config->getEditionId( 'PubTest2 %timestamp%', 'Print', 'North' ), $metadata['sceEditionId'][0] );
-		$this->assertEquals( 'South', $metadata['sceEdition'][1] );
-		$this->assertEquals( $config->getEditionId( 'PubTest2 %timestamp%', 'Print', 'South' ), $metadata['sceEditionId'][1] );
+				$config = $this->workflowFactory->getPublicationConfig();
+				$this->assertEquals( $config->getPublicationName( 'PubTest2 %timestamp%' ), $metadata['scePublication'] );
+				$this->assertEquals( $config->getPublicationId( 'PubTest2 %timestamp%' ), $metadata['scePublicationId'] );
+				$this->assertEquals( 'People', $metadata['sceCategory'] );
+				$categoryId = $config->getCategoryId( 'PubTest2 %timestamp%', 'People' );
+				$this->assertEquals( $categoryId, $metadata['sceCategoryId'] );
+				$this->assertEquals( 'Print', $metadata['sceChannel'][0] );
+				$this->assertEquals( $config->getPubChannelId( 'PubTest2 %timestamp%', 'Print' ), $metadata['sceChannelId'][0] );
+				$this->assertEquals( 'Week 45', $metadata['sceIssue'][0] );
+				$this->assertEquals( $config->getIssueId( 'PubTest2 %timestamp%', 'Print', 'Week 45' ), $metadata['sceIssueId'][0] );
+				$this->assertEquals( 'North', $metadata['sceEdition'][0] );
+				$this->assertEquals( $config->getEditionId( 'PubTest2 %timestamp%', 'Print', 'North' ), $metadata['sceEditionId'][0] );
+				$this->assertEquals( 'South', $metadata['sceEdition'][1] );
+				$this->assertEquals( $config->getEditionId( 'PubTest2 %timestamp%', 'Print', 'South' ), $metadata['sceEditionId'][1] );
+				break;
+			case 'Hard_Copy_To_Enterprise':
+				$this->assertFalse( isset( $metadata['sceSystemId'] ) );
+				$this->assertFalse( isset( $metadata['sceUsed'] ) );
+				break;
+			default:
+				$this->throwError( 'Unsupported value provided for ELVIS_CREATE_COPY option: '.ELVIS_CREATE_COPY );
+		}
 	}
 
 	/**
@@ -670,27 +690,38 @@ EOT;
 		$this->assertEquals( ELVIS_SUPER_USER, $metadata['assetCreator'] );
 		$this->assertEquals( ELVIS_SUPER_USER, $metadata['assetFileModifier'] );
 
-		$this->assertEquals( BizSession::getEnterpriseSystemId(), $metadata['sceSystemId'] );
-		$this->assertEquals( 'true', strtolower( $metadata['sceUsed'] ) );
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Shadow_Only':
+			case 'Copy_To_Production_Zone':
+				$this->assertEquals( BizSession::getEnterpriseSystemId(), $metadata['sceSystemId'] );
+				$this->assertEquals( 'true', strtolower( $metadata['sceUsed'] ) );
 
-		$this->assertNull( $metadata['sceLayout'] );
-		$this->assertNull( $metadata['sceLayoutId'] );
-		$this->assertNull( $metadata['scePage'] );
-		$this->assertNull( $metadata['scePlaced'] );
+				$this->assertNull( $metadata['sceLayout'] );
+				$this->assertNull( $metadata['sceLayoutId'] );
+				$this->assertNull( $metadata['scePage'] );
+				$this->assertNull( $metadata['scePlaced'] );
 
-		$config = $this->workflowFactory->getPublicationConfig();
-		$this->assertEquals( $config->getPublicationName( 'PubTest2 %timestamp%' ), $metadata['scePublication'] );
-		$this->assertEquals( $config->getPublicationId( 'PubTest2 %timestamp%' ), $metadata['scePublicationId'] );
-		$this->assertEquals( 'People', $metadata['sceCategory'] );
-		$categoryId = $config->getCategoryId( 'PubTest2 %timestamp%', 'People' );
-		$this->assertEquals( $categoryId, $metadata['sceCategoryId'] );
+				$config = $this->workflowFactory->getPublicationConfig();
+				$this->assertEquals( $config->getPublicationName( 'PubTest2 %timestamp%' ), $metadata['scePublication'] );
+				$this->assertEquals( $config->getPublicationId( 'PubTest2 %timestamp%' ), $metadata['scePublicationId'] );
+				$this->assertEquals( 'People', $metadata['sceCategory'] );
+				$categoryId = $config->getCategoryId( 'PubTest2 %timestamp%', 'People' );
+				$this->assertEquals( $categoryId, $metadata['sceCategoryId'] );
 
-		$this->assertNull( $metadata['sceChannel'] );
-		$this->assertNull( $metadata['sceChannelId'] );
-		$this->assertNull( $metadata['sceIssue'] );
-		$this->assertNull( $metadata['sceIssueId'] );
-		$this->assertNull( $metadata['sceEdition'] );
-		$this->assertNull( $metadata['sceEditionId'] );
+				$this->assertNull( $metadata['sceChannel'] );
+				$this->assertNull( $metadata['sceChannelId'] );
+				$this->assertNull( $metadata['sceIssue'] );
+				$this->assertNull( $metadata['sceIssueId'] );
+				$this->assertNull( $metadata['sceEdition'] );
+				$this->assertNull( $metadata['sceEditionId'] );
+				break;
+			case 'Hard_Copy_To_Enterprise':
+				$this->assertFalse( isset( $metadata['sceSystemId'] ) );
+				$this->assertFalse( isset( $metadata['sceUsed'] ) );
+				break;
+			default:
+				$this->throwError( 'Unsupported value provided for ELVIS_CREATE_COPY option: '.ELVIS_CREATE_COPY );
+		}
 	}
 
 	/**
@@ -730,8 +761,19 @@ EOT;
 	private function validateElvisImageInfoAndCheckIfRemovedFromEnterprise() : void
 	{
 		$metadata = $this->imageHit->metadata;
-		$this->assertEquals( '', $metadata['sceSystemId'] );
-		$this->assertNull( $metadata['sceUsed'] );
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Shadow_Only':
+			case 'Copy_To_Production_Zone':
+				$this->assertEquals( '', $metadata['sceSystemId'] );
+				$this->assertNull( $metadata['sceUsed'] );
+				break;
+			case 'Hard_Copy_To_Enterprise':
+				$this->assertFalse( isset( $metadata['sceSystemId'] ) );
+				$this->assertFalse( isset( $metadata['sceUsed'] ) );
+				break;
+			default:
+				$this->throwError( 'Unsupported value provided for ELVIS_CREATE_COPY option: '.ELVIS_CREATE_COPY );
+		}
 	}
 
 	// - - - - - - - - - HELPER FUNCTIONS - - - - - - - - - - - -
