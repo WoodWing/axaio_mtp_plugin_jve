@@ -1,6 +1,6 @@
 <?php
 /**
- * Biz logics class for Object Operations.
+ * Biz logic class for Object Operations.
  *
  * A list of Object Operations can be recorded for a certain layout object. This can
  * only be done when the acting user has a lock for the layout. Operations are there
@@ -44,15 +44,7 @@ class BizObjectOperation
 		// Lock the object when not locked yet. Error when could not lock or locked by someone else.
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 		$objectLock = new BizObjectLock( $objectId );
-		if( !$objectLock->isLocked() ) {
-			$objectLock->lockObject( $user );
-			$lockedByUs = true;
-		} else {
-			if( !$objectLock->isLockedByUser( $user ) ) {
-				throw new BizException( 'ERR_LOCKED', 'Client', $objectId );
-			}
-			$lockedByUs = false;
-		}
+		$lockedByUs = self::lockObjectIfNotLockedYet( $user, intval( $objectId ), $objectLock );
 
 		// Catch errors so we can unlock the objects again.
 		try {
@@ -89,7 +81,6 @@ class BizObjectOperation
 	 *
 	 * @param integer $objectId
 	 * @return ObjectOperation[]
-	 * @throws BizException On bad given params or fatal SQL errors.
 	 */
 	public static function getOperations( $objectId )
 	{
@@ -102,7 +93,6 @@ class BizObjectOperation
 	 *
 	 * @param integer $objectId
 	 * @param string $guid
-	 * @throws BizException On bad given params or fatal SQL errors.
 	 * @since 10.1.3
 	 */
 	public static function deleteOperation( $objectId, $guid )
@@ -115,7 +105,6 @@ class BizObjectOperation
 	 * Removes the operations from DB that were created for a given object.
 	 *
 	 * @param integer $objectId
-	 * @throws BizException On bad given params or fatal SQL errors.
 	 */
 	public static function deleteOperations( $objectId )
 	{
@@ -142,7 +131,7 @@ class BizObjectOperation
 			$connectors = BizServerPlugin::searchConnectors( 'AutomatedPrintWorkflow', null );
 			if( $connectors ) {
 				foreach( $operations as $operation ) {
-					// Since ES 10.2.0 this part is redesigned to allow recurively resolving operations.
+					// Since ES 10.2.0 this part is redesigned to allow recursively resolving operations.
 					// For example PlaceDigitalArticle can be resolved into PlaceArticle which can be resolved into multiple
 					// PlaceArticleElement. This can be done regardless of the order the connectors are called because it
 					// keeps on resolving operation as long as it detects one of the connectors returns different results.
@@ -273,5 +262,37 @@ class BizObjectOperation
 	private static function operationToString( ObjectOperation $operation )
 	{
 		return $operation->Name.' ('.$operation->Type.')';
+	}
+
+	/**
+	 * Lock the involved object, if the object is not yet locked by the user.
+	 *
+	 * If the object is locked it must be locked by the acting user. But if the object is not yet locked try to lock
+	 * it on behalf of the acting user.
+	 *
+	 * @since 10.4.2
+	 * @param string $user
+	 * @param integer $objectId
+	 * @param BizObjectLock $objectLock
+	 * @return bool
+	 * @throws BizException
+	 */
+	private static function lockObjectIfNotLockedYet( string $user, int $objectId, BizObjectLock $objectLock ): bool
+	{
+		$lockedByUs = false;
+		if( !$objectLock->isLocked() ) {
+			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+			$canBeLocked = BizObject::checkAccessRightOnObjectLock( $user, array( $objectId ) );
+			if( in_array( $objectId, $canBeLocked ) ) {
+				$objectLock->lockObject( $user );
+				$lockedByUs = true;
+			}
+		} else {
+			if( !$objectLock->isLockedByUser( $user ) ) {
+				throw new BizException( 'ERR_LOCKED', 'Client', $objectId );
+			}
+		}
+
+		return $lockedByUs;
 	}
 }
