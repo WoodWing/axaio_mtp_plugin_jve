@@ -110,6 +110,14 @@ if( !defined('ELVIS_NAMEDQUERY') ) {
 	define( 'ELVIS_NAMEDQUERY', 'Elvis Search' );
 }
 
+/**
+ * Client id and secret.
+ *
+ * These settings are used to setup a trusted back-end connection between Enterprise Server and Elvis Server. This is
+ * required to synchronize data from Enterprise Server to Elvis Server. See ELVIS_SUPER_USER option for more information.
+ *
+ * Available since Enterprise Server 10.5.0.
+ */
 if( !defined('ELVIS_CLIENT_ID') ) {
 	define( 'ELVIS_CLIENT_ID', '' );
 }
@@ -118,25 +126,31 @@ if( !defined('ELVIS_CLIENT_SECRET') ) {
 }
 
 /**
- * Elvis SUPER_USER username and password, needed for creating PDF previews with InDesign Server.
- * This user is also used to give Enterprise users without Elvis credentials access to the Elvis server.
+ * Elvis user with SUPER_USER access rights.
+ *
+ * This user is required for data synchronization from Enterprise Server to Elvis Server. During production, data is
+ * directly synchronized in context of workflow operations in Enterprise. For example, when a workflow user makes
+ * changes to metadata of a shadow image object in Enterprise, those changes are reflected to its corresponding image
+ * asset in Elvis. Since synchronisation runs over a trusted connection between both back-ends, there is no need for
+ * a password. Instead, the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options are used to establish the trust connection.
  */
 if( !defined('ELVIS_SUPER_USER') ) {
-	define( 'ELVIS_SUPER_USER', 'woodwing' );
-}
-if( !defined('ELVIS_SUPER_USER_PASS') ) {
-	define( 'ELVIS_SUPER_USER_PASS', 'ww' );
+	define( 'ELVIS_SUPER_USER', 'admin' );
 }
 
 /**
- * Enterprise Admin username and password, needed for metadata synchronisation from Elvis 
- * to Enterprise. By default we user a user which is known in both systems with the same credentials.
+ * Enterprise user with system administrator rights.
+ *
+ * This user is required for data synchronisation from Elvis to Enterprise. During production, this is done by a Crontab
+ * or Scheduler that continuously runs the sync.php module. For each run, this module does logon the configured admin
+ * user to Enterprise. Note that in this process, the super user (ELVIS_SUPER_USER) is used to retrieve data from Elvis,
+ * while the admin user (ELVIS_ENT_ADMIN_USER) is used to update data in Enterprise.
  */
 if( !defined('ELVIS_ENT_ADMIN_USER') ) {
-	define( 'ELVIS_ENT_ADMIN_USER', ELVIS_SUPER_USER );
+	define( 'ELVIS_ENT_ADMIN_USER', 'woodwing' );
 }
 if( !defined('ELVIS_ENT_ADMIN_PASS') ) {
-	define( 'ELVIS_ENT_ADMIN_PASS', ELVIS_SUPER_USER_PASS );
+	define( 'ELVIS_ENT_ADMIN_PASS', 'ww' );
 }
 
 /**

@@ -6,13 +6,6 @@
  * Implements Content Source Service.
  */
 
-require_once __DIR__.'/ElvisAMFClient.php';
-require_once __DIR__.'/../model/ElvisCSException.php';
-require_once __DIR__.'/../model/ElvisCSNotFoundException.php';
-require_once __DIR__.'/../model/ElvisCSAlreadyExistsException.php';
-require_once __DIR__.'/../model/ElvisCSLinkedToOtherSystemException.php';
-require_once __DIR__.'/../model/ElvisCSAccessDeniedException.php';
-
 /**
  * Interface used by the WoodWing Content Source plugin to perform asset
  * operations.
@@ -45,13 +38,6 @@ class ElvisContentSourceService
 		} else {
 			$this->client = $client;
 		}
-
-		// Register all possible exceptions for conversion from AMF objects
-		ElvisAMFClient::registerClass( ElvisCSException::getName() );
-		ElvisAMFClient::registerClass( ElvisCSNotFoundException::getName() );
-		ElvisAMFClient::registerClass( ElvisCSAlreadyExistsException::getName() );
-		ElvisAMFClient::registerClass( ElvisCSLinkedToOtherSystemException::getName() );
-		ElvisAMFClient::registerClass( ElvisCSAccessDeniedException::getName() );
 	}
 
 	/**

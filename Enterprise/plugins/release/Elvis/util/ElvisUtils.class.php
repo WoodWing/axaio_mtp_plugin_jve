@@ -6,10 +6,9 @@
 class ElvisUtils {
 
 	private static $unlock = null;
-	private static $toDelete = array();
 
 	/**
-	 * @param $unlock
+	 * @param bool $unlock
 	 */
 	public static function setUnlock($unlock)
 	{
@@ -17,7 +16,7 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Returns boolean to indicate if the SaveObject call releases the lock or retains the lock.
+	 * Whether the SaveObject call releases the lock or retains the lock.
 	 *
 	 * True when the SaveObject call releases the lock(check-in),
 	 * false when the SaveObject call retains the lock (remains checkout/save-version)
@@ -108,11 +107,12 @@ class ElvisUtils {
 							$retry = self::retryCopyToFileTransferServer( $attempt, $httpStatus );
 						} while( $retry );
 						if( intval( $httpStatus ) >= 500 ) {
-							ElvisAMFClient::throwExceptionForElvisCommunicationFailure(
-								'Failed to copy '.$rendition.' file from Elvis server to Transfer Server folder.' );
+							throw new Elvis_BizClasses_Exception( 'Failed to copy '.$rendition.
+								' file from Elvis server to Transfer Server folder.', 'ERROR' );
 						}
 						if( intval( $httpStatus ) >= 400 || $httpStatus === false ) { // false: simulate ES < 10.1.4 behaviour
-							throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
+							throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server',
+								null, null, array( '{RENDITION}', $rendition ) );
 						}
 						break;
 					case 'ContentSourceFileLink': // let client directly download from Elvis
@@ -232,32 +232,6 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Composes input stream options from Elvis session cookie.
-	 *
-	 * @since 10.0.5 / 10.1.2
-	 * @return array|null
-	 */
-	private static function composeSessionOptions()
-	{
-		$options = null;
-		require_once __DIR__.'/ElvisSessionUtil.php';
-		$cookies = ElvisSessionUtil::getSessionCookies();
-		if( $cookies ) {
-			$cookiesHeader = array();
-			foreach( $cookies as $name => $value ) {
-				$encodedValue = urlencode( $value );
-				$cookiesHeader[] = "{$name}={$encodedValue}";
-			}
-			if( $cookiesHeader ) {
-				$options = array( 'http' => array(
-					'header' => "Cookie: ".implode('; ',$cookiesHeader ),
-				) );
-			}
-		}
-		return $options;
-	}
-
-	/**
 	 * Restore Elvis version from enterprise version
 	 *
 	 * @param string $version - enterprise version
@@ -279,36 +253,6 @@ class ElvisUtils {
 	{
 		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return ELVIS_ENTERPRISE_VERSIONPREFIX.$version;
-	}
-
-	/**
-	 * Removes the shadow object for the given Elvis id
-	 * 
-	 * @param string $elvisId
-	 */
-	public static function removeGhostShadowObject($elvisId)
-	{
-		// construct alienId
-		$alienId = self::getAlienIdFromAssetId($elvisId);
-		
-		// ensure we invoke BizDeletedObject::deleteObject once (to avoid recursion)
-		if (!in_array($alienId, self::$toDelete)) {
-			self::$toDelete[] = $alienId;
-			
-			// Same check for shadow Id is done in deleteObject, but it will try to 
-			// access Elvis as Alien object instead which we don't want
-			require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
-			$shadowId = BizContentSource::getShadowObjectID($alienId);
-			
-			if ( $shadowId ) {
-				LogHandler::Log('ELVIS', 'DEBUG', 'Elvis asset with id: "' . $elvisId . '" was removed'.
-						', removing matching shadow object with id: "' . $shadowId .'"');
-				// remove shadow object
-				require_once BASEDIR . '/server/bizclasses/BizDeletedObject.class.php';
-				$user = BizSession::getShortUserName();
-				BizDeletedObject::deleteObject($user, $shadowId, true, array('Workflow', 'Trash'), null);
-			}
-		}
 	}
 
 	/**

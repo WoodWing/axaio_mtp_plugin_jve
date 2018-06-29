@@ -23,6 +23,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 
 	const CONFIG_FILES = 'Enterprise/config/plugins/Elvis/config.php or Enterprise/config/overrule_config.php';
 
+	/**
+	 * @inheritdoc
+	 */
 	final public function runTest()
 	{
 		require_once __DIR__.'/../../config.php';
@@ -53,10 +56,10 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if ( !$this->checkBrandSetup() ) {
 			return;
 		}
-		if ( !$this->checkAdminUser() ) {
+		if ( !$this->checkSuperUser() ) {
 			return;
 		}
-		if ( !$this->checkSuperUser() ) {
+		if ( !$this->checkAdminUser() ) {
 			return;
 		}
 		if ( !$this->checkSyncModule() ) {
@@ -68,9 +71,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * Checks if all defines exists in the Elvis/config.php file.
 	 *
 	 * @since 10.1.1
-	 * @return boolean TRUE when check OK, else FALSE.
+	 * @return bool
 	 */
-	private function checkDefinesExist()
+	private function checkDefinesExist() : bool
 	{
 		$result = true;
 
@@ -86,7 +89,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		}
 
 		// Check the passwords that should exist and should be filled in (not empty), but suppress logging the values.
-		$nonEmptySecureDefines = array( 'ELVIS_ENT_ADMIN_PASS', 'ELVIS_SUPER_USER_PASS' );
+		$nonEmptySecureDefines = array( 'ELVIS_ENT_ADMIN_PASS' );
 		if( !$this->utils->validateDefines( $this, $nonEmptySecureDefines, self::CONFIG_FILES, 'ERROR',
 			WW_Utils_TestSuite::VALIDATE_DEFINE_ALL, null, function( $defineName ) { return '***'; } ) ) {
 			$result = false;
@@ -99,6 +102,17 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$result = false;
 		}
 
+		// Check the deprecated defines that should NO longer exist.
+		$help = 'Please check the '.self::CONFIG_FILES.' files and remove the obsoleted option.';
+		$obsoletedDefines = array(
+			array( 'name' => 'ELVIS_SUPER_USER_PASS', 'help' => 'It is superseded by the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options.' ),
+		);
+		foreach( $obsoletedDefines as $opt ) {
+			if( defined( $opt['name'] ) ) {
+				$this->setResult( 'WARN', 'The option '.$opt['name'].' is obsoleted. '.$opt['help'].'', $help );
+			}
+		}
+
 		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server defines existence checked.' );
 		return $result;
 	}
@@ -107,9 +121,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * Checks if all defines in the Elvis/config.php file are correctly filled in.
 	 *
 	 * @since 10.1.1
-	 * @return boolean TRUE when check OK, else FALSE.
+	 * @return bool
 	 */
-	private function checkDefinedValues()
+	private function checkDefinedValues() : bool
 	{
 		$result = true;
 		$help = 'Please check the '.self::CONFIG_FILES.' file.';
@@ -160,7 +174,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * @since 10.0.5 / 10.1.2
 	 * @return bool Whether or not all required extensions are installed.
 	 */
-	private function checkPhpExtensions()
+	private function checkPhpExtensions() : bool
 	{
 		$result = true;
 		$exts = array(
@@ -192,7 +206,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * @since 10.0.5 / 10.1.2
 	 * @return bool Whether or not the method is supported.
 	 */
-	private function checkOpenSslCipherMethod()
+	private function checkOpenSslCipherMethod() : bool
 	{
 		$result = true;
 		$methods = openssl_get_cipher_methods();
@@ -216,7 +230,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * @since 10.0.5 / 10.1.2
 	 * @return string
 	 */
-	private function getPhpIni()
+	private function getPhpIni() : string
 	{
 		ob_start();
 		phpinfo(INFO_GENERAL);
@@ -232,9 +246,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * When successful, it retrieves server info from it and populates $serverInfo.
 	 * When successful, but Elvis tells it is not running / available, a warning is raised.
 	 *
-	 * @return boolean TRUE when could connect (regardless if Elvis is not running / available), else FALSE.
+	 * @return bool TRUE when could connect (regardless if Elvis is not running / available), else FALSE.
 	 */
-	private function checkConnection()
+	private function checkConnection() : bool
 	{
 		$result = true;
 		$this->serverVersion = null;
@@ -282,9 +296,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * Checks if Elvis Server version is compatible with Enterprise Server. See compatibility Matrix for details.
 	 *
 	 * @since 10.1.1
-	 * @return boolean TRUE when check OK, else FALSE.
+	 * @return bool
 	 */
-	private function checkVersionCompatibility()
+	private function checkVersionCompatibility() : bool
 	{
 		$versionOk = version_compare( $this->serverVersion, ELVIS_MINVERSION, '>=' );
 		if( !$versionOk ) {
@@ -302,7 +316,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * @since 10.5.0
 	 * @return bool
 	 */
-	private function checkDbModelElvisPlugin()
+	private function checkDbModelElvisPlugin() : bool
 	{
 		require_once BASEDIR.'/server/dbscripts/dbinstaller/ServerPlugin.class.php';
 		require_once BASEDIR.'/server/dbmodel/Factory.class.php';
@@ -354,9 +368,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * When the Copy To Production Zone feature is enabled, it checks if all brands have the Production Zone filled in.
 	 *
 	 * @since 10.1.1
-	 * @return boolean TRUE when check OK, else FALSE.
+	 * @return bool
 	 */
-	private function checkBrandSetup()
+	private function checkBrandSetup() : bool
 	{
 		$result = true;
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
@@ -395,49 +409,11 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	}
 
 	/**
-	 * Checks if the configured admin user can log on to the Elvis server.
+	 * Checks if the configured super user is configured at the Elvis server.
 	 *
-	 * This user is needed for metadata synchronisation from Elvis to Enterprise
-	 *
-	 * @return boolean TRUE when the user could logon, else FALSE.
+	 * @return bool
 	 */
-	private function checkAdminUser()
-	{
-		$user = null;
-		try {
-			$user = $this->getUserFromElvis( ELVIS_ENT_ADMIN_USER );
-		} catch( BizException $e ) {
-			if( !$this->handleComminicationErrors( $e, 'ELVIS_ENT_ADMIN_USER' ) ) {
-				$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" could not be found at Elvis Server.'.
-					' Reason: '.$e->getMessage().' Detail: '.$e->getDetail();
-				$help = 'Please check the user access configuration in Elvis and check the ELVIS_ENT_ADMIN_USER '.
-					'option in the '.self::CONFIG_FILES.' file.';
-				$this->setResult( 'ERROR', $message, $help );
-			}
-		}
-		$result = !is_null( $user );
-
-		if( $result ) { // TODO: remove the if-part when dropping the ELVIS_ENT_ADMIN_PASS option
-			$result = $this->logOn( ELVIS_ENT_ADMIN_USER, ELVIS_ENT_ADMIN_PASS );
-			if( !$result ) {
-				$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" could not log on to the Elvis Server.';
-				$help = 'Please check the user access configuration in Elvis and check the ELVIS_ENT_ADMIN_USER and '.
-					'ELVIS_ENT_ADMIN_PASS options in the '.self::CONFIG_FILES.' file.';
-				$this->setResult( 'ERROR', $message, $help );
-			}
-		}
-		LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_ENT_ADMIN_USER option checked.' );
-		return $result;
-	}
-
-	/**
-	 * Checks if the configured super user can log on to the Elvis server.
-	 *
-	 * This user is needed for creating PDF previews with InDesign Server.
-	 *
-	 * @return boolean TRUE when the user could logon, else FALSE.
-	 */
-	private function checkSuperUser()
+	private function checkSuperUser() : bool
 	{
 		$user = null;
 		try {
@@ -451,30 +427,48 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 				$this->setResult( 'ERROR', $message, $help );
 			}
 		}
-		$result = !is_null( $user );
-
-		if( $result ) { // TODO: remove the if-part when dropping the ELVIS_SUPER_USER_PASS option
-			$result = $this->logOn( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
-			if( !$result ) {
-				$message = 'The configured user "'.ELVIS_SUPER_USER.'" could not log on to the Elvis Server.';
-				$help = 'Please check the user access configuration in Elvis and check the ELVIS_SUPER_USER and '.
-					'ELVIS_SUPER_USER_PASS options in the '.self::CONFIG_FILES.' file.';
-				$this->setResult( 'ERROR', $message, $help );
-			}
-		}
 		LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_SUPER_USER option checked.' );
+		return !is_null( $user );
+	}
+
+	/**
+	 * Checks if the configured admin user is configured at the Enterprise Server.
+	 *
+	 * @return boolean
+	 */
+	private function checkAdminUser() : bool
+	{
+		$result = $this->logOn( ELVIS_ENT_ADMIN_USER, ELVIS_ENT_ADMIN_PASS );
+		if( !$result ) {
+			$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" could not log on to the Enterprise Server.';
+			$help = 'Please check the user access configuration in Enterprise and check the ELVIS_ENT_ADMIN_USER and '.
+				'ELVIS_ENT_ADMIN_PASS options in the '.self::CONFIG_FILES.' file.';
+			$this->setResult( 'ERROR', $message, $help );
+		}
+
+		if( $result ) {
+			require_once BASEDIR.'/server/secure.php';
+			$result = hasRights( null, ELVIS_ENT_ADMIN_USER ); // system admin rights?
+			if( !$result ) {
+				$message = 'The configured user "'.ELVIS_ENT_ADMIN_USER.'" does not have system access rights for Enterprise.';
+				$help = 'Please check the user access configuration in Enterprise and check the ELVIS_ENT_ADMIN_USER '.
+					'option in the '.self::CONFIG_FILES.' file.';
+			}
+
+			LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_ENT_ADMIN_USER option checked.' );
+		}
 		return $result;
 	}
 
 	/**
 	 * Detect and report low-level communication errors.
 	 *
+	 * @since 10.5.0
 	 * @param BizException $e
 	 * @param string $userDefine
 	 * @return bool Whether or not an error was detected and handled.
-	 * @since 10.5.0
 	 */
-	private function handleComminicationErrors( BizException $e, string $userDefine )
+	private function handleComminicationErrors( BizException $e, string $userDefine ) : bool
 	{
 		$handled = false;
 		$userName = constant( $userDefine );
@@ -514,19 +508,36 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 *
 	 * @param string $user user name.
 	 * @param string $password password.
-	 * @return boolean TRUE when the user could logon, else FALSE.
+	 * @return bool TRUE when the user could logon, else FALSE.
 	 */
-	private function logOn( $user, $password )
+	private function logOn( string $user, string $password ) : bool
 	{
-		require_once __DIR__.'/../../logic/ElvisAMFClient.php';
-		$result = true;
+		require_once BASEDIR.'/server/services/wfl/WflLogOnService.class.php';
+		$retVal = false;
 		try {
-			$credentials = base64_encode($user . ':' . $password); // User name and password are base 64 encoded.
-			ElvisAMFClient::loginByCredentials( $credentials );
-		} catch ( BizException $e ) {
-			$result = false;
+			$request = new WflLogOnRequest();
+			$request->User = $user;
+			$request->Password = $password;
+			$request->Server = 'Enterprise Server';
+			$request->ClientAppName = __CLASS__;
+			$request->ClientAppVersion = 'v'.SERVERVERSION;
+
+			require_once BASEDIR.'/server/utils/UrlUtils.php';
+			$clientip = WW_Utils_UrlUtils::getClientIP();
+			$request->ClientName = isset( $_SERVER['REMOTE_HOST'] ) ? $_SERVER['REMOTE_HOST'] : '';
+			// >>> BZ#6359 Let's use ip since gethostbyaddr could be extreemly expensive! which also risks throwing "Maximum execution time of 11 seconds exceeded"
+			if( empty( $request->ClientName ) ) {
+				$request->ClientName = $clientip;
+			}
+			$request->RequestInfo = array(); // ticket only
+
+			$service = new WflLogOnService();
+			/** @var $response WflLogOnResponse */
+			$response = $service->execute( $request );
+			$retVal = !empty( $response->Ticket );
+		} catch( BizException $e ) {
 		}
-		return $result;
+		return $retVal;
 	}
 
 	/**
@@ -543,7 +554,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 * @since 10.2.0
 	 * @return bool
 	 */
-	private function checkSyncModule()
+	private function checkSyncModule() : bool
 	{
 		require_once __DIR__.'/../../ElvisSync.class.php';
 		$result = true;

@@ -39,10 +39,6 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 		$this->assertTrue( isset( $suiteOpts['ElvisPassword'] ) );
 		$this->checkIfTestUserIsEnabledInElvis( $suiteOpts['ElvisUser'] );
 
-		// Check if the TESTSUITE['User'] option is the same as ELVIS_SUPER_USER, as required by this test script.
-		$this->assertEquals( ELVIS_SUPER_USER, $suiteOpts['User'],
-			'Make sure the TESTSUITE["User"] option matches the ELVIS_SUPER_USER option.');
-
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$utils = new WW_Utils_TestSuite();
 		$utils->initTest( 'JSON' );

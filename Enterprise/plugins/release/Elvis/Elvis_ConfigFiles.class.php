@@ -4,7 +4,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * Provides Elvis/config.php options to the Config Overview page (wwinfo.php) page and the phpinfo.htm file
- * in the server logging. It hides the password values for ELVIS_SUPER_USER_PASS and ELVIS_ENT_ADMIN_PASS.
+ * in the server logging. It hides the password values for ELVIS_SUPER_USER_PASS (and the obsoleted ELVIS_ENT_ADMIN_PASS).
  */
 
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ConfigFiles_EnterpriseConnector.class.php';
@@ -28,6 +28,7 @@ class Elvis_ConfigFiles extends ConfigFiles_EnterpriseConnector
 		if( $optionName == 'ELVIS_SUPER_USER_PASS' || $optionName == 'ELVIS_ENT_ADMIN_PASS' ) {
 			$value = '***';
 		}
+		// Note that ELVIS_ENT_ADMIN_PASS is obsoleted since 10.5.0, but still hide it in case the option is not removed yet.
 		return $value;
 	}
 }

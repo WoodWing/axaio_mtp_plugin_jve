@@ -21,13 +21,8 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp ) 
 	{
-		// Lazy logon; The Elvis integration is loosely coupled. We may need to access Elvis, but in this stage we don't
-		// know yet. However, we do have the user credentials in our hands, so all we do is store those for later use.
-		// For the real logon, see plugins/release/Elvis/logic/ElvisAMFClient.php
-		require_once __DIR__.'/util/ElvisUtils.class.php';
 		if( $req->User && $req->Password ) {
 			require_once __DIR__.'/util/ElvisSessionUtil.php';
-			ElvisSessionUtil::saveCredentials( $req->User, $req->Password );
 			ElvisSessionUtil::setRestricted( false );
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 		}
