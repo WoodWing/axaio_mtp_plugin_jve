@@ -146,10 +146,12 @@ class Elvis_BizClasses_Client
 			'private-api/contentsource/retrieve', $this->shortUserName );
 		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
 		$request->setSubjectId( $assetId );
-		$request->setHttpPostMethod();
-		$request->addPostParam( 'assetId', $assetId );
-		$request->addPostParam( 'checkout', $checkOut ? 'true' : 'false' );
-		$request->addCsvPostParam( 'metadataToReturn', $metadataToReturn );
+		$request->setHttpPutMethod();
+		$request->setJsonBody( (object)[
+			'assetId' => $assetId,
+			'checkout' => $checkOut,
+			'metadataToReturn' => $metadataToReturn
+		] );
 		$request->setExpectJson();
 
 		$response = $this->execute( $request );
