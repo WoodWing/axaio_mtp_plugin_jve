@@ -17,6 +17,7 @@ class WW_TestSuite_BuildTest_Elvis_Teardown_TestCase extends TestCase
 	public function getTestGoals()   { return 'Tries tearing down /clear up the testing environment. '; }
 	public function getTestMethods() { return
 		'<ol>
+		 	<li>Activate the IdsAutomation and AutomatedPrintWorkflow server plug-ins (if the Setup has de-activated them).</li>
 		 	<li>Logoff the user from Enterprise. (LogOff)</li>
 		 </ol>'; }
 	public function getPrio()        { return 1000; }
@@ -30,9 +31,21 @@ class WW_TestSuite_BuildTest_Elvis_Teardown_TestCase extends TestCase
 
 		// Read session data.
 		$vars = $this->getSessionVariables();
-		$ticket = @$vars['BuildTest_Elvis']['ticket'];
+
+		// Activate the IdsAutomation plugin when we did deactivate before.
+		$deactivatedIdsAutomationPlugin = @$vars['BuildTest_Elvis']['deactivatedIdsAutomationPlugin'];
+		if( $deactivatedIdsAutomationPlugin ) {
+			$utils->activatePluginByName( $this, 'IdsAutomation' );
+		}
+
+		// Activate the IdsAutomation plugin when we did deactivate before.
+		$deactivatedAutomatedPrintWorkflowPlugin = @$vars['BuildTest_Elvis']['deactivatedAutomatedPrintWorkflowPlugin'];
+		if( $deactivatedAutomatedPrintWorkflowPlugin ) {
+			$utils->activatePluginByName( $this, 'AutomatedPrintWorkflow' );
+		}
 
 		// LogOff when we did LogOn before.
+		$ticket = @$vars['BuildTest_Elvis']['ticket'];
 		if( $ticket ) {
 			$utils->wflLogOff( $this, $ticket );
 		}

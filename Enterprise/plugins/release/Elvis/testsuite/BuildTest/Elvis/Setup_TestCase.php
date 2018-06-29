@@ -13,15 +13,13 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 {
-	/** @var string|null */
-	private $ticket;
-
 	public function getDisplayName() { return 'Setup test data'; }
 	public function getTestGoals()   { return 'Checks if the basic environment can be setup properly.'; }
 	public function getTestMethods() { return
 		'Perform multiple services to setup the test environment.
 		 <ol>
 		 	<li>Logon user configured at TESTSUITE option in configserver.php.(LogOn)</li>
+		 	<li>De-activate the IdsAutomation and AutomatedPrintWorkflow server plug-ins.</li>
 		 	<li>Retrieve all the necessary settings and set in the session variables.</li>
 		 </ol> '; }
 	public function getPrio()        { return 1; }
@@ -45,10 +43,12 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 		$this->assertEquals( ELVIS_SUPER_USER, $suiteOpts['User'],
 			'Make sure the TESTSUITE["User"] option matches the ELVIS_SUPER_USER option.');
 
-		// LogOn test user through workflow interface
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$utils = new WW_Utils_TestSuite();
 		$utils->initTest( 'JSON' );
+		$vars = array();
+
+		// LogOn test user through workflow interface
 		$utils->setRequestComposer(
 			function( WflLogOnRequest $req ) {
 				$req->ClientAppName = 'WW_TestSuite_BuildTest_Elvis';
@@ -57,16 +57,22 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 			}
 		);
 		$response = $utils->wflLogOn( $this );
+		$this->assertNotNull( $response );
+		$vars['BuildTest_Elvis']['ticket'] = $response->Ticket;
+
+		// Make sure the IdsAutomation plugin is deactivated (disabled).
+		$deactivatedIdsAutomationPlugin = $utils->deactivatePluginByName( $this, 'IdsAutomation' );
+		$this->assertNotNull( $deactivatedIdsAutomationPlugin );
+		$vars['BuildTest_Elvis']['deactivatedIdsAutomationPlugin'] = $deactivatedIdsAutomationPlugin;
+
+		// Make sure the AutomatedPrintWorkflow plugin is deactivated (disabled).
+		$deactivatedAutomatedPrintWorkflowPlugin = $utils->deactivatePluginByName( $this, 'AutomatedPrintWorkflow' );
+		$this->assertNotNull( $deactivatedAutomatedPrintWorkflowPlugin );
+		$vars['BuildTest_Elvis']['deactivatedAutomatedPrintWorkflowPlugin'] = $deactivatedAutomatedPrintWorkflowPlugin;
 
 		// Save the retrieved ticket and brand info into session data.
 		// This data is picked up by successor sibling TestCase modules (within the parental TestSuite).
-		if( !is_null( $response ) ) {
-			$this->ticket = $response->Ticket;
-
-			$vars = array();
-			$vars['BuildTest_Elvis']['ticket'] = $response->Ticket;
-			$this->setSessionVariables( $vars );
-		}
+		$this->setSessionVariables( $vars );
 	}
 
 	/**

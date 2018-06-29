@@ -929,9 +929,9 @@ class WW_Utils_TestSuite
 	 *
 	 * @param TestCase $testCase The test module calling this function.
 	 * @param string $pluginName Server Plug-in to activate.
-	 * @return TRUE when activated. FALSE when no action taken. NULL on activation error.
+	 * @return bool TRUE when activated. FALSE when no action taken. NULL on activation error.
 	 */
-	public function activatePluginByName( TestCase $testCase, $pluginName )
+	public function activatePluginByName( TestCase $testCase, string $pluginName ) : bool
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		if( BizServerPlugin::isPluginActivated( $pluginName ) ) {
@@ -963,9 +963,9 @@ class WW_Utils_TestSuite
 	 *
 	 * @param TestCase $testCase The test module calling this function.
 	 * @param string $pluginName Server Plug-in to deactivate.
-	 * @return TRUE when deactivated. FALSE when no action taken. NULL on deactivation error.
+	 * @return bool TRUE when deactivated. FALSE when no action taken. NULL on deactivation error.
 	 */
-	public function deactivatePluginByName( TestCase $testCase, $pluginName )
+	public function deactivatePluginByName( TestCase $testCase, string $pluginName ) : bool
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		if( !BizServerPlugin::isPluginActivated( $pluginName ) ) {

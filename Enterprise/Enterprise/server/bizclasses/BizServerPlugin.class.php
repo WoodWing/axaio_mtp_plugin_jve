@@ -1268,9 +1268,9 @@ class BizServerPlugin
 	 * Checks if a certain server plug-in is installed and enabled (active).
 	 *
 	 * @param string $pluginName Internal unique name of server plug-in
-	 * @return true if installed and enabled, else false
+	 * @return bool true if installed and enabled, else false
 	 */
-	static public function isPluginActivated( $pluginName )
+	static public function isPluginActivated( string $pluginName ) : bool
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		$pluginInfo = BizServerPlugin::getInstalledPluginInfo( $pluginName );
@@ -1330,7 +1330,7 @@ class BizServerPlugin
 	 * @return PluginInfoData Info of the invoked plug-in.
 	 * @throws BizException On DB error.
 	 */
-	static public function activatePluginByName( $pluginName )
+	static public function activatePluginByName( string $pluginName ) : PluginInfoData
 	{
 		$pluginInfo = self::getInstalledPluginInfo( $pluginName );
 		if( $pluginInfo ) {
@@ -1351,7 +1351,7 @@ class BizServerPlugin
 	 * @return PluginInfoData Info of the invoked plug-in.
 	 * @throws BizException On DB error.
 	 */
-	static public function deactivatePluginByName( $pluginName )
+	static public function deactivatePluginByName( string $pluginName ) : PluginInfoData
 	{
 		$pluginInfo = self::getInstalledPluginInfo( $pluginName );
 		if( $pluginInfo ) {
@@ -1401,9 +1401,8 @@ class BizServerPlugin
 	 * @param EnterprisePlugin $pluginObj
 	 * @param PluginInfoData $pluginInfo
 	 * @throws BizException $e On installation failure or DB error.
-	 * @throws null
 	 */
-	static private function activatePlugin( EnterprisePlugin &$pluginObj, PluginInfoData &$pluginInfo )
+	static private function activatePlugin( EnterprisePlugin &$pluginObj, PluginInfoData &$pluginInfo ) : void
 	{
 		if( !$pluginInfo->IsInstalled || !$pluginInfo->IsActive ) {
 			$e = null;
@@ -1448,9 +1447,7 @@ class BizServerPlugin
 	 * @param PluginInfoData $pluginInfo
 	 * @throws BizException on DB error.
 	 */
-	static private function deactivatePlugin(
-		/** @noinspection PhpUnusedParameterInspection */ EnterprisePlugin &$pluginObj,
-		PluginInfoData &$pluginInfo )
+	static private function deactivatePlugin( EnterprisePlugin &$pluginObj,	PluginInfoData &$pluginInfo ) : void
 	{
 		if( $pluginInfo->IsActive ) {
 			try {

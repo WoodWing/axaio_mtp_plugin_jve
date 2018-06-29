@@ -96,17 +96,21 @@ EOT;
 
 			// Place image on page 4 (and validate image info in Enterprise and Elvis).
 			$this->placeElvisImageOnPage4();
-			$this->getShadowImageObject();
+			$this->getShadowImageObject( false );
 			$this->checkIfImageIsPlacedOnPageForEnterprise( 4 );
 			$this->retrieveImageInfoFromElvis();
 			$this->validateElvisImageInfoAndCheckIfPlacedOnPage( 4 );
 
 			// Move image to page 5 (and validate image info in Enterprise and Elvis).
 			$this->saveLayoutObjectWithImageMovedToPage5();
-			$this->getShadowImageObject();
+			$this->getShadowImageObject( false );
 			$this->checkIfImageIsPlacedOnPageForEnterprise( 5 );
 			$this->retrieveImageInfoFromElvis();
 			$this->validateElvisImageInfoAndCheckIfPlacedOnPage( 5 );
+
+			// Edit the image.
+			$this->getShadowImageObject( true );
+			$this->checkinImageObject();
 
 			// Try to remove the image directly from Elvis, which should fail since it is still in Enterprise.
 			// $this->deleteImageFromElvisShouldFail();
@@ -114,7 +118,7 @@ EOT;
 
 			// Remove the image from the layout (and validate image info in Enterprise and Elvis).
 			$this->checkinLayoutObjectWithRemovedImage();
-			$this->getShadowImageObject();
+			$this->getShadowImageObject( false );
 			$this->checkIfEnterpriseImageIsRemovedFromLayout();
 			$this->retrieveImageInfoFromElvis();
 			$this->validateElvisImageInfoAndCheckIfRemovedFromLayout();
@@ -451,7 +455,7 @@ EOT;
 	/**
 	 * Retrieve the shadow image object from Enterprise.
 	 */
-	private function getShadowImageObject() : void
+	private function getShadowImageObject( $checkout ) : void
 	{
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest();
@@ -461,6 +465,7 @@ EOT;
 		$request->Rendition = 'none';
 		$request->Lock = false;
 		$request->RequestInfo = array( 'MetaData', 'Relations', 'Targets' );
+		$request->Lock = $checkout;
 		/** @var WflGetObjectsResponse $response */
 		$response = $this->testSuiteUtils->callService( $this, $request, 'Get the shadow image from Enterprise' );
 		$this->assertInstanceOf( 'WflGetObjectsResponse', $response );
@@ -620,6 +625,38 @@ EOT;
 		$this->assertInstanceOf( 'Object', $response->Objects[0] );
 		$this->assertCount( 0, $response->Reports );
 		$this->layoutObject = $response->Objects[0];
+	}
+
+	/**
+	 * Check-in the shadow image in Enterprise.
+	 *
+	 * Goal: This makes the Elvis plugin call the 'fieldinfo' service of Elvis Server.
+	 */
+	private function checkinImageObject()
+	{
+		$object = $this->imageObject;
+
+		// Copy the native image file to the Transfer Server folder.
+		$attachment = new Attachment();
+		$attachment->Rendition = 'native';
+		$attachment->Type = 'image/jpeg';
+		$attachment->FilePath = __DIR__.'/testdata/image1_v1.jpg';
+		$this->uploadFileToTransferServer( $attachment );
+		$object->Files = array( $attachment );
+
+		require_once BASEDIR.'/server/services/wfl/WflSaveObjectsService.class.php';
+		$request = new WflSaveObjectsRequest();
+		$request->Ticket = $this->workflowTicket;
+		$request->Unlock = true;
+		$request->CreateVersion = true;
+		$request->ForceCheckIn = false;
+		$request->Objects = array( $this->imageObject );
+		/** @var WflSaveObjectsResponse $response */
+		$response = $this->testSuiteUtils->callService( $this, $request, 'Save the shadow image.' );
+		$this->assertInstanceOf( 'WflSaveObjectsResponse', $response );
+		$this->assertInstanceOf( 'Object', $response->Objects[0] );
+		$this->assertCount( 0, $response->Reports );
+		$this->imageObject = $response->Objects[0];
 	}
 
 	/**
