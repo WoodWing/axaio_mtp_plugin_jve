@@ -404,7 +404,7 @@ class Elvis_BizClasses_Client
 			'enterpriseSystemId' => $enterpriseSystemId,
 			'fields' => $fields
 		] );
-		$request->setHttpPostMethod();
+		$request->setHttpPutMethod();
 
 		$this->execute( $request );
 	}
