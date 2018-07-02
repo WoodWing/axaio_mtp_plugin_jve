@@ -467,7 +467,7 @@ class MadeToPrintDispatcher
 		$objType = DBObject::getObjectType( $objectId );
 		if( $objType == 'Layout' ) {
 			$layoutIds = array( $objectId );
-		} elseif( self::isArticleOrImageAndNotPlacedManifolds( $objectId, $objType ) ) {
+		} elseif( self::isArticleOrImageAndNotPlacedManifolds( intval( $objectId ), $objType ) ) {
 			$layoutIds = self::getParentLayouts( $objectId );
 		}
 
@@ -488,20 +488,20 @@ class MadeToPrintDispatcher
 	 *
 	 * @since 10.4.2
 	 * @param int $objId
-	 * @param string $objType
+	 * @param string|null $objType
 	 * @return bool True when $objType is an article or an image and it's not placed more than 50 times in any layout.
 	 */
-	private static function isArticleOrImageAndNotPlacedManifolds( int $objId, string $objType ):bool
+	private static function isArticleOrImageAndNotPlacedManifolds( int $objId, ?string $objType ):bool
 	{
-		$result = false;
-		if( $objType == 'Article' || $objType == 'Image' ) {
-			if( !BizRelation::isAnyChildPlacedExceedAllowedThreshold( array( $objId ), 50 )) {
-				$result = true;
-			}
+		require_once BASEDIR . '/server/bizclasses/BizRelation.class.php';
+		if( $objType != 'Article' && $objType != 'Image' ) {
+			return false;
 		}
-		return $result;
+		if( BizRelation::isAnyChildPlacedExceedAllowedThreshold( array( $objId ), 50 )) {
+			return false;
+		}
+		return true;
 	}
-
 
 	/**
 	 * Checks if the layout and its children all match the configured 'trigger' statuses.
