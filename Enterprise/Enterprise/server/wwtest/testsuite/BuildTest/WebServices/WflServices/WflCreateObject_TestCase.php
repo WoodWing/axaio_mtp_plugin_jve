@@ -56,7 +56,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 	{
 		// Build two Article objects to test with. (Also used by WflDeleteObject test.)
 		$articleObjs = array();
-		for( $counter=0; $counter<2; $counter++ ) { 
+		for( $counter=0; $counter<2; $counter++ ) {
 			$articleName = 'Article _'. $counter . ' _' .date("m d H i s");
 			$articleObj = $this->buildArticleObject( null, $articleName );
 			if ( is_null( $articleObj )) {
@@ -68,6 +68,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 		$this->uploadObjToTransferServer( $articleObjs );
 
 		$objects = $this->callCreateObjectService( $articleObjs );
+
+		$this->verifyCreateObjectsResponse( $objects );
 
 		$this->collectObjIdsForDeletion( $objects );
 	}
@@ -94,6 +96,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 
 		$objects = $this->callCreateObjectService( $articleObjs );
 
+		$this->verifyCreateObjectsResponse( $objects );
+
 		$this->collectObjIdsForDeletion( $objects );
 	}
 
@@ -108,15 +112,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 			$attachment = $articleObj->Files[0];
 			$content = $attachment->Content;
 			$attachment->Content = null;
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( !$transferServer->writeContentToFileTransferServer( $content, $attachment ) ) {
-				$articleName = $articleObj->MetaData->BasicMetaData->Name;
-				$this->setResult( 'ERROR', 'Failed uploading native file for article "'.$articleName.'".', 
-					'Check the Transfer Server settings at the configserver.php file.' );
-				return;
-			}
-	
 			require_once BASEDIR.'/server/utils/TransferClient.class.php';
 			$transferClient = new WW_Utils_TransferClient( $this->ticket );
 			if( !$transferClient->uploadFile($attachment) ) {
@@ -147,6 +142,25 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 		$response = $this->utils->callService( $this, $request, 'Create Objects' );
 
 		return $response->Objects;
+	}
+
+	/**
+	 * To verify the CreateObjects service calls.
+	 *
+	 * Currently, funciton only verifies the WorkflowMetaData Creator and Modifier.
+	 *
+	 * @since 10.4.2
+	 * @param Object[] $objects
+	 * @throws BizException
+	 */
+	private function verifyCreateObjectsResponse( $objects )
+	{
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
+		$currentUser = $this->vars['BuildTest_WebServices_WflServices']['currentUser'];
+		if( $objects ) foreach( $objects as $object ) {
+			$this->assertEquals( $currentUser->FullName, $object->MetaData->WorkflowMetaData->Creator );
+			$this->assertEquals( $currentUser->FullName, $object->MetaData->WorkflowMetaData->Modifier );
+		}
 	}
 
 	/**
