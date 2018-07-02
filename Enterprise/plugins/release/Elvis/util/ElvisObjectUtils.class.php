@@ -341,8 +341,7 @@ class ElvisObjectUtils
 						require_once __DIR__.'/ElvisObjectRelationUtils.class.php';
 						$shadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( array( $publishForm ) );
 						if( $shadowRelations ) {
-							require_once __DIR__.'/../logic/ElvisUpdateManager.class.php';
-							ElvisUpdateManager::updateOrDeleteAssetRelations( array( $publishForm ), $shadowRelations );
+							Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelations( array( $publishForm ), $shadowRelations );
 						}
 					}
 				}

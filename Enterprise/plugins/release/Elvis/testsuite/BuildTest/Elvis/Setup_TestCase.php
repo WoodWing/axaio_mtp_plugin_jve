@@ -89,10 +89,9 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 	 */
 	private function checkIfFallbackUserIsEnabledInElvis()
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
 		require_once __DIR__.'/../../../config.php'; // ELVIS_SUPER_USER
 
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$userDetails = $service->getUserDetails( ELVIS_SUPER_USER );
 		$this->assertTrue( $userDetails->enabled );
 	}
@@ -104,10 +103,9 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 	 */
 	private function checkIfTestUserIsEnabledInElvis( $username )
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
 		require_once __DIR__.'/../../../config.php'; // ELVIS_SUPER_USER
 
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$userDetails = $service->getUserDetails( $username );
 		$this->assertTrue( $userDetails->enabled );
 	}

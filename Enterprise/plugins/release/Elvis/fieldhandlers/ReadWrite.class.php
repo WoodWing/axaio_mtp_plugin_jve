@@ -3,7 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-class ReadWriteFieldHandler
+class Elvis_FieldHandlers_ReadWrite
 {
 	/** @var string $lvsFieldName */
 	public $lvsFieldName;

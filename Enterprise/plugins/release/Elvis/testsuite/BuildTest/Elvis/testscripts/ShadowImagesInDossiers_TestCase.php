@@ -361,9 +361,7 @@ EOT;
 	 */
 	private function getUserFromElvis( string $username ) : Elvis_DataClasses_EntUserDetails
 	{
-		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
-
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		return $service->getUserDetails( $username );
 	}
 
@@ -416,8 +414,7 @@ EOT;
 	 */
 	private function createElvisImage( int $imageIndex )
 	{
-		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$metadata = array();
 		$hit = $service->create( $metadata, $this->images[ $imageIndex ]->attachments[0] );
 		$this->assertInstanceOf( 'Elvis_DataClasses_EntHit', $hit );
@@ -598,10 +595,8 @@ EOT;
 	 */
 	private function updateElvisImage()
 	{
-		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
-
 		$client = new Elvis_BizClasses_TestClient( $this->elvisTestUserName );
-		$service = new ElvisContentSourceService( $this->elvisTestUserName, $client ); // the service starts using our client
+		$service = new Elvis_BizClasses_AssetService( $this->elvisTestUserName, $client ); // the service starts using our client
 		$this->assertTrue( $client->login( $this->elvisTestUserPassword ) );
 
 		$metadata = array();
@@ -798,8 +793,7 @@ EOT;
 	 */
 	private function validateImageDescriptionFieldsAtElvis()
 	{
-		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		foreach( $this->images as $image ) {
 			if( $image->assetHit ) {
 				$hit = $service->retrieve( $image->assetHit->id );
@@ -844,10 +838,8 @@ EOT;
 	 */
 	private function retrieveElvisImage( int $imageIndex )
 	{
-		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
-
 		$imageObject = $this->images[ $imageIndex ]->entObject;
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$hit = $service->retrieve( $imageObject->MetaData->BasicMetaData->DocumentID, false );
 		$this->assertInstanceOf( 'Elvis_DataClasses_EntHit', $hit );
 		$this->assertNotNull( $hit->id );

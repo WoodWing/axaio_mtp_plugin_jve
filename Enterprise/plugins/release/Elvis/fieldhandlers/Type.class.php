@@ -3,9 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once 'ReadOnlyFieldHandler.class.php';
-
-class TypeFieldHandler extends ReadOnlyFieldHandler
+class Elvis_FieldHandlers_Type extends Elvis_FieldHandlers_ReadOnly
 {
 	public function __construct()
 	{

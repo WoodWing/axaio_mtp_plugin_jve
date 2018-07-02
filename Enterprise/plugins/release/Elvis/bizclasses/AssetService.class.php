@@ -1,16 +1,12 @@
 <?php
 /**
+ * Performs asset related operations on Elvis Server.
+ *
  * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Implements Content Source Service.
  */
 
-/**
- * Interface used by the WoodWing Content Source plugin to perform asset
- * operations.
- */
-class ElvisContentSourceService
+class Elvis_BizClasses_AssetService
 {
 	const SERVICE = 'contentSourceService';
 

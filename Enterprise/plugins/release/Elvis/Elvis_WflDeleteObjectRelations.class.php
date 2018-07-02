@@ -35,11 +35,9 @@ class Elvis_WflDeleteObjectRelations extends WflDeleteObjectRelations_Enterprise
 
 	final public function runAfter( WflDeleteObjectRelationsRequest $req, WflDeleteObjectRelationsResponse &$resp )
 	{
-		require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
-
 		// Update Elvis with new shadow relations (if any) of changed layouts
 		if( $this->changedLayoutIds ) {
-			ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $this->changedLayoutIds, null );
+			Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelationsByObjectIds( $this->changedLayoutIds, null );
 		}
 	} 
 	

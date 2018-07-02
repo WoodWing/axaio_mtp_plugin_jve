@@ -1,10 +1,10 @@
 <?php
 class Elvis_BizClasses_Metadata
 {
-	/** @var ReadWriteFieldHandler[] */
+	/** @var Elvis_FieldHandlers_ReadWrite[] */
 	private $fieldHandlers;
 
-	/** @var ReadWriteFieldHandler[] */
+	/** @var Elvis_FieldHandlers_ReadWrite[] */
 	private $fieldHandlersByElvisMetadata;
 
 	/** @var  string[] Elvis field names */
@@ -40,10 +40,10 @@ class Elvis_BizClasses_Metadata
 	 * is specified then the brand must be the same as the one already set on the Enterprise metadata.
 	 *
 	 * @param BasicMetaData $basicMetaData
-	 * @param ReadWriteFieldHandler $fieldHandler
+	 * @param Elvis_FieldHandlers_ReadWrite $fieldHandler
 	 * @return bool
 	 */
-	private function fieldsCanBeMapped( BasicMetaData $basicMetaData, ReadWriteFieldHandler $fieldHandler )
+	private function fieldsCanBeMapped( BasicMetaData $basicMetaData, Elvis_FieldHandlers_ReadWrite $fieldHandler )
 	{
 		$result = false;
 		if( empty( $fieldHandler->mappedToBrand() ) ) {
@@ -137,8 +137,7 @@ class Elvis_BizClasses_Metadata
 		// Send to Elvis only editable metadata fields.
 		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $editableFields ) );
 		if( $elvisMetadata ) {
-			require_once __DIR__.'/../logic/ElvisContentSourceService.php';
-			$service = new ElvisContentSourceService();
+			$service = new Elvis_BizClasses_AssetService();
 			$service->update( $assetId, $elvisMetadata, $file, $undoCheckout );
 		}
 	}
@@ -165,46 +164,34 @@ class Elvis_BizClasses_Metadata
 	private function initFieldHandlers()
 	{
 		require_once __DIR__.'/../config.php';
-		require_once __DIR__.'/../model/fieldHandler/ContentSourceFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/CopyrightMarkedFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/NameFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/KeywordsFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/ReadOnlyFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/ReadWriteFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/ShadowIdFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/TypeFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/FormatFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/VersionFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/WriteOnlyFieldHandler.class.php';
-		require_once __DIR__.'/../model/fieldHandler/UserFieldHandler.class.php';
 		if( isset( $this->fieldHandlers ) ) {
 			return;
 		}
-		//FieldHandler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname
+		// Elvis_FieldHandlers_... parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname
 
 		//Get configurable field handlers from config
-		$this->fieldHandlers = Elvis_Config_GetFieldHanders();
+		$this->fieldHandlers = Elvis_Config_GetFieldHandlers();
 
 		//Special FieldHandlers
-		$this->fieldHandlers['Keywords'] = new KeywordsFieldHandler();               //"tags", true, "text", "Keywords"
-		$this->fieldHandlers['Name'] = new NameFieldHandler();                     //"name", false, "text", "Name"
-		$this->fieldHandlers['Type'] = new TypeFieldHandler();                     //"assetDomain", false, "text", "Type"
-		$this->fieldHandlers['Format'] = new FormatFieldHandler();                  //"mimeType", false, "text", "Format"
-		$this->fieldHandlers['Version'] = new VersionFieldHandler();               //"versionNumber", false, "number", "Version"
-		$this->fieldHandlers['ContentSource'] = new ContentSourceFieldHandler();      //"", false, "text", "ContentSource"
-		$this->fieldHandlers['DocumentID'] = new ShadowIdFieldHandler();            //"id", false, "text", "DocumentID"
-		$this->fieldHandlers['CopyrightMarked'] = new CopyrightMarkedFieldHandler();   //"", false, "", "CopyrightMarked"
+		$this->fieldHandlers['Keywords'] = new Elvis_FieldHandlers_Keywords();               //"tags", true, "text", "Keywords"
+		$this->fieldHandlers['Name'] = new Elvis_FieldHandlers_Name();                     //"name", false, "text", "Name"
+		$this->fieldHandlers['Type'] = new Elvis_FieldHandlers_Type();                     //"assetDomain", false, "text", "Type"
+		$this->fieldHandlers['Format'] = new Elvis_FieldHandlers_Format();                  //"mimeType", false, "text", "Format"
+		$this->fieldHandlers['Version'] = new Elvis_FieldHandlers_Version();               //"versionNumber", false, "number", "Version"
+		$this->fieldHandlers['ContentSource'] = new Elvis_FieldHandlers_ContentSource();      //"", false, "text", "ContentSource"
+		$this->fieldHandlers['DocumentID'] = new Elvis_FieldHandlers_ShadowId();            //"id", false, "text", "DocumentID"
+		$this->fieldHandlers['CopyrightMarked'] = new Elvis_FieldHandlers_CopyrightMarked();   //"", false, "", "CopyrightMarked"
 
-		$this->fieldHandlers['Modifier'] = new UserFieldHandler( "assetFileModifier", false, "text", "Modifier" );
+		$this->fieldHandlers['Modifier'] = new Elvis_FieldHandlers_User( "assetFileModifier", false, "text", "Modifier" );
 		$this->fieldHandlers['Modifier']->replaceUnknownUserWithActingUser( $this->getHandlerName() );
 
-		$this->fieldHandlers['Modified'] = new ReadOnlyFieldHandler( "assetFileModified", false, "datetime", "Modified" );
-		$this->fieldHandlers['Creator'] = new UserFieldHandler( "assetCreator", false, "text", "Creator" );
-		$this->fieldHandlers['Created'] = new ReadOnlyFieldHandler( "assetCreated", false, "datetime", "Created" );
+		$this->fieldHandlers['Modified'] = new Elvis_FieldHandlers_ReadOnly( "assetFileModified", false, "datetime", "Modified" );
+		$this->fieldHandlers['Creator'] = new Elvis_FieldHandlers_User( "assetCreator", false, "text", "Creator" );
+		$this->fieldHandlers['Created'] = new Elvis_FieldHandlers_ReadOnly( "assetCreated", false, "datetime", "Created" );
 
 		// We can only set the user who locks the file, not the locked date, Enterprise defines it's own date
-		$this->fieldHandlers['LockedBy'] = new UserFieldHandler( "checkedOutBy", false, "text", "LockedBy" );
-		$this->fieldHandlers['FileSize'] = new ReadOnlyFieldHandler( "fileSize", false, "number", "FileSize" );
+		$this->fieldHandlers['LockedBy'] = new Elvis_FieldHandlers_User( "checkedOutBy", false, "text", "LockedBy" );
+		$this->fieldHandlers['FileSize'] = new Elvis_FieldHandlers_ReadOnly( "fileSize", false, "number", "FileSize" );
 
 		$this->fieldHandlersByElvisMetadata = array();
 		foreach( $this->fieldHandlers as $fieldHandler ) {
@@ -223,8 +210,8 @@ class Elvis_BizClasses_Metadata
 
 		//	Not mapped because complexity > importance
 
-		//	$this->fieldHandlers['Compression'] = new ReadOnlyFieldHandler("compression", false, "number", "Compression");
-		//	$this->fieldHandlers['Urgency'] = new UrgencyFieldHandler();
+		//	$this->fieldHandlers['Compression'] = new Elvis_FieldHandlers_ReadOnly("compression", false, "number", "Compression");
+		//	$this->fieldHandlers['Urgency'] = new Elvis_FieldHandlers_UrgencyFieldHandler();
 	}
 
 	/**
@@ -239,7 +226,7 @@ class Elvis_BizClasses_Metadata
 			$this->metadataToReturn = array();
 			foreach( $this->fieldHandlers as $fieldHandler ) {
 				$elvisFieldName = $fieldHandler->lvsFieldName;
-				if( !( $fieldHandler instanceof WriteOnlyFieldHandler ) && isset( $elvisFieldName ) && trim( $elvisFieldName )
+				if( !( $fieldHandler instanceof Elvis_FieldHandlers_WriteOnly ) && isset( $elvisFieldName ) && trim( $elvisFieldName )
 					&& !in_array( $elvisFieldName, $this->metadataToReturn )
 				) {
 					$this->metadataToReturn[] = $elvisFieldName;

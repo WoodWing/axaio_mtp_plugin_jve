@@ -77,7 +77,6 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 	final public function runAfter( WflSetObjectPropertiesRequest $req, WflSetObjectPropertiesResponse &$resp )
 	{
 		require_once __DIR__.'/config.php';
-		require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
 		require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
 
 		$updatedObjects = array();
@@ -97,7 +96,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 
 		// Update Elvis when there's changes in Layout Target and the layout has Elvis shadow child objects.
 		if( $updatedObjects && $updatedShadowRelations ) {
-			ElvisUpdateManager::updateOrDeleteAssetRelations( $updatedObjects, $updatedShadowRelations );
+			Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelations( $updatedObjects, $updatedShadowRelations );
 		}
 	}
 	

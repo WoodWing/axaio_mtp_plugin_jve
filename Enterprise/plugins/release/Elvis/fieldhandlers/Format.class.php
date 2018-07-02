@@ -3,9 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once 'ReadWriteFieldHandler.class.php';
-
-class FormatFieldHandler extends ReadWriteFieldHandler
+class Elvis_FieldHandlers_Format extends Elvis_FieldHandlers_ReadWrite
 {
 	public function __construct()
 	{

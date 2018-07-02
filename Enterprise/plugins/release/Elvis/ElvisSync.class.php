@@ -9,7 +9,6 @@
  */
 
 require_once __DIR__.'/config.php';
-require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
 class ElvisSync
 {
@@ -25,7 +24,7 @@ class ElvisSync
 	/** @var float */
 	private $syncStartTime;
 
-	/** @var ElvisContentSourceService */
+	/** @var Elvis_BizClasses_AssetService */
 	private $elvisContentSourceService;
 
 	/** @var string */
@@ -274,7 +273,7 @@ class ElvisSync
 			// through this sync.
 			BizSession::setServiceName( 'ElvisSync' );
 
-			$this->elvisContentSourceService = new ElvisContentSourceService();
+			$this->elvisContentSourceService = new Elvis_BizClasses_AssetService();
 
 			return $ticket;
 

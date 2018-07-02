@@ -239,7 +239,7 @@ WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
 /**
  * Field mappings between Enterprise and Elvis fields. 
  * 
- * Custom Enterprise fields and multivalue Elvis fields are not supported in this mapping
+ * Custom Enterprise fields and multi-value Elvis fields are not supported in this mapping
  * 
  * Special fields which are statically mapped between Enterprise and Elvis:
  * - Keywords <-> tags
@@ -260,64 +260,73 @@ WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
  * - Compression
  * - Urgency
  * 
- * FieldHandler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname 
+ * Since 10.5.0 the field handlers are renamed as follows:
+ * - ReadWriteFieldHandler => Elvis_FieldHandlers_ReadWrite
+ * - ReadOnlyFieldHandler  => Elvis_FieldHandlers_ReadOnly
+ * - NameFieldHandler      => Elvis_FieldHandlers_Name
+ * - ... etc
+ * If your Elvis/config.php file still contains field handlers in the old notation, please adjust accordingly.
+ *
+ * Since 10.5.0 it is recommended to add your custom field handlers in the config_overrule.php file.
+ * Please add them in a function named Elvis_Config_GetAdditionalFieldHandlers as follows:
+ *    function Elvis_Config_GetAdditionalFieldHandlers()
+ *    {
+ *       // Field handler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname
+ *       $cfgFieldHandlers = array();
+ *       $cfgFieldHandlers['C_BooleanTest'] = new Elvis_FieldHandlers_ReadWrite("cf_BooleanTest", false, "boolean", "C_BooleanTest");
+ *       $cfgFieldHandlers['C_DateTest'] = new Elvis_FieldHandlers_ReadWrite("cf_DateTest", false, "datetime", "C_DateTest");
+ *       $cfgFieldHandlers['C_DateTimeTest'] = new Elvis_FieldHandlers_ReadWrite("cf_DateTimeTest", false, "datetime", "C_DateTimeTest");
+ *       $cfgFieldHandlers['C_DoubleTest'] = new Elvis_FieldHandlers_ReadWrite("cf_DoubleTest", false, "decimal", "C_DoubleTest");
+ *       $cfgFieldHandlers['C_IntegerTest'] = new Elvis_FieldHandlers_ReadWrite("cf_IntegerTest", false, "number", "C_IntegerTest");
+ *       $cfgFieldHandlers['C_ListTest'] = new Elvis_FieldHandlers_ReadWrite("cf_ListTest", false, "text", "C_ListTest");
+ *       $cfgFieldHandlers['C_MultiLineTest'] = new Elvis_FieldHandlers_ReadWrite("cf_MultiLineTest", false, "text", "C_MultiLineTest");
+ *       $cfgFieldHandlers['C_MultiListTestElvisMultiField'] = new Elvis_FieldHandlers_ReadWrite("cf_MultiListTestElvisMultiField", true, "text", "C_MultiListTestElvisMultiField");
+ *       $cfgFieldHandlers['C_MultiStringTestElvisMultiField'] = new Elvis_FieldHandlers_ReadWrite("cf_MultiStringTestElvisMultiField", true, "text", "C_MultiStringTestElvisMultiField");
+ *       $cfgFieldHandlers['C_StringTest'] = new Elvis_FieldHandlers_ReadWrite("cf_StringTest", false, "text", "C_StringTest");
+ *       // In case the mapping is only applicable for a specific brand, the brand Id ( e.g. 1) can be added.
+ *       $cfgFieldHandlers['C_StringTest'] = new Elvis_FieldHandlers_ReadWrite("cf_StringTest", false, "text", "C_StringTest", 1 );
+ *       return $cfgFieldHandlers;
+ *    }
+ * In the very exceptional case that you want to change the field definitions listed below, it is recommended
+ * to add them to the Elvis_Config_GetAdditionalFieldHandlers function in the config_overrule.php file, since
+ * that is easier to maintain than adjusting the definitions below.
+ *
+ * Since 10.5.0 the field handlers are listed in a new function named Elvis_Config_GetFieldHandlers.
+ * If that function does not exist in your Elvis/config.php file, please add as shown below:
  */
-
-if( !function_exists( 'Elvis_Config_GetFieldHanders' ) ) {
-	function Elvis_Config_GetFieldHanders()
+if( !function_exists( 'Elvis_Config_GetFieldHandlers' ) ) {
+	function Elvis_Config_GetFieldHandlers()
 	{
-		require_once __DIR__.'/model/fieldHandler/ReadOnlyFieldHandler.class.php';
-		require_once __DIR__.'/model/fieldHandler/ReadWriteFieldHandler.class.php';
-		require_once __DIR__.'/model/fieldHandler/ResolutionFieldHandler.class.php';
-
+		// Field handler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname
 		$cfgFieldHandlers = array();
 
 		// Read Write Handlers
-		$cfgFieldHandlers['Comment'] = new ReadWriteFieldHandler( "versionDescription", false, "text", "Comment" );
-		$cfgFieldHandlers['Rating'] = new ReadWriteFieldHandler( "rating", false, "number", "Rating" );
-		$cfgFieldHandlers['Copyright'] = new ReadWriteFieldHandler( "copyright", false, "text", "Copyright" );
-		$cfgFieldHandlers['CopyrightURL'] = new ReadWriteFieldHandler( "licensorWebsite", false, "text", "CopyrightURL" );
-		$cfgFieldHandlers['Author'] = new ReadWriteFieldHandler( "creatorName", false, "text", "Author" );
-		$cfgFieldHandlers['Credit'] = new ReadWriteFieldHandler( "credit", false, "text", "Credit" );
-		$cfgFieldHandlers['Source'] = new ReadWriteFieldHandler( "source", false, "text", "Source" );
-		$cfgFieldHandlers['Description'] = new ReadWriteFieldHandler( "description", false, "text", "Description" );
-		$cfgFieldHandlers['DescriptionAuthor'] = new ReadWriteFieldHandler( "captionWriter", false, "text", "DescriptionAuthor" );
+		$cfgFieldHandlers['Comment'] = new Elvis_FieldHandlers_ReadWrite( "versionDescription", false, "text", "Comment" );
+		$cfgFieldHandlers['Rating'] = new Elvis_FieldHandlers_ReadWrite( "rating", false, "number", "Rating" );
+		$cfgFieldHandlers['Copyright'] = new Elvis_FieldHandlers_ReadWrite( "copyright", false, "text", "Copyright" );
+		$cfgFieldHandlers['CopyrightURL'] = new Elvis_FieldHandlers_ReadWrite( "licensorWebsite", false, "text", "CopyrightURL" );
+		$cfgFieldHandlers['Author'] = new Elvis_FieldHandlers_ReadWrite( "creatorName", false, "text", "Author" );
+		$cfgFieldHandlers['Credit'] = new Elvis_FieldHandlers_ReadWrite( "credit", false, "text", "Credit" );
+		$cfgFieldHandlers['Source'] = new Elvis_FieldHandlers_ReadWrite( "source", false, "text", "Source" );
+		$cfgFieldHandlers['Description'] = new Elvis_FieldHandlers_ReadWrite( "description", false, "text", "Description" );
+		$cfgFieldHandlers['DescriptionAuthor'] = new Elvis_FieldHandlers_ReadWrite( "captionWriter", false, "text", "DescriptionAuthor" );
 
 		// Read only Handlers
-		$cfgFieldHandlers['AspectRatio'] = new ReadOnlyFieldHandler( "aspectRatio", false, "decimal", "AspectRatio" );
-		$cfgFieldHandlers['Channels'] = new ReadOnlyFieldHandler( "audioChannels", false, "text", "Channels" );
-		$cfgFieldHandlers['ColorSpace'] = new ReadOnlyFieldHandler( "colorSpace", false, "text", "ColorSpace" );
-		$cfgFieldHandlers['Dpi'] = new ResolutionFieldHandler( "resolutionX", false, "number", "Dpi" );
-		$cfgFieldHandlers['Encoding'] = new ReadOnlyFieldHandler( "videoCodec", false, "text", "Encoding" );
-		$cfgFieldHandlers['Width'] = new ReadOnlyFieldHandler( "width", false, "number", "Width" );
-		$cfgFieldHandlers['Height'] = new ReadOnlyFieldHandler( "height", false, "number", "Height" );
-		$cfgFieldHandlers['Orientation'] = new ReadOnlyFieldHandler( "orientation", false, "number", "Orientation" );
-		$cfgFieldHandlers['LengthChars'] = new ReadOnlyFieldHandler( "numberOfCharacters", false, "number", "LengthChars" );
-		$cfgFieldHandlers['LengthLines'] = new ReadOnlyFieldHandler( "numberOfLines", false, "number", "LengthLines" );
-		$cfgFieldHandlers['LengthParas'] = new ReadOnlyFieldHandler( "numberOfParagraphs", false, "number", "LengthParas" );
-		$cfgFieldHandlers['LengthWords'] = new ReadOnlyFieldHandler( "wordCount", false, "number", "LengthWords" );
+		$cfgFieldHandlers['AspectRatio'] = new Elvis_FieldHandlers_ReadOnly( "aspectRatio", false, "decimal", "AspectRatio" );
+		$cfgFieldHandlers['Channels'] = new Elvis_FieldHandlers_ReadOnly( "audioChannels", false, "text", "Channels" );
+		$cfgFieldHandlers['ColorSpace'] = new Elvis_FieldHandlers_ReadOnly( "colorSpace", false, "text", "ColorSpace" );
+		$cfgFieldHandlers['Dpi'] = new Elvis_FieldHandlers_Resolution( "resolutionX", false, "number", "Dpi" );
+		$cfgFieldHandlers['Encoding'] = new Elvis_FieldHandlers_ReadOnly( "videoCodec", false, "text", "Encoding" );
+		$cfgFieldHandlers['Width'] = new Elvis_FieldHandlers_ReadOnly( "width", false, "number", "Width" );
+		$cfgFieldHandlers['Height'] = new Elvis_FieldHandlers_ReadOnly( "height", false, "number", "Height" );
+		$cfgFieldHandlers['Orientation'] = new Elvis_FieldHandlers_ReadOnly( "orientation", false, "number", "Orientation" );
+		$cfgFieldHandlers['LengthChars'] = new Elvis_FieldHandlers_ReadOnly( "numberOfCharacters", false, "number", "LengthChars" );
+		$cfgFieldHandlers['LengthLines'] = new Elvis_FieldHandlers_ReadOnly( "numberOfLines", false, "number", "LengthLines" );
+		$cfgFieldHandlers['LengthParas'] = new Elvis_FieldHandlers_ReadOnly( "numberOfParagraphs", false, "number", "LengthParas" );
+		$cfgFieldHandlers['LengthWords'] = new Elvis_FieldHandlers_ReadOnly( "wordCount", false, "number", "LengthWords" );
 
-		// Custom Enterprise field mapped to custom Elvis field - sample mappings
-		/*
-		$cfgFieldHandlers['C_BooleanTest'] = new ReadWriteFieldHandler("cf_BooleanTest", false, "boolean", "C_BooleanTest");
-		$cfgFieldHandlers['C_DateTest'] = new ReadWriteFieldHandler("cf_DateTest", false, "datetime", "C_DateTest");
-		$cfgFieldHandlers['C_DateTimeTest'] = new ReadWriteFieldHandler("cf_DateTimeTest", false, "datetime", "C_DateTimeTest");
-		$cfgFieldHandlers['C_DoubleTest'] = new ReadWriteFieldHandler("cf_DoubleTest", false, "decimal", "C_DoubleTest");
-		$cfgFieldHandlers['C_IntegerTest'] = new ReadWriteFieldHandler("cf_IntegerTest", false, "number", "C_IntegerTest");
-		$cfgFieldHandlers['C_ListTest'] = new ReadWriteFieldHandler("cf_ListTest", false, "text", "C_ListTest");
-		$cfgFieldHandlers['C_MultiLineTest'] = new ReadWriteFieldHandler("cf_MultiLineTest", false, "text", "C_MultiLineTest");
-		$cfgFieldHandlers['C_MultiListTestElvisMultiField'] = new ReadWriteFieldHandler("cf_MultiListTestElvisMultiField", true, "text", "C_MultiListTestElvisMultiField");
-		$cfgFieldHandlers['C_MultiStringTestElvisMultiField'] = new ReadWriteFieldHandler("cf_MultiStringTestElvisMultiField", true, "text", "C_MultiStringTestElvisMultiField");
-		$cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest");
-		// In case the mapping is only applicable for a specific brand, the brand Id ( e.g. 1) can be added.
-		$cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest", 1 );
-		*/
-
-		// Instead of editing the above, allow customizations adding more handlers (or overruling one/more of the built-in
-		// handlers) in a way that is easier maintain. For that a global function named Elvis_Config_GetAdditionalFieldHanders
-		// should be defined in the in config_overrule.php file that returns a list of file handlers to be merged/overruled.
-		if( function_exists( 'Elvis_Config_GetAdditionalFieldHanders' ) ) {
-			$extraFieldHanders = Elvis_Config_GetAdditionalFieldHanders();
+		if( function_exists( 'Elvis_Config_GetAdditionalFieldHandlers' ) ) {
+			$extraFieldHanders = Elvis_Config_GetAdditionalFieldHandlers();
 			$cfgFieldHandlers = array_merge( $cfgFieldHandlers, $extraFieldHanders );
 		}
 
@@ -327,7 +336,7 @@ if( !function_exists( 'Elvis_Config_GetFieldHanders' ) ) {
 if( defined( 'ELVIS_FIELD_HANDLERS' ) ) { // Warn incomplete migrations.
 	LogHandler::Log( 'EVLIS', 'ERROR', 'The ELVIS_FIELD_HANDLERS option is no longer supported. '.
 		'To configure field handlers in your config_overrule.php file, please define a function named '.
-		'Elvis_Config_GetFieldHanders. In the config/plugins/Elvis/config.php file there is the default implementation '.
+		'Elvis_Config_GetFieldHandlers. In the config/plugins/Elvis/config.php file there is the default implementation '.
 		'of this function which could be used as an example. And, please remove your ELVIS_FIELD_HANDLERS option definition. '
 );
 }

@@ -58,8 +58,7 @@ class Elvis_TestSuite_BuildTest_Elvis_SyncUtils
 	 */
 	public function emptyElvisQueue() : void
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		do {
 			$updates = $service->retrieveAssetUpdates( 1 ); // Get updates from Elvis.
 			$updateIds = array_map( function( $update ) { return $update->id; }, $updates );
@@ -76,8 +75,7 @@ class Elvis_TestSuite_BuildTest_Elvis_SyncUtils
 	 */
 	public function countAssetUpdates() : int
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		return count( $service->retrieveAssetUpdates( 1 ) );
 	}
 
@@ -86,8 +84,7 @@ class Elvis_TestSuite_BuildTest_Elvis_SyncUtils
 	 */
 	public function pushMetadataConfig()
 	{
-		require_once __DIR__.'/../../../logic/ElvisContentSourceService.php';
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$metadataHandler = new Elvis_BizClasses_Metadata();
 		$fields = $metadataHandler->getMetadataToReturn();
 		$service->configureMetadataFields( $fields );

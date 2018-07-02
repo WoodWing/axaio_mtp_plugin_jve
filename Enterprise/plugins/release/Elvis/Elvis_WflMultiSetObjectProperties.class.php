@@ -77,8 +77,7 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 
 			// Update Elvis with new shadow relations of un-archived objects (if any)
 			if( !empty( $changedObjectIds ) ) {
-				require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
-				ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $changedObjectIds, null );
+				Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelationsByObjectIds( $changedObjectIds, null );
 			}
 		}
 	} 

@@ -3,9 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once 'ReadOnlyFieldHandler.class.php';
-
-class KeywordsFieldHandler extends ReadWriteFieldHandler
+class Elvis_FieldHandlers_Keywords extends Elvis_FieldHandlers_ReadWrite
 {
 	public function __construct()
 	{

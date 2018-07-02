@@ -97,24 +97,23 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 	{
 		require_once __DIR__.'/config.php';
 		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
-		require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
 
 		if( !empty( $this->deletedShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the following deleted layouts
 			$deletedIds = array_keys( $this->deletedShadowRelations );
-			ElvisUpdateManager::deleteAssetRelationsByObjectIds( $deletedIds, array( 'Trash' ) );
+			Elvis_BizClasses_AssetRelationsService::deleteAssetRelationsByObjectIds( $deletedIds, array( 'Trash' ) );
 		}
 
 		if( !empty( $this->deletedWorkflowShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the found updated shadow objects for the layouts
 			$deletedIds = array_keys( $this->deletedWorkflowShadowRelations );
-			ElvisUpdateManager::deleteAssetRelationsByObjectIds( $deletedIds );
+			Elvis_BizClasses_AssetRelationsService::deleteAssetRelationsByObjectIds( $deletedIds );
 		}
 
 		if( !empty( $this->updatedShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the following layouts without shadow relations
 			$updatedIds = array_keys( $this->updatedShadowRelations );
-			ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $updatedIds, $this->updatedShadowRelations );
+			Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelationsByObjectIds( $updatedIds, $this->updatedShadowRelations );
 		}
 	} 
 

@@ -55,12 +55,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	final public function getAlienObject( $alienId, $rendition, $lock )
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getAlienObject called for alienId:' . $alienId . '; rendition:' . $rendition . '; lock:' . $lock );
 
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$hit = $service->retrieve( $assetId, $lock );
 
 		$object = new Object();
@@ -97,14 +96,13 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public function getShadowObject2( $alienId, &$object, $objprops, $lock, $rendition, $haveVersion )
 	{
-		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 
 		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
 
 		$this->checkUserEditRight( $lock, $rendition );
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$hit = $service->retrieve( $assetId, $lock );
 
 		$hasSceId = array_key_exists('sceId', $hit->{'metadata'}) && empty($hit->{'metadata'}['sceId']);
@@ -136,7 +134,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$elvisMetadata['sceModified'] = $objprops['Modified'];
 			$elvisMetadata['sceModifier'] = $objprops['Modifier'];
 
-			$service = new ElvisContentSourceService();
+			$service = new Elvis_BizClasses_AssetService();
 			$service->updateWorkflowMetadata( array( $assetId ), $elvisMetadata );
 		}
 	}
@@ -167,11 +165,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	final public function createShadowObject( $alienId, $destObject )
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId );
 
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
@@ -222,12 +219,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	public function createCopyObject( $alienId, $destObject )
 	{
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createCopyObject called for alienId:' . $alienId );
 
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$hit = $service->retrieve( $assetId );
 
 		if( !$destObject ) {
@@ -325,10 +321,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		// At this point there is no active session and the write can safely be ignored.
 		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
-		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
 		$elvisId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 
 		// Revert smart connection checkout when changing properties
 		if( ElvisUtils::isSmartConnection() ) {
@@ -375,7 +370,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
 		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/logic/ElvisContentSourceService.php';
 		require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBWorkflow.class.php';
 
@@ -406,7 +400,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		// whatever permission the current user has, so these are set using AMF; this
 		// only set sce prefixed metadata properties as a super user.
 		$elvisMetadata = $this->fillElvisEnterpriseMetadataMulti( $metaDataValues );
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$service->updateWorkflowMetadata( $assetIds, $elvisMetadata );
 
 		// Bulk REST client update
@@ -432,8 +426,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 		$systemId = BizSession::getEnterpriseSystemId();
 		if( $assetId && $systemId ) {
-			require_once __DIR__.'/logic/ElvisContentSourceService.php';
-			$service = new ElvisContentSourceService();
+			$service = new Elvis_BizClasses_AssetService();
 			$shadowObjectIdentity = new Elvis_DataClasses_ShadowObjectIdentity( $systemId, $assetId );
 			if( !$restore ) {
 				try {
@@ -498,9 +491,8 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			case 'Hard_Copy_To_Enterprise':
 			case 'Shadow_Only':
 				require_once __DIR__.'/util/ElvisUtils.class.php';
-				require_once __DIR__.'/logic/ElvisContentSourceService.php';
 
-				$service = new ElvisContentSourceService();
+				$service = new Elvis_BizClasses_AssetService();
 				$destName = $destObject->MetaData->BasicMetaData->Name;
 				$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
 				$copyId = $service->copy( $assetId, $destName );
@@ -543,9 +535,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public static function completeUser( AdmUser $user )
 	{
-		require_once __DIR__.'/../logic/ElvisContentSourceService.php';
-
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$userDetails = $service->getUserDetails( $user->Name );
 		if( $userDetails ) {
 			require_once __DIR__.'/../config.php'; // ELVIS_INTERNAL_USER_POSTFIX

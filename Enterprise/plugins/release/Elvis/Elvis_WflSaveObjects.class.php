@@ -82,7 +82,6 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	final public function runAfter( WflSaveObjectsRequest $req, WflSaveObjectsResponse &$resp )
 	{
 		require_once __DIR__.'/util/ElvisPlacementUtils.class.php';
-		require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
 
 		// Walk through all placements of the old and new layout/form objects and collect changed shadow object ids of placements
 		$reqObjectIds = array_keys( $this->oldShadowRelations ) + array_keys( $this->newShadowRelations );
@@ -139,7 +138,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 
 		if( !empty( $changedRequestObjects ) ) {
 			// For each layout-image relation for which placements have been changed, update Elvis.
-			ElvisUpdateManager::updateOrDeleteAssetRelations( $changedRequestObjects, $this->newShadowRelations );
+			Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelations( $changedRequestObjects, $this->newShadowRelations );
 		}
 
 		// Perform update on enterprise object's version when newer version is found on shadow object from Elvis

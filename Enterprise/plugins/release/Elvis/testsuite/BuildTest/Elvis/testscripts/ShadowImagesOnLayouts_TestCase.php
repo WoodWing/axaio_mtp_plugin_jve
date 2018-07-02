@@ -378,8 +378,7 @@ EOT;
 		$attachment->Type = 'image/jpeg';
 		$attachment->FilePath = __DIR__.'/testdata/image1_v1.jpg';
 
-		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$metadata = array();
 		$hit = $service->create( $metadata, $attachment );
 		$this->assertInstanceOf( 'Elvis_DataClasses_EntHit', $hit );
@@ -516,8 +515,7 @@ EOT;
 	 */
 	private function retrieveImageInfoFromElvis() : void
 	{
-		require_once __DIR__.'/../../../../logic/ElvisContentSourceService.php';
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		$metadata = array();
 		$extraFields = array(
 			'sceUsed',

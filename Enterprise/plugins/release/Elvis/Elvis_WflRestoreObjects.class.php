@@ -34,7 +34,6 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 		require_once __DIR__.'/config.php';
 		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
 		require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
-		require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
 
 		// Get restored shadow relations per layout/dossier, retrieved from DB.
 		$reqLayoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs ); // Only interested in placements of layouts
@@ -54,7 +53,7 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 
 		if( !empty( $restoredPlacedShadowObjects ) ) {
 			$changedLayoutIds = array_keys( $restoredPlacedShadowObjects );
-			ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $changedLayoutIds, $restoredPlacedShadowObjects );
+			Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelationsByObjectIds( $changedLayoutIds, $restoredPlacedShadowObjects );
 		}
 	} 
 

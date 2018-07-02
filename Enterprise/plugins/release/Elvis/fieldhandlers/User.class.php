@@ -3,9 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once 'ReadOnlyFieldHandler.class.php';
-
-class UserFieldHandler extends ReadOnlyFieldHandler
+class Elvis_FieldHandlers_User extends Elvis_FieldHandlers_ReadOnly
 {
 	/** @var bool Whether or not to replace unknown user in Enterprise with current acting user */
 	private $replaceUnknownUserWithActingUser = true;
@@ -21,7 +19,7 @@ class UserFieldHandler extends ReadOnlyFieldHandler
 	public function read( $entMetadata, $elvisMetadata )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-		require_once __DIR__.'/../../config.php'; // ELVIS_INTERNAL_USER_POSTFIX
+		require_once __DIR__.'/../config.php'; // ELVIS_INTERNAL_USER_POSTFIX
 
 		$propertyName = $this->property->Name;
 		$username = $this->getEnterpriseValue( $elvisMetadata ); // short- or full name

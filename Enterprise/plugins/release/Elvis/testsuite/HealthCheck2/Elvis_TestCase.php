@@ -497,9 +497,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 */
 	private function getUserFromElvis( string $username ) : Elvis_DataClasses_EntUserDetails
 	{
-		require_once __DIR__.'/../../logic/ElvisContentSourceService.php';
-
-		$service = new ElvisContentSourceService();
+		$service = new Elvis_BizClasses_AssetService();
 		return $service->getUserDetails( $username );
 	}
 

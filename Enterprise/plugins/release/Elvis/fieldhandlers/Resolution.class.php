@@ -10,9 +10,7 @@
  * while mapping resolutionX into Dpi.
  */
 
-require_once 'ReadOnlyFieldHandler.class.php';
-
-class ResolutionFieldHandler extends ReadOnlyFieldHandler
+class Elvis_FieldHandlers_Resolution extends Elvis_FieldHandlers_ReadOnly
 {
 	/**
 	 * @inheritdoc

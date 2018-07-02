@@ -6,7 +6,7 @@
  * Manager for sending Object updates/deletes to Elvis.
  */
 
-class ElvisUpdateManager
+class Elvis_BizClasses_AssetRelationsService
 {
 	/**
 	 * Send an updateObject message to Elvis, given an object.
@@ -44,8 +44,7 @@ class ElvisUpdateManager
 		// Send the updateObjects message.
 		$operations = self::composeElvisUpdateAssetRelationsOperations( $objects, $shadowObjectRelations );
 		if( !is_null( $operations ) ) {
-			require_once __DIR__.'/../logic/ElvisContentSourceService.php';
-			$service = new ElvisContentSourceService();
+			$service = new Elvis_BizClasses_AssetService();
 			$service->updateAssetRelations( $operations );
 		}
 	}
@@ -89,8 +88,7 @@ class ElvisUpdateManager
 		if( $objects ) {
 			$operations = self::composeElvisDeleteObjectRelations( $objects );
 			if( $operations ) {
-				require_once __DIR__.'/../logic/ElvisContentSourceService.php';
-				$service = new ElvisContentSourceService();
+				$service = new Elvis_BizClasses_AssetService();
 				$service->deleteAssetRelations( $operations );
 			}
 		}

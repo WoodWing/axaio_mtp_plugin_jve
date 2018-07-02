@@ -3,9 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once 'ReadWriteFieldHandler.class.php';
-
-class NameFieldHandler extends ReadWriteFieldHandler
+class Elvis_FieldHandlers_Name extends Elvis_FieldHandlers_ReadWrite
 {
 	private static $mimeTypeProperty = 'Format';
 
@@ -26,7 +24,7 @@ class NameFieldHandler extends ReadWriteFieldHandler
 			$extension = $this->getExtension( $entMetadataOrValue );
 			if( !empty( $extension ) ) {
 				$elvisMetadata[ $this->lvsFieldName ] = $name.$extension;
-				LogHandler::Log( 'ContentSource', 'DEBUG', 'NameFieldHandler::write; added extension to filename: '.$name.$extension );
+				LogHandler::Log( 'ContentSource', 'DEBUG', 'Elvis_FieldHandlers_Name::write; added extension to filename: '.$name.$extension );
 			} else {
 				$message = 'Mimetype unknown for '.$name.', not allowed to use dots in the name when performing this action.';
 				throw new BizException( null, 'Server', null, $message, null, 'ERROR' );
@@ -57,7 +55,7 @@ class NameFieldHandler extends ReadWriteFieldHandler
 		$fileName = $this->getEnterpriseValue( $elvisMetadata ); // Value of Elvis MetaData 'filename' will be used.
 		$endIdx = mb_strrpos( $fileName, '.', 'UTF8' );
 		if( !$endIdx ) {
-			LogHandler::Log( 'ContentSource', 'WARN', 'NameFieldHandler::getFilename; filename has no extension: '.$fileName );
+			LogHandler::Log( 'ContentSource', 'WARN', 'Elvis_FieldHandlers_Name::getFilename; filename has no extension: '.$fileName );
 			return $fileName;
 		}
 		$fileName = mb_substr( $fileName, 0, $endIdx, 'UTF8' );

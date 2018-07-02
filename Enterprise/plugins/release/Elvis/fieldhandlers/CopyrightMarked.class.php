@@ -3,9 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once 'ReadOnlyFieldHandler.class.php';
-
-class CopyrightMarkedFieldHandler extends ReadOnlyFieldHandler
+class Elvis_FieldHandlers_CopyrightMarked extends Elvis_FieldHandlers_ReadOnly
 {
 	public function __construct()
 	{

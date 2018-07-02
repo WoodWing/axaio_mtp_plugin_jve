@@ -3,9 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once 'ReadWriteFieldHandler.class.php';
-
-class ReadOnlyFieldHandler extends ReadWriteFieldHandler
+class Elvis_FieldHandlers_ReadOnly extends Elvis_FieldHandlers_ReadWrite
 {
 	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName )
 	{

@@ -63,7 +63,6 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 	{
 		require_once __DIR__.'/config.php';
 		if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
-			require_once __DIR__.'/logic/ElvisUpdateManager.class.php';
 			require_once __DIR__.'/util/ElvisObjectUtils.class.php';
 			require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
 
@@ -89,7 +88,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 					$newShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
 
 					if( $newShadowRelations ) {
-						ElvisUpdateManager::updateOrDeleteAssetRelationsByObjectIds( $layoutIds, $newShadowRelations );
+						Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelationsByObjectIds( $layoutIds, $newShadowRelations );
 					}
 				}
 

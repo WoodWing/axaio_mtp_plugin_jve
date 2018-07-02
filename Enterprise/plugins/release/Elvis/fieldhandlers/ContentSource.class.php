@@ -3,9 +3,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once 'ReadOnlyFieldHandler.class.php';
-
-class ContentSourceFieldHandler extends ReadOnlyFieldHandler
+class Elvis_FieldHandlers_ContentSource extends Elvis_FieldHandlers_ReadOnly
 {
 	public function __construct()
 	{
@@ -17,7 +15,7 @@ class ContentSourceFieldHandler extends ReadOnlyFieldHandler
 	 */
 	public function read( $entMetadata, $elvisMetadata )
 	{
-		require_once __DIR__.'/../../config.php'; // ELVIS_CONTENTSOURCEID
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEID
 		$entMetadata->{$this->entMetadataCategory}->{$this->property->Name} = ELVIS_CONTENTSOURCEID;
 	}
 }
