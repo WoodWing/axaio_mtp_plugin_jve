@@ -136,16 +136,16 @@ class Elvis_BizClasses_ClientResponse
 	 * JSON decoded representation of the response body.
 	 *
 	 * @return mixed JSON decoded representation of the response body.
-	 * @throws Elvis_BizClasses_Exception
+	 * @throws Elvis_BizClasses_ClientException
 	 */
 	public function jsonBody()
 	{
 		if( $this->body === false ) {
-			throw new Elvis_BizClasses_Exception( 'Invalid response body' );
+			throw new Elvis_BizClasses_ClientException( 'Invalid response body' );
 		}
 		$decoded = json_decode( $this->body );
 		if( is_null( $decoded ) ) {
-			throw new Elvis_BizClasses_Exception( 'Invalid response body' );
+			throw new Elvis_BizClasses_ClientException( 'Invalid response body' );
 		}
 		return $decoded;
 	}

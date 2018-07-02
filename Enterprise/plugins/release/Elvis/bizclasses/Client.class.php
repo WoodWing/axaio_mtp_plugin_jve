@@ -495,7 +495,7 @@ class Elvis_BizClasses_Client
 					$request->setUserShortName( ELVIS_SUPER_USER );
 					$response = $this->execute( $request );
 				} else {
-					throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
+					throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
 				}
 			}
 			if( $response->isForbiddenError() ) { // HTTP 403
@@ -522,7 +522,7 @@ class Elvis_BizClasses_Client
 					$request->nextAttempt();
 					$response = $this->execute( $request );
 				} else {
-					throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
+					throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
 				}
 			}
 			if( $response->isConflictError() ) { // HTTP 409
@@ -530,11 +530,11 @@ class Elvis_BizClasses_Client
 					throw new BizException( 'ERR_SUBJECT_EXISTS', 'Client', $detail, // S1038
 						null, array( $request->getSubjectEntity(), $request->getSubjectName(), 'INFO' ) );
 				} else {
-					throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
+					throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
 				}
 			}
 			if( $response->isClientProgrammaticError() ) { // all HTTP 4xx codes except the ones listed above
-				throw new Elvis_BizClasses_Exception( $detail, 'ERROR' );
+				throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
 			}
 		}
 		return $response;

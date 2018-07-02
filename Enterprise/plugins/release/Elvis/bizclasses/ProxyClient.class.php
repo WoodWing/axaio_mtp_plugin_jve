@@ -35,7 +35,7 @@ class Elvis_BizClasses_ProxyClient
 	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
 	 *
 	 * @return Elvis_BizClasses_ClientResponse
-	 * @throws Elvis_BizClasses_Exception
+	 * @throws Elvis_BizClasses_ClientException
 	 */
 	private function proxyGet()
 	{
@@ -66,7 +66,7 @@ class Elvis_BizClasses_ProxyClient
 	 *
 	 * The HTTP response headers and returned data from Elvis are streamed in the PHP output.
 	 *
-	 * @throws Elvis_BizClasses_Exception
+	 * @throws Elvis_BizClasses_ClientException
 	 */
 	public function proxy()
 	{
@@ -77,7 +77,7 @@ class Elvis_BizClasses_ProxyClient
 				$this->proxyGet();
 				break;
 			default:
-				throw new Elvis_BizClasses_Exception( 'HTTP method '.$httpMethod.' not supported' );
+				throw new Elvis_BizClasses_ClientException( 'HTTP method '.$httpMethod.' not supported' );
 		}
 	}
 }

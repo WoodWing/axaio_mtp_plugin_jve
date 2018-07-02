@@ -4,11 +4,10 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-class Elvis_BizClasses_Exception extends BizException
+class Elvis_BizClasses_ClientException extends BizException
 {
-
 	/**
-	 * Construct the Elvis_BizClasses_Exception.
+	 * Constructor.
 	 *
 	 * @param string $detail Error detail of code specifying the error.
 	 * @param string|null $severity Severity / log level, such as 'ERROR', 'WARN', etc. See LogHandler for accepted values.

@@ -46,7 +46,7 @@ class Elvis_BizClasses_Attachment
 							$retry = self::retryCopyToFileTransferServer( $attempt, $httpStatus );
 						} while( $retry );
 						if( intval( $httpStatus ) >= 500 ) {
-							throw new Elvis_BizClasses_Exception( 'Failed to copy '.$rendition.
+							throw new Elvis_BizClasses_ClientException( 'Failed to copy '.$rendition.
 								' file from Elvis server to Transfer Server folder.', 'ERROR' );
 						}
 						if( intval( $httpStatus ) >= 400 || $httpStatus === false ) { // false: simulate ES < 10.1.4 behaviour
