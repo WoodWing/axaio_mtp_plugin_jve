@@ -3,7 +3,7 @@
  * Utility functions related to Elvis shadow object placements.
  * For example checking for changes between old and new placements.
  *
- * @since      4.4
+ * @since      10.5.0 Class originates from util/ElvisPlacementUtils.class.php
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 

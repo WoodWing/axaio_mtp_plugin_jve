@@ -2,7 +2,7 @@
 /**
  * Performs asset related operations on Elvis Server.
  *
- * @since      4.4
+ * @since      10.5.0 Class originates from logic/ElvisContentSourceService.class.php
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 

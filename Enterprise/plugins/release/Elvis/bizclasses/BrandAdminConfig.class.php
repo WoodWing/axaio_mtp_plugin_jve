@@ -3,6 +3,7 @@
  * Utility that provides the settings made by brand administrator.
  *
  * @since      10.1.1
+ * @since      10.5.0 Class originates from util/ElvisBrandAdminConfig.class.php
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 

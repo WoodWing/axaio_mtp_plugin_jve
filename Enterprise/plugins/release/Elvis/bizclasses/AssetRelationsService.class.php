@@ -1,9 +1,9 @@
 <?php
 /**
- * @since      4.4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Manager for sending Object updates/deletes to Elvis.
+ *
+ * @since      10.5.0 Class originates from logic/ElvisUpdateManager.class.php
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 class Elvis_BizClasses_AssetRelationsService

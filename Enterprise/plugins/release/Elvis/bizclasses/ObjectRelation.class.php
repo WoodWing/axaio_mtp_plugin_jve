@@ -2,7 +2,7 @@
 /**
  * Utility functions for retrieving Elvis Object relations.
  *
- * @since      4.4
+ * @since      10.5.0 Class originates from util/ElvisObjectRelationUtils.class.php
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
