@@ -40,6 +40,9 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 	/** @var array $vars Placeholder for the session variables. */
 	private $vars;
 
+	/** @var string $testStartTime Used for cleaning up of IDSA jobs.*/
+	private $testStartTime = null;
+
 	// Step#01: Fill in the TestGoals, TestMethods and Prio...
 	public function getDisplayName()
 	{
@@ -53,15 +56,16 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 
 	public function getTestMethods()
 	{
-		return 'Scenario:<ol>
-			\'<li>Scenario:</li>\'.
-			\'<li>Create users and groups, add access rights for these groups for a newly created brand.</li>\'.
-			\'<li>An object is created.</li>\'.
-			\'<li>Of this object the right to lock the object is tested.</li>\'.
-			\'<li>First by a user that is entitled.</li>\'.
-			\'<li>Next by a user that is not entitled. In this case an \'Access Denied\' error is exepeted.</li>\'.
-			\'<li>Test data is cleaned up.</li>\'.
-		</ol>';
+		return 'Scenario:<ol>'.
+			'<li>Scenario:</li>'.
+			'<li>Create users and groups, add access rights for these groups for a newly created brand.</li>'.
+			'<li>An object is created.</li>'.
+			'<li>Of this object the right to lock the object is tested.</li>'.
+			'<li>Also it it tested if the user can create an ObjectOperation on the layout. This also requires a lock.</li>'.
+			'<li>First by a user that is entitled.</li>'.
+			'<li>Next by a user that is not entitled. In this case an \'Access Denied\' error is exepeted.</li>'.
+			'<li>Test data is cleaned up.</li>'.
+		'</ol>';
 	}
 
 	public function getPrio()
@@ -106,6 +110,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 		$this->workflowFactory->setupTestData();
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		$this->transferServer = new BizTransferServer();
+		$this->testStartTime = date('Y-m-d\TH:i:s');
 	}
 
 	/**
@@ -120,10 +125,12 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 		$this->doLogOn();
 		$this->testLayout = $this->createLayout( 'Layout %timestamp%' );
 		$this->testLockObject( null );
+		$this->testObjectOperation( null );
 		$this->doLogOff();
 		$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "Jim %timestamp%" );
 		$this->doLogOn();
 		$this->testLockObject( '(S1002)' );
+		$this->testObjectOperation( '(S1002)' );
 		$this->doLogOff();
 	}
 
@@ -138,6 +145,47 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 	{
 		$this->lockObject( $this->testLayout, $expectedError );
 		$this->unlockObjects( array( $this->testLayout->MetaData->BasicMetaData->ID ) );
+	}
+
+	/**
+	 * Tries to create an ObjectOperation on the layout. In order to be able to create the operation the user must lock
+	 * the layout first.
+	 * The created operation is removed and the corresponding job is cleaned when the test is teared down.
+	 *
+	 * @since 10.4.2
+	 * @param string|null $expectedError
+	 */
+	private function testObjectOperation( $expectedError )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflCreateObjectOperationsService.class.php';
+		$request = new WflCreateObjectOperationsRequest();
+		$request->Ticket = $this->workflowTicket;
+		$request->HaveVersion = new ObjectVersion();
+		$request->HaveVersion->ID = $this->testLayout->MetaData->BasicMetaData->ID;
+		$request->HaveVersion->Version = $this->testLayout->MetaData->WorkflowMetaData->Version;
+
+		$operation = new ObjectOperation();
+		require_once  BASEDIR.'/server/utils/NumberUtils.class.php';
+		$operation->Id = NumberUtils::createGUID();
+		$operation->Type = 'AutomatedPrintWorkflow';
+		$operation->Name = 'ClearFrameContent';
+		$operation->Params = array();
+		$operation->Params[0] = new Param();
+		$operation->Params[0]->Name = 'EditionId';
+		$operation->Params[0]->Value = 0;
+		$operation->Params[1] = new Param();
+		$operation->Params[1]->Name = 'SplineId';
+		$operation->Params[1]->Value = 294;
+
+
+		$request->Operations = array( $operation );
+		/** @var WflCreateObjectOperationsResponse $response */
+		$response = $this->testSuiteUtils->callService( $this, $request, "Call: ". __METHOD__, $expectedError );
+
+		require_once BASEDIR.'/server/bizclasses/BizObjectOperation.class.php';
+		if( !is_null( $response ) ) {
+			BizObjectOperation::deleteOperations( $this->testLayout->MetaData->BasicMetaData->ID);
+		}
 	}
 
 	/**
@@ -228,6 +276,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 			unset( $this->transferServerFiles );
 		}
 		$this->workflowFactory->teardownTestData();
+		$this->clearIdsServerJobsInTheQueue();
 	}
 
 	/**
@@ -431,5 +480,18 @@ EOT;
 		$this->assertInstanceOf( 'Object', $response->Objects[0] );
 
 		return $response->Objects[0];
+	}
+
+	/**
+	 * Clean up all the IDS server jobs in the job queue created by this build test.
+	 *
+	 * @since 10.4.2
+	 */
+	private function clearIdsServerJobsInTheQueue()
+	{
+		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
+		$where = '`queuetime` >= ? ';
+		$params = array( strval( $this->testStartTime ) );
+		$result = DBBase::deleteRows( 'indesignserverjobs', $where, $params );
 	}
 }
