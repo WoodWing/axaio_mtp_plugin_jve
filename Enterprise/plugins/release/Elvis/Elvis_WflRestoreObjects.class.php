@@ -14,11 +14,7 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 	final public function getPrio()     { return self::PRIO_DEFAULT; }
 	final public function getRunMode()  { return self::RUNMODE_AFTER; }
 
-	/**
-	 * Not Called.
-	 *
-	 * @param WflRestoreObjectsRequest $req
-	 */
+	// Not called
 	final public function runBefore( WflRestoreObjectsRequest &$req )
 	{
 	}
@@ -26,25 +22,22 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 	/**
 	 * Collects Elvis shadow objects (from placements of) restored objects and sends update to Elvis.
 	 *
-	 * @param WflRestoreObjectsRequest $req
-	 * @param WflRestoreObjectsResponse $resp
+	 * @inheritdoc
 	 */
 	final public function runAfter( WflRestoreObjectsRequest $req, WflRestoreObjectsResponse &$resp )
 	{
-		require_once __DIR__.'/config.php';
-		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
-		require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 
 		// Get restored shadow relations per layout/dossier, retrieved from DB.
-		$reqLayoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs ); // Only interested in placements of layouts
-		$restoredPlacedShadowObjects = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $reqLayoutIds );
+		$reqLayoutIds = Elvis_BizClasses_Object::filterRelevantIdsFromObjectIds( $req->IDs ); // Only interested in placements of layouts
+		$restoredPlacedShadowObjects = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjectIds( $reqLayoutIds );
 
 		// Collect changed layouts due restored elvis shadow objects
-		$shadowIds = ElvisObjectUtils::filterElvisShadowObjects( $req->IDs );
-		$layoutIds = ElvisObjectRelationUtils::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
+		$shadowIds = Elvis_BizClasses_Object::filterElvisShadowObjects( $req->IDs );
+		$layoutIds = Elvis_BizClasses_ObjectRelation::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
 
 		if( $layoutIds ) {
-			$shadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
+			$shadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
 			if( $shadowRelations ) {
 				// Add additional layouts which need updating
 				$restoredPlacedShadowObjects += $shadowRelations;
@@ -57,11 +50,7 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 		}
 	} 
 
-	/**
-	 * Not called
-	 *
-	 * @param WflRestoreObjectsRequest $req
-	 */
+	// Not called
 	final public function runOverruled( WflRestoreObjectsRequest $req )
 	{
 	} 

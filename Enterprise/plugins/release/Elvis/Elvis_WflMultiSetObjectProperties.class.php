@@ -19,8 +19,13 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 	 */
 	private $oldStatuses = null;
 
+	/**
+	 * @inheritdoc
+	 */
 	final public function runBefore( WflMultiSetObjectPropertiesRequest &$req )
 	{
+		require_once __DIR__.'/config.php'; // auto-loading
+
 		// Find out if the state property changed and retrieve current statuses if this is the case
 		$statePropertyChanged = false;
 		foreach( $req->MetaData as $MetaDataValue ) {
@@ -31,13 +36,17 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 		}
 
 		if( $statePropertyChanged ) {
-			require_once __DIR__.'/util/ElvisObjectUtils.class.php';
-			$this->oldStatuses = ElvisObjectUtils::getObjectsStatuses( ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs ) );
+			$this->oldStatuses = Elvis_BizClasses_Object::getObjectsStatuses( Elvis_BizClasses_Object::filterRelevantIdsFromObjectIds( $req->IDs ) );
 		}
-	} 
+	}
 
+	/**
+	 * @inheritdoc
+	 */
 	final public function runAfter( WflMultiSetObjectPropertiesRequest $req, WflMultiSetObjectPropertiesResponse &$resp )
 	{
+		require_once __DIR__.'/config.php'; // auto-loading
+
 		if( !is_null( $this->oldStatuses ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 
@@ -70,7 +79,7 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 				} else {
 					$objTarStatusName = $targetStatusName;
 				}
-				if( ElvisObjectUtils::statusChangedToUnarchived( $curStatusCfg->Name, $objTarStatusName ) ) {
+				if( Elvis_BizClasses_Object::statusChangedToUnarchived( $curStatusCfg->Name, $objTarStatusName ) ) {
 					$changedObjectIds[] = $objId;
 				}
 			}

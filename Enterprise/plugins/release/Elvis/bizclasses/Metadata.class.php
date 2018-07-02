@@ -118,9 +118,8 @@ class Elvis_BizClasses_Metadata
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadata, $elvisMetadata );
 
-		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
-		$editableFields = ElvisSessionUtil::getEditableFields();
+		$editableFields = Elvis_BizClasses_UserSetting::getEditableFields();
 		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
 			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 			$fieldInfos = $client->fieldInfo();
@@ -131,7 +130,7 @@ class Elvis_BizClasses_Metadata
 					$editableFields[] = $field;
 				}
 			}
-			ElvisSessionUtil::setEditableFields( $editableFields );
+			Elvis_BizClasses_UserSetting::setEditableFields( $editableFields );
 		}
 
 		// Send to Elvis only editable metadata fields.

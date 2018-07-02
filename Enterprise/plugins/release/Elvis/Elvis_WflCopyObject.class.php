@@ -21,8 +21,7 @@ class Elvis_WflCopyObject extends WflCopyObject_EnterpriseConnector
 
 	final public function runAfter( WflCopyObjectRequest $req, WflCopyObjectResponse &$resp )
 	{
-		require_once __DIR__.'/config.php';
-		require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 
 		$copiedObject = new Object();
 		$copiedObject->MetaData = $resp->MetaData;
@@ -31,7 +30,7 @@ class Elvis_WflCopyObject extends WflCopyObject_EnterpriseConnector
 
 		$respObjects = array( $copiedObject );
 		// Get object shadow relations from the response objects
-		$newShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $respObjects );
+		$newShadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjects( $respObjects );
 
 		// If array contains anything, it means the copied object has shadow relations and needs to send an update to Elvis
 		if( !empty( $newShadowRelations ) ) {

@@ -12,57 +12,49 @@ require_once BASEDIR . '/server/interfaces/services/wfl/WflSaveObjects_Enterpris
 class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 {
 	/**
-	 * @var Relation[] List of Relations (that are being saved), that belong to the
-	 *                  placed shadow objects.
+	 * @var Relation[] List of Relations (that are being saved), that belong to the placed shadow objects.
 	 *                  Array has following keys: [layout id][child id][Type]
 	 */
 	private $newShadowRelations = null;
 
 	/**
-	 * @var Relation[] List of Relations (that were in DB before save), that belong
-	 *                  to the placed shadow objects.
+	 * @var Relation[] List of Relations (that were in DB before save), that belong to the placed shadow objects.
 	 *                  Array has following keys: [layout id][child id][Type]
 	 */
 	private $oldShadowRelations = null;
 
-	/**
-	 * @var Object[] List of old objects
-	 */
+	/** @var Object[] List of old objects */
 	private $oldObjects = null;
 
-	/** 
-     * @var AdmStatus[] List of old statuses per object id
-	 */
+	/** @var AdmStatus[] List of old statuses per object id */
 	private $oldStatuses = null;
 
 	final public function getPrio() { return self::PRIO_DEFAULT; }
 	final public function getRunMode() { return self::RUNMODE_BEFOREAFTER; }
 
 	/**
-	 * @param WflSaveObjectsRequest $req
+	 * @inheritdoc
 	 */
 	final public function runBefore( WflSaveObjectsRequest &$req )
 	{
-		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
-		require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		// Just remember whether or not the user is unlocking or keeps the lock after save.
-		ElvisUtils::setUnlock( $req->Unlock );
+		Elvis_BizClasses_ObjectLock::setUnlock( $req->Unlock );
 
 		// Get shadow relations per layout from request objects
-		$this->newShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $req->Objects );
+		$this->newShadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjects( $req->Objects );
 
 		// Get current old shadow relations per layout, retrieved from DB.
-		$reqObjectIds = ElvisObjectUtils::filterRelevantIdsFromObjects( $req->Objects );
+		$reqObjectIds = Elvis_BizClasses_Object::filterRelevantIdsFromObjects( $req->Objects );
 		$this->oldObjects = array();
 		foreach( $reqObjectIds as $objId ) {
 			$user = BizSession::getShortUserName();
 			$this->oldObjects[$objId] = BizObject::getObject( $objId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
 		}
-		$this->oldShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $this->oldObjects );
-		$this->oldStatuses = ElvisObjectUtils::getObjectsStatuses( $reqObjectIds );
+		$this->oldShadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjects( $this->oldObjects );
+		$this->oldStatuses = Elvis_BizClasses_Object::getObjectsStatuses( $reqObjectIds );
 
 		// For heavy debugging:
 		/*
@@ -76,12 +68,11 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	/**
 	 * Collects changed shadow object ids and triggers an update if needed.
 	 *
-	 * @param WflSaveObjectsRequest $req
-	 * @param WflSaveObjectsResponse $resp
+	 * @inheritdoc
 	 */
 	final public function runAfter( WflSaveObjectsRequest $req, WflSaveObjectsResponse &$resp )
 	{
-		require_once __DIR__.'/util/ElvisPlacementUtils.class.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 
 		// Walk through all placements of the old and new layout/form objects and collect changed shadow object ids of placements
 		$reqObjectIds = array_keys( $this->oldShadowRelations ) + array_keys( $this->newShadowRelations );
@@ -102,7 +93,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 			// First test if the status changed from archived to non-archived status
 			$newStatusName = $object->MetaData->WorkflowMetaData->State->Name;
 			if( array_key_exists( $reqObjectId, $this->oldStatuses ) &&
-					ElvisObjectUtils::statusChangedToUnarchived( $this->oldStatuses[$reqObjectId]->Name, $newStatusName ) ) {
+					Elvis_BizClasses_Object::statusChangedToUnarchived( $this->oldStatuses[$reqObjectId]->Name, $newStatusName ) ) {
 				$changedRequestObjects[] = $object;
 				continue;
 			}
@@ -110,7 +101,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 			// Compare if targets changed
 			if( $object->MetaData->BasicMetaData->Type == 'Layout' ) { // Publish Forms can never change target
 				if( array_key_exists( $reqObjectId, $this->oldObjects ) ) {
-					$targetsChanged = ElvisObjectUtils::compareLayoutTargets( $object->Targets, $this->oldObjects[ $reqObjectId ]->Targets );
+					$targetsChanged = Elvis_BizClasses_Object::compareLayoutTargets( $object->Targets, $this->oldObjects[ $reqObjectId ]->Targets );
 					if( $targetsChanged ) {
 						$changedRequestObjects[] = $object;
 						continue;
@@ -127,7 +118,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 				// Commented out as workaround for relations changes detection problem.
 				// When layout in checkout state, it updated in Enterprise immediately after image placed.
 				// So $oldShadowRelations and $newShadowRelations contains the same data.
-//				$changedShadowIdsForLayout = ElvisPlacementUtils::findChangedPlacedShadowObjects( $oldShadowRelations, $newShadowRelations );
+//				$changedShadowIdsForLayout = Elvis_BizClasses_Placement::findChangedPlacedShadowObjects( $oldShadowRelations, $newShadowRelations );
 //				if( $changedShadowIdsForLayout ) { // avoid adding layoutId for nothing
 				$changedRequestObjects[] = $object;
 //				}
@@ -142,15 +133,10 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 		}
 
 		// Perform update on enterprise object's version when newer version is found on shadow object from Elvis
-		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
-		ElvisObjectUtils::updateObjectsVersion( $resp->Objects );
+		Elvis_BizClasses_Object::updateObjectsVersion( $resp->Objects );
 	}
 
-	/**
-	 * Not called.
-	 *
-	 * @param WflSaveObjectsRequest $req
-	 */
+	// Not called.
 	public function runOverruled( WflSaveObjectsRequest $req )
 	{
 	}

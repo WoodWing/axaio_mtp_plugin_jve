@@ -429,11 +429,9 @@ EOT;
 	 */
 	private function addElvisImageToEntDossier( int $imageIndex )
 	{
-		require_once __DIR__.'/../../../../util/ElvisUtils.class.php';
-
 		$relation = new Relation();
 		$relation->Parent = $this->dossierObject->MetaData->BasicMetaData->ID;
-		$relation->Child = ElvisUtils::getAlienIdFromAssetId( $this->images[ $imageIndex ]->assetHit->id );
+		$relation->Child = Elvis_BizClasses_AssetId::getAlienIdFromAssetId( $this->images[ $imageIndex ]->assetHit->id );
 		$relation->Type = 'Contained';
 
 		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';

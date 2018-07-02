@@ -34,24 +34,21 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 	 */
 	final public function runBefore( WflDeleteObjectsRequest &$req )
 	{
-		require_once __DIR__.'/config.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 
 		// When the object is deleted from the Workflow area, the relations are deleted
 		$inWorkflow = in_array( 'Workflow', $req->Areas );
 		if( $inWorkflow && !$req->Permanent ) { // TODO In the runAfter the objects are needed. If objects are permanently deleted they must be cached in the runBefore.
-			require_once __DIR__.'/util/ElvisObjectUtils.class.php';
-			require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
-
 			// Get current shadow relations placed on the layouts or dossiers, retrieved from DB.
-			$reqLayoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs, $req->Areas[0] );
-			$this->deletedShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $reqLayoutIds );
+			$reqLayoutIds = Elvis_BizClasses_Object::filterRelevantIdsFromObjectIds( $req->IDs, $req->Areas[0] );
+			$this->deletedShadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjectIds( $reqLayoutIds );
 
 			// Find deleted Elvis assets. For each deleted asset, we need to collect the layouts.
-			$shadowIds = ElvisObjectUtils::filterElvisShadowObjects( $req->IDs );
-			$parentIds = ElvisObjectRelationUtils::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
+			$shadowIds = Elvis_BizClasses_Object::filterElvisShadowObjects( $req->IDs );
+			$parentIds = Elvis_BizClasses_ObjectRelation::getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds );
 
 			if( $parentIds ) {
-				$parentShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $parentIds );
+				$parentShadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjectIds( $parentIds );
 				if( $parentShadowRelations ) foreach( $parentShadowRelations as $parentId => $shadowRelations ) {
 					// No need to check relations if already deleted above
 					if( array_key_exists( $parentId, $this->deletedShadowRelations ) ) {
@@ -95,8 +92,7 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 	 */
 	final public function runAfter( WflDeleteObjectsRequest $req, WflDeleteObjectsResponse &$resp )
 	{
-		require_once __DIR__.'/config.php';
-		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 
 		if( !empty( $this->deletedShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the following deleted layouts

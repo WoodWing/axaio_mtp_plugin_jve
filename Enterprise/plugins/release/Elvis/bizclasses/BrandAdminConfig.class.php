@@ -1,11 +1,12 @@
 <?php
 /**
+ * Utility that provides the settings made by brand administrator.
+ *
  * @since      10.1.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Utility that provides the settings made by brand administrator.
  */
-class ElvisBrandAdminConfig
+
+class Elvis_BizClasses_BrandAdminConfig
 {
 	/**
 	 * Returns the value of a custom property, as configured for a given Publication.

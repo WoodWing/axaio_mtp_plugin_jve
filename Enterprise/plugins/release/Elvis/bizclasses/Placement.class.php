@@ -1,13 +1,13 @@
 <?php
 /**
- * @since      4.4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Utility functions related to Elvis shadow object placements.
  * For example checking for changes between old and new placements.
+ *
+ * @since      4.4
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-class ElvisPlacementUtils
+class Elvis_BizClasses_Placement
 {
 	/**
 	 * Finds a placement to merge edition to from another placement.
@@ -139,8 +139,8 @@ class ElvisPlacementUtils
 					// In this case the placements itself must be compared
 					// See PlacementUtils::comparePlacements for the compare rules
 					$changedPlacements = array_merge(
-						array_udiff( $oldChildPlacements, $newChildPlacements, 'ElvisPlacementUtils::comparePlacements' ),
-						array_udiff( $newChildPlacements, $oldChildPlacements, 'ElvisPlacementUtils::comparePlacements' )
+						array_udiff( $oldChildPlacements, $newChildPlacements, 'Elvis_BizClasses_Placement::comparePlacements' ),
+						array_udiff( $newChildPlacements, $oldChildPlacements, 'Elvis_BizClasses_Placement::comparePlacements' )
 					);
 					if( !empty( $changedPlacements ) ) {
 						$changedShadowIds[] = $childId;

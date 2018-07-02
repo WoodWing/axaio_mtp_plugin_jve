@@ -16,9 +16,8 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 
 	final public function runBefore( WflCreateObjectRelationsRequest &$req )
 	{
-		require_once __DIR__.'/config.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 		if( ELVIS_CREATE_COPY === 'Hard_Copy_To_Enterprise' ) {
-			require_once __DIR__.'/util/ElvisUtils.class.php';
 			require_once __DIR__.'/Elvis_ContentSource.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 			$user = BizSession::getShortUserName();
@@ -28,7 +27,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 				$parent = $relation->Parent;
 				$child = $relation->Child;
 
-				if( ElvisUtils::isElvisAssetId( $child ) ) {
+				if( Elvis_BizClasses_AssetId::isElvisAssetId( $child ) ) {
 					// Create copy of asset
 					$object = new Object();
 					$contentSource = new Elvis_ContentSource();
@@ -61,17 +60,15 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 
 	final public function runAfter( WflCreateObjectRelationsRequest $req, WflCreateObjectRelationsResponse &$resp )
 	{
-		require_once __DIR__.'/config.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 		if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
-			require_once __DIR__.'/util/ElvisObjectUtils.class.php';
-			require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
 
 			// Collect Elvis shadow ids
 			$shadowIds = array();
 			foreach( $resp->Relations as $relation ) {
 				$shadowIds[] = $relation->Child;
 			}
-			$shadowIds = ElvisObjectUtils::filterElvisShadowObjects( $shadowIds );
+			$shadowIds = Elvis_BizClasses_Object::filterElvisShadowObjects( $shadowIds );
 
 			if( $shadowIds ) {
 				// Collect layout ids for which we are creating shadow object relations
@@ -81,11 +78,11 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 						$layoutIds[] = $relation->Parent;
 					}
 				}
-				$layoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $layoutIds );
+				$layoutIds = Elvis_BizClasses_Object::filterRelevantIdsFromObjectIds( $layoutIds );
 
 				if( $layoutIds ) {
 					// Collect shadow relations if any are found and send the updated placements to Elvis
-					$newShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
+					$newShadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjectIds( $layoutIds );
 
 					if( $newShadowRelations ) {
 						Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelationsByObjectIds( $layoutIds, $newShadowRelations );

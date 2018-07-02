@@ -1,14 +1,13 @@
 <?php
 /**
+ * Utility functions related to Elvis Objects.
+ *
  * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Utility functions related to Elvis Objects.
  */
 
-class ElvisObjectUtils
+class Elvis_BizClasses_Object
 {
-
 	/**
 	 * Given a list of object ids, return only the Elvis shadow object ids.
 	 *
@@ -332,14 +331,13 @@ class ElvisObjectUtils
 			if( $pubPublishFormId && $pubObjectIds ) {
 				// To avoid too much performance (calling getObjects) impact on publish operations for which no shadow
 				// objects are involved, we bail out when none of the placed objects are shadows of Elvis assets.
-				$pubShadowObjectIds = ElvisObjectUtils::filterElvisShadowObjects( $pubObjectIds );
+				$pubShadowObjectIds = Elvis_BizClasses_Object::filterElvisShadowObjects( $pubObjectIds );
 				if( $pubShadowObjectIds ) {
 					require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 					$user = BizSession::getShortUserName();
 					$publishForm = BizObject::getObject( $pubPublishFormId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
 					if( $publishForm ) {
-						require_once __DIR__.'/ElvisObjectRelationUtils.class.php';
-						$shadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( array( $publishForm ) );
+						$shadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjects( array( $publishForm ) );
 						if( $shadowRelations ) {
 							Elvis_BizClasses_AssetRelationsService::updateOrDeleteAssetRelations( array( $publishForm ), $shadowRelations );
 						}

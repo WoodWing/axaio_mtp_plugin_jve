@@ -1,12 +1,12 @@
 <?php
 /**
+ * Utility functions for retrieving Elvis Object relations.
+ *
  * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Utility functions for retrieving Elvis Object relations.
  */
 
-class ElvisObjectRelationUtils
+class Elvis_BizClasses_ObjectRelation
 {
 	/**
 	 * Get all placed Elvis shadow object relations returned per requested parent and child id.
@@ -20,7 +20,6 @@ class ElvisObjectRelationUtils
 	 */
 	public static function getPlacedShadowRelationsFromParentObjectIds( array $objectIds ) : array
 	{
-		require_once __DIR__.'/ElvisObjectUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 
 		$placedShadowObjectRelations = array();
@@ -34,7 +33,7 @@ class ElvisObjectRelationUtils
 			}
 
 			// Filter the relations on Elvis shadow objects
-			$elvisShadowIds = ElvisObjectUtils::filterElvisShadowObjects( array_keys( $placedShadowObjectRelations[$parentId] ) );
+			$elvisShadowIds = Elvis_BizClasses_Object::filterElvisShadowObjects( array_keys( $placedShadowObjectRelations[$parentId] ) );
 			$placedShadowObjectRelations[$parentId] = array_intersect_key( $placedShadowObjectRelations[$parentId], array_flip($elvisShadowIds) );
 		}
 
@@ -53,7 +52,6 @@ class ElvisObjectRelationUtils
 	 */
 	public static function getPlacedShadowRelationsFromParentObjects( $objects, $area = 'Workflow' ) : array
 	{
-		require_once __DIR__.'/ElvisObjectUtils.class.php';
 
 		// Collect the objects placed on a Layout or PublishForm.
 		$placedObjectIds = array();
@@ -68,7 +66,7 @@ class ElvisObjectRelationUtils
 			}
 			if( $object->Relations ) foreach( $object->Relations as $relation ) {
 				if( $relation->Type == 'Placed' && $objectId == $relation->Parent &&
-					ElvisObjectUtils::isParentObjectTypeOfElvisInterest( $objectType ) ) {
+					Elvis_BizClasses_Object::isParentObjectTypeOfElvisInterest( $objectType ) ) {
 					$placedObjectIds[] = $relation->Child;
 					$placedRelations[ $relation->Parent ][ $relation->Child ][ $relation->Type ] = $relation;
 				}
@@ -78,7 +76,7 @@ class ElvisObjectRelationUtils
 		// Filter the placed objects (and their placements) that originate from Elvis only (=shadow objects).
 		$shadowRelations = array();
 		if( $placedObjectIds ) {
-			$placedShadowObjectIds = ElvisObjectUtils::filterElvisShadowObjects( $placedObjectIds );
+			$placedShadowObjectIds = Elvis_BizClasses_Object::filterElvisShadowObjects( $placedObjectIds );
 			if( $placedShadowObjectIds ) foreach( $placedShadowObjectIds as $placedShadowObjectId ) {
 				if( $placedRelations ) foreach( $placedRelations as $objectId => $reqChildRelations ) {
 					if( array_key_exists( $placedShadowObjectId, $reqChildRelations ) ) {
@@ -99,7 +97,6 @@ class ElvisObjectRelationUtils
 	 */
 	public static function getRelevantParentObjectIdsForPlacedShadowIds( $shadowIds ) : array
 	{
-		require_once __DIR__.'/ElvisObjectUtils.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizRelation.class.php';
 
 		// Find deleted Elvis assets. For each deleted asset, we need to collect the layouts.
@@ -114,6 +111,6 @@ class ElvisObjectRelationUtils
 		foreach( $placedRelations as $relation ) {
 			$parentIds[] = $relation->Parent;
 		}
-		return ElvisObjectUtils::filterRelevantIdsFromObjectIds( array_unique( $parentIds ) );
+		return Elvis_BizClasses_Object::filterRelevantIdsFromObjectIds( array_unique( $parentIds ) );
 	}
 }

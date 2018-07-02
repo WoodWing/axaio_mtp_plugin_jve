@@ -391,11 +391,9 @@ EOT;
 	 */
 	private function placeElvisImageOnPage4() : void
 	{
-		require_once __DIR__.'/../../../../util/ElvisUtils.class.php';
-
 		$relation = new Relation();
 		$relation->Parent = $this->layoutObject->MetaData->BasicMetaData->ID;
-		$relation->Child = ElvisUtils::getAlienIdFromAssetId( $this->imageAssetId );
+		$relation->Child = Elvis_BizClasses_AssetId::getAlienIdFromAssetId( $this->imageAssetId );
 		$relation->Type = 'Placed';
 		$relation->Placements = array( $this->composeInDesignImagePlacementForPage( 4 ) );
 
@@ -476,8 +474,7 @@ EOT;
 		switch( ELVIS_CREATE_COPY ) {
 			case 'Copy_To_Production_Zone':
 				$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );
-				require_once __DIR__.'/../../../../util/ElvisUtils.class.php';
-				$this->imageAssetId = ElvisUtils::getAssetIdFromAlienId( $this->imageObject->MetaData->BasicMetaData->DocumentID );
+				$this->imageAssetId = Elvis_BizClasses_AssetId::getAssetIdFromAlienId( $this->imageObject->MetaData->BasicMetaData->DocumentID );
 				break;
 			case 'Shadow_Only':
 				$this->assertEquals( 'ELVIS', $imageObject->MetaData->BasicMetaData->ContentSource );

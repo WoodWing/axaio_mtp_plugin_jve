@@ -22,11 +22,9 @@ class Elvis_BizClasses_AssetRelationsService
 	 */
 	public static function updateOrDeleteAssetRelations( array $objects, $shadowObjectRelations )
 	{
-		require_once __DIR__.'/../util/ElvisObjectRelationUtils.class.php';
-
 		// Retrieve all placed relations with Elvis shadow objects.
 		if( is_null( $shadowObjectRelations ) ) {
-			$shadowObjectRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( $objects );
+			$shadowObjectRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjects( $objects );
 		}
 
 		// Request Elvis to break relations between assets for which we don't have any placed relations with shadow objects.
@@ -137,7 +135,7 @@ class Elvis_BizClasses_AssetRelationsService
 		$operations = null;
 		if( $objects ) foreach( $objects as $object ) {
 			// Never update objects in archived state
-			if( ElvisObjectUtils::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
+			if( Elvis_BizClasses_Object::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
 				continue;
 			}
 
@@ -308,14 +306,12 @@ class Elvis_BizClasses_AssetRelationsService
 	 */
 	private static function composeElvisPlacements( Object $object, $shadowPlacements )
 	{
-		require_once __DIR__.'/../util/ElvisPlacementUtils.class.php';
-
 		$elvisPlacements = null;
 		if( $shadowPlacements ) {
 			// When edition of a placement is null, new placements need to be created for each possible edition.
-			$entPlacements = ElvisPlacementUtils::resolvePlacementEditions( $object->Targets, $shadowPlacements );
+			$entPlacements = Elvis_BizClasses_Placement::resolvePlacementEditions( $object->Targets, $shadowPlacements );
 			// Add pasteBoard property to placements
-			ElvisPlacementUtils::resolvePasteBoardInPlacements( $entPlacements );
+			Elvis_BizClasses_Placement::resolvePasteBoardInPlacements( $entPlacements );
 
 			$isPublishForm = $object->MetaData->BasicMetaData->Type == 'PublishForm';
 			if( $isPublishForm ) {
@@ -363,7 +359,7 @@ class Elvis_BizClasses_AssetRelationsService
 					$elvisPlacement->top  = floatval( $entPlacement->Top );
 					$elvisPlacement->left  = floatval( $entPlacement->Left );
 					$elvisPlacement->onPasteBoard  = (boolean)$entPlacement->onPasteBoard; // Enterprise<->Elvis internal property.
-					$elvisPlacement->onMasterPage = (boolean)ElvisPlacementUtils::isPlacedOnMasterPage( $entPlacement );
+					$elvisPlacement->onMasterPage = (boolean)Elvis_BizClasses_Placement::isPlacedOnMasterPage( $entPlacement );
 					$elvisPlacement->editions = array();
 					if( isset( $entPlacement->Editions ) ) foreach( $entPlacement->Editions as $edition ) {
 						$elvisEdition = new Elvis_DataClasses_EntityDescriptor();
@@ -433,11 +429,9 @@ class Elvis_BizClasses_AssetRelationsService
 	 */
 	public static function composeElvisDeleteObjectRelations( array $objects ) : array
 	{
-		require_once __DIR__.'/../util/ElvisObjectUtils.class.php';
-
 		$operations = array();
 		foreach( $objects as $object ) {
-			if( ElvisObjectUtils::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
+			if( Elvis_BizClasses_Object::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
 				continue; // Never update objects in archived state
 			}
 			$operation = new Elvis_DataClasses_DeleteObjectRelationOperation();

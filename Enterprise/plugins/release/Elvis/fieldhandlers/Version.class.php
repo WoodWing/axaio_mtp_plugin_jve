@@ -15,10 +15,9 @@ class Elvis_FieldHandlers_Version extends Elvis_FieldHandlers_ReadOnly
 	 */
 	public function read( $entMetadata, $elvisMetadata )
 	{
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
 		$elvisVersion = $elvisMetadata[ $this->lvsFieldName ];
 		if( isset( $elvisVersion ) ) {
-			$enterpriseVersion = ElvisUtils::getEnterpriseVersionNumber( $elvisVersion );
+			$enterpriseVersion = Elvis_BizClasses_Version::getEnterpriseVersionNumber( $elvisVersion );
 			$entMetadata->{$this->entMetadataCategory}->{$this->property->Name} = $enterpriseVersion;
 		}
 	}

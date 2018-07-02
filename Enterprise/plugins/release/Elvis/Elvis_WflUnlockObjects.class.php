@@ -14,9 +14,12 @@ class Elvis_WflUnlockObjects extends WflUnlockObjects_EnterpriseConnector {
     final public function getPrio() { return self::PRIO_DEFAULT; }
     final public function getRunMode() { return self::RUNMODE_BEFORE; }
 
+	/**
+	 * @inheritdoc
+	 */
     final public function runBefore( WflUnlockObjectsRequest &$req )
     {
-	    require_once __DIR__.'/config.php';
+	    require_once __DIR__.'/config.php'; // auto-loading
 	    if( $req->IDs ) foreach( $req->IDs as $id ) {
 		    $elvisId = self::getDocumentIdForObjectId( $id );
 		    if( !is_null( $elvisId ) ) {

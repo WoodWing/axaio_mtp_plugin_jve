@@ -376,7 +376,6 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
 			require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 			require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
-			require_once __DIR__.'/../../util/ElvisBrandAdminConfig.class.php';
 			$typeMap = BizAdmProperty::getCustomPropertyTypes( 'Publication' );
 			$publications = DBAdmPublication::listPublicationsObj( $typeMap );
 			/** @var AdmPublication[] $pubsToFix */
@@ -384,7 +383,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			if( $publications ) foreach( $publications as $publication ) {
 				$productionZone = null;
 				if( $publication->ExtraMetaData ) {
-					$productionZone = ElvisBrandAdminConfig::getProductionZone( $publication );
+					$productionZone = Elvis_BizClasses_BrandAdminConfig::getProductionZone( $publication );
 				}
 				if( !$productionZone ) {
 					$pubsToFix[] = $publication;

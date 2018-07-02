@@ -14,9 +14,7 @@ class Elvis_BizClasses_Version
 	 */
 	public function listVersions( string $alienId, string $rendition ) : array
 	{
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
-
-		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
+		$assetId = Elvis_BizClasses_AssetId::getAssetIdFromAlienId( $alienId );
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHits = $client->listVersions( $assetId );
 		$hits = array_map( array( 'Elvis_DataClasses_EntHit', 'fromStdClass' ), $stdClassHits );
@@ -39,10 +37,8 @@ class Elvis_BizClasses_Version
 	 */
 	public function retrieveVersion( string $alienId, string $version, string $rendition ) : VersionInfo
 	{
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
-
-		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$assetVersion = ElvisUtils::getElvisVersionNumber( $version );
+		$assetId = Elvis_BizClasses_AssetId::getAssetIdFromAlienId( $alienId );
+		$assetVersion = self::getElvisVersionNumber( $version );
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->retrieveVersion( $assetId, $assetVersion );
 		$hit = Elvis_DataClasses_EntHit::fromStdClass( $stdClassHit );
@@ -57,10 +53,8 @@ class Elvis_BizClasses_Version
 	 */
 	public function promoteVersion( string $alienId, string $version )
 	{
-		require_once __DIR__.'/../util/ElvisUtils.class.php';
-
-		$assetId = ElvisUtils::getAssetIdFromAlienId( $alienId );
-		$assetVersion = ElvisUtils::getElvisVersionNumber( $version );
+		$assetId = Elvis_BizClasses_AssetId::getAssetIdFromAlienId( $alienId );
+		$assetVersion = self::getElvisVersionNumber( $version );
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$client->promoteVersion( $assetId, $assetVersion );
 	}
@@ -85,9 +79,33 @@ class Elvis_BizClasses_Version
 		$vi->Created = $object->MetaData->WorkflowMetaData->Modified;
 		$vi->Comment = $object->MetaData->WorkflowMetaData->Comment;
 		$vi->Object = $object->MetaData->BasicMetaData->Name;
-		$vi->File = ElvisUtils::getAttachment( $hit, $rendition, 'FileUrl' );
+		$vi->File = Elvis_BizClasses_Attachment::getAttachment( $hit, $rendition, 'FileUrl' );
 		$vi->Slugline = '';
 
 		return $vi;
+	}
+
+	/**
+	 * Compose an Elvis asset version number, based on a given Enterprise object version number.
+	 *
+	 * @param string $version Enterprise object version number.
+	 * @return string Elvis asset version
+	 */
+	public static function getElvisVersionNumber( string $version ) : string
+	{
+		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
+		return substr($version, strlen(ELVIS_ENTERPRISE_VERSIONPREFIX));
+	}
+
+	/**
+	 * Compose an Enterprise object version number, based on a given Elvis asset version number.
+	 *
+	 * @param string $version Elvis asset version number.
+	 * @return string Enterprise object version number.
+	 */
+	public static function getEnterpriseVersionNumber( string $version ) : string
+	{
+		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
+		return ELVIS_ENTERPRISE_VERSIONPREFIX.$version;
 	}
 }

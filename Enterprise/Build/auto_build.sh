@@ -579,7 +579,6 @@ function step5_ionCubeEncodePhpFiles {
 		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
 		plugins/release/Elvis/Elvis_WflLogOn.class.php \
 		plugins/release/Elvis/Elvis_ContentSource.class.php \
-		plugins/release/Elvis/util/ElvisSessionUtil.php \
 	"
 	for icFoldersOrFile in ${icFoldersOrFiles}; do
 		${PHP_EXE} "${ES_PHP_ENCODER}" ${ioncubeEncodeParams} --encodelevel=1 --phppath="${icFoldersOrFile}"

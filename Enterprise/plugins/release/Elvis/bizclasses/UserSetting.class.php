@@ -1,7 +1,12 @@
 <?php
-require_once __DIR__.'/../config.php';
+/**
+ * Store user settings in Enterprise for Elvis users.
+ *
+ * @since      10.5.0 Class functions originate from util/ElvisSessionUtil.class.php
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
-class ElvisSessionUtil
+class Elvis_BizClasses_UserSetting
 {
 	/**
 	 * Read a Elvis ContentSource session setting from DB that were saved for the given session user.

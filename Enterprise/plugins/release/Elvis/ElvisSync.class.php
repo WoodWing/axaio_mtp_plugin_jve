@@ -8,7 +8,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once __DIR__.'/config.php';
+require_once __DIR__.'/config.php'; // auto-loading
 
 class ElvisSync
 {
@@ -431,7 +431,6 @@ class ElvisSync
 	 */
 	private function lockOrUnLockObject( Elvis_DataClasses_AssetUpdate $update ) : void
 	{
-		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		if( !isset( $update->metadata['checkedOutBy'] ) ) {
@@ -440,7 +439,7 @@ class ElvisSync
 		}
 
 		$checkedOutBy = self::getUsername( $update->metadata['checkedOutBy'] );
-		$alienId = ElvisUtils::getAlienIdFromAssetId( $update->assetId );
+		$alienId = Elvis_BizClasses_AssetId::getAlienIdFromAssetId( $update->assetId );
 		$username = self::getUsername( $update->username );
 
 		$requestInfo = array();
@@ -482,10 +481,9 @@ class ElvisSync
 	 */
 	private function updateObjectProperties( Elvis_DataClasses_AssetUpdate $update, Elvis_BizClasses_Metadata $metadataHandler ) : bool
 	{
-		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
-		$alienId = ElvisUtils::getAlienIdFromAssetId( $update->assetId );
+		$alienId = Elvis_BizClasses_AssetId::getAlienIdFromAssetId( $update->assetId );
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'UpdateObjectProperties - for: '.$alienId );
 		try {
 			$entMetadata = new MetaData();
@@ -509,10 +507,9 @@ class ElvisSync
 	 */
 	private function deleteObject( Elvis_DataClasses_AssetUpdate $update ) : bool
 	{
-		require_once __DIR__.'/util/ElvisUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizDeletedObject.class.php';
 
-		$alienId = ElvisUtils::getAlienIdFromAssetId( $update->assetId );
+		$alienId = Elvis_BizClasses_AssetId::getAlienIdFromAssetId( $update->assetId );
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'DeletingObject: '.$alienId );
 
 		try {

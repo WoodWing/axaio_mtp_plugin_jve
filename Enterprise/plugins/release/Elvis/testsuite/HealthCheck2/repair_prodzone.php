@@ -59,16 +59,15 @@ class Elvis_RepairProductionZoneApp
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
 		require_once __DIR__.'/../../config.php'; // DEFAULT_ELVIS_PRODUCTION_ZONE
-		require_once __DIR__.'/../../util/ElvisBrandAdminConfig.class.php';
 
 		$typeMap = BizAdmProperty::getCustomPropertyTypes( 'Publication' );
 		$pubsToFix = $this->getPublications( $ticket, $pubIds );
 		if( $pubsToFix ) foreach( $pubsToFix as $pubToFix ) {
-			$productionZone = ElvisBrandAdminConfig::getProductionZone( $pubToFix );
+			$productionZone = Elvis_BizClasses_BrandAdminConfig::getProductionZone( $pubToFix );
 			if( is_null( $productionZone ) ) {
-				ElvisBrandAdminConfig::addProductionZone( $pubToFix, DEFAULT_ELVIS_PRODUCTION_ZONE );
+				Elvis_BizClasses_BrandAdminConfig::addProductionZone( $pubToFix, DEFAULT_ELVIS_PRODUCTION_ZONE );
 			} elseif( !$productionZone ) {
-				ElvisBrandAdminConfig::setProductionZone( $pubToFix, DEFAULT_ELVIS_PRODUCTION_ZONE );
+				Elvis_BizClasses_BrandAdminConfig::setProductionZone( $pubToFix, DEFAULT_ELVIS_PRODUCTION_ZONE );
 			}
 		}
 		$this->savePublications( $ticket, $pubsToFix );

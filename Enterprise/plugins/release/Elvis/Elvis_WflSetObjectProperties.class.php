@@ -11,19 +11,21 @@ require_once BASEDIR . '/server/interfaces/services/wfl/WflSetObjectProperties_E
 
 class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConnector
 {
+	/** @var string[]|null */
 	private $objectChanged = null;
 
 	final public function getPrio()     { return self::PRIO_DEFAULT; }
 	final public function getRunMode()  { return self::RUNMODE_BEFOREAFTER; }
 
+	/**
+	 * @inheritdoc
+	 */
 	final public function runBefore( WflSetObjectPropertiesRequest &$req )
 	{
-		require_once __DIR__.'/config.php';
-		require_once __DIR__.'/util/ElvisUtils.class.php';
-		require_once __DIR__.'/util/ElvisObjectUtils.class.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
-		if( !is_null($req->MetaData->BasicMetaData->ID) && ElvisUtils::isElvisAssetId($req->MetaData->BasicMetaData->ID) ) {
+		if( !is_null($req->MetaData->BasicMetaData->ID) && Elvis_BizClasses_AssetId::isElvisAssetId($req->MetaData->BasicMetaData->ID) ) {
 			// Hack: WflSetObjectPropertiesService incorrectly sets MetaData->BasicMetaData->ID to $req->ID 
 			// even if it's a shadow object. This is wrong for shadow objects and leads to all kind of issues in the Enterprise core.
 			$req->MetaData->BasicMetaData->ID = null;
@@ -39,14 +41,14 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 			$objectType = DBObject::getObjectType( $objectId, 'Workflow' );
 		}
-		if( ElvisObjectUtils::isParentObjectTypeOfElvisInterest( $objectType ) ) {
+		if( Elvis_BizClasses_Object::isParentObjectTypeOfElvisInterest( $objectType ) ) {
 			$object = BizObject::getObject( $objectId, $user, false, 'none', array( 'Targets' ), null, true );
 
 			// Compare if targets changed. If Targets is null, no change.
 			$targetsChanged = false;
 			if( $objectType == 'Layout' ) { // Publish Form targets can never change.
 				if( !is_null( $req->Targets ) ) { // Only check when client provided targets at all.
-					$targetsChanged = ElvisObjectUtils::compareLayoutTargets( $object->Targets, $req->Targets );
+					$targetsChanged = Elvis_BizClasses_Object::compareLayoutTargets( $object->Targets, $req->Targets );
 				}
 			}
 			if( $targetsChanged ) {
@@ -66,7 +68,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 						}
 					}
 
-					if( ElvisObjectUtils::statusChangedToUnarchived( $oldStatusName, $newStatusName ) ) {
+					if( Elvis_BizClasses_Object::statusChangedToUnarchived( $oldStatusName, $newStatusName ) ) {
 						$this->objectChanged[] = $objectId;
 					}
 				}
@@ -74,10 +76,12 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 		}
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	final public function runAfter( WflSetObjectPropertiesRequest $req, WflSetObjectPropertiesResponse &$resp )
 	{
-		require_once __DIR__.'/config.php';
-		require_once __DIR__.'/util/ElvisObjectRelationUtils.class.php';
+		require_once __DIR__.'/config.php'; // auto-loading
 
 		$updatedObjects = array();
 		$updatedShadowRelations = array();
@@ -87,7 +91,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 				$object = BizObject::getObject( $objectId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
 
 				// Find shadow relations from object
-				$updatedShadowRelations = ElvisObjectRelationUtils::getPlacedShadowRelationsFromParentObjects( array( $object ) );
+				$updatedShadowRelations = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjects( array( $object ) );
 				if( !empty( $updatedShadowRelations ) ) {
 					$updatedObjects[] = $object;
 				}
