@@ -110,8 +110,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 	{
 		foreach( $articleObjs as $articleObj ) {
 			$attachment = $articleObj->Files[0];
-			$content = $attachment->Content;
-			$attachment->Content = null;
 			require_once BASEDIR.'/server/utils/TransferClient.class.php';
 			$transferClient = new WW_Utils_TransferClient( $this->ticket );
 			if( !$transferClient->uploadFile($attachment) ) {
