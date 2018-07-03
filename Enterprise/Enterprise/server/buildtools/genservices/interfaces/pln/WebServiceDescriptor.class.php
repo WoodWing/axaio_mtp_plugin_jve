@@ -11,18 +11,70 @@ require_once BASEDIR.'/server/buildtools/genservices/interfaces/WebServiceDescri
 
 class WW_BuildTools_GenServices_Interfaces_Pln_WebServiceDescriptor implements WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface
 {
-	final public function getServiceNameFull()  { return 'Planning'; }
-	final public function getServiceNameShort() { return 'Pln'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/pln/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:SmartEditorialPlan'; }
-	final public function getExclDataClasses()  { return array('AttachmentContent', 'Edition','Attachment'); }
-	final public function getWflDataClasses()   { return array( 'Edition','Attachment' ); } // already defined by workflow
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/editorialplan.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/SmartEditorialPlan.wsdl'; }
-	final public function getProviderBasePath() { return BASEDIR.'/server'; }
-	final public function getPluginNameFull()   { return null; }
-	final public function getPluginNameShort()  { return null; }
+	final public function getServiceNameFull()
+	{
+		return 'Planning';
+	}
+
+	final public function getServiceNameShort()
+	{
+		return 'Pln';
+	}
+
+	final public function getDataClassesFile()
+	{
+		return BASEDIR.'/server/interfaces/services/pln/DataClasses.php';
+	}
+
+	final public function getDataClassPrefix()
+	{
+		return $this->getServiceNameShort();
+	}
+
+	final public function getNameSpace()
+	{
+		return 'urn:SmartEditorialPlan';
+	}
+
+	final public function getExclDataClasses()
+	{
+		return array( 'AttachmentContent', 'Edition', 'Attachment' );
+	}
+
+	final public function getWflDataClasses()
+	{
+		return array( 'Edition', 'Attachment' );
+	} // already defined by workflow
+
+	final public function getSoapEntryPoint()
+	{
+		return "LOCALURL_ROOT.INETROOT.'/editorialplan.php'";
+	}
+
+	final public function getExternalSoapEntryPoint()
+	{
+		return "SERVERURL_ROOT.INETROOT.'/editorialplan.php'";
+	}
+
+	final public function getWsdlFilePath()
+	{
+		return BASEDIR.'/server/interfaces/SmartEditorialPlan.wsdl';
+	}
+
+	final public function getProviderBasePath()
+	{
+		return BASEDIR.'/server';
+	}
+
+	final public function getPluginNameFull()
+	{
+		return null;
+	}
+
+	final public function getPluginNameShort()
+	{
+		return null;
+	}
 
 	final public function getUrlToFilePath($serviceName)
 	{
