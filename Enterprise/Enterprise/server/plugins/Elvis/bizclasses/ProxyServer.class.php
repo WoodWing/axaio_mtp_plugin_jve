@@ -225,7 +225,7 @@ class Elvis_BizClasses_ProxyServer
 	 */
 	private function resolveElvisAssetId()
 	{
-		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEID
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_CONTENTSOURCEID
 
 		$contentSource = $this->objectMetaData->BasicMetaData->ContentSource;
 		$documentId = $this->objectMetaData->BasicMetaData->DocumentID;
@@ -304,7 +304,7 @@ class Elvis_BizClasses_ProxyServer
 	 *
 	 * The param is valid when it is alphanumeric or contains dashes(-) or underscores (_) or dots (.).
 	 * Example:
-	 *    http://127.0.0.1/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=500101124&rendition=preview&preview-args=maxWidth_200_maxHeight_200.jpg
+	 *    http://127.0.0.1/Enterprise/server/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=500101124&rendition=preview&preview-args=maxWidth_200_maxHeight_200.jpg
 	 *
 	 * @param string $previewArgs
 	 * @return bool
@@ -313,7 +313,7 @@ class Elvis_BizClasses_ProxyServer
 	{
 		// Do not accept % to avoid double encoding attacks https://www.owasp.org/index.php/Double_Encoding
 		// Do not accept / to avoid accessing other assets through relative paths, for example:
-		//    http://127.0.0.1/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=500101124&rendition=preview&preview-args=../../D1wjdC_3KpzAyeZQKFPYUQ
+		//    http://127.0.0.1/Enterprise/server/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=500101124&rendition=preview&preview-args=../../D1wjdC_3KpzAyeZQKFPYUQ
 		//      L> Note that object id 500101124 is NOT the shadow of asset id D1wjdC_3KpzAyeZQKFPYUQ, so the hacker
 		//         tries to by-pass the access rights validation at Enterprise for asset D1wjdC_3KpzAyeZQKFPYUQ (the
 		//         hacker has no access rights for) by providing object id 500101124 (the hacker has access rights for).

@@ -21,7 +21,7 @@ class Elvis_WflCreateObjects extends WflCreateObjects_EnterpriseConnector
 
 	final public function runAfter( WflCreateObjectsRequest $req, WflCreateObjectsResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		// Get shadow relations per layout/dossier of created objects, retrieved from response objects
 		$createdPlacedShadowObjects = Elvis_BizClasses_ObjectRelation::getPlacedShadowRelationsFromParentObjects( $resp->Objects );

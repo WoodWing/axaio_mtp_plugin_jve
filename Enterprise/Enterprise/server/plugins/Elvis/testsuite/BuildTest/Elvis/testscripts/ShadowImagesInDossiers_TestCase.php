@@ -183,7 +183,7 @@ EOT;
 	 */
 	private function setupTestData()
 	{
-		require_once __DIR__.'/../../../../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->testSuiteUtils = new WW_Utils_TestSuite();
 		$this->testSuiteUtils->initTest( 'JSON' );
@@ -739,7 +739,7 @@ EOT;
 	 */
 	private function testInvalidTicket()
 	{
-		require_once BASEDIR.'/config/plugins/Elvis/config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?objectid='.urlencode( $this->images[0]->entObject->MetaData->BasicMetaData->ID ).
 			'&rendition=native';
@@ -753,7 +753,7 @@ EOT;
 	 */
 	private function testObjectNotFound()
 	{
-		require_once BASEDIR.'/config/plugins/Elvis/config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?objectid=9223372036854775807'. // take max int 64 for non-existing object id
 			'&rendition=preview';
@@ -767,7 +767,7 @@ EOT;
 	 */
 	private function testUnsupportedFileRendition()
 	{
-		require_once BASEDIR.'/config/plugins/Elvis/config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		$url = ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?objectid='.urlencode( $this->images[0]->entObject->MetaData->BasicMetaData->ID ).
 			'&rendition=foo';

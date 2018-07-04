@@ -27,7 +27,7 @@ class WW_TestSuite_BuildTest_Elvis_CopyToProductZone_ShadowImagesOnLayouts_TestC
 	 */
 	public function runTest(): void
 	{
-		require_once __DIR__.'/../../../../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		$this->assertEquals( 'Copy_To_Production_Zone', ELVIS_CREATE_COPY );
 		parent::runTest();
 	}

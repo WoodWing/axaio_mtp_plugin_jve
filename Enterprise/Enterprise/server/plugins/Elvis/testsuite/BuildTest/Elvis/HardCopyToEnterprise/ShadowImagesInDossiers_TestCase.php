@@ -27,7 +27,7 @@ class WW_TestSuite_BuildTest_Elvis_HardCopyToEnterprise_ShadowImagesInDossiers_T
 	 */
 	public function runTest(): void
 	{
-		require_once __DIR__.'/../../../../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		$this->assertEquals( 'Hard_Copy_To_Enterprise', ELVIS_CREATE_COPY );
 		parent::runTest();
 	}

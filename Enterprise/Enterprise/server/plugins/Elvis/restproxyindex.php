@@ -18,7 +18,7 @@
  * - preview-args: The preview- or cropping dimensions. Optional. See Elvis REST API for details.
  *
  * Example request:
- *    http://localhost/Enterprise/config/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=123&rendition=preview
+ *    http://localhost/Enterprise/server/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=123&rendition=preview
  *
  * The following HTTP codes may be returned:
  * - HTTP 200: The file is found and is streamed back to caller.
@@ -34,12 +34,8 @@
  */
 
 $beforeInclude = microtime( true );
-if( file_exists( __DIR__.'/../../config.php' ) ) {
-	require_once '../../config.php';
-} else { // fall back at symbolic link to VCS source location of server plug-in
-	require_once '../../../Enterprise/config/config.php';
-}
-require_once __DIR__.'/config.php'; // auto-loading
+require_once __DIR__.'/../../../config/config.php';
+require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 $footprint = sprintf( '%03d', round( ( microtime( true ) - $beforeInclude ) * 1000 ) );
 LogHandler::Log( 'ElvisRestProxyIndex', 'CONTEXT', 'Enterprise Server footprint: '.$footprint.'ms (= startup time).' );

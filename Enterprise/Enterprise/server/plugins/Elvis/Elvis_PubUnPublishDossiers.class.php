@@ -24,7 +24,7 @@ class Elvis_PubUnPublishDossiers extends PubUnPublishDossiers_EnterpriseConnecto
 	 */
 	final public function runAfter( PubUnPublishDossiersRequest $req, PubUnPublishDossiersResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 		try {
 			Elvis_BizClasses_Object::updatePublisFormPlacementsForPublishDossierOperation( $resp->PublishedDossiers );
 		} catch( BizException $e ) {

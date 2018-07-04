@@ -24,7 +24,7 @@ class Elvis_PubUpdateDossiers extends PubUpdateDossiers_EnterpriseConnector
 	 */
 	final public function runAfter( PubUpdateDossiersRequest $req, PubUpdateDossiersResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 		try {
 			Elvis_BizClasses_Object::updatePublisFormPlacementsForPublishDossierOperation( $resp->PublishedDossiers );
 		} catch( BizException $e ) {

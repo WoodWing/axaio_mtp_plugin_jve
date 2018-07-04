@@ -34,7 +34,7 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 	 */
 	final public function runBefore( WflDeleteObjectsRequest &$req )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		// When the object is deleted from the Workflow area, the relations are deleted
 		$inWorkflow = in_array( 'Workflow', $req->Areas );
@@ -92,7 +92,7 @@ class Elvis_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 	 */
 	final public function runAfter( WflDeleteObjectsRequest $req, WflDeleteObjectsResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		if( !empty( $this->deletedShadowRelations ) ) {
 			// Tell Elvis to delete the placement information of the following deleted layouts

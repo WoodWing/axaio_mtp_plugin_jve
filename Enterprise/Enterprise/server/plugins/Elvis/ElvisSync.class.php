@@ -8,7 +8,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once __DIR__.'/config.php'; // auto-loading
+require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 class ElvisSync
 {

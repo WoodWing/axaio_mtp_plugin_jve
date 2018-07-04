@@ -24,7 +24,7 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	 */
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp ) 
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		if( $req->User && $req->Password ) {
 			// Only users known to Elvis are allowed to edit native Elvis files. Other users are restricted to read-only.
@@ -44,7 +44,7 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 		// When a client requests for 'ticket only' the feature set is -not- provided by
 		// the core server, so we need to handle with care.
 		if( isset($resp->ServerInfo->FeatureSet) ) {
-			require_once __DIR__.'/config.php'; // Load the Elvis settings
+			require_once BASEDIR.'/config/config_elvis.php'; // Load the Elvis settings
 			// Pass the ElvisServerUrl option in the feature set, as used by Content Station.
 			$resp->ServerInfo->FeatureSet[] = new Feature( 'ElvisServerUrl', ELVIS_CLIENT_URL );
 

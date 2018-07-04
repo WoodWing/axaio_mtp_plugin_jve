@@ -16,12 +16,11 @@ class Elvis_WflCopyObject extends WflCopyObject_EnterpriseConnector
 
 	final public function runBefore( WflCopyObjectRequest &$req )
 	{
-		require_once __DIR__.'/config.php';
 	}
 
 	final public function runAfter( WflCopyObjectRequest $req, WflCopyObjectResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		$copiedObject = new Object();
 		$copiedObject->MetaData = $resp->MetaData;

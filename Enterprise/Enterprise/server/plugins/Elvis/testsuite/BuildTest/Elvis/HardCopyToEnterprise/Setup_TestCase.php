@@ -20,7 +20,7 @@ class WW_TestSuite_BuildTest_Elvis_HardCopyToEnterprise_Setup_TestCase extends T
 
 	final public function runTest()
 	{
-		require_once __DIR__.'/../../../../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		$vars = array();
 		$vars['BuildTest_Elvis_HardCopyToEnterprise']['ELVIS_CREATE_COPY'] = ELVIS_CREATE_COPY;
 		$this->setSessionVariables( $vars );

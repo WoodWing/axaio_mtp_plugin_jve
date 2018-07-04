@@ -2,7 +2,7 @@
 /**
  * This connector is called by core server when the user is about to create a brand. It populates the custom
  * "Production Zone" property to the Brand Maintenance page under the "Elvis" section with the default value
- * configured for the DEFAULT_ELVIS_PRODUCTION_ZONE setting that is taken from Elvis/config.php.
+ * configured for the DEFAULT_ELVIS_PRODUCTION_ZONE setting that is taken from config_elvis.php.
  *
  * @since      10.1.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
@@ -33,7 +33,7 @@ class Elvis_AdmCreatePublications extends AdmCreatePublications_EnterpriseConnec
 	 */
 	final public function runBefore( AdmCreatePublicationsRequest &$req )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading, ELVIS_CREATE_COPY
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading, ELVIS_CREATE_COPY
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone'  ) {
 			if( $req->Publications ) foreach( $req->Publications as $publication ) {
 				$productionZone = Elvis_BizClasses_BrandAdminConfig::getProductionZone( $publication );

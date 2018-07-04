@@ -27,7 +27,7 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 	final public function runTest()
 	{
 		// Test if Elvis is compatible with Enterprise.
-		require_once __DIR__.'/../../../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		$this->testElvisServerConnection();
 
 		// Check if the ELVIS_DEFAULT_USER option is configured and whether this user exists in Elvis.
@@ -89,7 +89,7 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 	 */
 	private function checkIfFallbackUserIsEnabledInElvis()
 	{
-		require_once __DIR__.'/../../../config.php'; // ELVIS_DEFAULT_USER
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_DEFAULT_USER
 
 		$service = new Elvis_BizClasses_AssetService();
 		$userDetails = $service->getUserDetails( ELVIS_DEFAULT_USER );
@@ -103,7 +103,7 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 	 */
 	private function checkIfTestUserIsEnabledInElvis( $username )
 	{
-		require_once __DIR__.'/../../../config.php'; // ELVIS_DEFAULT_USER
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_DEFAULT_USER
 
 		$service = new Elvis_BizClasses_AssetService();
 		$userDetails = $service->getUserDetails( $username );

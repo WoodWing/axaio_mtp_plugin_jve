@@ -24,7 +24,7 @@ class Elvis_WflDeleteObjectRelations extends WflDeleteObjectRelations_Enterprise
 	 */
 	final public function runBefore( WflDeleteObjectRelationsRequest &$req )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		// Collect changed layouts due restored elvis shadow objects
 		$childIds = array();
@@ -40,7 +40,7 @@ class Elvis_WflDeleteObjectRelations extends WflDeleteObjectRelations_Enterprise
 	 */
 	final public function runAfter( WflDeleteObjectRelationsRequest $req, WflDeleteObjectRelationsResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		// Update Elvis with new shadow relations (if any) of changed layouts
 		if( $this->changedLayoutIds ) {

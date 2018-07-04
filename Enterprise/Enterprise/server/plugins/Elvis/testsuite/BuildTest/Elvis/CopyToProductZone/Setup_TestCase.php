@@ -20,7 +20,7 @@ class WW_TestSuite_BuildTest_Elvis_CopyToProductZone_Setup_TestCase extends Test
 
 	final public function runTest()
 	{
-		require_once __DIR__.'/../../../../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		$vars = array();
 		$vars['BuildTest_Elvis_CopyToProductZone']['ELVIS_CREATE_COPY'] = ELVIS_CREATE_COPY;
 		$this->setSessionVariables( $vars );

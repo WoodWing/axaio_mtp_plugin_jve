@@ -37,7 +37,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	 */
 	final public function runBefore( WflSaveObjectsRequest &$req )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		// Just remember whether or not the user is unlocking or keeps the lock after save.
@@ -72,7 +72,7 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	 */
 	final public function runAfter( WflSaveObjectsRequest $req, WflSaveObjectsResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		// Walk through all placements of the old and new layout/form objects and collect changed shadow object ids of placements
 		$reqObjectIds = array_keys( $this->oldShadowRelations ) + array_keys( $this->newShadowRelations );

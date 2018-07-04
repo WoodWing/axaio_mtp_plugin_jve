@@ -17,7 +17,7 @@ class Elvis_BizClasses_Object
 	public static function filterElvisShadowObjects( $objectIds ) : array
 	{
 		require_once BASEDIR .'/server/dbclasses/DBBase.class.php';
-		require_once __DIR__.'/../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 
 		$elvisShadowObjectIds = array();
 
@@ -183,7 +183,7 @@ class Elvis_BizClasses_Object
 	 */
 	public static function isArchivedStatus( $statusName ) : bool
 	{
-		require_once __DIR__.'/../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 
 		static $ArchivedStatuses;
 		if (!isset($ArchivedStatuses)) {

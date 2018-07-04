@@ -1,6 +1,6 @@
 <?php
 /**
- * Provides Elvis/config.php options to the Config Overview page (wwinfo.php) page and the phpinfo.htm file
+ * Provides config_elvis.php options to the Config Overview page (wwinfo.php) page and the phpinfo.htm file
  * in the server logging. It hides the password values for ELVIS_DEFAULT_USER (and the obsoleted ELVIS_ENT_ADMIN_PASS).
  *
  * @since      10.1.1
@@ -16,7 +16,7 @@ class Elvis_ConfigFiles extends ConfigFiles_EnterpriseConnector
 	 */
 	public function getConfigFiles()
 	{
-		return array( 'plugins/Elvis/config.php' => __DIR__.'/config.php' );
+		return array( 'config_elvis.php' => BASEDIR.'/config/config_elvis.php' );
 	}
 
 	/**
@@ -24,7 +24,7 @@ class Elvis_ConfigFiles extends ConfigFiles_EnterpriseConnector
 	 */
 	public function displayOptionValue( $configFile, $optionName, $value )
 	{
-		require_once __DIR__.'/config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		if( $optionName == 'ELVIS_SUPER_USER_PASS' || $optionName == 'ELVIS_ENT_ADMIN_PASS' ) {
 			$value = '***';
 		}

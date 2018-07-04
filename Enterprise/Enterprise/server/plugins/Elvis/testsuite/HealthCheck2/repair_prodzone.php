@@ -12,11 +12,7 @@
  * The Health Check will detect this and provide a URL to this module and passes on the Publication ids to make sure
  * no accidental changes are made.
  */
-if( file_exists('../../../../../config/config.php') ) {
-	require_once '../../../../../config/config.php';
-} else { // fall back at symbolic link (repository location of server plug-in)
-	require_once '../../../../../Enterprise/config/config.php';
-}
+require_once __DIR__.'/../../../../../config/config.php';
 
 // Obtain ticket of admin user from cookie. Redirect if no valid ticket.
 require_once BASEDIR.'/server/secure.php';
@@ -58,7 +54,7 @@ class Elvis_RepairProductionZoneApp
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
-		require_once __DIR__.'/../../config.php'; // DEFAULT_ELVIS_PRODUCTION_ZONE
+		require_once BASEDIR.'/config/config_elvis.php'; // DEFAULT_ELVIS_PRODUCTION_ZONE
 
 		$typeMap = BizAdmProperty::getCustomPropertyTypes( 'Publication' );
 		$pubsToFix = $this->getPublications( $ticket, $pubIds );

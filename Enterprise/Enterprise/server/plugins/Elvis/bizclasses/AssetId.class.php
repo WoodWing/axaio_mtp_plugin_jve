@@ -20,7 +20,7 @@ class Elvis_BizClasses_AssetId
 		// Note that str_replace() is used because sometimes Enterprise prefixes the $alienId with two prefixes.
 		// Bad example: _ELVIS__ELVIS_<ASSETID>
 		// How it should be: _ELVIS_<ASSETID>
-		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return str_replace( ELVIS_CONTENTSOURCEPREFIX, '', $alienId );
 	}
 
@@ -33,7 +33,7 @@ class Elvis_BizClasses_AssetId
 	 */
 	public static function isElvisAssetId( $alienId )
 	{
-		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return strpos( $alienId, ELVIS_CONTENTSOURCEPREFIX ) !== false;
 	}
 
@@ -46,7 +46,7 @@ class Elvis_BizClasses_AssetId
 	 */
 	public static function getAlienIdFromAssetId( $assetId )
 	{
-		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return ELVIS_CONTENTSOURCEPREFIX.$assetId;
 	}
 }

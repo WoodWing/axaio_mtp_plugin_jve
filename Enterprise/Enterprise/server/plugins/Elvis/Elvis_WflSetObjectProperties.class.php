@@ -22,7 +22,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 	 */
 	final public function runBefore( WflSetObjectPropertiesRequest &$req )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		if( !is_null($req->MetaData->BasicMetaData->ID) && Elvis_BizClasses_AssetId::isElvisAssetId($req->MetaData->BasicMetaData->ID) ) {
@@ -81,7 +81,7 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 	 */
 	final public function runAfter( WflSetObjectPropertiesRequest $req, WflSetObjectPropertiesResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		$updatedObjects = array();
 		$updatedShadowRelations = array();

@@ -145,7 +145,7 @@ EOT;
 	 */
 	private function setupTestData() : void
 	{
-		require_once __DIR__.'/../../../../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->testSuiteUtils = new WW_Utils_TestSuite();
 		$this->testSuiteUtils->initTest( 'JSON' );

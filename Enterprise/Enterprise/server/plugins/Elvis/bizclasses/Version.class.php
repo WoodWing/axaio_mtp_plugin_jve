@@ -93,7 +93,7 @@ class Elvis_BizClasses_Version
 	 */
 	public static function getElvisVersionNumber( string $version ) : string
 	{
-		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return substr($version, strlen(ELVIS_ENTERPRISE_VERSIONPREFIX));
 	}
 
@@ -105,7 +105,7 @@ class Elvis_BizClasses_Version
 	 */
 	public static function getEnterpriseVersionNumber( string $version ) : string
 	{
-		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return ELVIS_ENTERPRISE_VERSIONPREFIX.$version;
 	}
 }

@@ -162,7 +162,7 @@ class Elvis_BizClasses_Metadata
 	 */
 	private function initFieldHandlers()
 	{
-		require_once __DIR__.'/../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		if( isset( $this->fieldHandlers ) ) {
 			return;
 		}

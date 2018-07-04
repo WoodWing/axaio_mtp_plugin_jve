@@ -336,7 +336,7 @@ if( !function_exists( 'Elvis_Config_GetFieldHandlers' ) ) {
 if( defined( 'ELVIS_FIELD_HANDLERS' ) ) { // Warn incomplete migrations.
 	LogHandler::Log( 'EVLIS', 'ERROR', 'The ELVIS_FIELD_HANDLERS option is no longer supported. '.
 		'To configure field handlers in your config_overrule.php file, please define a function named '.
-		'Elvis_Config_GetFieldHandlers. In the config/plugins/Elvis/config.php file there is the default implementation '.
+		'Elvis_Config_GetFieldHandlers. In the config_elvis.php file there is the default implementation '.
 		'of this function which could be used as an example. And, please remove your ELVIS_FIELD_HANDLERS option definition. '
 );
 }
@@ -349,6 +349,6 @@ define('ELVIS_CONTENTSOURCEID', 'ELVIS');
 define('ELVIS_CONTENTSOURCEPREFIX', '_ELVIS_');
 define('ELVIS_ENTERPRISE_VERSIONPREFIX', '0.');
 define('ELVIS_INTERNAL_USER_POSTFIX', ' (Elvis internal user)');
-define('ELVIS_CONTENTSOURCE_PUBLIC_PROXYURL', SERVERURL_ROOT.INETROOT.'/config/plugins/Elvis/restproxyindex.php');
-define('ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL', LOCALURL_ROOT.INETROOT.'/config/plugins/Elvis/restproxyindex.php');
+define('ELVIS_CONTENTSOURCE_PUBLIC_PROXYURL', SERVERURL_ROOT.INETROOT.'/server/plugins/Elvis/restproxyindex.php');
+define('ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL', LOCALURL_ROOT.INETROOT.'/server/plugins/Elvis/restproxyindex.php');
 define('ELVIS_MINVERSION', '6.15.0.0'); // minimum required version // TODO: fine tune this version once known

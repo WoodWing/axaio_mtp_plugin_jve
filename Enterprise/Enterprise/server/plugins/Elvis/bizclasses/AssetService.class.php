@@ -260,7 +260,7 @@ class Elvis_BizClasses_AssetService
 	 */
 	public function getUserDetails( string $username ) : Elvis_DataClasses_EntUserDetails
 	{
-		require_once __DIR__.'/../config.php'; // ELVIS_DEFAULT_USER
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_DEFAULT_USER
 
 		$client = new Elvis_BizClasses_Client( ELVIS_DEFAULT_USER );
 		$stdClassUserDetails = $client->getUserDetails( $username );

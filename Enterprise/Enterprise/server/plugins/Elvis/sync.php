@@ -11,20 +11,17 @@
 //    Run every 3 minutes, process as many updates from the queue, but for a maximum of 3 minutes
 //       with a long-poll wait time towards Elvis of 30 seconds.
 //    Cron settings (run every 3 minutes): */3 * * * *
-//    URL: http://localhost/Enterprise/config/plugins/Elvis/sync.php?maxexectime=180&maxtimeoutperrun=30
+//    URL: http://localhost/Enterprise/server/plugins/Elvis/sync.php?maxexectime=180&maxtimeoutperrun=30
 //
 // Automated test example:
 //    Run once only, process 5 updates from the queue, and use the default maximum process time of 600 seconds
 //       with a long-poll wait time towards Elvis of 1 second.
-//    URL: http://localhost/Enterprise/config/plugins/Elvis/sync.php?maxupdates=5&maxtimeoutperrun=1&production=false
+//    URL: http://localhost/Enterprise/server/plugins/Elvis/sync.php?maxupdates=5&maxtimeoutperrun=1&production=false
 
 
-if( file_exists(__DIR__.'/../../config.php') ) {
-	require_once '../../config.php';
-} else { // fall back at symbolic link to VCS source location of server plug-in
-	require_once '../../../Enterprise/config/config.php';
-}
+require_once __DIR__.'/../../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
+require_once BASEDIR.'/config/config_elvis.php';
 require_once __DIR__.'/ElvisSync.class.php';
 
 set_time_limit(3600);

@@ -24,7 +24,7 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 	 */
 	final public function runBefore( WflMultiSetObjectPropertiesRequest &$req )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		// Find out if the state property changed and retrieve current statuses if this is the case
 		$statePropertyChanged = false;
@@ -45,7 +45,7 @@ class Elvis_WflMultiSetObjectProperties extends WflMultiSetObjectProperties_Ente
 	 */
 	final public function runAfter( WflMultiSetObjectPropertiesRequest $req, WflMultiSetObjectPropertiesResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		if( !is_null( $this->oldStatuses ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';

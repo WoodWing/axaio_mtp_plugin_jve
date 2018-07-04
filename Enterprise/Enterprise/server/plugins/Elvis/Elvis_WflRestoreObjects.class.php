@@ -26,7 +26,7 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 	 */
 	final public function runAfter( WflRestoreObjectsRequest $req, WflRestoreObjectsResponse &$resp )
 	{
-		require_once __DIR__.'/config.php'; // auto-loading
+		require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 
 		// Get restored shadow relations per layout/dossier, retrieved from DB.
 		$reqLayoutIds = Elvis_BizClasses_Object::filterRelevantIdsFromObjectIds( $req->IDs ); // Only interested in placements of layouts

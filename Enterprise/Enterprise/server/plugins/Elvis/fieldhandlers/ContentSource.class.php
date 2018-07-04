@@ -15,7 +15,7 @@ class Elvis_FieldHandlers_ContentSource extends Elvis_FieldHandlers_ReadOnly
 	 */
 	public function read( $entMetadata, $elvisMetadata )
 	{
-		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEID
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_CONTENTSOURCEID
 		$entMetadata->{$this->entMetadataCategory}->{$this->property->Name} = ELVIS_CONTENTSOURCEID;
 	}
 }

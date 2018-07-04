@@ -8,7 +8,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once __DIR__.'/../config.php';
+require_once BASEDIR.'/config/config_elvis.php';
 
 class Elvis_BizClasses_CurlClient
 {

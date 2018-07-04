@@ -21,7 +21,7 @@ class Elvis_TestSuite_BuildTest_Elvis_SyncUtils
 		try {
 			$maxExecTime = 10;
 			$client = new Zend\Http\Client();
-			$client->setUri( LOCALURL_ROOT.INETROOT.'/config/plugins/Elvis/sync.php' );
+			$client->setUri( LOCALURL_ROOT.INETROOT.'/server/plugins/Elvis/sync.php' );
 			$client->setMethod( Zend\Http\Request::METHOD_GET );
 			$client->setParameterGet( array(
 				'maxexectime' => $maxExecTime, // Max number of seconds wait for the whole operation.

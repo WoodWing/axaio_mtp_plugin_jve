@@ -10,7 +10,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 {
 	public function getDisplayName() { return 'Elvis Content Source'; }
 	public function getTestGoals()   { return 'Validates wether the Elvis integration is ready for production.'; }
-	public function getTestMethods() { return 'It checks if options are correctly defined in the Elvis/config.php file and '.
+	public function getTestMethods() { return 'It checks if options are correctly defined in the config_elvis.php file and '.
 		'wether a connection with Elvis Server can be established. It detects if Elvis Server is running and validates if the '.
 		'version is compatible with Enterprise. It determines if the configured user ELVIS_ENT_ADMIN_USER can login to Enterprise '.
 		'and the configured ELVIS_DEFAULT_USER user can log on to Elvis.'; }
@@ -22,14 +22,14 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	/** @var string Version of Elvis Server */
 	private $serverVersion;
 
-	const CONFIG_FILES = 'Enterprise/config/plugins/Elvis/config.php or Enterprise/config/overrule_config.php';
+	const CONFIG_FILES = 'Enterprise/config/config_elvis.php or Enterprise/config/overrule_config.php';
 
 	/**
 	 * @inheritdoc
 	 */
 	final public function runTest()
 	{
-		require_once __DIR__.'/../../config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
 
@@ -69,7 +69,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	}
 
 	/**
-	 * Checks if all defines exists in the Elvis/config.php file.
+	 * Checks if all defines exists in the config_elvis.php file.
 	 *
 	 * @since 10.1.1
 	 * @return bool
@@ -120,7 +120,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	}
 
 	/**
-	 * Checks if all defines in the Elvis/config.php file are correctly filled in.
+	 * Checks if all defines in the config_elvis.php file are correctly filled in.
 	 *
 	 * @since 10.1.1
 	 * @return bool
@@ -399,7 +399,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 					$pubIdsToFix[] = $pubToFix->Id;
 				}
 				$help = 'Alternatively, reconsider the configured setting for the ELVIS_CREATE_COPY option in the '.self::CONFIG_FILES.' file.';
-				$link = '../../config/plugins/Elvis/testsuite/HealthCheck2/repair_prodzone.php?ids='.implode(',',$pubIdsToFix);
+				$link = '../../server/plugins/Elvis/testsuite/HealthCheck2/repair_prodzone.php?ids='.implode(',',$pubIdsToFix);
 				$message .= '</ul>Click <a href="'.$link.'" target="_blank">here</a> to automatically update the brands with the default value '.DEFAULT_ELVIS_PRODUCTION_ZONE.'.';
 				$this->setResult( 'ERROR', $message );
 				$result = false;

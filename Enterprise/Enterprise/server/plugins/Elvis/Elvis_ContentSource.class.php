@@ -6,7 +6,7 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-require_once __DIR__.'/config.php'; // auto-loading
+require_once BASEDIR.'/config/config_elvis.php'; // auto-loading
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_EnterpriseConnector.class.php';
 
 class Elvis_ContentSource extends ContentSource_EnterpriseConnector
@@ -520,7 +520,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$service = new Elvis_BizClasses_AssetService();
 		$userDetails = $service->getUserDetails( $user->Name );
 		if( $userDetails ) {
-			require_once __DIR__.'/../config.php'; // ELVIS_INTERNAL_USER_POSTFIX
+			require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_INTERNAL_USER_POSTFIX
 			$user->FullName = $userDetails->fullName;
 			$user->EmailAddress = $userDetails->email;
 			if( !$userDetails->ldapUser ) {
@@ -544,7 +544,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public function getContentSourceProxyLinksBaseUrl()
 	{
-		require_once __DIR__.'/config.php';
+		require_once BASEDIR.'/config/config_elvis.php';
 		return ELVIS_CONTENTSOURCE_PUBLIC_PROXYURL;
 	}
 
