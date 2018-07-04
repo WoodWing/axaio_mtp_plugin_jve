@@ -1,6 +1,6 @@
 <?php
 /**
- * Implements the object version control.
+ * Implement the object version control for Elvis assets.
  *
  * @since 		8.3
  * @copyright	WoodWing Software bv. All Rights Reserved.
@@ -11,17 +11,12 @@ require_once BASEDIR.'/server/interfaces/plugins/connectors/Version_EnterpriseCo
 class Elvis_Version extends Version_EnterpriseConnector
 {
 	/**
-	 * Content Sources are free to set their own version.
-	 *
-	 * @return bool Use Content Source version.
+	 * @inheritdoc.
 	 */
 	public function useContentSourceVersion()
 	{
-		require_once __DIR__.'/Elvis_ContentSource.class.php';
 		$contentSource = new Elvis_ContentSource();
-		$contentSourceId = $contentSource->getContentSourceId();
-
-		return array( $contentSourceId => true );
+		return array( $contentSource->getContentSourceId() => true );
 	}
 
 	// Generic connector methods that can be overruled by a Version implementation:
@@ -31,26 +26,14 @@ class Elvis_Version extends Version_EnterpriseConnector
 	}
 	
 	/**
-	 * Overrides createVersion in Version_EnterpriseConnector for backwards compatibility
-	 * 
-	 * Gives a connector control over the creation of new version of an object.
-	 * @param int $objectId Id of the object
-	 * @param string $sourceVersion (<major>.<minor>)
-	 * @param string $nextVersion (<major>.<minor>)
-	 * @param string $storename Reference to the filestore.
-	 * @param boolean $setObjPropMode Optional. Special case for SetObjectProperties context, conditionally creating versions.
+	 * @inheritdoc
 	 */
 	public function createVersion( $objectId, $sourceVersion, $nextVersion, $storename, $setObjPropMode )
 	{
 	}
 
 	/**
-	 * Overrides deleteVersion in Version_EnterpriseConnector for backwards compatibility
-	 *
-	 * Gives a connector control over the delete of a version of an object.
-	 * @param int $objectId Id of the object
-	 * @param string $version (<major>.<minor>)
-	 * @param string $storeName Reference to the filestore.
+	 * @inheritdoc
 	 */
 	public function deleteVersion( $objectId, $version, $storeName )
 	{
