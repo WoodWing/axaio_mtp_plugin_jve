@@ -75,6 +75,11 @@ class WW_Utils_Autoloader
 							require $file;
 							return true;
 						}
+						$file = BASEDIR.'/server/plugins/'.$folder.'/'.$fileNameBase.'.class.php';
+						if( file_exists( $file ) ) {
+							require $file;
+							return true;
+						}
 					}
 				}
 			}
