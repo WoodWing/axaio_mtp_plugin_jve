@@ -2400,7 +2400,6 @@ class WflVersionInfoValidator
 		}
 		if( $validator->checkExist( $datObj, 'State' ) ) {
 			$validator->enterPath( 'State' );
-			$validator->checkNull( $datObj->State );
 			if( !is_null( $datObj->State ) ) {
 				$validator->checkType( $datObj->State, 'State' );
 				WflStateValidator::validate( $validator, $datObj->State );

@@ -1590,7 +1590,7 @@ class VersionInfo
 	 * @param string               $Slugline             
 	 * @param string               $Created              
 	 * @param string               $Object               
-	 * @param State                $State                
+	 * @param State                $State                Nullable.
 	 * @param Attachment           $File                 Nullable.
 	 */
 	public function __construct( $Version=null, $User=null, $Comment=null, $Slugline=null, $Created=null, $Object=null, $State=null, $File=null)
