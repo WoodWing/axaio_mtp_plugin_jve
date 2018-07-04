@@ -13,117 +13,186 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
  */
 class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_DefaultArticleTemplate_TestCase extends TestCase
 {
+	private $vars = null;
 	private $ticket = null;
 	private $publication = null;
+	private $publicationInfo = null;
 	private $category = null;
+	private $categoryInfo = null;
 	private $printTarget = null;
 	private $articleTemplateId = null;
 	private $articleTemplateName = null;
 	private $articleTemplateStatus = null;
 	private $articleTemplateRating = null;
 	private $articleTemplateDescription = null;
-	const NAMEDQUERY = 'DefaultArticleTemplate';
 
-	public function getDisplayName() { return 'NamedQuery - ' . self::NAMEDQUERY; }
-	public function getTestGoals()   { return 'Checks if ' . self::NAMEDQUERY . ' named query is works well.'; }
-	public function getTestMethods() { return 'Perform named query and check whether it returns the correct article template ID.'; }
-    public function getPrio()        { return 106; }
+	public function getDisplayName() { return 'NamedQuery - [DefaultArticleTemplate]'; }
+	public function getTestGoals()   { return 'Checks if NamedQuery works well.'; }
+	public function getTestMethods() { return 'Perform NamedQuery for DefaultArticleTemplate and verify its reponse.'; }
+	public function getPrio()        { return 106; }
 	
 	final public function runTest()
 	{
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
 
-		// Retrieve the data that has been determined by "Setup test data" TestCase.
-   		$vars = $this->getSessionVariables();
-   		$this->ticket      = $vars['BuildTest_WebServices_WflServices']['ticket'];
-   		$publicationInfo   = $vars['BuildTest_WebServices_WflServices']['publication'];
-   		$categoryInfo      = $vars['BuildTest_WebServices_WflServices']['category'];
-   		$artTplStatusInfo  = $vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'];
-   		$this->printTarget = $vars['BuildTest_WebServices_WflServices']['printTarget'];
-		if( !$this->ticket || !$publicationInfo || !$categoryInfo || !$artTplStatusInfo ) {
-			$this->setResult( 'ERROR', 'Could not find test data to work on.', 
-								'Please enable the "Setup test data" entry and try again.' );
-			return;
-		}
+		do {
+			if( !$this->setupTestData()) {
+				break;
+			}
+			$this->runDefaultArticleTemplateNamedQueryTest();
+		} while ( false );
 
-		// Prepare brand, catergory and status to be used later for image object creation.
-		$this->publication = new Publication( $publicationInfo->Id, $publicationInfo->Name );
-		$this->category = new Category( $categoryInfo->Id, $categoryInfo->Name );
-		$this->articleTemplateStatus = new State( $artTplStatusInfo->Id, $artTplStatusInfo->Name );
-		$this->articleTemplateRating = 127;
-		$this->articleTemplateDescription = __CLASS__.' Description';
-		
-		// Create a CS6 article template object in database.
-		$response = $this->createAticleTemplate();
-		$basicMetaData = @$response->Objects[0]->MetaData->BasicMetaData;
-		if( $basicMetaData ) {
-			$this->articleTemplateId = $basicMetaData->ID;
-			$this->articleTemplateName = $basicMetaData->Name;
-		}
-		if( !$this->articleTemplateId || !$this->articleTemplateName ) {
-			LogHandler::Log( 'WflNamedQuery', 'ERROR', 
-							'Could not create article template object. Check the server logging.' );
-		}
-		
-		// Search for any article templates in the system.
-		$stepInfo = 'Running NamedQuery "' . self::NAMEDQUERY .'" to search for any article template.';
-		$resp = $this->namedQuery( $stepInfo, null );
-		if( $this->validateNamedQueryResp( $resp ) ) {
-			LogHandler::Log( 'WflNamedQuery', 'DEBUG', 
-				'Article template with Id: "' . $this->articleTemplateId . '" found in the search result.');
-		} else {
-			LogHandler::Log( 'WflNamedQuery', 'ERROR', 
-				'Article template with Id: "' . $this->articleTemplateId . '" not found in the search result.');
-			$this->setResult( 'ERROR', 'No article template record found.', 
-								'Please enable the "Setup test data" entry and try again.' );
-		}
-
-		// Search the system (by name) for only that article template we've created.
-		$stepInfo = 'Running NamedQuery "' . self::NAMEDQUERY .'" to search for article template with Name: "' . $this->articleTemplateName . '".';
-		$resp = $this->namedQuery( $stepInfo, $this->articleTemplateName );
-		if( $this->validateNamedQueryResp( $resp ) ) {
-			LogHandler::Log( 'WflNamedQuery', 'DEBUG', 
-				'Article template with Name: "' . $this->articleTemplateName . '" found in the search result.');
-		} else {
-			LogHandler::Log( 'WflNamedQuery', 'ERROR', 
-				'Article template with Name: "' . $this->articleTemplateName . '" not found in the search result.');
-			$this->setResult( 'ERROR', 'No article template with name: ' . $this->articleTemplateName . ' found.', 
-								'Please enable the "Setup test data" entry and try again.' );
-		}
-		
 		// Permanently delete the article template object (we created before).
 		$this->cleanupTestData();
 	}
 
 	/**
+	 * Setup the generic test data that can be used for all NamedQuery tests.
+	 *
+	 * @since 10.4.2
+	 * @return bool
+	 */
+	private function setupTestData()
+	{
+		// Retrieve the data that has been determined by "Setup test data" TestCase.
+		$this->vars = $this->getSessionVariables();
+		$this->ticket      = $this->vars['BuildTest_WebServices_WflServices']['ticket'];
+		$this->publicationInfo   = $this->vars['BuildTest_WebServices_WflServices']['publication'];
+		$this->categoryInfo      = $this->vars['BuildTest_WebServices_WflServices']['category'];
+		if( !$this->ticket || !$this->publicationInfo || !$this->categoryInfo  ) {
+			$this->setResult( 'ERROR', 'Could not find test data to work on.',
+				'Please enable the "Setup test data" entry and try again.' );
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Tests and validates 'DefaultArticleTemplate' NamedQuery service call.
+	 *
+	 * @since 10.4.2
+	 */
+	private function runDefaultArticleTemplateNamedQueryTest()
+	{
+		$nameQuery = 'DefaultArticleTemplate';
+		do {
+			$artTplStatusInfo  = $this->vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'];
+			$this->printTarget = $this->vars['BuildTest_WebServices_WflServices']['printTarget'];
+			if( !$artTplStatusInfo || !$this->printTarget ) {
+				$this->setResult( 'ERROR', 'Could not find test data to test "'.$nameQuery.'" NamedQuery.',
+					'Please enable the "Setup test data" entry and try again.' );
+				break;
+			}
+
+			// Prepare brand, catergory and status to be used later for image object creation.
+			$this->publication = new Publication( $this->publicationInfo->Id, $this->publicationInfo->Name );
+			$this->category = new Category( $this->categoryInfo->Id, $this->categoryInfo->Name );
+			$this->articleTemplateStatus = new State( $artTplStatusInfo->Id, $artTplStatusInfo->Name );
+			$this->articleTemplateRating = 127;
+			$this->articleTemplateDescription = __CLASS__.' Description';
+
+			// Create a CS6 article template object in database.
+			$response = $this->createAticleTemplate();
+			$basicMetaData = @$response->Objects[0]->MetaData->BasicMetaData;
+			if( $basicMetaData ) {
+				$this->articleTemplateId = $basicMetaData->ID;
+				$this->articleTemplateName = $basicMetaData->Name;
+			}
+			if( !$this->articleTemplateId || !$this->articleTemplateName ) {
+				LogHandler::Log( 'WflNamedQuery', 'ERROR',
+					'Could not create article template object. Check the server logging.' );
+				break;
+			}
+
+			// Search for any article templates in the system.
+			$stepInfo = 'Running NamedQuery "' . $nameQuery .'" to search for any article template.';
+			$resp = $this->callNamedQueryService( $stepInfo, $nameQuery, array() );
+			if( $this->validateDefaultArticleTemplateNamedQueryResp( $resp ) ) {
+				LogHandler::Log( 'WflNamedQuery', 'DEBUG',
+					'Article template with Id: "' . $this->articleTemplateId . '" found in the search result.');
+			} else {
+				LogHandler::Log( 'WflNamedQuery', 'ERROR',
+					'Article template with Id: "' . $this->articleTemplateId . '" not found in the search result.');
+				$this->setResult( 'ERROR', 'No article template record found.',
+					'Please enable the "Setup test data" entry and try again.' );
+				break;
+			}
+
+			// Search the system (by name) for only that article template we've created.
+			$stepInfo = 'Running NamedQuery "' . $nameQuery .'" to search for article template with Name: "' . $this->articleTemplateName . '".';
+
+			$queryParams = array( $this->composeQueryParam( 'Name', '=', $this->articleTemplateName ) );
+			$resp = $this->callNamedQueryService( $stepInfo, $nameQuery, $queryParams );
+			if( $this->validateDefaultArticleTemplateNamedQueryResp( $resp ) ) {
+				LogHandler::Log( 'WflNamedQuery', 'DEBUG',
+					'Article template with Name: "' . $this->articleTemplateName . '" found in the search result.');
+			} else {
+				LogHandler::Log( 'WflNamedQuery', 'ERROR',
+					'Article template with Name: "' . $this->articleTemplateName . '" not found in the search result.');
+				$this->setResult( 'ERROR', 'No article template with name: ' . $this->articleTemplateName . ' found.',
+					'Please enable the "Setup test data" entry and try again.' );
+				break;
+			}
+
+		} while ( false );
+	}
+
+	/**
+	 * Compose QueryParam and returns it.
+	 *
+	 * @since 10.4.2
+	 * @param string $property
+	 * @param string $operation
+	 * @param string $value
+	 * @return QueryParam
+	 */
+	private function composeQueryParam( string $property, string $operation, string $value ):QueryParam
+	{
+		require_once BASEDIR . '/server/interfaces/services/wfl/DataClasses.php';
+		$queryParam = new QueryParam();
+		$queryParam->Property = $property;
+		$queryParam->Operation = $operation;
+		$queryParam->Value = $value;
+		return $queryParam;
+	}
+
+	/**
 	 * Calls the workflow interface NamedQuery service.
 	 *
+	 * @since 10.4.2 Renamed the function name from ﻿namedQuery to callNamedQueryService and parameters are adjusted.
 	 * @param string $stepInfo Extra info to log.
-	 * @param string|null $name Name of article templat to search for. NULL for all article templates.
+	 * @param string $queryName  The NamedQuery service call 'Query' parameter.
+	 * @param array $queryParams List of QueryParam or empty array when no Params needed.
+	 * @param int|null $firstEntry The starting number of the rows to fetch.
+	 * @param int|null $maxEntries The total number of rows to fetch.
+	 * @param bool|null $hierarchical True to returns tree list (including children columns and rows) instead of a list.
+	 * @param array|null $order On which column to sort.
 	 * @return WflNamedQueryResponse|null Response on succes. NULL on error.
 	 */
-	private function namedQuery( $stepInfo, $name )
+	private function callNamedQueryService( string $stepInfo, string $queryName, array $queryParams,
+	                                        ?int $firstEntry=null, ?int $maxEntries=null, ?bool  $hierarchical=null, ?array $order=null )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflNamedQueryService.class.php';
 		$request = new WflNamedQueryRequest();
 		$request->Ticket = $this->ticket;
-		$request->User   = BizSession::getShortUserName();
-		$request->Query  = self::NAMEDQUERY;
-		$request->Params = array();
-		if( $name ) {
-			$request->Params = array( new QueryParam( 'Name', '=', $name ) );
-		}
+		$request->Query  = $queryName;
+		$request->Params = $queryParams;
+		$request->FirstEntry = $firstEntry;
+		$request->MaxEntries = $maxEntries;
+		$request->Hierarchical = $hierarchical;
+		$request->Order = $order;
 		return $this->utils->callService( $this, $request, $stepInfo );
 	}
 
 	/**
-	 * Validate the WflNamedQueryResponse result
+	 * Validate the WflNamedQueryResponse for NamedQuery 'DefaultArticleTemplateNamed'.
 	 *
+	 * @since 10.4.2 Renamed the function from validateNamedQueryResp to validateDefaultArticleTemplateNamedQueryResp.
 	 * @param WflNamedQueryResponse $response
 	 * @return boolean 
 	 */
-	private function validateNamedQueryResp( $response )
+	private function validateDefaultArticleTemplateNamedQueryResp( $response )
 	{
 		// Prepare minimal columns we expect in the NamedQuery response.
 		$minProps = array('ID', 'Name', 'Type', 'Format', 'Publication', 'PublicationId', 'Category', 'CategoryId',
