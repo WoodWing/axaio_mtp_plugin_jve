@@ -144,6 +144,7 @@ EOT;
 			$this->testListOneVersionsOfImage();
 			$this->promoteElvisImageVersion(); // through Elvis
 			$this->testListTwoVersionsOfImage();
+			$this->testRetrieveFirstVersion();
 			if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
 				$this->restoreImageObjectVersion(); // through Enterprise
 				$this->testListThreeVersionsOfImage();
@@ -574,6 +575,29 @@ EOT;
 	}
 
 	/**
+	 * Retrieve an object version history.
+	 *
+	 * @param string $objectId
+	 * @return VersionInfo
+	 */
+	private function retrieveObjectVersion( string $objectId ) : VersionInfo
+	{
+		require_once BASEDIR . '/server/services/wfl/WflGetVersionService.class.php';
+		$request = new WflGetVersionRequest();
+		$request->Ticket = $this->workflowTicket;
+		$request->ID = $objectId;
+		$request->Version = '0.1';
+		$request->Rendition = 'native';
+		$request->Areas = array( 'Workflow' );
+
+		/** @var WflGetVersionResponse $response */
+		$response = $this->testSuiteUtils->callService( $this, $request, 'Get object version.' );
+		$this->assertInstanceOf( 'WflGetVersionResponse', $response );
+		$this->assertInstanceOf( 'VersionInfo', $response->VersionInfo );
+		return $response->VersionInfo;
+	}
+
+	/**
 	 * Unlocks the test image.
 	 */
 	private function unlockImageObject()
@@ -650,6 +674,15 @@ EOT;
 		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
 		$expectedCount = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? 1 : 2;
 		$this->assertCount( $expectedCount, $versions );
+	}
+
+	/**
+	 * Retrieve the oldest version via Enterprise services, which should trigger Elvis plugin to retrieve version from Elvis.
+	 */
+	private function testRetrieveFirstVersion()
+	{
+		$version = $this->retrieveObjectVersion( $this->images[0]->shadowId );
+		$this->assertEquals( '0.1', $version->Version );
 	}
 
 	/**

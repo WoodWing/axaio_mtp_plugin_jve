@@ -13,7 +13,7 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 
 	final public function getPrio() { return self::PRIO_DEFAULT; }
 	final public function getRunMode() { return self::RUNMODE_AFTER; }
-	
+
 	// Not called.
 	final public function runBefore( WflLogOnRequest &$req )
 	{
