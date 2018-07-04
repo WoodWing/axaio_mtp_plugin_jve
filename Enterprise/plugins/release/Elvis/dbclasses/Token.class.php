@@ -37,7 +37,7 @@ class Elvis_DbClasses_Token extends DBBase
 	 */
 	public static function get( string $enterpriseUser )
 	{
-		$row = self::getRow( self::TABLENAME, '`entuser` = ?', array( 'elvisuser', 'token' ), array( $enterpriseUser ) );
+		$row = self::getRow( self::TABLENAME, '`entuser` = ?', array( 'entuser', 'elvisuser', 'token' ), array( $enterpriseUser ) );
 		return $row ? self::rowToObj( $row ) : null;
 	}
 
@@ -60,17 +60,11 @@ class Elvis_DbClasses_Token extends DBBase
 	 */
 	public static function objToRow( $obj )
 	{
-		$row = array();
-		if( !is_null( $obj->enterpriseUser ) ) {
-			$row['entuser'] = strval( $obj->enterpriseUser );
-		}
-		if( !is_null( $obj->elvisUser ) ) {
-			$row['elvisuser'] = strval( $obj->elvisUser );
-		}
-		if( !is_null( $obj->accessToken ) ) {
-			$row['token'] = strval( $obj->accessToken );
-		}
-		return $row;
+		return array(
+			'entuser'  => $obj->enterpriseUser,
+			'elvisuser'=> $obj->elvisUser,
+			'token'    => $obj->accessToken
+		);
 	}
 
 	/**
@@ -81,16 +75,11 @@ class Elvis_DbClasses_Token extends DBBase
 	 */
 	public static function rowToObj( $row )
 	{
-		$obj = new Elvis_DataClasses_Token();
-		if( array_key_exists( 'entuser', $row ) ) {
-			$obj->enterpriseUser = strval( $row['entuser'] );
-		}
-		if( array_key_exists( 'elvisuser', $row ) ) {
-			$obj->elvisUser = strval( $row['elvisuser'] );
-		}
-		if( array_key_exists( 'token', $row ) ) {
-			$obj->accessToken = strval( $row['token'] );
-		}
+		$obj = new Elvis_DataClasses_Token(
+			strval( $row['entuser'] ),
+			strval( $row['elvisuser'] ),
+			strval( $row['token'] )
+		);
 		return $obj;
 	}
 }

@@ -111,9 +111,17 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @return string|null
 	 */
-	public function getUserShortName()
+	public function getUserShortName(): ?string
 	{
 		return $this->userShortName;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function requiresAuthentication(): bool
+	{
+		return $this->getUserShortName() && is_null( $this->getHeader( 'Authorization' ) );
 	}
 
 	/**
@@ -129,15 +137,17 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @return integer
 	 */
-	public function getAttempt()
+	public function getAttempt(): int
 	{
 		return $this->attempt;
 	}
 
 	/**
 	 * Indicate the subject entity of this request.
+	 *
+	 * @return string
 	 */
-	public function getSubjectEntity()
+	public function getSubjectEntity(): string
 	{
 		return $this->subjectEntity;
 	}
@@ -147,43 +157,45 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @param string $entity
 	 */
-	public function setSubjectEntity( string $entity )
+	public function setSubjectEntity( string $entity ): void
 	{
 		$this->subjectEntity = $entity;
 	}
 
 	/**
-	 * Indicate the subject id of this request.
+	 * Retrieve the subject id of this request.
+	 *
+	 * @return string
 	 */
-	public function getSubjectId()
+	public function getSubjectId(): string
 	{
 		return $this->subjectId;
 	}
 
 	/**
-	 * Retrieve the subject id of this request.
+	 * Indicate the subject id of this request.
 	 *
 	 * @param string $id
 	 */
-	public function setSubjectId( string $id )
+	public function setSubjectId( string $id ): void
 	{
 		$this->subjectId = $id;
 	}
 
 	/**
-	 * Indicate the subject name of this request.
+	 * Retrieve the subject name of this request.
 	 */
-	public function getSubjectName()
+	public function getSubjectName(): string
 	{
 		return $this->subjectName;
 	}
 
 	/**
-	 * Retrieve the subject name of this request.
+	 * Indicate the subject name of this request.
 	 *
 	 * @param string $name
 	 */
-	public function setSubjectName( string $name )
+	public function setSubjectName( string $name ): void
 	{
 		$this->subjectName = $name;
 	}
@@ -193,7 +205,7 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @param string $value
 	 */
-	public function addPathParam( string $value )
+	public function addPathParam( string $value ): void
 	{
 		$this->pathParams[] = urlencode( $value );
 	}
@@ -206,7 +218,7 @@ class Elvis_BizClasses_ClientRequest
 	 * @param string $name
 	 * @param string $value
 	 */
-	public function addQueryParam( string $name, string $value )
+	public function addQueryParam( string $name, string $value ): void
 	{
 		$this->queryParams[ urlencode( $name ) ] = urlencode( $value );
 	}
@@ -217,7 +229,7 @@ class Elvis_BizClasses_ClientRequest
 	 * @param string $name
 	 * @param mixed $value
 	 */
-	public function addQueryParamAsJson( string $name, $value )
+	public function addQueryParamAsJson( string $name, $value ): void
 	{
 		$this->queryParams[ urlencode( $name ) ] = json_encode( $value );
 	}
@@ -229,7 +241,7 @@ class Elvis_BizClasses_ClientRequest
 	 * @param string $searchName
 	 * @param string[] $searchValues
 	 */
-	public function addSearchQueryParam( string $paramName, string $searchName, array $searchValues )
+	public function addSearchQueryParam( string $paramName, string $searchName, array $searchValues ): void
 	{
 		$paramValue = '';
 		$operator = '';
@@ -246,7 +258,7 @@ class Elvis_BizClasses_ClientRequest
 	 * @param string $name
 	 * @param string[] $values
 	 */
-	public function addCsvQueryParam( string $name, array $values )
+	public function addCsvQueryParam( string $name, array $values ): void
 	{
 		$values = array_map( 'strval', $values );
 		$values = array_map( 'urlencode', $values );
@@ -261,7 +273,7 @@ class Elvis_BizClasses_ClientRequest
 	 * @param string $name
 	 * @param string $value
 	 */
-	public function addPostParam( string $name, string $value )
+	public function addPostParam( string $name, string $value ): void
 	{
 		$this->postParams[ $name ] = $value;
 	}
@@ -272,7 +284,7 @@ class Elvis_BizClasses_ClientRequest
 	 * @param string $name
 	 * @param mixed $value
 	 */
-	public function addPostParamAsJson( string $name, $value )
+	public function addPostParamAsJson( string $name, $value ): void
 	{
 		$this->postParams[ $name ] = json_encode( $value );
 	}
@@ -284,7 +296,7 @@ class Elvis_BizClasses_ClientRequest
 	 * @param string $searchName
 	 * @param string[] $searchValues
 	 */
-	public function addSearchPostParam( string $paramName, string $searchName, array $searchValues )
+	public function addSearchPostParam( string $paramName, string $searchName, array $searchValues ): void
 	{
 		$paramValue = '';
 		$operator = '';
@@ -301,7 +313,7 @@ class Elvis_BizClasses_ClientRequest
 	 * @param string $name
 	 * @param string[] $values
 	 */
-	public function addCsvPostParam( string $name, array $values )
+	public function addCsvPostParam( string $name, array $values ): void
 	{
 		$values = array_map( 'strval', $values );
 		$this->postParams[ $name ] = implode( ',', $values );
@@ -341,7 +353,7 @@ class Elvis_BizClasses_ClientRequest
 	/**
 	 * Define the HTTP POST method for the request.
 	 */
-	public function setHttpPostMethod()
+	public function setHttpPostMethod(): void
 	{
 		$this->httpMethod = self::HTTP_METHOD_POST;
 	}
@@ -349,7 +361,7 @@ class Elvis_BizClasses_ClientRequest
 	/**
 	 * Define the HTTP PUT method for the request.
 	 */
-	public function setHttpPutMethod()
+	public function setHttpPutMethod(): void
 	{
 		$this->httpMethod = self::HTTP_METHOD_PUT;
 	}
@@ -357,7 +369,7 @@ class Elvis_BizClasses_ClientRequest
 	/**
 	 * Define the HTTP DELETE method for the request.
 	 */
-	public function setHttpDeleteMethod()
+	public function setHttpDeleteMethod(): void
 	{
 		$this->httpMethod = self::HTTP_METHOD_DELETE;
 	}
@@ -389,7 +401,7 @@ class Elvis_BizClasses_ClientRequest
 	/**
 	 * Call this function when a JSON structure is expected in the response.
 	 */
-	public function setExpectJson()
+	public function setExpectJson(): void
 	{
 		$this->expectJson = true;
 	}
@@ -399,7 +411,7 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @return bool
 	 */
-	public function getExpectJson() : bool
+	public function getExpectJson(): bool
 	{
 		return $this->expectJson;
 	}
@@ -407,7 +419,7 @@ class Elvis_BizClasses_ClientRequest
 	/**
 	 * Call this function when raw data is expected in the response.
 	 */
-	public function setExpectRawData()
+	public function setExpectRawData(): void
 	{
 		$this->expectRawData = true;
 	}
@@ -417,7 +429,7 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @return bool
 	 */
-	public function getExpectRawData() : bool
+	public function getExpectRawData(): bool
 	{
 		return $this->expectRawData;
 	}
@@ -425,7 +437,7 @@ class Elvis_BizClasses_ClientRequest
 	/**
 	 * Call this function when a Not Found error is severe.
 	 */
-	public function setNotFoundErrorAsSevere()
+	public function setNotFoundErrorAsSevere(): void
 	{
 		$this->notFoundIsSevere = true;
 	}
@@ -435,7 +447,7 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @return bool
 	 */
-	public function isNotFoundErrorSevere() : bool
+	public function isNotFoundErrorSevere(): bool
 	{
 		return $this->notFoundIsSevere;
 	}
@@ -451,7 +463,7 @@ class Elvis_BizClasses_ClientRequest
 	/**
 	 * @return Attachment|null
 	 */
-	public function getFileToUpload()
+	public function getFileToUpload(): ?Attachment
 	{
 		return $this->fileToUpload;
 	}
@@ -461,7 +473,7 @@ class Elvis_BizClasses_ClientRequest
 	 *
 	 * @return string
 	 */
-	public function getDescription()
+	public function getDescription(): string
 	{
 		$description = $this->composeServicePath();
 		if( $this->getSubjectId() ) {

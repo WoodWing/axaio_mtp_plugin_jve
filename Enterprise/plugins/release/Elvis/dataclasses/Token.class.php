@@ -8,12 +8,26 @@
 
 class Elvis_DataClasses_Token
 {
-	/** @var string|null Short name of the acting Enterprise user. */
-	public $enterpriseUser = null;
+	/** @var string Short name of the acting Enterprise user. */
+	public $enterpriseUser = '';
 
-	/** @var string|null Elvis user name used to authenticate the Enterprise connection with Elvis. Could be either the acting user or the configured fallback user (ELVIS_SUPER_USER). */
-	public $elvisUser = null;
+	/** @var string Elvis user name used to authenticate the Enterprise connection with Elvis. Could be either the acting user or the configured fallback user (ELVIS_SUPER_USER). */
+	public $elvisUser = '';
 
-	/** @var string|null Elvis OAuth access token. */
-	public $accessToken = null;
+	/** @var string Elvis OAuth access token. */
+	public $accessToken = '';
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $enterpriseUser
+	 * @param string $elvisUser
+	 * @param string $accessToken
+	 */
+	public function __construct( string $enterpriseUser, string $elvisUser, string $accessToken )
+	{
+		$this->enterpriseUser = $enterpriseUser;
+		$this->elvisUser = $elvisUser;
+		$this->accessToken = $accessToken;
+	}
 }

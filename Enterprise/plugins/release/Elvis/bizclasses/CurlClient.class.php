@@ -35,8 +35,8 @@ class Elvis_BizClasses_CurlClient
 	 */
 	public function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
-		if( $request->getUserShortName() && is_null( $request->getHeader( 'Authorization' ) ) ) {
-			$response = $this->executeForUser( $request );
+		if( $request->requiresAuthentication() ) {
+			$response = $this->executeWithAuthentication( $request );
 		} else {
 			$response = $this->executeUnauthorized( $request );
 		}
@@ -49,7 +49,7 @@ class Elvis_BizClasses_CurlClient
 	 * @param Elvis_BizClasses_ClientRequest $request
 	 * @return Elvis_BizClasses_ClientResponse
 	 */
-	private function executeForUser( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
+	private function executeWithAuthentication( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
 		$curlOptions = $this->curlOptions;
 		$accessToken = self::getAccessToken( $request->getUserShortName() );
@@ -322,10 +322,6 @@ class Elvis_BizClasses_CurlClient
 			throw new Elvis_BizClasses_ClientException( 'Failed to retrieve access token from Elvis Server. Details:'.$response->getErrorMessage(), 'ERROR' );
 		}
 
-		$accessToken = new Elvis_DataClasses_Token();
-		$accessToken->enterpriseUser = $enterpriseUser;
-		$accessToken->elvisUser = $elvisUser;
-		$accessToken->accessToken = $response->jsonBody()->access_token;
-		return $accessToken;
+		return new Elvis_DataClasses_Token( $enterpriseUser, $elvisUser, $response->jsonBody()->access_token );
 	}
 }
