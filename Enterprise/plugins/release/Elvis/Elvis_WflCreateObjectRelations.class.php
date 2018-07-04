@@ -18,6 +18,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 	{
 		require_once __DIR__.'/config.php'; // auto-loading
 		if( ELVIS_CREATE_COPY === 'Hard_Copy_To_Enterprise' ) {
+			require_once __DIR__.'/Elvis_ContentSource.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 			$user = BizSession::getShortUserName();
 			$ticket = BizSession::getTicket();
@@ -27,7 +28,6 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 				$child = $relation->Child;
 
 				if( Elvis_BizClasses_AssetId::isElvisAssetId( $child ) ) {
-					require_once __DIR__.'/Elvis_ContentSource.class.php';
 					// Create copy of asset
 					$object = new Object();
 					$contentSource = new Elvis_ContentSource();
