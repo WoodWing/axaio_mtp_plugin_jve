@@ -1,13 +1,13 @@
 <?php
-
 /**
- * @since 10.5.0
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Proxy server that accepts an Elvis request from an Enterprise client and pass it on to Elvis Server.
  *
  * See header of the restproxyindex.php module for details how to user the proxy server.
+ *
+ * @since 10.5.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
+
 class Elvis_BizClasses_ProxyServer
 {
 	/** @var array $httpParams HTTP input parameters (taken from URL or Cookie). */

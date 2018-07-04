@@ -1,9 +1,9 @@
 <?php
 /**
+ * Elvis Content Source plugin.
+ *
  * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Elvis Content Source plugin.
  */
 
 require_once BASEDIR . '/server/interfaces/plugins/EnterprisePlugin.class.php';

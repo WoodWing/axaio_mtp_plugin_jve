@@ -1,9 +1,9 @@
 <?php
 /**
+ * Implements the object version control.
+ *
  * @since 		8.3
  * @copyright	WoodWing Software bv. All Rights Reserved.
- *
- * Implements the object version control.
  */
 
 require_once BASEDIR.'/server/interfaces/plugins/connectors/Version_EnterpriseConnector.class.php';

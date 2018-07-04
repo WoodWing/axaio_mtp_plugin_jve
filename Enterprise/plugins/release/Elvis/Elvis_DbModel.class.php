@@ -1,9 +1,9 @@
 <?php
 /**
+ * Provide Elvis DB model.
+ *
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Provide Elvis DB model.
  */
 
 require_once BASEDIR.'/server/interfaces/plugins/connectors/DbModel_EnterpriseConnector.class.php';

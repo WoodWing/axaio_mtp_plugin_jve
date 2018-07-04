@@ -1,10 +1,11 @@
 <?php
 /**
+ * Class to contain Elvis response data and provide usefull methods on it.
+ *
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Class to contain Elvis response data and provide usefull methods on it.
  */
+
 class Elvis_BizClasses_ClientResponse
 {
 	/** @var int */

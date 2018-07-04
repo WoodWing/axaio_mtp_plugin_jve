@@ -1,9 +1,9 @@
 <?php
 /**
+ * Maintains Elvis authentication tokens in the database.
+ *
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Maintains Elvis authentication tokens in the database.
  */
 
 require_once BASEDIR.'/server/dbclasses/DBBase.class.php';

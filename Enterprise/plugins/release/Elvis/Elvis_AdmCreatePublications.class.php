@@ -1,11 +1,11 @@
 <?php
 /**
- * @since      10.1.1
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * This connector is called by core server when the user is about to create a brand. It populates the custom
  * "Production Zone" property to the Brand Maintenance page under the "Elvis" section with the default value
  * configured for the DEFAULT_ELVIS_PRODUCTION_ZONE setting that is taken from Elvis/config.php.
+ *
+ * @since      10.1.1
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR . '/server/interfaces/services/adm/AdmCreatePublications_EnterpriseConnector.class.php';

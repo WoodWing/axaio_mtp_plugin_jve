@@ -1,10 +1,10 @@
 <?php
 /**
- * @since      4.4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Hooks into the Copy Objects workflow web service.
  * Called when an end-user copies a file (typically using SC or CS).
+ *
+ * @since      4.4
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR . '/server/interfaces/services/wfl/WflCopyObject_EnterpriseConnector.class.php';

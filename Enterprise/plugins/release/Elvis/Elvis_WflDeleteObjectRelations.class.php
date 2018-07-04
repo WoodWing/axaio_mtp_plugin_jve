@@ -1,10 +1,10 @@
 <?php
 /**
- * @since      4.4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Hooks into the Delete Object Relations workflow web service.
  * Called when an end-user removes a file e.g. from a layout or dossier (typically using SC or CS).
+ *
+ * @since      4.4
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR . '/server/interfaces/services/wfl/WflDeleteObjectRelations_EnterpriseConnector.class.php';

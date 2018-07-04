@@ -1,10 +1,10 @@
 <?php
 /**
- * @since      10.1.1
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Updates the Published Date property for image assets in Elvis when user has unpublished a Publish Form.
  * This is done for all the shadow images placed on the form.
+ * 
+ * @since      10.1.1
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR . '/server/interfaces/services/pub/PubUnPublishDossiers_EnterpriseConnector.class.php';

@@ -1,9 +1,9 @@
 <?php
 /**
+ * Elvis DB model definition.
+ *
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Elvis DB model definition.
  */
 
 require_once BASEDIR.'/server/dbmodel/Provider.class.php';

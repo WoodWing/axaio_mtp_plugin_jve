@@ -1,10 +1,10 @@
 <?php
 /**
- * @since      4.4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Hooks into the Mulitple Set Object Properties workflow web service.
  * Called when an end-user changes properties for a selection of objects (typically using CS).
+ *
+ * @since      4.4
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR . '/server/interfaces/services/wfl/WflMultiSetObjectProperties_EnterpriseConnector.class.php';

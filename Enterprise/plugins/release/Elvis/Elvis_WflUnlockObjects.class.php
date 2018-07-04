@@ -1,10 +1,10 @@
 <?php
 /**
- * @since      4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Hooks into the Send To Next workflow web service.
  * Called when an end-user send a file to the next workflow status (typically using CS).
+ *
+ * @since      4
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR . '/server/interfaces/services/wfl/WflUnlockObjects_EnterpriseConnector.class.php';

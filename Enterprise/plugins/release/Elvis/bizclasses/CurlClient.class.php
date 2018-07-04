@@ -1,11 +1,11 @@
 <?php
 /**
- * @since      10.5.0
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Class to execute a Elvis API request with authentication handling.
  *
  * Implementation uses cURL to make the API requests.
+ *
+ * @since      10.5.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once __DIR__.'/../config.php';

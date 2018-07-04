@@ -1,13 +1,13 @@
 <?php
-
 /**
- * @since 10.5.0
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Exception for the Elvis_BizClasses_ProxyServer class.
  *
  * When Enterprise Server throws a BizException, this class can be used to compose an HTTP error from it.
+ *
+ * @since 10.5.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
+
 class Elvis_BizClasses_ProxyServerHttpException extends Exception
 {
 	/** @var Zend\Http\Response */

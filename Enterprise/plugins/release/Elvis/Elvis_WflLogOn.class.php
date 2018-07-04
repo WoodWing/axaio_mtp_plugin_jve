@@ -1,10 +1,10 @@
 <?php
 /**
- * @since      4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Hooks into the LogOn workflow web service.
  * Called when an end-user does logon to Enterprise (typically using SC or CS).
+ *
+ * @since      4
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR.'/server/interfaces/services/wfl/WflLogOn_EnterpriseConnector.class.php';

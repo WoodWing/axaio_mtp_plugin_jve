@@ -1,10 +1,10 @@
 <?php
 /**
- * @since      4.4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Hooks into the Restore Objects workflow web service.
  * Called when an end-user restores a file from the Trash Can (typically using SC or CS).
+ *
+ * @since      4.4
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR . '/server/interfaces/services/wfl/WflRestoreObjects_EnterpriseConnector.class.php';

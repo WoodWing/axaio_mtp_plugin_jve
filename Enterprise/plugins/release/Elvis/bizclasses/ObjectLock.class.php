@@ -1,6 +1,6 @@
 <?php
 /**
- * Elvis asset id - Enterprise shadow object id mapping.
+ * Keep track of an object lock during the save operation.
  *
  * @since      10.5.0 Class functions originate from util/ElvisUtils.class.php
  * @copyright  WoodWing Software bv. All Rights Reserved.

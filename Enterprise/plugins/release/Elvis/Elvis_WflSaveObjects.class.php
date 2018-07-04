@@ -1,10 +1,10 @@
 <?php
 /**
- * @since      4
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Hooks into the Save Objects workflow web service.
  * Called when an end-user saves a file (typically using SC or CS).
+ *
+ * @since      4
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR . '/server/interfaces/services/wfl/WflSaveObjects_EnterpriseConnector.class.php';

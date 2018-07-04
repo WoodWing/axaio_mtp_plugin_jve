@@ -1,9 +1,9 @@
 <?php
 /**
+ * Class to proxy API requests to Elvis.
+ *
  * @since      10.5.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Class to proxy API requests to Elvis.
  */
 
 class Elvis_BizClasses_ProxyClient

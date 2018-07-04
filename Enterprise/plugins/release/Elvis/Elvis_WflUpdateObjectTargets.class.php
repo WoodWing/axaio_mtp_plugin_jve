@@ -1,9 +1,9 @@
 <?php
 /**
+ * Hooks into the Update Object Targets workflow web service.
+ *
  * @since      4.4
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * Hooks into the Update Object Targets workflow web service.
  */
 
 require_once BASEDIR . '/server/interfaces/services/wfl/WflUpdateObjectTargets_EnterpriseConnector.class.php';

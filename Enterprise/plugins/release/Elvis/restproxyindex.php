@@ -1,8 +1,5 @@
 <?php
 /**
- * @since      10.5.0
- * @copyright  WoodWing Software bv. All Rights Reserved.
- *
  * Proxy server that accepts an Elvis request from an Enterprise client and pass it on to Elvis Server.
  *
  * The original client request must be authorized for Enterprise. The Elvis REST service request must be provided
@@ -30,7 +27,10 @@
  * - HTTP 403: The user has no Read access to the invoked object in Enterprise or Elvis.
  * - HTTP 404: The object could not be found in Enterprise or Elvis.
  * - HTTP 405: Bad HTTP method requested by caller. Only GET, POST and OPTIONS are supported.
- * - HTTP 500: Unexpected server error.*
+ * - HTTP 500: Unexpected server error.
+ *
+ * @since      10.5.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
 $beforeInclude = microtime( true );
