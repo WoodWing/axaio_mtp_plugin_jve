@@ -27,7 +27,7 @@ class Elvis_BizClasses_CurlClient
 	}
 
 	/**
-	 * Execute a service request against Elvis server for the session user or ELVIS_SUPER_USER.
+	 * Execute a service request against Elvis server for the session user or ELVIS_DEFAULT_USER.
 	 *
 	 * @param Elvis_BizClasses_ClientRequest $request
 	 * @return Elvis_BizClasses_ClientResponse
@@ -314,8 +314,8 @@ class Elvis_BizClasses_CurlClient
 
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isAuthenticationError() ) {
-			if( $elvisUser !== ELVIS_SUPER_USER ) {
-				return self::requestAccessToken( $enterpriseUser, ELVIS_SUPER_USER );
+			if( $elvisUser !== ELVIS_DEFAULT_USER ) {
+				return self::requestAccessToken( $enterpriseUser, ELVIS_DEFAULT_USER );
 			}
 		}
 		if( $response->isError() ) {

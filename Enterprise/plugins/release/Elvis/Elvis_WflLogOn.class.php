@@ -34,7 +34,7 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 			// In this logon hook, we take that moment to forget whether or not this Enterprise user is unknown to Elvis
 			// and to clear the restriction. Doing so, the Enterprise username will initially be used to authorize the
 			// trusted backend connection. That works if the user is/became known to Elvis. If that fails, the restricted
-			// fallback user (ELVIS_SUPER_USER) will be used as fallback for which the restricted flag will be raised again.
+			// fallback user (ELVIS_DEFAULT_USER) will be used as fallback for which the restricted flag will be raised again.
 			Elvis_BizClasses_UserSetting::clearRestricted();
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 			Elvis_DbClasses_Token::delete( BizSession::getShortUserName() );

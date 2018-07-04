@@ -43,7 +43,7 @@ class Elvis_DbModel_Definition extends WW_DbModel_Provider
 							'comment' => 'Short name of the acting Enterprise user.' ),
 						array( 'v' => '1.0', 'name' => 'elvisuser', 'type' => 'varchar(40)', 'default' => "''",
 							'comment' => 'Elvis user name used to authenticate the Enterprise connection with Elvis. '.
-								'Could be either the acting user or the configured fallback user (ELVIS_SUPER_USER).' ),
+								'Could be either the acting user or the configured fallback user (ELVIS_DEFAULT_USER).' ),
 						array( 'v' => '1.0', 'name' => 'token', 'type' => 'varchar(1024)', 'default' => "''",
 							'comment' => 'Elvis OAuth access token.' ),
 					),

@@ -30,7 +30,7 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 		require_once __DIR__.'/../../../config.php';
 		$this->testElvisServerConnection();
 
-		// Check if the ELVIS_SUPER_USER option is configured and whether this user exists in Elvis.
+		// Check if the ELVIS_DEFAULT_USER option is configured and whether this user exists in Elvis.
 		$this->checkIfFallbackUserIsEnabledInElvis();
 
 		// Check if the test user exists in Elvis.
@@ -85,14 +85,14 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 	}
 
 	/**
-	 * Check if the configured ELVIS_SUPER_USER is enabled in Elvis.
+	 * Check if the configured ELVIS_DEFAULT_USER is enabled in Elvis.
 	 */
 	private function checkIfFallbackUserIsEnabledInElvis()
 	{
-		require_once __DIR__.'/../../../config.php'; // ELVIS_SUPER_USER
+		require_once __DIR__.'/../../../config.php'; // ELVIS_DEFAULT_USER
 
 		$service = new Elvis_BizClasses_AssetService();
-		$userDetails = $service->getUserDetails( ELVIS_SUPER_USER );
+		$userDetails = $service->getUserDetails( ELVIS_DEFAULT_USER );
 		$this->assertTrue( $userDetails->enabled );
 	}
 
@@ -103,7 +103,7 @@ class WW_TestSuite_BuildTest_Elvis_Setup_TestCase extends TestCase
 	 */
 	private function checkIfTestUserIsEnabledInElvis( $username )
 	{
-		require_once __DIR__.'/../../../config.php'; // ELVIS_SUPER_USER
+		require_once __DIR__.'/../../../config.php'; // ELVIS_DEFAULT_USER
 
 		$service = new Elvis_BizClasses_AssetService();
 		$userDetails = $service->getUserDetails( $username );

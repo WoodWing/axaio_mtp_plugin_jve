@@ -545,8 +545,8 @@ EOT;
 		$metadata = $this->imageHit->metadata;
 
 		$this->assertEquals( 'image/jpeg', $metadata['mimeType'] );
-		$this->assertEquals( ELVIS_SUPER_USER, $metadata['assetCreator'] );
-		$this->assertEquals( ELVIS_SUPER_USER, $metadata['assetFileModifier'] );
+		$this->assertEquals( ELVIS_DEFAULT_USER, $metadata['assetCreator'] );
+		$this->assertEquals( ELVIS_DEFAULT_USER, $metadata['assetFileModifier'] );
 
 		switch( ELVIS_CREATE_COPY ) {
 			case 'Shadow_Only':
@@ -725,8 +725,8 @@ EOT;
 		$metadata = $this->imageHit->metadata;
 
 		$this->assertEquals( 'image/jpeg', $metadata['mimeType'] );
-		$this->assertEquals( ELVIS_SUPER_USER, $metadata['assetCreator'] );
-		$this->assertEquals( ELVIS_SUPER_USER, $metadata['assetFileModifier'] );
+		$this->assertEquals( ELVIS_DEFAULT_USER, $metadata['assetCreator'] );
+		$this->assertEquals( ELVIS_DEFAULT_USER, $metadata['assetFileModifier'] );
 
 		switch( ELVIS_CREATE_COPY ) {
 			case 'Shadow_Only':

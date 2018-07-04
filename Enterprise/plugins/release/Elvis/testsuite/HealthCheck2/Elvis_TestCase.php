@@ -12,7 +12,8 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	public function getTestGoals()   { return 'Validates wether the Elvis integration is ready for production.'; }
 	public function getTestMethods() { return 'It checks if options are correctly defined in the Elvis/config.php file and '.
 		'wether a connection with Elvis Server can be established. It detects if Elvis Server is running and validates if the '.
-		'version is compatible with Enterprise. It determines if the configured admin user and super user can log on to Elvis.'; }
+		'version is compatible with Enterprise. It determines if the configured user ELVIS_ENT_ADMIN_USER can login to Enterprise '.
+		'and the configured ELVIS_DEFAULT_USER user can log on to Elvis.'; }
 	public function getPrio()        { return 24; }
 
 	/** @var WW_Utils_TestSuite */
@@ -81,7 +82,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		$nonEmptyDefines = array(
 			'ELVIS_URL', 'ELVIS_CLIENT_URL', 'ELVIS_CLIENT_ID', 'ELVIS_CLIENT_SECRET',
 			'ELVIS_CONNECTION_TIMEOUT', 'ELVIS_CONNECTION_REATTEMPTS',
-			'ELVIS_ENT_ADMIN_USER', 'ELVIS_SUPER_USER',
+			'ELVIS_ENT_ADMIN_USER', 'ELVIS_DEFAULT_USER',
 			'ELVIS_NAMEDQUERY', 'ELVIS_CREATE_COPY', 'IMAGE_RESTORE_LOCATION'
 		);
 		if( !$this->utils->validateDefines( $this, $nonEmptyDefines, self::CONFIG_FILES, 'ERROR' ) ) {
@@ -105,6 +106,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		// Check the deprecated defines that should NO longer exist.
 		$help = 'Please check the '.self::CONFIG_FILES.' files and remove the obsoleted option.';
 		$obsoletedDefines = array(
+			array( 'name' => 'ELVIS_SUPER_USER', 'help' => 'It is renamed to ELVIS_DEFAULT_USER.' ),
 			array( 'name' => 'ELVIS_SUPER_USER_PASS', 'help' => 'It is superseded by the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options.' ),
 		);
 		foreach( $obsoletedDefines as $opt ) {
@@ -408,7 +410,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	}
 
 	/**
-	 * Checks if the configured super user is configured at the Elvis server.
+	 * Checks if the configured ELVIS_DEFAULT_USER user is configured at the Elvis server.
 	 *
 	 * @return bool
 	 */
@@ -418,15 +420,15 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		// Before talking to Elvis, remove the access token (stored in our DB) for the fallback user to make sure that the
 		// CurlClient obtains a new access token from Elvis. The goal is to validate the values configured for the
 		// ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options (which will happen implicitly/indirectly).
-		Elvis_DbClasses_Token::delete( ELVIS_SUPER_USER );
+		Elvis_DbClasses_Token::delete( ELVIS_DEFAULT_USER );
 		try {
-			$user = $this->getUserFromElvis( ELVIS_SUPER_USER );
+			$user = $this->getUserFromElvis( ELVIS_DEFAULT_USER );
 		} catch( BizException $e ) {
 			$help = "Possible causes:".
 				"<ul>".
 					"<li>Enterprise is not configured for Elvis; Please register Enterprise Server at Elvis Server and set ".
 						"the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options in the ".self::CONFIG_FILES." file.</li>".
-					"<li>The configured user named '".ELVIS_SUPER_USER."' is unknown to Elvis. Please check the ELVIS_SUPER_USER option in ".
+					"<li>The configured user named '".ELVIS_DEFAULT_USER."' is unknown to Elvis. Please check the ELVIS_DEFAULT_USER option in ".
 						"the ".self::CONFIG_FILES." file. Also check the internal-users.properties.txt file (provided by Elvis).'</li>".
 					"<li>The configured user is no super user in Elvis. Please make sure the ROLE_SUPERUSER option is set ".
 						"for the user in the internal-users.properties.txt file (provided by Elvis).</li>".
@@ -434,7 +436,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$message = 'Failed to communicate with Elvis Server.';
 			$this->setResult( 'ERROR', $message, $help );
 		}
-		LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_SUPER_USER option checked.' );
+		LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_DEFAULT_USER option checked.' );
 		return !is_null( $user );
 	}
 

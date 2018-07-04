@@ -48,7 +48,7 @@ class Elvis_BizClasses_UserSetting
 	/**
 	 * Read the 'Restricted' Elvis ContentSource flag from the DB that was stored for the session user during logon.
 	 *
-	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as a guest user (badly called 'ELVIS_SUPER_USER')
+	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as ELVIS_DEFAULT_USER
 	 * then this flag is set to TRUE. When the user is known to both back-ends it is set to FALSE.
 	 *
 	 * @since 10.1.4

@@ -11,7 +11,7 @@ class Elvis_DataClasses_Token
 	/** @var string Short name of the acting Enterprise user. */
 	public $enterpriseUser = '';
 
-	/** @var string Elvis user name used to authenticate the Enterprise connection with Elvis. Could be either the acting user or the configured fallback user (ELVIS_SUPER_USER). */
+	/** @var string Elvis user name used to authenticate the Enterprise connection with Elvis. Could be either the acting user or the configured fallback user (ELVIS_DEFAULT_USER). */
 	public $elvisUser = '';
 
 	/** @var string Elvis OAuth access token. */

@@ -476,7 +476,7 @@ class Elvis_BizClasses_Client
 	}
 
 	/**
-	 * Execute a service request against Elvis server for the session user or ELVIS_SUPER_USER.
+	 * Execute a service request against Elvis server for the session user or ELVIS_DEFAULT_USER.
 	 *
 	 * @param Elvis_BizClasses_ClientRequest $request
 	 * @return Elvis_BizClasses_ClientResponse
@@ -492,11 +492,11 @@ class Elvis_BizClasses_Client
 		if( $response->isError() ) {
 			$this->handleErrorResponse( $request, $response );
 		}
-		// If the Enterprise user is unknown to Elvis, the CurlClient class will fallback to ELVIS_SUPER_USER to authenticate
+		// If the Enterprise user is unknown to Elvis, the CurlClient class will fallback to ELVIS_DEFAULT_USER to authenticate
 		// at Elvis. Here we detect that and we restrict that user in Enterprise; He/she is not allowed to edit native files
 		// of Elvis assets. See more info at function header of Elvis_ContentSource::checkUserEditRight().
-		if( $request->getUserShortName() && $request->getUserShortName() !== ELVIS_SUPER_USER &&
-			$response->getAuthenticationUser() === ELVIS_SUPER_USER ) {
+		if( $request->getUserShortName() && $request->getUserShortName() !== ELVIS_DEFAULT_USER &&
+			$response->getAuthenticationUser() === ELVIS_DEFAULT_USER ) {
 			Elvis_BizClasses_UserSetting::setRestricted();
 		}
 		return $response;

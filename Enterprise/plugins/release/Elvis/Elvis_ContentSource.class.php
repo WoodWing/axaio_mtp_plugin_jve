@@ -324,11 +324,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		}
 
 		if( !Elvis_BizClasses_Object::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
-			// Normally all metadata is set using the REST client. These are set using
-			// the permissions of the current user. However there are some specific
-			// Enterprise metadata properties defined in Elvis, which needs to be set
-			// whatever permission the current user has, so these are set using AMF; this
-			// only set sce prefixed metadata properties as a super user.
+			// Normally all metadata is set using the REST client. These are set using the permissions of the current user.
+			// However there are some specific Enterprise metadata properties defined in Elvis, which needs to be set whatever
+			// permission the current user has; this only set sce prefixed metadata properties as an ELVIS_DEFAULT_USER user.
 			$elvisMetadata = $this->fillElvisEnterpriseMetadata( $object->MetaData );
 
 			$elvisMetadata['sceModified'] = $object->MetaData->WorkflowMetaData->Modified;
@@ -386,11 +384,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties called '.
 			'for alienIds [ '.implode( ', ', $assetIds ).' ]' );
 
-		// Normally all metadata is set using the REST client. These are set using
-		// the permissions of the current user. However there are some specific
-		// Enterprise metadata properties defined in Elvis, which needs to be set
-		// whatever permission the current user has, so these are set using AMF; this
-		// only set sce prefixed metadata properties as a super user.
+		// Normally all metadata is set using the REST client. These are set using the permissions of the current user.
+		// However there are some specific Enterprise metadata properties defined in Elvis, which needs to be set whatever
+		// permission the current user has; this only set sce prefixed metadata properties as an ELVIS_DEFAULT_USER user.
 		$elvisMetadata = $this->fillElvisEnterpriseMetadataMulti( $metaDataValues );
 		$service = new Elvis_BizClasses_AssetService();
 		$service->updateWorkflowMetadata( $assetIds, $elvisMetadata );

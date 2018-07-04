@@ -114,7 +114,7 @@ if( !defined('ELVIS_NAMEDQUERY') ) {
  * Client ID and secret
  *
  * These settings are used for setting up a trusted back-end connection between Enterprise Server and Elvis Server so
- * that data can be synchronized between these systems. See ELVIS_SUPER_USER option for more information.
+ * that data can be synchronized between these systems. See ELVIS_DEFAULT_USER option for more information.
  *
  * Available since Enterprise Server 10.5.0.
  */
@@ -134,8 +134,8 @@ if( !defined('ELVIS_CLIENT_SECRET') ) {
  * asset in Elvis. Because synchronization runs over a trusted connection between both back-ends, there is no need for
  * a password. Instead, the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options are used to establish the trusted connection.
  */
-if( !defined('ELVIS_SUPER_USER') ) {
-	define( 'ELVIS_SUPER_USER', 'admin' );
+if( !defined('ELVIS_DEFAULT_USER') ) {
+	define( 'ELVIS_DEFAULT_USER', 'admin' );
 }
 
 /**
@@ -143,7 +143,7 @@ if( !defined('ELVIS_SUPER_USER') ) {
  *
  * This user is required for data synchronization from Elvis to Enterprise. During production, this is done by a Crontab
  * or Scheduler that continuously runs the sync.php module. For each run, this module logs in to Enterprise using the
- * configured admin user. Note that in this process, the super user (ELVIS_SUPER_USER) is used to retrieve data from Elvis,
+ * configured admin user. Note that in this process, the default user (ELVIS_DEFAULT_USER) is used to retrieve data from Elvis,
  * while the admin user (ELVIS_ENT_ADMIN_USER) is used to update data in Enterprise.
  */
 if( !defined('ELVIS_ENT_ADMIN_USER') ) {

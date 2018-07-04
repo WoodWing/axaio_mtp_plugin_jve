@@ -229,7 +229,7 @@ EOT;
 		$this->elvisSyncUtils->pushMetadataConfig();
 		$this->assertEquals( 0, $this->elvisSyncUtils->countAssetUpdates() );
 
-		$user = $this->getUserFromElvis( ELVIS_SUPER_USER );
+		$user = $this->getUserFromElvis( ELVIS_DEFAULT_USER );
 		$this->assertTrue( $user->enabled );
 		$this->assertBizException(
 			'S1056', // expect ERR_SUBJECT_NOTEXISTS
