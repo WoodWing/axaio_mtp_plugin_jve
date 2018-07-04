@@ -58,8 +58,8 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 	/**
 	 * @inheritdoc
 	 */
-	public function requiredServerVersion()
+	public function isActivatedByDefault()
 	{
-		return '10.5.0 Build 0';
+		return false;
 	}
 }
