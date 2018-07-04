@@ -111,10 +111,10 @@ if( !defined('ELVIS_NAMEDQUERY') ) {
 }
 
 /**
- * Client id and secret.
+ * Client ID and secret
  *
- * These settings are used to setup a trusted back-end connection between Enterprise Server and Elvis Server. This is
- * required to synchronize data from Enterprise Server to Elvis Server. See ELVIS_SUPER_USER option for more information.
+ * These settings are used for setting up a trusted back-end connection between Enterprise Server and Elvis Server so
+ * that data can be synchronized between these systems. See ELVIS_SUPER_USER option for more information.
  *
  * Available since Enterprise Server 10.5.0.
  */
@@ -126,24 +126,24 @@ if( !defined('ELVIS_CLIENT_SECRET') ) {
 }
 
 /**
- * Elvis user with SUPER_USER access rights.
+ * Elvis user with SUPER_USER access rights
  *
  * This user is required for data synchronization from Enterprise Server to Elvis Server. During production, data is
  * directly synchronized in context of workflow operations in Enterprise. For example, when a workflow user makes
- * changes to metadata of a shadow image object in Enterprise, those changes are reflected to its corresponding image
- * asset in Elvis. Since synchronisation runs over a trusted connection between both back-ends, there is no need for
- * a password. Instead, the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options are used to establish the trust connection.
+ * changes to the metadata of a shadow image object in Enterprise, those changes are reflected to its corresponding image
+ * asset in Elvis. Because synchronization runs over a trusted connection between both back-ends, there is no need for
+ * a password. Instead, the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options are used to establish the trusted connection.
  */
 if( !defined('ELVIS_SUPER_USER') ) {
 	define( 'ELVIS_SUPER_USER', 'admin' );
 }
 
 /**
- * Enterprise user with system administrator rights.
+ * Enterprise user with system administrator rights
  *
- * This user is required for data synchronisation from Elvis to Enterprise. During production, this is done by a Crontab
- * or Scheduler that continuously runs the sync.php module. For each run, this module does logon the configured admin
- * user to Enterprise. Note that in this process, the super user (ELVIS_SUPER_USER) is used to retrieve data from Elvis,
+ * This user is required for data synchronization from Elvis to Enterprise. During production, this is done by a Crontab
+ * or Scheduler that continuously runs the sync.php module. For each run, this module logs in to Enterprise using the
+ * configured admin user. Note that in this process, the super user (ELVIS_SUPER_USER) is used to retrieve data from Elvis,
  * while the admin user (ELVIS_ENT_ADMIN_USER) is used to update data in Enterprise.
  */
 if( !defined('ELVIS_ENT_ADMIN_USER') ) {
@@ -154,7 +154,7 @@ if( !defined('ELVIS_ENT_ADMIN_PASS') ) {
 }
 
 /**
- * List of "archived" statuses.
+ * List of "archived" statuses
  *
  * These statuses should match the statuses from the Elvis archive plugin.
  * No updates are sent to Elvis when an object is in one of theses statuses.
@@ -237,9 +237,9 @@ require_once BASEDIR.'/server/utils/Autoloader.class.php';
 WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
 
 /**
- * Field mappings between Enterprise and Elvis fields. 
+ * Mapping fields between Enterprise and Elvis fields
  * 
- * Custom Enterprise fields and multi-value Elvis fields are not supported in this mapping
+ * Note: custom Enterprise fields and multi-value Elvis fields cannot be mapped with other fields.
  * 
  * Special fields which are statically mapped between Enterprise and Elvis:
  * - Keywords <-> tags
@@ -247,7 +247,7 @@ WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
  * - Type <- assetDomain
  * - Format <- mimeType
  * - Version <- versionNumber
- * - ContentSource - Not really mapped contains value coming from ELVIS_CONTENTSOURCEID
+ * - ContentSource - Not really mapped, contains values from ELVIS_CONTENTSOURCEID
  * - DocumentID <- id
  * - CopyrightMarked <- copyright
  * 
@@ -288,8 +288,8 @@ WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
  *       return $cfgFieldHandlers;
  *    }
  * In the very exceptional case that you want to change the field definitions listed below, it is recommended
- * to add them to the Elvis_Config_GetAdditionalFieldHandlers function in the config_overrule.php file, since
- * that is easier to maintain than adjusting the definitions below.
+ * to add them to the Elvis_Config_GetAdditionalFieldHandlers function in the config_overrule.php file.
+ * This makes it easier to maintain compared to adjusting the definitions below.
  *
  * Since 10.5.0 the field handlers are listed in a new function named Elvis_Config_GetFieldHandlers.
  * If that function does not exist in your Elvis/config.php file, please add as shown below:
