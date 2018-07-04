@@ -144,8 +144,8 @@ EOT;
 			$this->testListOneVersionsOfImage();
 			$this->promoteElvisImageVersion(); // through Elvis
 			$this->testListTwoVersionsOfImage();
-			$this->testRetrieveFirstVersion();
 			if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
+				$this->testRetrieveFirstVersion();
 				$this->restoreImageObjectVersion(); // through Enterprise
 				$this->testListThreeVersionsOfImage();
 			}

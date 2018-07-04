@@ -27,6 +27,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 				$child = $relation->Child;
 
 				if( Elvis_BizClasses_AssetId::isElvisAssetId( $child ) ) {
+					require_once __DIR__.'/Elvis_ContentSource.class.php';
 					// Create copy of asset
 					$object = new Object();
 					$contentSource = new Elvis_ContentSource();

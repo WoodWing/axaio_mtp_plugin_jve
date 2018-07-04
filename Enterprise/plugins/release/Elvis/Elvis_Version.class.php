@@ -15,6 +15,7 @@ class Elvis_Version extends Version_EnterpriseConnector
 	 */
 	public function useContentSourceVersion()
 	{
+		require_once __DIR__.'/Elvis_ContentSource.class.php';
 		$contentSource = new Elvis_ContentSource();
 		return array( $contentSource->getContentSourceId() => true );
 	}
