@@ -82,6 +82,12 @@ EOT;
 	/** @var Elvis_BizClasses_TestClient */
 	private $elvisTestClient;
 
+	/** @var int */
+	private $adminUserId;
+
+	/** @var int */
+	private $editorsGroupId;
+
 	/**
 	 * @inheritdoc
 	 */

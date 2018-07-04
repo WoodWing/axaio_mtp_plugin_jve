@@ -579,7 +579,13 @@ function step5_ionCubeEncodePhpFiles {
 		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
 		plugins/release/Elvis/Elvis_WflLogOn.class.php \
 		plugins/release/Elvis/Elvis_ContentSource.class.php \
+		plugins/release/Elvis/bizclasses/UserSetting.class.php \
+		plugins/release/Elvis/bizclasses/Client.class.php \
+		plugins/release/Elvis/bizclasses/CurlClient.class.php \
+		plugins/release/Elvis/dbclasses/Token.class.php \
 	"
+	# Note that the plugins/release/Elvis classes listed above are ionCubed to hide the use and implementation of the
+	# 'Restricted' functions provided by the Elvis_BizClasses_UserSetting class.
 	for icFoldersOrFile in ${icFoldersOrFiles}; do
 		${PHP_EXE} "${ES_PHP_ENCODER}" ${ioncubeEncodeParams} --encodelevel=1 --phppath="${icFoldersOrFile}"
 	done

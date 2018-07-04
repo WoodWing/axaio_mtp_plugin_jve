@@ -486,57 +486,68 @@ class Elvis_BizClasses_Client
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'Calling REST API '.$request->getDescription() );
 
+		$request->setExpectJson(); // all services may return error in JSON format
 		$client = new Elvis_BizClasses_CurlClient();
 		$response = $client->execute( $request );
 		if( $response->isError() ) {
-			$detail = $response->getErrorMessage();
-			if( $response->isAuthenticationError() ) { // HTTP 401
-				if( $request->getUserShortName() !== ELVIS_SUPER_USER ) {
-					$request->setUserShortName( ELVIS_SUPER_USER );
-					$response = $this->execute( $request );
+			$this->handleErrorResponse( $request, $response );
+		}
+		// If the Enterprise user is unknown to Elvis, the CurlClient class will fallback to ELVIS_SUPER_USER to authenticate
+		// at Elvis. Here we detect that and we restrict that user in Enterprise; He/she is not allowed to edit native files
+		// of Elvis assets. See more info at function header of Elvis_ContentSource::checkUserEditRight().
+		if( $request->getUserShortName() && $request->getUserShortName() !== ELVIS_SUPER_USER &&
+			$response->getAuthenticationUser() === ELVIS_SUPER_USER ) {
+			Elvis_BizClasses_UserSetting::setRestricted();
+		}
+		return $response;
+	}
+
+	/**
+	 * @param Elvis_BizClasses_ClientRequest $request
+	 * @param Elvis_BizClasses_ClientResponse $response
+	 * @throws BizException
+	 * @throws Elvis_BizClasses_ClientException
+	 */
+	private function handleErrorResponse( Elvis_BizClasses_ClientRequest $request, Elvis_BizClasses_ClientResponse $response )
+	{
+		$detail = $response->getErrorMessage();
+		if( $response->isForbiddenError() ) { // HTTP 403
+			throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
+				null, null, 'INFO' );
+		}
+		if( $response->isNotFoundError() || $response->isGoneError() ) { // HTTP 404 or 410
+			$severity = $request->isNotFoundErrorSevere() ? 'ERROR' : 'INFO';
+			if( $request->getSubjectEntity() ) {
+				if( $request->getSubjectId() ) {
+					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', $detail, // S1056
+						null, array( $request->getSubjectEntity(), $request->getSubjectId(), $severity ) );
 				} else {
-					throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
+					throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', $detail, // S1036
+						null, array( $request->getSubjectEntity() ), $severity );
 				}
+			} else {
+				throw new BizException( 'ERR_NOTFOUND', 'Client', $detail, // S1029
+					null, null, $severity );
 			}
-			if( $response->isForbiddenError() ) { // HTTP 403
-				throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
-					null, null, 'INFO' );
-			}
-			if( $response->isNotFoundError() || $response->isGoneError() ) { // HTTP 404 or 410
-				$severity = $request->isNotFoundErrorSevere() ? 'ERROR' : 'INFO';
-				if( $request->getSubjectEntity() ) {
-					if( $request->getSubjectId() ) {
-						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', $detail, // S1056
-							null, array( $request->getSubjectEntity(), $request->getSubjectId(), $severity ) );
-					} else {
-						throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', $detail, // S1036
-							null, array( $request->getSubjectEntity() ), $severity );
-					}
-				} else {
-					throw new BizException( 'ERR_NOTFOUND', 'Client', $detail, // S1029
-						null, null, $severity );
-				}
-			}
-			if( $response->isRequestTimeoutError() ) { // HTTP 408
-				if( $request->getAttempt() <= 3 ) {
-					$request->nextAttempt();
-					$response = $this->execute( $request );
-				} else {
-					throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
-				}
-			}
-			if( $response->isConflictError() ) { // HTTP 409
-				if( $request->getSubjectEntity() && $request->getSubjectName() ) {
-					throw new BizException( 'ERR_SUBJECT_EXISTS', 'Client', $detail, // S1038
-						null, array( $request->getSubjectEntity(), $request->getSubjectName(), 'INFO' ) );
-				} else {
-					throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
-				}
-			}
-			if( $response->isClientProgrammaticError() ) { // all HTTP 4xx codes except the ones listed above
+		}
+		if( $response->isRequestTimeoutError() ) { // HTTP 408
+			if( $request->getAttempt() <= 3 ) {
+				$request->nextAttempt();
+				$response = $this->execute( $request );
+			} else {
 				throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
 			}
 		}
-		return $response;
+		if( $response->isConflictError() ) { // HTTP 409
+			if( $request->getSubjectEntity() && $request->getSubjectName() ) {
+				throw new BizException( 'ERR_SUBJECT_EXISTS', 'Client', $detail, // S1038
+					null, array( $request->getSubjectEntity(), $request->getSubjectName(), 'INFO' ) );
+			} else {
+				throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
+			}
+		}
+		if( $response->isClientProgrammaticError() ) { // all HTTP 4xx codes except the ones listed above
+			throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
+		}
 	}
 }

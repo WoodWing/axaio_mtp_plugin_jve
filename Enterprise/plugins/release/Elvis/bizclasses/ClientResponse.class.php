@@ -17,6 +17,9 @@ class Elvis_BizClasses_ClientResponse
 	/** @var bool|string */
 	private $body;
 
+	/** @var string|null */
+	private $authenticationUser;
+
 	/**
 	 * Response constructor.
 	 *
@@ -157,5 +160,21 @@ class Elvis_BizClasses_ClientResponse
 	public function getErrorMessage()
 	{
 		return $this->errorMessage;
+	}
+
+	/**
+	 * @param string $authenticationUser
+	 */
+	public function setAuthenticationUser( string $authenticationUser )
+	{
+		$this->authenticationUser = $authenticationUser;
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public function getAuthenticationUser()
+	{
+		return $this->authenticationUser;
 	}
 }

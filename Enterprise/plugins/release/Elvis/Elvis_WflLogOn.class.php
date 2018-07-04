@@ -19,11 +19,25 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	{
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp ) 
 	{
+		require_once __DIR__.'/config.php'; // auto-loading
+
 		if( $req->User && $req->Password ) {
-			Elvis_BizClasses_UserSetting::setRestricted( false );
+			// Only users known to Elvis are allowed to edit native Elvis files. Other users are restricted to read-only.
+			// The user who is about to logon could be added to (or removed from) Elvis by the system administrator.
+			// When that happens, the user may (or may not) be logged on to Enterprise and he/she will find out that the
+			// restriction is still in place. Their first reaction will be to re-login and so the logon will be be called.
+			// In this logon hook, we take that moment to forget whether or not this Enterprise user is unknown to Elvis
+			// and to clear the restriction. Doing so, the Enterprise username will initially be used to authorize the
+			// trusted backend connection. That works if the user is/became known to Elvis. If that fails, the restricted
+			// fallback user (ELVIS_SUPER_USER) will be used as fallback for which the restricted flag will be raised again.
+			Elvis_BizClasses_UserSetting::clearRestricted();
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
+			Elvis_DbClasses_Token::delete( BizSession::getShortUserName() );
 		}
 
 		// Add the feature to the feature set of the logon response.

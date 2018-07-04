@@ -39,17 +39,20 @@ class Elvis_DbModel_Definition extends WW_DbModel_Provider
 				array( 'v' => '1.0', 'name' => DBPREFIX.'lvs_tokens',
 					'comment' => 'Elvis access tokens.',
 					'fields' => array(
-						array( 'v' => '1.0', 'name' => 'user', 'type' => 'varchar(40)', 'default' => "''",
-							'comment' => 'Short user name must be unique.' ),
+						array( 'v' => '1.0', 'name' => 'entuser', 'type' => 'varchar(40)', 'default' => "''",
+							'comment' => 'Short name of the acting Enterprise user.' ),
+						array( 'v' => '1.0', 'name' => 'elvisuser', 'type' => 'varchar(40)', 'default' => "''",
+							'comment' => 'Elvis user name used to authenticate the Enterprise connection with Elvis. '.
+								'Could be either the acting user or the configured fallback user (ELVIS_SUPER_USER).' ),
 						array( 'v' => '1.0', 'name' => 'token', 'type' => 'varchar(1024)', 'default' => "''",
-							'comment' => 'Elvis access token.' ),
+							'comment' => 'Elvis OAuth access token.' ),
 					),
 					'indexes' => array(
-						array( 'v' => '1.0', 'name' => 'primary', 'fields' => 'user', 'primary' => true ),
+						array( 'v' => '1.0', 'name' => 'primary', 'fields' => 'entuser', 'primary' => true ),
 					),
 					'inserts' => array(),
 					'lookups' => array(
-						array('v' => '1.0', 'field' => 'user', 'reftable' => 'smart_users', 'reffield' => 'user'),
+						array('v' => '1.0', 'field' => 'entuser', 'reftable' => 'smart_users', 'reffield' => 'user'),
 					),
 				),
 			),

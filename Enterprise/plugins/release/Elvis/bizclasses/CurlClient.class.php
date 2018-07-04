@@ -35,9 +35,8 @@ class Elvis_BizClasses_CurlClient
 	 */
 	public function execute( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
-		$userShortName = $request->getUserShortName();
-		if( $userShortName && is_null( $request->getHeader( 'Authorization' ) ) ) {
-			$response = $this->executeForUser( $request, $userShortName );
+		if( $request->getUserShortName() && is_null( $request->getHeader( 'Authorization' ) ) ) {
+			$response = $this->executeForUser( $request );
 		} else {
 			$response = $this->executeUnauthorized( $request );
 		}
@@ -48,18 +47,20 @@ class Elvis_BizClasses_CurlClient
 	 * Execute a service request against Elvis server for a specific user.
 	 *
 	 * @param Elvis_BizClasses_ClientRequest $request
-	 * @param string $userShortName
 	 * @return Elvis_BizClasses_ClientResponse
 	 */
-	private function executeForUser( Elvis_BizClasses_ClientRequest $request, string $userShortName ) : Elvis_BizClasses_ClientResponse
+	private function executeForUser( Elvis_BizClasses_ClientRequest $request ) : Elvis_BizClasses_ClientResponse
 	{
 		$curlOptions = $this->curlOptions;
-		$request->setHeader( 'Authorization', 'Bearer '.self::getAccessToken( $userShortName ) );
+		$accessToken = self::getAccessToken( $request->getUserShortName() );
+		$request->setHeader( 'Authorization', 'Bearer '.$accessToken->accessToken );
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isAuthenticationError() ) {
-			$request->setHeader( 'Authorization', 'Bearer '.self::requestAndSaveAccessToken( $userShortName ) );
+			$accessToken = self::requestAndSaveAccessToken( $request->getUserShortName() );
+			$request->setHeader( 'Authorization', 'Bearer '.$accessToken->accessToken );
 			$response = self::plainRequest( $request, $curlOptions );
 		}
+		$response->setAuthenticationUser( $accessToken->elvisUser );
 		return $response;
 	}
 
@@ -257,15 +258,15 @@ class Elvis_BizClasses_CurlClient
 	/**
 	 * Get access token to execute a request against an Elvis server.
 	 *
-	 * @param  string $shortUserName
-	 * @return string access token
+	 * @param string $enterpriseUser Short name of the acting Enterprise user.
+	 * @return Elvis_DataClasses_Token
 	 * @throws Elvis_BizClasses_ClientException
 	 */
-	private static function getAccessToken( string $shortUserName ) : string
+	private static function getAccessToken( string $enterpriseUser ) : Elvis_DataClasses_Token
 	{
-		$accessToken = Elvis_DbClasses_Token::get( $shortUserName );
+		$accessToken = Elvis_DbClasses_Token::get( $enterpriseUser );
 		if( is_null( $accessToken ) ) {
-			$accessToken = self::requestAndSaveAccessToken( $shortUserName );
+			$accessToken = self::requestAndSaveAccessToken( $enterpriseUser );
 		}
 		return $accessToken;
 	}
@@ -273,37 +274,39 @@ class Elvis_BizClasses_CurlClient
 	/**
 	 * Request access token and save it.
 	 *
-	 * @param  string $shortUserName
-	 * @return string access token
+	 * @param string $enterpriseUser Short name of the acting Enterprise user.
+	 * @return Elvis_DataClasses_Token
 	 * @throws Elvis_BizClasses_ClientException
 	 */
-	private static function requestAndSaveAccessToken( string $shortUserName ) : string
+	private static function requestAndSaveAccessToken( string $enterpriseUser ) : Elvis_DataClasses_Token
 	{
-		$accessToken = self::requestAccessToken( $shortUserName );
-		Elvis_DbClasses_Token::save( $shortUserName, $accessToken );
+		$elvisUser = $enterpriseUser; // first try with Enterprise user
+		$accessToken = self::requestAccessToken( $enterpriseUser, $elvisUser );
+		Elvis_DbClasses_Token::save( $accessToken );
 		return $accessToken;
 	}
 
 	/**
 	 * Request access token from Elvis.
 	 *
-	 * @param  string $shortUserName
-	 * @return string access token
+	 * @param string $enterpriseUser Short name of the acting Enterprise user.
+	 * @param string $elvisUser Elvis user to be used for authentication of the back-end connection.
+	 * @return Elvis_DataClasses_Token
 	 * @throws Elvis_BizClasses_ClientException when access token can't be retrieved.
 	 */
-	private static function requestAccessToken( string $shortUserName ) : string
+	private static function requestAccessToken( string $enterpriseUser, string $elvisUser ) : Elvis_DataClasses_Token
 	{
 		$post = array(
 			'grant_type' => 'client_credentials',
-			'impersonator_id' => $shortUserName,
+			'impersonator_id' => $elvisUser,
 		);
 		$curlOptions = array(
 			CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
 			CURLOPT_USERPWD => ELVIS_CLIENT_ID.':'.ELVIS_CLIENT_SECRET
 		);
-		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'oauth/token', $shortUserName );
+		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( 'oauth/token', $elvisUser );
 		$request->setSubjectEntity( BizResources::localize( 'USR_USER' ) );
-		$request->setSubjectId( $shortUserName );
+		$request->setSubjectId( $elvisUser );
 		$request->setHttpPostMethod();
 		$request->setHeader( 'Content-Type', 'application/x-www-form-urlencoded' );
 		$request->setBody( self::composeUrlEncodedPostBody( $post ) );
@@ -311,11 +314,18 @@ class Elvis_BizClasses_CurlClient
 
 		$response = self::plainRequest( $request, $curlOptions );
 		if( $response->isAuthenticationError() ) {
-			throw new Elvis_BizClasses_ClientException( 'SCEntError_ElvisAccessTokenError', 'ERROR' );
+			if( $elvisUser !== ELVIS_SUPER_USER ) {
+				return self::requestAccessToken( $enterpriseUser, ELVIS_SUPER_USER );
+			}
 		}
 		if( $response->isError() ) {
 			throw new Elvis_BizClasses_ClientException( 'Failed to retrieve access token from Elvis Server. Details:'.$response->getErrorMessage(), 'ERROR' );
 		}
-		return $response->jsonBody()->access_token;
+
+		$accessToken = new Elvis_DataClasses_Token();
+		$accessToken->enterpriseUser = $enterpriseUser;
+		$accessToken->elvisUser = $elvisUser;
+		$accessToken->accessToken = $response->jsonBody()->access_token;
+		return $accessToken;
 	}
 }

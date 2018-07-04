@@ -46,32 +46,38 @@ class Elvis_BizClasses_UserSetting
 	}
 
 	/**
-	 * Read the 'Restricted' Elvis ContentSource setting from DB that was stored for the session user during logon.
+	 * Read the 'Restricted' Elvis ContentSource flag from the DB that was stored for the session user during logon.
 	 *
-	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as a guest user (badly called 'super user')
+	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as a guest user (badly called 'ELVIS_SUPER_USER')
 	 * then this flag is set to TRUE. When the user is known to both back-ends it is set to FALSE.
 	 *
 	 * @since 10.1.4
 	 * @return bool Whether or not the user has restricted access rights.
 	 */
-	public static function getRestricted()
+	final public static function getRestricted() // use 'final' to block hackers overruling this function with their subclass
 	{
 		$restricted = self::getUserSetting( 'Restricted' );
-		return is_null($restricted) ? true : boolval( intval( $restricted ) ); // convert '0' to FALSE or '1' to TRUE
+		return is_null($restricted) ? false : boolval( intval( $restricted ) ); // convert '0' to FALSE or '1' to TRUE
 	}
 
 	/**
-	 * Saves the 'Restricted' Elvis ContentSource setting into DB for the session user who is about to logon.
-	 *
-	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as a guest user (badly called 'super user')
-	 * then this flag is set to TRUE. When the user is known to both back-ends it is set to FALSE.
+	 * Raise the 'Restricted' flag for the session user. See getRestricted() for more info.
 	 *
 	 * @since 10.1.4
-	 * @param bool $restricted
 	 */
-	public static function setRestricted( $restricted )
+	final public static function setRestricted() // use 'final' to block hackers overruling this function with their subclass
 	{
-		self::setUserSetting( 'Restricted', strval( intval( $restricted ) ) ); // store FALSE as '0' or TRUE as '1'
+		self::setUserSetting( 'Restricted', '1' );
+	}
+
+	/**
+	 * Clear the 'Restricted' flag for the session user. See getRestricted() for more info.
+	 *
+	 * @since 10.5.0
+	 */
+	final public static function clearRestricted() // use 'final' to block hackers overruling this function with their subclass
+	{
+		self::setUserSetting( 'Restricted', '0' );
 	}
 
 	/**

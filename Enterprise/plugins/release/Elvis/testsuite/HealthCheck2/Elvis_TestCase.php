@@ -415,16 +415,24 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	private function checkSuperUser() : bool
 	{
 		$user = null;
+		// Before talking to Elvis, remove the access token (stored in our DB) for the fallback user to make sure that the
+		// CurlClient obtains a new access token from Elvis. The goal is to validate the values configured for the
+		// ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options (which will happen implicitly/indirectly).
+		Elvis_DbClasses_Token::delete( ELVIS_SUPER_USER );
 		try {
 			$user = $this->getUserFromElvis( ELVIS_SUPER_USER );
 		} catch( BizException $e ) {
-			if( !$this->handleComminicationErrors( $e, 'ELVIS_SUPER_USER' ) ) {
-				$message = 'The configured user "'.ELVIS_SUPER_USER.'" could not be found at Elvis Server.'.
-					' Reason: '.$e->getMessage().' Detail: '.$e->getDetail();
-				$help = 'Please check the user access configuration in Elvis and check the ELVIS_SUPER_USER '.
-					'option in the '.self::CONFIG_FILES.' file.';
-				$this->setResult( 'ERROR', $message, $help );
-			}
+			$help = "Possible causes:".
+				"<ul>".
+					"<li>Enterprise is not configured for Elvis; Please register Enterprise Server at Elvis Server and set ".
+						"the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options in the ".self::CONFIG_FILES." file.</li>".
+					"<li>The configured user named '".ELVIS_SUPER_USER."' is unknown to Elvis. Please check the ELVIS_SUPER_USER option in ".
+						"the ".self::CONFIG_FILES." file. Also check the internal-users.properties.txt file (provided by Elvis).'</li>".
+					"<li>The configured user is no super user in Elvis. Please make sure the ROLE_SUPERUSER option is set ".
+						"for the user in the internal-users.properties.txt file (provided by Elvis).</li>".
+				"</ul>";
+			$message = 'Failed to communicate with Elvis Server.';
+			$this->setResult( 'ERROR', $message, $help );
 		}
 		LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_SUPER_USER option checked.' );
 		return !is_null( $user );
@@ -457,35 +465,6 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			LogHandler::Log( 'Elvis', 'INFO', 'ELVIS_ENT_ADMIN_USER option checked.' );
 		}
 		return $result;
-	}
-
-	/**
-	 * Detect and report low-level communication errors.
-	 *
-	 * @since 10.5.0
-	 * @param BizException $e
-	 * @param string $userDefine
-	 * @return bool Whether or not an error was detected and handled.
-	 */
-	private function handleComminicationErrors( BizException $e, string $userDefine ) : bool
-	{
-		$handled = false;
-		$userName = constant( $userDefine );
-		if( $e->getDetail() == 'SCEntError_ElvisAccessTokenError' ) {
-			$help = "Possible causes:".
-				"<ul>".
-					"<li>Enterprise is not configured for Elvis; Please register Enterprise Server at Elvis Server and set ".
-						"the ELVIS_CLIENT_ID and ELVIS_CLIENT_SECRET options in the ".self::CONFIG_FILES." file.</li>".
-					"<li>The configured user named '{$userName}' is unknown to Elvis. Please check the {$userDefine} option in ".
-						"the ".self::CONFIG_FILES." file. Also check the internal-users.properties.txt file (provided by Elvis).'</li>".
-					"<li>The configured user is no super user in Elvis. Please make sure the ROLE_SUPERUSER option is set ".
-						"for the user in the internal-users.properties.txt file (provided by Elvis).</li>".
-				"</ul>";
-			$message = 'Failed to retrieve an access token from Elvis Server.';
-			$this->setResult( 'ERROR', $message, $help );
-			$handled = true;
-		}
-		return $handled;
 	}
 
 	/**

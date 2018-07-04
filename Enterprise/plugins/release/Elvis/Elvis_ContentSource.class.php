@@ -136,11 +136,19 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	}
 
 	/**
-	 * Checks if the user is allowed to open a shadow object for editing. If not, an exception is thrown.
+	 * Check if the user is allowed to open a shadow object for editing. If not, the access denied exception (S1002) is thrown.
+	 *
+	 * Users that do not have a license for Elvis are allowed to see assets from Elvis in Enterprise, but not allowed to
+	 * edit them. For example, this allows those users to open a layout for editing that has placed Elvis images. However,
+	 * they are not allowed to select such image and perform the Edit Original action in InDesign.
+	 *
+	 * In other words, this is a kind of license check to make sure we don't give away too much functionality to
+	 * customers that did not buy Elvis seats for their Enterprise users. To make it harder to hack this limitation,
+	 * all PHP files involved are ionCube Encoded. See Build/auto_build.sh.
 	 *
 	 * @param bool $lock Object is locked.
 	 * @param string $rendition Requested rendition.
-	 * @throws BizException
+	 * @throws BizException when the user has no rights to edit/lock Elvis assets.
 	 */
 	private function checkUserEditRight( $lock, $rendition )
 	{
