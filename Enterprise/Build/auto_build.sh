@@ -427,7 +427,7 @@ function step2c_updateResourceFilesForMaintenanceMode {
 # (that resides in the resource folder) which allows us to compare timestamps and skip submits.
 #
 function step2d_updateResourceFilesForElvis {
-	updateResourceFiles Elvis plugins/release/ step2d 124
+	updateResourceFiles Elvis Enterprise/server/plugins/ step2d 124
 }
 
 #
@@ -635,7 +635,7 @@ function step7_zipExternalModules {
 	echo "step7b: Zipping release plug-ins ..."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
 	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "AdobeDps2" "${WORKSPACE}/artifacts" "Adobe_AEM_Build_${ADOBEDPS2_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
-	plugins="Facebook Twitter WordPress Drupal8 Elvis"
+	plugins="Facebook Twitter WordPress Drupal8"
 	for plugin in ${plugins}; do
 		# For Drupal 8 we want to modify the name to indicate this is the plugin (and not the module)
 		if [ "${plugin}" == "Drupal8" ]; then
