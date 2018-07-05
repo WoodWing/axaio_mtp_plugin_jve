@@ -1371,4 +1371,16 @@ class BizSession
 		}
 		return $enterpriseSystemId;
 	}
+
+	/**
+	 * Checks is the application is Smart Mover.
+	 *
+	 * @since 10.4.2
+	 * @param string $application
+	 * @return bool
+	 */
+	public static function isSmartMover( string $application ):bool
+	{
+		return (bool)stristr( $application, 'mover-' );
+	}
 }

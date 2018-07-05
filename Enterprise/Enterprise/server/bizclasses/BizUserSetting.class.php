@@ -36,7 +36,7 @@ class WW_BizClasses_UserSetting
 		// some process id. So here we check if the application name *start* with "Mover".
 		// Note: Since Mover never *saves* settings, we can safely do this without the risk returning
 		//       same settings twice, which could happen after logon+logoff+logon.
-		if( stripos( $clientAppName, 'mover' ) === 0 ) { // Smart Mover client?
+		if( BizSession::isSmartMover( $clientAppName ) ) {
 			$settings = DBUserSetting::getUserQuerySettings( $userShortName, function( $settingName, $clientAppName ) {
 				$clientAppName = $this->enrichClientAppNameForDisplay( $clientAppName );
 				return $settingName.'-'.$clientAppName;
