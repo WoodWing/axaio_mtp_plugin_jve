@@ -311,20 +311,20 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 	private function testRestClientConnection()
 	{
 		try {
-			require_once BASEDIR . '/server/utils/rabbitmq/restapi/Client.class.php';
+			require_once BASEDIR.'/server/utils/rabbitmq/restapi/Client.class.php';
 			$this->restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $this->restConnection );
 		} catch( BizException $e ) {
-			$this->setResult( 'ERROR', $e->getMessage() . ' ' . $e->getDetail() ); // should not happen (all validated before)
+			$this->setResult( 'ERROR', $e->getMessage().' '.$e->getDetail() ); // should not happen (all validated before)
 			return false;
 		}
 		$curlErrNr = 0;
 		$curlErrMsg = '';
 		if( !$this->restClient->checkConnection( $curlErrNr, $curlErrMsg ) ) {
 			$this->setResult( 'ERROR',
-				'Could not connect through RabbitMQ REST API using "' . $this->restConnection->Url . '". ' .
-				$curlErrMsg . ' (cURL error ' . $curlErrNr . '). ',
-				'Please check the RabbitMQ installation. ' .
-				'Note that the Url is taken from the following entry:<br/>'.$this->composeMessageQueueConnectionInHtml('REST').'<br/>'.
+				'Could not connect through RabbitMQ REST API using "'.$this->restConnection->Url.'". '.
+				$curlErrMsg.' (cURL error '.$curlErrNr.'). ',
+				'Please check the RabbitMQ installation. '.
+				'Note that the Url is taken from the following entry:<br/>'.$this->composeMessageQueueConnectionInHtml( 'REST' ).'<br/>'.
 				self::PLEASE_CHECK_CONFIGSERVER );
 			return false;
 		}
@@ -332,16 +332,24 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 			$rmqVersion = $this->restClient->getVersion();
 			$detectedVersionParts = explode( '.', $rmqVersion );
 			$detectedVersion = $detectedVersionParts[0].'.'.$detectedVersionParts[1]; // keep major.minor only, remove the 3rd digit (patch level).
-			$expectedVersion = '3.6';
-			if( version_compare( $detectedVersion, $expectedVersion ) !== 0 ) { // expected exact match
+			$supportedVersions = $this->supportedVersions();
+			$versionSupported = false;
+			foreach( $supportedVersions as $supportedVersion ) {
+				if( version_compare( $detectedVersion, $supportedVersion ) == 0 ) { // expected exact match
+					$versionSupported = true;
+					break;
+				}
+			}
+			if( !$versionSupported ) {
+				$supportedVersionsString = $this->supportedVersionsAsString();
 				$this->setResult( 'ERROR',
-					'Detected RabbitMQ '.$detectedVersion.' which is not supported by Enterprise. ' .
-					'Enterprise integrates with RabbitMQ '.$expectedVersion.' only. ' .
+					'Detected RabbitMQ '.$detectedVersion.' which is not supported by Enterprise. '.
+					'Enterprise integrates with RabbitMQ '.$supportedVersionsString.' only. '.
 					'Please check the RabbitMQ installation. ' );
 				return false;
 			}
 		} catch( BizException $e ) {
-			$this->setResult( 'ERROR', 'Could not detect version of RabbitMQ. ' . $e->getMessage() . ' ' . $e->getDetail() );
+			$this->setResult( 'ERROR', 'Could not detect version of RabbitMQ. '.$e->getMessage().' '.$e->getDetail() );
 			return false;
 		}
 		try {
@@ -349,7 +357,7 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 				$this->restClient->createVirtualHost();
 			}
 		} catch( BizException $e ) {
-			$this->setResult( 'ERROR', 'Could not create virtual host in RabbitMQ. ' . $e->getMessage() . ' ' . $e->getDetail() );
+			$this->setResult( 'ERROR', 'Could not create virtual host in RabbitMQ. '.$e->getMessage().' '.$e->getDetail() );
 			return false;
 		}
 		return true;
@@ -725,5 +733,28 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 	{
 		require_once BASEDIR . '/server/bizclasses/BizMessageQueue.class.php';
 		BizMessageQueue::removeOrphanQueues();
+	}
+
+	/**
+	 * Returns the support RabbitMQ versions.
+	 *
+	 * @since 10.1.8
+	 * @return string[]
+	 */
+	private function supportedVersions()
+	{
+		return array( '3.6', '3.7' );
+	}
+
+	/**
+	 * Returns the supported versions as a string. String can be used in messages.
+	 *
+	 * @since 10.1.8
+	 * @return string
+	 */
+	private function supportedVersionsAsString()
+	{
+		$supportVersions = $this->supportedVersions();
+		return implode( ' or ', $supportVersions );
 	}
 }

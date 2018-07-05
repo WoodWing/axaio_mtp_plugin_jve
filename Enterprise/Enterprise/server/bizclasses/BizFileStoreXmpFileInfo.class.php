@@ -198,6 +198,7 @@ class BizFileStoreXmpFileInfo
 	 *   "Adobe InDesign CC 2014 (Macintosh)"    => 10.0
 	 *   "Adobe InDesign CC 2015 (Macintosh)"    => 11.0
 	 *   "Adobe InDesign CC 2017 (Macintosh)"    => 12.0
+	 *    etc, see server/serverinfo.php for newer versions.
 	 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	 * 
 	 * Note that the CreatorTool property contains a diplay version, such as "CS6".

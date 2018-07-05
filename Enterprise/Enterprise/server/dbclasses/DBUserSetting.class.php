@@ -11,6 +11,8 @@
  * class that no longer allows empty values.
  */
 
+require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+
 class DBUserSetting extends DBBase
 {
 	const TABLENAME = 'settings';
@@ -120,8 +122,10 @@ class DBUserSetting extends DBBase
 	}
 
 	/**
-	 * Remove the specified user settings or all settings for a client application.
+	 * Remove the specified user settings for a client application.
 	 *
+	 * @since 10.1.8
+	 * @since 10.3.0
 	 * @param string $userShortName
 	 * @param string $clientAppName
 	 * @param string[] $settingNames
@@ -192,7 +196,7 @@ class DBUserSetting extends DBBase
 	{
 		LogHandler::log( __METHOD__, 'DEPRECATED',
 			'Please use DBUserSetting::getSettingId() instead.' );
-		return (bool)self::getSettingId( $userShortName, $settingName, $clientAppName );
+		return (bool)self::getSettingId( $userShortName, $clientAppName, $settingName );
 	}
 
 	/**

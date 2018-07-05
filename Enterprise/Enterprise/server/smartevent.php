@@ -241,6 +241,47 @@ class smartevent
 	}
 
 	/**
+	 * Adds PublicationId and Publication channel object elements to the event fields.
+	 *
+	 * @since 10.4.1
+	 * @param integer $pubId
+	 * @param AdmPubChannel $pubChannel
+	 */
+	protected function addPubChannelFields( int $pubId, AdmPubChannel $pubChannel ):void
+	{
+		$this->addfield( 'PublicationId',      $pubId );
+		$this->addfield( 'Id',                 $pubChannel->Id );
+		$this->addfield( 'Name',               $pubChannel->Name );
+		$this->addfield( 'Type',               $pubChannel->Type );
+		$this->addfield( 'CurrentIssueId',     $pubChannel->CurrentIssueId );
+		$this->addfield( 'DirectPublish',      $pubChannel->DirectPublish );
+		$this->addfield( 'SupportsForms',      $pubChannel->SupportsForms );
+		$this->addfield( 'SupportsCropping',   $pubChannel->SupportsCropping );
+	}
+
+	/**
+	 * Adds PublicationId, PubChannelId and Issue object elements to the event fields.
+	 *
+	 * @since 10.4.1
+	 * @param integer $pubId
+	 * @param integer $pubChannelId
+	 * @param AdmIssue $issue
+	 */
+	protected function addIssueFields( int $pubId, int $pubChannelId, AdmIssue $issue ):void
+	{
+		$this->addfield( 'PublicationId', $pubId );
+		$this->addfield( 'PubChannelId', $pubChannelId );
+		$this->addfield( 'Id', $issue->Id );
+		$this->addfield( 'Name', $issue->Name  );
+		$this->addfield( 'OverrulePublication', $issue->OverrulePublication );
+		$this->addfield( 'Activated', $issue->Activated );
+		$this->addfield( 'PublicationDate', $issue->PublicationDate );
+		$this->addfield( 'ReversedRead', $issue->ReversedRead );
+		$this->addfield( 'Description', $issue->Description );
+		$this->addfield( 'Subject', $issue->Subject );
+	}
+
+	/**
 	 * Sends the broadcast message.
 	 *
 	 * Generates and sends the requested message, the current $messageCompositionMethods are available:
@@ -831,6 +872,34 @@ class smartevent
 	}
 
 	/**
+	 * Takes the publication id to publish message to the intended exchange name.
+	 *
+	 * The system needs to know to which exchange the message should be published. There is a message exchange at system level,
+	 * per brand and per overrule issue. By calling this function, assumed is that the message should be published in
+	 * the brand exchange.
+	 *
+	 * @since 10.4.1
+	 * @param integer $pubId
+	 */
+	protected function composeExchangeNameForPubChannel( int $pubId )
+	{
+		// When message queue integration is disabled, there is no need to resolved the exchange name.
+		require_once BASEDIR . '/server/bizclasses/BizMessageQueue.class.php';
+		$this->exchangeName = null;
+		if( !BizMessageQueue::isInstalled() ) {
+			return;
+		}
+
+		if( !$pubId ) {
+			LogHandler::Log( 'smartevent', 'WARN', 'No publication id specfified. Event message can not be published 
+				to exchange.' );
+			return;
+		}
+
+		$this->exchangeName = BizMessageQueue::composeExchangeNameForPublication( $pubId );
+	}
+
+	/**
 	 * Takes an issue id to resolve brand/overrule issue and determines the exchange name (used to publish the message).
 	 *
 	 * The system needs to know to which exchange the message should be published. There is a message exchange at system level,
@@ -841,9 +910,16 @@ class smartevent
 	 * operate properly in production without messages. Only a warning is given when bad param is provided since that is
 	 * considered a programmatic error.
 	 *
+	 * For $pubId, when leave it to null(default), this function will resolve it.
+	 * For some events however, such as Issue deletion(smartevent_deleteissueEx), function cannot resolve Issue's
+	 * Publication Id. This is due to that Issue would have already been deleted when it reaches this function.
+	 * This means function cannot retrieve the Issue's Channel Id to further resolve the Publication Id. In this case,
+	 * the caller has to provide the $pubId.
+	 *
 	 * @param integer $issueId
+	 * @param null|integer Null by default. See more in the function header.
 	 */
-	protected function composeExchangeNameForIssue( $issueId )
+	protected function composeExchangeNameForIssue( $issueId, $pubId = null )
 	{
 		// When the message queue integration is disabled, there is no need to resolve the exchange name.
 		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
@@ -864,6 +940,10 @@ class smartevent
 			$this->exchangeName = BizMessageQueue::composeExchangeNameForOverruleIssue( $issueId );
 			LogHandler::Log( 'smartevent', 'INFO',
 				'Resolved exchange name '.$this->exchangeName.' from overrule issue id '.$issueId );
+		} else if( $pubId ) {
+				$this->exchangeName = BizMessageQueue::composeExchangeNameForPublication( $pubId );
+				LogHandler::Log( 'smartevent', 'INFO',
+					'Resolved exchange name '.$this->exchangeName.' from publication id '.$pubId );
 		} else {
 			$channelId = DBIssue::getChannelId( $issueId );
 			if( $channelId ) {
@@ -1661,6 +1741,109 @@ class smartevent_setPropertiesForMultipleObjects extends smartevent
 		$this->addfield( 'properties', $properties, true );
 
 		$this->fire( 'CartessianEvenly' );
+	}
+}
+
+class smartevent_updatepubchannel extends smartevent
+{
+	/**
+	 * smartevent_updatepubchannel constructor.
+	 *
+	 * @since 10.4.1
+	 * @param string $ticket
+	 * @param integer $pubId
+	 * @param AdmPubChannel $pubChannel
+	 */
+	public function __construct( $ticket, $pubId, $pubChannel )
+	{
+		$se = parent::__construct( EVENT_UPDATE_PUB_CHANNEL, $ticket );
+		$this->composeExchangeNameForPubChannel( $pubId );
+		$this->addPubChannelFields( $pubId, $pubChannel );
+		$this->fire();
+	}
+}
+
+class smartevent_createissueEx extends smartevent
+{
+	/**
+	 * smartevent_createissueEx constructor.
+	 *
+	 * @since 10.4.1
+	 * @param string $ticket
+	 * @param integer $pubId
+	 * @param integer $pubChannelId
+	 * @param AdmIssue $issue
+	 */
+	public function __construct( $ticket, $pubId, $pubChannelId, $issue )
+	{
+		parent::__construct( EVENT_CREATE_ISSUE, $ticket );
+		$this->composeExchangeNameForIssue( $issue->Id, $pubId );
+		$this->addIssueFields( $pubId, $pubChannelId, $issue );
+		$this->fire();
+	}
+}
+
+class smartevent_modifyissueEx extends smartevent
+{
+	/**
+	 * smartevent_modifyissueEx constructor.
+	 *
+	 * @since 10.4.1
+	 * @param string $ticket
+	 * @param integer $pubId
+	 * @param integer $pubChannelId
+	 * @param AdmIssue $issue
+	 */
+	public function __construct( $ticket, $pubId, $pubChannelId, $issue )
+	{
+		parent::__construct( EVENT_MODIFY_ISSUE, $ticket );
+		$this->composeExchangeNameForIssue( $issue->Id, $pubId );
+		$this->addIssueFields( $pubId, $pubChannelId, $issue );
+		$this->fire();
+	}
+
+}
+
+class smartevent_deleteissueEx extends smartevent
+{
+	/**
+	 * smartevent_deleteissueEx constructor.
+	 *
+	 * @since 10.4.1
+	 * @param string $ticket
+	 * @param integer $pubId
+	 * @param integer $issueId
+	 */
+	public function __construct( $ticket, $pubId, $issueId )
+	{
+		parent::__construct( EVENT_DELETE_ISSUE, $ticket );
+		$this->composeExchangeNameForIssue( $issueId, $pubId );
+		$this->addfield( 'Id', $issueId );
+		$this->fire();
+	}
+}
+
+class smartevent_updateissuesorderEx extends smartevent
+{
+	/**
+	 * smartevent_updateissuesorderEx constructor.
+	 *
+	 * @since 10.4.1
+	 * @param string $ticket
+	 * @param integer $pubId
+	 * @param integer $pubChannelId
+	 * @param integer[] $reorderedIssueIds
+	 */
+	public function __construct( $ticket, $pubId, $pubChannelId, $reorderedIssueIds )
+	{
+		parent::__construct( EVENT_UPDATE_ISSUES_ORDER, $ticket );
+		reset( $reorderedIssueIds );
+		$issueId = $reorderedIssueIds[0]; // Getting any issue id is fine.
+		$this->composeExchangeNameForIssue( $issueId, $pubId );
+		$this->addfield( 'PublicationId', $pubId );
+		$this->addfield( 'PubChannelId', $pubChannelId );
+		$this->addfield( 'IssueIdsOrder', $reorderedIssueIds, true );
+		$this->fire();
 	}
 }
 

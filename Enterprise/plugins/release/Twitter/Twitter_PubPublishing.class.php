@@ -311,11 +311,12 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
 			}
 		}
 
-		$maxLengthWithURL = 140 - self::SHORTENED_URL_LENGTH;
-		$reasonParams = array( $maxLengthWithURL, strlen( $text ), substr( $text, 0, 140 ) );
+		require_once __DIR__.'/EnterpriseTwitterConnector.class.php';
+		$maxMessageLength = EnterpriseTwitterConnector::getMaxMessageLength();
+		$maxLengthWithURL = $maxMessageLength - self::SHORTENED_URL_LENGTH;
+		$reasonParams = array( $maxLengthWithURL, strlen( $text ), substr( $text, 0, $maxMessageLength ) );
 
-		// Tweet may only be a maximum of 140 characters long.
-		if( strlen( $text ) > 140 ) {
+		if( strlen( $text ) > $maxMessageLength ) {
 			$msg = BizResources::localize( 'ERRMSG_TWEET_SIZE', true, $reasonParams );
 			$detail = BizResources::localize( 'ERRDET_TWEET_SIZE', true, $reasonParams );
 			throw new BizException( null, 'Client', $detail, $msg );
@@ -353,7 +354,7 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
 				}
 			}
 
-			//A tweet with an url  may only be a maximum of 140 - the length of the shortened url long.
+			//A tweet with an url  may only be a maximum of a tweet message - the length of the shortened url long.
 			if( strlen( $text ) > $maxLengthWithURL ) {
 				$msg = BizResources::localize( 'ERRMSG_TWEETANDURL_SIZE', true, $reasonParams );
 				$detail = BizResources::localize( 'ERRDET_TWEETANDURL_SIZE' );

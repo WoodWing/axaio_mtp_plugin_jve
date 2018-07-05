@@ -87,21 +87,14 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 
 		try {
 			$this->setupTestData();
-
-			// Scenario 1
-			$this->testRouteObjectsToUser1();
-
-			// Scenario 2
-			$this->testRouteObjectsToUser2();
-
-			// Scenario 3
-			$this->testRouteObjectsHavingPersonalState();
-		} 
+			$this->runTestScenarios();
+			$this->modifyAdmGroup();
+			$this->runTestScenarios();
+		}
 		catch( BizException $e ) {
 		}
 
 		$this->tearDownTestData();
-
 		$this->setSessionVariables( $this->vars );
 	}
 
@@ -119,6 +112,19 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 		$this->setupAdmIssues();
 		$this->setupAdmEditions();
 		$this->setupAdmAuthorization();
+	}
+
+	/**
+	 * Run the actual scenarios.
+	 */
+	private function runTestScenarios()
+	{
+		// Scenario 1
+		$this->testRouteObjectsToUser1();
+		// Scenario 2
+		$this->testRouteObjectsToUser2();
+		// Scenario 3
+		$this->testRouteObjectsHavingPersonalState();
 	}
 
 	/**
@@ -142,7 +148,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates categories for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmCategories()
 	{
@@ -172,7 +177,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates statuses for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmStates()
 	{
@@ -208,7 +212,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates users for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmUsers()
 	{
@@ -245,46 +248,63 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	}
 
 	/**
-	 * Finds user group for testing.
+	 * Creates non-admin user group for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmGroups()
 	{
-		$userGroup = $this->vars['BuildTest_WebServices_WflServices']['userGroup'];
-
-		// Get our user group
-		require_once BASEDIR.'/server/services/adm/AdmGetUserGroupsService.class.php';
-		$request = new AdmGetUserGroupsRequest();
+		require_once BASEDIR . '/server/services/adm/AdmCreateUserGroupsService.class.php';
+		$groupObj = new AdmUserGroup();
+		$groupObj->Name = 'Group-StN '.date("Y-m-d H:i:s");
+		$groupObj->Description = 'Group to test SendToNext.';
+		$groupObj->Admin = false;
+		$groupObj->Routing = true;
+		$service = new AdmCreateUserGroupsService();
+		$request = new AdmCreateUserGroupsRequest();
 		$request->Ticket = $this->ticket;
 		$request->RequestModes = array();
-		$stepInfo = 'Getting test suite user group';
-		$response = $this->utils->callService( $this, $request, $stepInfo, null, null, true );
+		$request->UserGroups = array( $groupObj );
+		$response = $this->utils->callService( $this, $request, 'Create User Group');
+		$this->userGroup = $response->UserGroups[0];
 
-		$this->userGroup = null;
-		foreach( $response->UserGroups as $userGroupObj ) {
-			if( $userGroupObj->Name == $userGroup->Name ) {
-				$this->userGroup = $userGroupObj;
-				break;
-			}
-		}
-		$this->assertNotNull( $this->userGroup,
-				'Could not find the test user group "'.$userGroup->Name.'". '.
-				'Please check the TESTSUITE setting in configserver.php and the user groups.' );
+		$this->assertNotNull( $this->userGroup, 'Could not create the test user group '.$groupObj->Name.'.' );
 	}
-	
+
 	/**
-	 * Forgets the user group that was used for testing.
+	 * Change the test group from non-admin to amin group.
+	 */
+	private function modifyAdmGroup()
+	{
+		require_once BASEDIR . '/server/services/adm/AdmModifyUserGroupsService.class.php';
+		$service = new AdmModifyUserGroupsService();
+		$request = new AdmModifyUserGroupsRequest();
+		$request->Ticket = $this->ticket;
+		$request->RequestModes = array();
+		$this->userGroup->Admin = true;
+		$request->UserGroups = array( $this->userGroup );
+		$response = $this->utils->callService( $this, $request, 'Modify User Group');
+		$this->assertNotNull( $response->UserGroups[0], 'Could not modfy the test user group '.$this->userGroup->Name.'.' );
+	}
+
+
+	/**
+	 * Delete the user group that was created for testing.
+	 *
 	 */
 	private function cleanupAdmGroups()
 	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteUserGroupsService.class.php';
+		$service = new AdmDeleteUserGroupsService();
+		$request = new AdmDeleteUserGroupsRequest();
+		$request->Ticket = $this->ticket;
+		$request->GroupIds = array( $this->userGroup->Id );
+		$response = $this->utils->callService( $this, $request, 'Delete User Group');
 		$this->userGroup = null;
 	}
 
 	/**
 	 * Finds a brand for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmPublication()
 	{
@@ -303,7 +323,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	 * Creates routing profiles for testing.
 	 *
 	 * @param string $scenario
-	 * @throws BizException on failure
 	 */
 	private function setupAdmRouting( $scenario )
 	{
@@ -387,7 +406,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	 * @param Category $category
 	 * @param string $routeTo
 	 * @return Object
-	 * @throws BizException on failure
 	 */
 	private function createDossier( $dossierName, $issue, $editions, $admState, $category, $routeTo )
 	{
@@ -463,7 +481,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Tests the SendToNext service.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function testRouteObjectsToUser1()
 	{
@@ -512,7 +529,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Tests the SendToNext service.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function testRouteObjectsToUser2()
 	{
@@ -561,7 +577,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Tests the SendToNext service.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function testRouteObjectsHavingPersonalState()
 	{
@@ -621,7 +636,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates authorizations for each combination of statuses and categories.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmAuthorization()
 	{
@@ -654,7 +668,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates an issue for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmIssues()
 	{
@@ -699,7 +712,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates four editions for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmEditions()
 	{
@@ -731,7 +743,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates publication channel for testing.
 	 *
-	 * @throws BizException on failure
 	 */
 	private function setupAdmPubChannel()
 	{

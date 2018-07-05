@@ -29,7 +29,7 @@ class HtmlPageNavigator
 		$this->backcount = @$_REQUEST['BackCount'];
 		if( $this->backcount == '' ) $this->backcount = 0;
 		$this->backcount -= 1;
-		$this->thisurl = $_SERVER['PHP_SELF'].'?BackCount='.$this->backcount;
+		$this->thisurl = INETROOT.'/server/utils/HtmlPageNavigator.class.php'.'?BackCount='.$this->backcount;
 	}
 
 	public function GetBackIconButton()

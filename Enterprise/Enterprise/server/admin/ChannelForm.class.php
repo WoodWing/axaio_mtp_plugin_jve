@@ -551,14 +551,17 @@ class ChannelForm extends HtmlAnyForm
 	{
 		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 		$updates = $this->IssuesTree->requestValues();
-		foreach( $updates as $updateid => $update ) {
-			$updateidarray = explode('~', $updateid);
-			$type = $updateidarray[0];
-			if( $type == 'Issue' ) {
-				$issueid = $updateidarray[1];
-				$fields = array( 'code' => $update['code'] );
-				DBIssue::updateIssue( $issueid, $fields );
+		if( $updates ) {
+			foreach( $updates as $updateid => $update ) {
+				$updateidarray = explode('~', $updateid);
+				$type = $updateidarray[0];
+				if( $type == 'Issue' ) {
+					$issueId = $updateidarray[1];
+					$fields = array( 'code' => $update['code'] );
+					DBIssue::updateIssue( $issueId, $fields );
+				}
 			}
+			$this->sendEventForReorderedIssues( $_REQUEST['publid'], $_REQUEST['channelid'] );
 		}
 	}
 
@@ -627,6 +630,22 @@ class ChannelForm extends HtmlAnyForm
 			$this->EditionsTree->beginNode('Edition', $edition['name'], $edition, 'Edition' . '~' . $editionid);
 			$this->EditionsTree->endNode();
 		}            
+	}
+
+	/**
+	 * ﻿Send out a list of reordered issue ids via n-casting and RabbitMQ.
+	 *
+	 * @since 10.4.1
+	 * @param integer $pubId
+	 * @param integer $pubChannelId
+	 */
+	private function sendEventForReorderedIssues( $pubId, $pubChannelId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		require_once BASEDIR.'/server/smartevent.php';
+		$reorderedIssues = DBIssue::listChannelIssues( $pubChannelId );
+		$reorderedIssues = array_keys( $reorderedIssues ); // Only ids
+		new smartevent_updateissuesorderEx( BizSession::getTicket(), $pubId, $pubChannelId, $reorderedIssues );
 	}
 	
 	public function drawHeader()

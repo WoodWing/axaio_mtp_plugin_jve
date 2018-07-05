@@ -59,7 +59,7 @@ class WW_SOAP_AdsServer extends WW_SOAP_Server
 			}
 			// replace default web service location with the real one
 			$contents = str_replace( 'http://127.0.0.1/Enterprise/plutusadminindex.php', 
-				SERVERURL_ROOT.$_SERVER['PHP_SELF'], $contents ); // do not use SERVERURL_SCRIPT (or else "?wsdl" gets added to URL)
+				SERVERURL_ROOT.INETROOT.'/server/protocols/soap/AdsServer.php', $contents ); // do not use SERVERURL_SCRIPT (or else "?wsdl" gets added to URL)
 			header( 'Content-type: text/xml' );
 			header( 'Content-Length: '.strlen($contents) ); // required for PHP v5.3
 			print $contents;

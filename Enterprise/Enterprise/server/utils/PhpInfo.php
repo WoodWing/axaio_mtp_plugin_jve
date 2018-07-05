@@ -124,7 +124,7 @@ class WW_Utils_PhpInfo
 	{
 		// Get phpinfo (without HTML headers since we already have!)
 		ob_start();
-		phpinfo();
+		phpinfo( INFO_GENERAL | INFO_MODULES );
 		$phpInfo = ob_get_contents();
 		ob_end_clean();
 		$phpInfo = preg_replace('%^.*<body>(.*)</body>.*$%ms', '$1', $phpInfo);

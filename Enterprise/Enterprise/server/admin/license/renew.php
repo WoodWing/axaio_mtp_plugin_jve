@@ -243,7 +243,7 @@
 		exit;
 	}
 
-	$localURL = SERVERURL_ROOT.$_SERVER['PHP_SELF'];
+	$localURL = SERVERURL_ROOT.INETROOT.'/server/admin/license/renew.php';
 	$localURL = str_replace( "renew.php", "getlicense.php", $localURL );
 	$clientname = $lic->getServerNameOrAddr();
 

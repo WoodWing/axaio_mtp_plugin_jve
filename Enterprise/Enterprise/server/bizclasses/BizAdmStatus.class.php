@@ -301,14 +301,11 @@ class BizAdmStatus
 	/**
 	 * Converts an Admin status to a Wfl status.
 	 *
-	 * Note that due to the object type juggling in for example DBAdmStatus.class.php a so called AmdStates object
-	 * is sometimes of the type stdClass. So the input parameter is not typed.
-	 *
 	 * @since 10.1.7
-	 * @param AdmStatus|stdClass $adminStatus
+	 * @param AdmStatus $adminStatus
 	 * @return State
 	 */
-	static public function convertAdminStatusToWflStatus( $adminStatus )
+	static public function convertAdminStatusToWflStatus( AdmStatus $adminStatus ): State
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		$wflStatus = new State();

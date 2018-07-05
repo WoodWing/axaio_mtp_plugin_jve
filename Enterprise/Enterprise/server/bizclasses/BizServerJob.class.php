@@ -185,6 +185,13 @@ class BizServerJob
 						$job = $bizServiceLogsCleanup->createJob( $pushIntoQueue );
 					}
 				break;
+				case 'AutoCleanWebEditDir':
+					require_once BASEDIR . '/server/bizclasses/BizWebeditDirCleanup.class.php';
+					if( BizWebeditDirCleanup::isWebEditDirCleanupEnabled() ) {
+						$bizWebeditDirCleanup = new BizWebeditDirCleanup();
+						$job = $bizWebeditDirCleanup->createJob( $pushIntoQueue );
+					}
+					break;
 				default: // should not happen
 					// Here it will not show that job to be CREATED failed to hide from outside world that
 					// a new job is possible to be created.
@@ -644,6 +651,10 @@ class BizServerJob
 			case 'AutoCleanServiceLogs':
 				require_once BASEDIR . '/server/bizclasses/BizServiceLogsCleanup.class.php';
 				$bizClass = new BizServiceLogsCleanup();
+				break;
+			case 'AutoCleanWebEditDir':
+				require_once BASEDIR . '/server/bizclasses/BizWebeditDirCleanup.class.php';
+				$bizClass = new BizWebeditDirCleanup();
 				break;
 			default:
 				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No core server class found to handle job {$jobType} (jobid = {$jobId})\r\n");

@@ -1579,10 +1579,6 @@ class BizObject
 			}
 		}
 
-		// Protect the MasterId from accidentally being updated in context of SetObjectProperties.
-		// This is a readonly field that can only be set through CreateObjects and CopyObjects.
-		unset( $newRow['masterid'] );
-
 		// Save properties to DB:
 		$sth = DBObject::updateObject( $id, null, $newRow, '' );
 		if (!$sth) {
@@ -1803,13 +1799,6 @@ class BizObject
 				if( $metaDataValue->PropertyValues ) {
 					// Normalize the property values.
 
-					// Protect the MasterId from accidentally being updated in context of MultiSetObjectProperties.
-					// This is a readonly field that can only be set through CreateObjects and CopyObjects.
-					if( $metaDataValue->Property == 'MasterId' ) {
-						unset( $metaDataValues[$index] );
-						continue;
-					}
-
 					$propValues = array();
 					foreach( $metaDataValue->PropertyValues as $propValue ) {
 						$propValues[] = $propValue->Value;
@@ -1854,7 +1843,7 @@ class BizObject
 			// Retrieve the statuses that are defined for this publication / overrule issue.
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 			$statuses = array();
-			$gotStatuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType );
+			$gotStatuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType, null, 'wfl' );
 			// $gotStatuses has index [0...N-1] but we need $statuses with status ids as index.
 			if( $gotStatuses ) foreach( $gotStatuses as $status ) {
 				$statuses[$status->Id] = $status;
@@ -3573,12 +3562,11 @@ class BizObject
 	 *
 	 * The version of objects should be provided. When mismatches, the S1140 error
 	 * is thrown to let caller get latest object and try again.
+	 * If the user has no right to lock one of the objects a S1002 (Access Denied) error is thrown. As the access right
+	 * is checked before the actual locking none of the objects will get locked.
 	 *
 	 * The function return the object ids of successfully locked objects only.
 	 * Caller should enable the reporting feature to catch errors.
-	 *
-	 * It does not check for read/write access rights; Those are covered by
-	 * GetObjects and SaveObjects services, which are needed to edit content.
 	 *
 	 * @param string $user
 	 * @param ObjectVersion[] $haveVersions
@@ -3592,9 +3580,10 @@ class BizObject
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Invalid params provided for '.__METHOD__.'().' );
 		}
 
+		$haveObjectIds = array_map( function( $hv ) { return $hv->ID; }, $haveVersions );
+		$checkedObjects = self::checkAccessRightOnObjectLock( $user, $haveObjectIds );
 		// Lock the objects, so that the version can no longer change by others in the meantime.
 		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-		$haveObjectIds = array_map( function( $hv ) { return $hv->ID; }, $haveVersions );
 		$lockedObjectIds = DBObjectLock::lockObjects( $haveObjectIds, $user ); // TODO Add to BizObjectLock
 
 		// Grab the latest object versions from DB (for those object that could be locked).
@@ -3615,7 +3604,7 @@ class BizObject
 		foreach( $haveVersions as $haveVersion ) {
 			try {
 				if( !isset( $lockedObjectIds[$haveVersion->ID] ) ) {
-					if( self::objectExists( $haveVersion->ID, 'Workflow' ) ) {
+					if( in_array( $haveVersion->ID, $checkedObjects ) ) {
 						throw new BizException( 'ERR_LOCKED', 'Client', $haveVersion->ID );
 					} else {
 						throw new BizException( 'ERR_NOTFOUND', 'Client', $haveVersion->ID );
@@ -4644,6 +4633,7 @@ class BizObject
 				//If user has not 'Open for Edit' rights, they could still have 'Open for Edit (Unplaced)' rights.
 				if( !BizAccess::checkRightsForObjectProps( $user, 'E', BizAccess::DONT_THROW_ON_DENIED, $objectProps ) ) {
 
+					require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 					// Check if the user has access to unplaced files only. If not, it means the user does not have any edit rights.
 					if( BizAccess::checkRightsForObjectProps( $user, 'O', BizAccess::THROW_ON_DENIED, $objectProps )
 						 && BizRelation::hasRelationOfType( $objectProps['ID'], 'Placed', 'parents' ) ) {
@@ -5024,8 +5014,10 @@ class BizObject
 					$srcRelation['pagerange'], $srcRelation['rating'], $srcRelation['parenttype'] );
 				if ( is_null( $objRelId ) ) { throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() ); }
 				if ( $trgtParentTargets ) {
+					require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 					BizTarget::createObjectRelationTargets( $user, $objRelId, $trgtParentTargets );
 				}
+				require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 				if ( !DBPlacements::copyPlacements( $srcRelation['parent'], $srcRelation['child'], $newCopiedParentId ) ) {
 					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 				}
@@ -5281,6 +5273,7 @@ class BizObject
 					$newRelTarget->PublishedVersion = null;
 					$newRelTarget->ExternalId = null;
 				}
+				require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 				BizTarget::createObjectRelationTargets( $user, $objRelId, $newRelTargets );
 			}
 		}
@@ -5329,7 +5322,7 @@ class BizObject
 	private static function getObjectTargetsModified( $user, $srcid, $targets, &$objTargetsRemoved, &$objTargetsAdded )
 	{
 		// >>> BZ#20917 Determine which object targets are removed and which are added
-
+		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		$orgObjTargets = BizTarget::getTargets( $user, $srcid );
 		foreach( $orgObjTargets as $orgObjTarget ) {
 			$targetFound = false;
@@ -6220,5 +6213,34 @@ class BizObject
 		$object->Files = array(); // The files are moved to the Filestore so they aren't needed anymore.
 
 		return $object;
+	}
+
+	/**
+	 * Checks the if user is entitled to lock the objects.
+	 *
+	 * If the user is not entitled to one of the objects all oobjects will fail.
+	 *
+	 * @since 10.4.1
+	 * @param string $user
+	 * @param integer[] $objectIds
+	 * @return integer[] List of object ids which can be locked by the user.
+	 * @throws BizException
+	 */
+	private static function checkAccessRightOnObjectLock( string $user, array $objectIds ): array
+	{
+		$checkedObjects = array();
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+		$dbObjectRows = DBObject::getMultipleObjectDBRows( $objectIds );
+		foreach( $dbObjectRows as $objectId => $dbObjectRow ) {
+			$objectProperties = BizProperty::objRowToPropValues( $dbObjectRow );
+			try {
+				self::checkAccessRights( true, $user, $objectProperties );
+			} catch( BizException $e ) {
+				throw new BizException( 'ERR_AUTHORIZATION', 'Client', $objectId );
+			}
+			$checkedObjects[] = $objectId;
+		}
+		return $checkedObjects;
 	}
 }

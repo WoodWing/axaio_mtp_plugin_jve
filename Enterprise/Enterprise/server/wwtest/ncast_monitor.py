@@ -60,7 +60,12 @@ def main():
     'DeleteObjectLabels',
     'AddObjectLabels',
     'RemoveObjectLabels',
-    'SetPropertiesForMultipleObjects']
+    'SetPropertiesForMultipleObjects',
+    'CreateIssue',
+    'ModifyIssue',
+    'DeleteIssue',
+    'UpdateIssuesOrder',
+    'UpdatePublicationChannel']
     EVENTYTYPES = [ '', 'System', 'Client', 'User' ]
     if MulticastGroup == "<broadcast>" :
         print "Enterprise ncast_monitor.py started with listening for broadcasts on port=[%s]" % (EventPort)
@@ -91,11 +96,12 @@ def main():
             fieldkey = `data[offset:offset+keysize]`
             offset = offset + keysize
             # parse value
-            if offset >= len(data) :
-                break
-            valsize = long(ord(data[offset]))
-            valsize = (valsize << 8) | ord(data[offset+1])
-            offset = offset + 2
+            if offset < len(data) :
+                valsize = long(ord(data[offset]))
+                valsize = (valsize << 8) | ord(data[offset+1])
+                offset = offset + 2
+            else :
+                valsize = 0
             fieldval = `data[offset:offset+valsize]`
             offset = offset + valsize
             print "- %-20s: %s" % (fieldkey, fieldval)

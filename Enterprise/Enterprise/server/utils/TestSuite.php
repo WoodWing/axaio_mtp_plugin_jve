@@ -624,7 +624,7 @@ class WW_Utils_TestSuite
 		$request->Ticket = $ticket;
 		$request->SaveSettings = false;
 		$stepInfo = 'LogOff TESTSUITE user.';
-		/*$response =*/ $this->callService( $testCase, $request, $stepInfo );		
+		/*$response =*/ $this->callService( $testCase, $request, $stepInfo );
 	}
 
 	/**

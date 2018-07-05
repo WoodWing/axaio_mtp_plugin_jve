@@ -1,14 +1,14 @@
 <?php
 /**
- * @since 		v8.0
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @since      v8.0
+ * @copyright   WoodWing Software bv. All Rights Reserved.
  *
  * Checks all PHP modules for the following potential problems due to PHP coding:
  * - Whether the include paths of all PHP modules can be resolved that belong to Enterprise Server.
  * - Whether ionCube Loader + Zend Optimizer could crash due to try-catch.
  * - Whether the class constructors are not using the old style that is no longer compatible with PHP7.
  */
- 
+
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 require_once BASEDIR.'/server/utils/FolderInterface.intf.php';
 require_once BASEDIR.'/server/utils/FolderUtils.class.php';
@@ -395,13 +395,7 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 							}
 						}
 						if( array_key_exists( $text, $this->obsoletedPhpFunctions ) ) {
-							$ignoreFiles = array(
-								// This file uses the dl() function, but it is shipped with ionCube Loader:
-								BASEDIR.'/server/wwtest/loader-wizard.php' => true,
-								// This file is derived from loader-wizard.php and so has same problem:
-								BASEDIR.'/server/wwtest/wwioncubetest.php' => true,
-							);
-							if( !array_key_exists( $filePath, $ignoreFiles ) ) {
+							if( !$this->isIoncubeWizardFile( $filePath )  ) {
 								$this->setResult( 'ERROR', $this->getFileInfoStr( $filePath ).
 									'Obsoleted function: [<b>'.$text.'</b>]' );
 							}
@@ -414,6 +408,12 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 								$incPath .= substr( $text, 1, strlen( $text ) - 2 ); // get path, all between quotes
 							}
 						}
+						if( $text == "'PHP_SELF'" ) {
+							if( !$this->isIoncubeWizardFile( $filePath ) ) {
+								$this->setResult( 'ERROR', $this->getFileInfoStr( $filePath ).
+									'Not allowed: [<b>'.$text.'</b>] Use INETROOT to resolve the relative path.' );
+							}
+						}
 						break;
 
 					default:
@@ -424,6 +424,30 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 				}
 			}
 		}
+	}
+
+	/**
+	 * The php files used by the ionCube wizard as loaded before any other files. These files can be seen as third-party
+	 * files and are excluded from the validation.
+	 *
+	 * @param string $file
+	 * @return bool
+	 */
+	private function isIoncubeWizardFile( $file )
+	{
+		$result = false;
+		$ignoreFiles = array(
+			// This file uses the dl() function, but it is shipped with ionCube Loader:
+			BASEDIR.'/server/wwtest/loader-wizard.php' => true,
+			// This file is derived from loader-wizard.php and so has same problem:
+			BASEDIR.'/server/wwtest/wwioncubetest.php' => true,
+		);
+
+		if( array_key_exists( $file, $ignoreFiles ) ) {
+			$result = true;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -510,7 +534,7 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 							if( $funcName == $className ) {
 								$this->setResult( 'ERROR', $this->getFileInfoStr( $filePath ).
 									' Contructor of class <b>\''.$className.'\'</b> uses the old style. '.
-									'This is no longer compatible with PHP7. Please use \'__construct\' instead.');
+									'This is no longer compatible with PHP7. Please use \'__construct\' instead.' );
 							}
 							$catchClassName = false;
 							$className = '';

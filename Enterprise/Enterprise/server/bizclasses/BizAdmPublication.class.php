@@ -244,6 +244,8 @@ class BizAdmPublication
 	 * Create Issue Object
 	 *
 	 * Returns new created issues object
+	 * Since 10.4.1 N-casting / RabbitMQ message for CreateIssue event is added. However, it is not supported for
+	 * OverruleIssue, which means no event will be sent out.
 	 *
 	 * @param string $usr short username who should have authorization to create these issues
 	 * @param string[] $subReq RequestModes
@@ -311,10 +313,16 @@ class BizAdmPublication
 		// Recalculate new deadlines for categories, statuses and objects. (BZ#17883)
 		self::updateRecalcIssuesDeadlines( $pubId, $newIssues, array() );
 
-		// Notify event plugins
-		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
-		foreach( $newIssues as $newIssue ) {
-			BizEnterpriseEvent::createIssueEvent( $newIssue->Id, 'create' );
+		// Notification / Messaging
+		if( $newIssues ) {
+			require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
+			require_once BASEDIR.'/server/smartevent.php';
+			foreach( $newIssues as $newIssue ) {
+				BizEnterpriseEvent::createIssueEvent( $newIssue->Id, 'create' );
+				if( !$newIssue->OverrulePublication ) { // EN-89582
+					new smartevent_createIssueEx( BizSession::getTicket(), $pubId, $pubChannelId, $newIssue );
+				}
+			}
 		}
 
 		return $newIssues;
@@ -377,6 +385,8 @@ class BizAdmPublication
 	 * Modify Issue Object
 	 *
 	 * Returns modified issue object
+	 * Since 10.4.1 N-casting / RabbitMQ message for ModifyIssue event is added. Unlike CreateIssue, it is also supported
+	 * for OverruleIssue.
 	 *
 	 * @param  string $usr short username who should have authorization to modify these issues
 	 * @param  string[] $subReq RequestModes
@@ -453,10 +463,14 @@ class BizAdmPublication
 		// Recalculate new deadlines for categories, statuses and objects.
 		self::updateRecalcIssuesDeadlines( $pubId, $modifyIssues, $orgDeadlines );
 
-		// Notify event plugins
-		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
-		foreach( $modifyIssues as $modIssue ) {
-			BizEnterpriseEvent::createIssueEvent( $modIssue->Id, 'update' );
+		// Notification / Messaging
+		if( $modifyIssues ) {
+			require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
+			require_once BASEDIR.'/server/smartevent.php';
+			foreach( $modifyIssues as $modIssue ) {
+				BizEnterpriseEvent::createIssueEvent( $modIssue->Id, 'update' );
+				new smartevent_modifyissueEx( BizSession::getTicket(), $pubId, $pubChannelId, $modIssue );
+			}
 		}
 
 		return $modifyIssues;
@@ -464,7 +478,10 @@ class BizAdmPublication
 
 	/**
 	 * Delete Issue Object
-	 * 
+	 *
+	 * Since 10.4.1 N-casting / RabbitMQ message for DeleteIssue event is added. Unlike CreateIssue, it is also supported
+	 * for OverruleIssue.
+	 *
 	 * @param string $usr short username who should have authorization to delete these issues
 	 * @param integer $pubId Publication that issue belongs to
 	 * @param integer[] $issueIds Array of issue id that needs to be delete
@@ -478,8 +495,10 @@ class BizAdmPublication
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
 		require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
+		require_once BASEDIR.'/server/smartevent.php';
 		foreach( $issueIds as $issueId ) {
 			BizCascadePub::deleteIssue( $issueId );
+			new smartevent_deleteissueEx( BizSession::getTicket(), $pubId, $issueId );
 		}
 	}
 
@@ -990,6 +1009,8 @@ class BizAdmPublication
 	/**
 	 * Modify Publication Channels.
 	 *
+	 * Since 10.4.1 N-casting / RabbitMQ message for ModifyPubChannel event is added.
+	 *
 	 * @param string $usr short username who should have authorization to modify these channels
 	 * @param string[] $subReq RequestModes
 	 * @param integer $pubId Publication that PubChannel belongs to
@@ -1022,7 +1043,23 @@ class BizAdmPublication
 			throw new BizException( 'ERR_DATABASE', 'Server', DBAdmPubChannel::getError() );
 		}
 		self::enrichPubChannelObjsWithRuntimeValues( $modifyPubChannels );
+		self::sendEventForPubChannels( $pubId, $modifyPubChannels );
 		return $modifyPubChannels;
+	}
+
+	/**
+	 * Send out a list of publication channels via n-casting and RabbitMQ.
+	 *
+	 * @since 10.4.1
+	 * @param integer $pubId
+	 * @param AdmPubChannel[] $pubChannels
+	 */
+	private static function sendEventForPubChannels( int $pubId, array $pubChannels ):void
+	{
+		require_once BASEDIR.'/server/smartevent.php';
+		if( $pubChannels ) foreach( $pubChannels as $pubChannel ) {
+			new smartevent_updatepubchannel( BizSession::getTicket(), $pubId, $pubChannel );
+		}
 	}
 
 	/**
