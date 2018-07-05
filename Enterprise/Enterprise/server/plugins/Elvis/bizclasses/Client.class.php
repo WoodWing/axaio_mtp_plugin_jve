@@ -512,8 +512,14 @@ class Elvis_BizClasses_Client
 	{
 		$detail = $response->getErrorMessage();
 		if( $response->isForbiddenError() ) { // HTTP 403
-			throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
-				null, null, 'INFO' );
+			$jsonError = $response->jsonBody();
+			if( $jsonError->errorname == 'LocalizedAccessDeniedException' ) { // let Elvis tell user which asset is locked
+				throw new BizException( '', 'Client', $detail,
+					$jsonError->message. ' (S1002)', null, 'INFO' ); // S-code from ERR_AUTHORIZATION
+			} else { // fallback to generic Access Denied error
+				throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
+					null, null, 'INFO' );
+			}
 		}
 		if( $response->isNotFoundError() || $response->isGoneError() ) { // HTTP 404 or 410
 			$severity = $request->isNotFoundErrorSevere() ? 'ERROR' : 'INFO';
