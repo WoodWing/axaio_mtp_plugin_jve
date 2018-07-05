@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">Opravdu chcete stáhnout tuto verzi?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Není možné nastavit verzi DPS Viewer na 25 nebo nižší, protože úroveň přístupu následujících fasciklů je nastavena na Bezplatné (S1123). %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Není možné změnit přístupovou úroveň; to vyžaduje verzi DPS Viewer 26 nebo vyšší. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Nelze odeslat přílohu do systému Drupal (S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Nelze odeslat přílohu do systému Drupal (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Toto jméno již je použito pro jiného uživatele (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Název již v databázi existuje (S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">Toto jméno již je použito pro skupinu uživatelů (S1011)</Term>

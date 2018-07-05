@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">このバージョンをダウンロードしてもよろしいですか？</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">以下のドシエのアクセスレベルが自由に設定されているため、DPS Viewerをバージョン25またはそれ以下に設定できません。 (S1123):  %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">アクセスレベル: を変更できません。DPS Viewer のバージョン26またはそれ以降のバージョンが必要になります。 (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">アタッチメントはDrupalにアップロードができません。 (S1064) </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">アタッチメントはDrupalにアップロードができません。 (S1064)</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">この名前はユーザとしてすでに存在します(S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">この名前はすでにデータベースに存在します(S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">この名前はグループとしてすでに存在します(S1011)</Term>

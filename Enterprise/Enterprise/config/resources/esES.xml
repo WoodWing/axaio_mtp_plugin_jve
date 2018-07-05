@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">¿Confirma que desea descargar esta versión?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">No se puede establecer la versión de DPS Viewer en 25 o menos porque el nivel de acceso de las siguientes carpetas está establecido en Gratuito (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">No se puede cambiar el nivel de acceso; se requiere la versión 26 o superior de DPS Viewer. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">El archivo adjunto no pudo cargarse a Drupal (S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">El archivo adjunto no pudo cargarse a Drupal (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Este nombre de usuario ya existe (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Este nombre ya existe en la base de datos (S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">Este nombre ya existe como grupo de usuarios (S1011)</Term>

@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">Czy na pewno pobrać tę wersję?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Nie można wybrać wersji 25 lub niższej programu DPS Viewer, ponieważ dostęp do następujących dossier jest bezpłatny (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Nie można zmienić poziomu dostępu, wymaga to wersji 26 lub wyższej programu DPS Viewer. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Nie można przesłać załącznika do systemu Drupal (S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Nie można przesłać załącznika do systemu Drupal (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Nazwa istnieje już jako użytkownik (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Nazwa istnieje już w bazie danych (S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">Nazwa istnieje już jako grupa (S1011)</Term>
