@@ -51,11 +51,6 @@ class BizNamedQuery extends BizQueryBase
 		if( $query == 'PublishFormTemplates' ) {
 			$minimalProps = self::getMinimalPropsForPublishTemplates();			
 			self::enrichPublishTemplatesQueryParams( $args );
-			$hierarchicalSearch = $hierarchical; // respect the caller (and it should be false)
-		} else {
-			// In the past, -ALL- namedQueries were always hierarchical, and therefore, here we overrule
-			// the $hierarchical sent in by the caller, always set it to True.
-			$hierarchicalSearch = true; 
 		}
 
 		// The Named Query ($query) could be either:
@@ -81,6 +76,7 @@ class BizNamedQuery extends BizQueryBase
 			$searchSucces = false; //If search by (Solr) search engine is succesful skip database search.
 			$mode = self::getQueryMode($ticket, false);
 			require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
+			$hierarchicalSearch = self::determineHierarchicalSearch( $query, $hierarchical );
 			if (BizSearch::handleSearch( $query, $args, $firstEntry, $maxEntries, $mode, $hierarchicalSearch, $queryOrder, $minimalProps, null ) ) {
 				try {
 					$ret = BizSearch::search($query, $args, $firstEntry, $maxEntries, $mode, $hierarchicalSearch, $queryOrder, $minimalProps, null );
@@ -95,7 +91,7 @@ class BizNamedQuery extends BizQueryBase
 				switch( $query ) {
 					case 'Inbox':
 					case $inbox:
-						$ret = self::runInboxDBQuery($mode, $ticket, $user, $firstEntry, $maxEntries, $queryOrder);
+						$ret = self::runInboxDBQuery($mode, $ticket, $user, $firstEntry, $maxEntries, $hierarchicalSearch, $queryOrder);
 						break;
 					case 'DefaultArticleTemplate':
 						$ret = self::runDefaultArticleTemplateQuery($mode, $ticket, $user, $args, $hierarchical, $firstEntry, $maxEntries, $queryOrder);
@@ -118,6 +114,33 @@ class BizNamedQuery extends BizQueryBase
 		require_once BASEDIR . '/server/dbclasses/DBLog.class.php';
 		DBlog::logService($user, 'NamedQuery');
 		return $ret;
+	}
+
+	/**
+	 * Determine the hierarchical flag based on the $query type.
+	 *
+	 * @since 10.4.2
+	 * @param string $query
+	 * @param bool|null $requestedHierarchical
+	 * @return bool
+	 */
+	private static function determineHierarchicalSearch( $query, $requestedHierarchical )
+	{
+		$inbox = self::getInboxQueryName();
+		switch( $query ) {
+			case 'PublishFormTemplates':
+				$hierarchical = $requestedHierarchical; // respect the caller (and it should be false)
+				break;
+			case 'Inbox':
+			case $inbox:
+				$hierarchical = $requestedHierarchical ?? false;
+				break;
+			default:
+				// In the past, -ALL- namedQueries were always hierarchical, and therefore, here we overrule
+				// the $hierarchical sent in by the caller, always set it to True.
+				$hierarchical = true;
+		}
+		return $hierarchical;
 	}
 
 	/**
@@ -974,10 +997,11 @@ class BizNamedQuery extends BizQueryBase
 	 * @param string  $user         Username of the current user
 	 * @param integer $firstEntry   Where to start fetching records
 	 * @param integer $maxEntries   How many records to fetch
+	 * @param bool    $hierarchical Whether to return the children rows.
 	 * @param array   $queryOrder   On which columns to sort, in which direction
 	 * @return WflNamedQueryResponse
 	 */
-	static private function runInboxDBQuery( $mode, $ticket, $user, $firstEntry, $maxEntries, $queryOrder )
+	static private function runInboxDBQuery( $mode, $ticket, $user, $firstEntry, $maxEntries, $hierarchical, $queryOrder )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizQuery.class.php';
@@ -991,18 +1015,15 @@ class BizNamedQuery extends BizQueryBase
 			$params[] = new QueryParam('RouteTo', '=', $group->Name);	
 		}				
 		
-		// Minimal properties needed for "Inbox' query. BZ#16495
-		$minimalProps = array('ID', 'Type', 'Name', 'State', 'Format', 'LockedBy', 'Category' ,'PublicationId', 'SectionId', 'StateId', 'PubChannelIds');
-		$minimalProps = self::addMinPropForOverRuleIssue($mode, $minimalProps);
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
 		$request = new WflQueryObjectsRequest();
 		$request->Ticket = $ticket;
 		$request->Params = $params;
 		$request->FirstEntry = $firstEntry;
 		$request->MaxEntries = $maxEntries;
-		$request->Hierarchical = true;
+		$request->Hierarchical = $hierarchical;
 		$request->Order = $queryOrder;
-		$request->MinimalProps = $minimalProps;
+		$request->MinimalProps = self::getMinimalPropsForInbox( $mode );
 		$result = BizQuery::queryObjects2( $request, $user );
 		
 		// QueryObjects returns a WflQueryObjectsResponse, but a WflNamedQueryResponse is needed. So parse the object. BZ#17257
@@ -1011,7 +1032,23 @@ class BizNamedQuery extends BizQueryBase
 		$result = WW_Utils_PHPClass::typeCast( $result, 'WflNamedQueryResponse' );
 		
 		return $result;
-	}	
+	}
+
+	/**
+	 * Returns the minimal properties needed for Inbox NamedQuery.
+	 *
+	 * Also refer to BZ#16495.
+	 *
+	 * @since 10.4.2
+	 * @param string $mode
+	 * @return array
+	 */
+	public static function getMinimalPropsForInbox( $mode ):array
+	{
+		$minimalProps = array('ID', 'Type', 'Name', 'State', 'Format', 'LockedBy', 'Category' ,'PublicationId', 'SectionId', 'StateId', 'PubChannelIds');
+		$minimalProps = self::addMinPropForOverRuleIssue( $mode, $minimalProps );
+		return $minimalProps;
+	}
 
 	/**
 	 * Returns the name of the built-in inbox, which is localized for current user.
