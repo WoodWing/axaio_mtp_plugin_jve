@@ -25,8 +25,9 @@ class Elvis_FieldHandlers_ReadWrite
 	 * @param boolean $multiValue TRUE if field has multiple values, FALSE otherwise.
 	 * @param string $dataType String representation of the Elvis field's data type.
 	 * @param string $entPropertyName Enterprise metadata property name.
+	 * @param integer $brandId
 	 */
-	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName,  $brandId = 0 )
+	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName, $brandId = 0 )
 	{
 		$this->lvsFieldName = $lvsFieldName;
 		$this->multiValue = $multiValue;

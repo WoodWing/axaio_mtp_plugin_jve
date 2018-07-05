@@ -40,7 +40,7 @@ class Elvis_BizClasses_ProxyServerHttpException extends Exception
 	 */
 	public function getReasonPhrase()
 	{
-		$this->response->getReasonPhrase();
+		return $this->response->getReasonPhrase();
 	}
 
 	/**

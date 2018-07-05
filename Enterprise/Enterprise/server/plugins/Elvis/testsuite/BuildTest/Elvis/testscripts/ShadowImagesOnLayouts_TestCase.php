@@ -457,8 +457,10 @@ EOT;
 
 	/**
 	 * Retrieve the shadow image object from Enterprise.
+	 *
+	 * @param bool $checkout
 	 */
-	private function getShadowImageObject( $checkout ) : void
+	private function getShadowImageObject( bool $checkout ) : void
 	{
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest();
