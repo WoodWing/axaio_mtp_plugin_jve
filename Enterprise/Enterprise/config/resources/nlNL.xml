@@ -801,7 +801,7 @@
   <Term key="ERR_ACTIVATE_VERSION">Weet u zeker dat u deze versie wilt activeren?</Term>
   <Term key="ERR_ADD_DOSSIER_TO_DOSSIER">Een Dossier kan niet aan zichzelf worden toegevoegd. (S1085)</Term>
   <Term key="ERR_AIR_OR_FLEX_NOT_CORRECT">Air of Flex SDK komt niet overeen. (S1086)</Term>
-  <Term key="ERR_APPLICATION_CAN_NOT_BE_LOADED">De applicatie kan niet geladen worden. (S1090)</Term>
+  <Term key="ERR_APPLICATION_CAN_NOT_BE_LOADED">De applicatie kon niet geladen worden. (S1090)</Term>
   <Term key="ERR_APP_NOT_DEFINED">Applicatie %1 is niet aangetroffen in ApplicationMapping.xml</Term>
   <Term key="ERR_ARGUMENT">Ontbrekende functieparameter (S1000)</Term>
   <Term key="ERR_ARTICLE_ALREADY_OPEN">Het artikel kan niet bewerkt worden; het wordt al bewerkt in een andere tab. (S1091)</Term>
