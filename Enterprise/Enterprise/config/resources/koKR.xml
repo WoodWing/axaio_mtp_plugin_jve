@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">이 버젼을 다운로드해도 좋습니까?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">다음 도시에가 무료로 설정된 권한을 가지고 있기 때문에 DPS 뷰어 버전이 25 이하가 필요합니다. (S1123):  %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">접근 권한을 변경할수 없습니다; DPS 뷰어 버전 26이상이 필요합니다. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">드루팔로 연결하여 업로드 할 수 없습니다(S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">드루팔로 연결하여 업로드 할 수 없습니다(S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">이 이름의 사용자는 존재합니다(S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">이 이름은 데이타베이스에 존재합니다(S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">이 이름의 그룹은 존재합니다(S1011)</Term>
