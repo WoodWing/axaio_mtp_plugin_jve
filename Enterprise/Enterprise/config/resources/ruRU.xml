@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">Хотите загрузить эту версию?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Не удается установить DPS Viewer версии 25 или ниже, так как для уровня доступа следующих дел указано значение Free (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Не удается изменить уровень доступа; требуется DPS Viewer версии 26 или выше. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Невозможно загрузить прикрепления в Drupal (S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Невозможно загрузить прикрепления в Drupal (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Это имя присвоено другому пользователю (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Имя уже существует в базе данных (S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">Это имя уже присвоено Группе Пользователей (S1011)</Term>
