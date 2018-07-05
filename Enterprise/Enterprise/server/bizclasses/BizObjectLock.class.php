@@ -14,7 +14,7 @@ class BizObjectLock
 	/** @var int Id of the object to be locked/released */
 	private $objectId = null;
 
-	/** @var string Short name of the user on which behalve the lock/release is done. */
+	/** @var string Short name of the user on whose behalf the lock/release is done. */
 	private $shortUserName = '';
 
 	/** @var string IP-address of the client. */
@@ -29,7 +29,7 @@ class BizObjectLock
 	/** @var string version of the client application */
 	private $appVersion = false;
 
-	/** @var bool isLocked Is the object in the objectlocks table. */
+	/** @var bool isLocked Is the object in the 'smart_objectlocks' table. */
 	private $isLocked = false;
 
 	public function __construct( $objectId )
@@ -94,11 +94,7 @@ class BizObjectLock
 	 */
 	public function isLockedBySameUserAndApplication( string $shortUserName )
 	{
-		return ( $this->isLocked ) &&
-			( strtolower( $this->shortUserName ) == strtolower( $shortUserName ) ) &&
-			( $this->appName == BizSession::getClientName() ) &&
-			( $this->appVersion == BizSession::getClientVersion() );
-
+		return $this->isLockedByUser( $shortUserName ) && $this->isSameApplication();
 	}
 
 	/**
@@ -110,6 +106,27 @@ class BizObjectLock
 	public function isLockedByUser( string $shortUserName )
 	{
 		return ( $this->isLocked && ( strtolower( $this->shortUserName ) == strtolower( $shortUserName ) ) );
+	}
+
+	/**
+	 * Checks if the current application is the sam as the application that locked the object.
+	 *
+	 * All Smart Mover clients are regarded as 'same', EN-90666.
+	 *
+	 * @since 10.4.2
+	 * @return bool
+	 */
+	private function isSameApplication()
+	{
+		$same = false;
+		if( BizSession::isSmartMover( $this->appName ) && BizSession::isSmartMover( BizSession::getClientName() ) ) {
+			$same = true;
+		} else {
+			$same = ( $this->appName == BizSession::getClientName() ) &&
+				( $this->appVersion == BizSession::getClientVersion() );
+		}
+
+		return $same;
 	}
 
 	/**
