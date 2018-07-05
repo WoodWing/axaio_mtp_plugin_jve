@@ -256,7 +256,7 @@ class Elvis_BizClasses_ProxyServer
 	 * @return string The URL (without the absolute Elvis base path).
 	 * @throws Elvis_BizClasses_ProxyServerHttpException
 	 */
-	private function composeRestServiceForFileDownload()
+	private function composeRestServiceForFileDownload(): string
 	{
 		if( !isset( $this->httpParams['rendition'] ) ) {
 			$message = 'Please specify "rendition" param at URL.';
@@ -269,6 +269,7 @@ class Elvis_BizClasses_ProxyServer
 			case 'preview':
 				$service = 'preview/'.rawurlencode( $this->elvisAssetId ).$this->composePreviewUrlArguments();
 				break;
+			case 'placement':
 			case 'native':
 				$service = 'file/'.rawurlencode( $this->elvisAssetId );
 				break;
@@ -309,7 +310,7 @@ class Elvis_BizClasses_ProxyServer
 	 * @param string $previewArgs
 	 * @return bool
 	 */
-	protected function isValidPreviewArgsParam( string $previewArgs ) : bool
+	protected function isValidPreviewArgsParam( string $previewArgs ): bool
 	{
 		// Do not accept % to avoid double encoding attacks https://www.owasp.org/index.php/Double_Encoding
 		// Do not accept / to avoid accessing other assets through relative paths, for example:
@@ -330,7 +331,7 @@ class Elvis_BizClasses_ProxyServer
 	 * @param string $assetId
 	 * @return bool
 	 */
-	private function isValidAssetId( string $assetId ) : bool
+	private function isValidAssetId( string $assetId ): bool
 	{
 		$allowedSymbols = array( '-', '_' );
 		return $assetId && ctype_alnum( str_replace( $allowedSymbols, '', $assetId ) );
