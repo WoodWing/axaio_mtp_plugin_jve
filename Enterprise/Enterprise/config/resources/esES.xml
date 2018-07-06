@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">No se ha encontrado la carpeta de cache web-edit. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">No se pudo grabar en el directorio %1.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">El %1 que está tratando de abrir está ocupado en un proceso del sistema. Por favor espere unos momentos e intente nuevamente.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">No fue posible ejecutar la operación. Una nueva versión está disponible en el File Store. Por favor obtenga la versión más reciente e intente de nuevo. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">La operación no pudo realizarse porque el navegador Web se encuentra en modo Sin conexión. Ponga el navegador Web en modo Conectado y vuelva a intentarlo.</Term>
   <Term key="ERR_OLD_SAFARI">Esta versión del navegador Safari no es compatible. Por favor descargue la versión 3 o posterior para acceder a Web Editor. (S1111)</Term>

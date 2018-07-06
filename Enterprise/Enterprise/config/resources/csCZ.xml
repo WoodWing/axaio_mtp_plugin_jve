@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">Nebyla nalezena složka vyrovnávací paměti webového editoru. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">Nebylo možné zapisovat do adresáře %1.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">Snažíte se otevřít %1, je však aktuálně používáno procesem na pozadí. Chvíli počkejte a zkuste to znovu.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">Operaci nelze provést. Ve File Store je k dispozici novější verze. Získejte nejnovější verzi a zkuste to znovu. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Operaci nelze provést, protože váš webový prohlížeč je nyní v režimu offline. Přepněte prosím svůj prohlížeč do online režimu a zkuste to znovu.</Term>
   <Term key="ERR_OLD_SAFARI">Tato verze prohlížeče Safari není podporována. Pro přístup k aplikaci Web Editor si stáhněte Safari verze 3 nebo vyšší. (S1111)</Term>

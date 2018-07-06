@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">没有网页编辑缓存文件夹 (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">不能写到目录 %1.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">你正打开的 %1 目前由一个后台进程使. 请过几分钟后再试.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">操作不能进行. File Store中中有一个最新. 请获得最新版之后再. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">因为你的流览器处于离线模式,本操作不能执行.请切换到在线模式再试</Term>
   <Term key="ERR_OLD_SAFARI">Safari 浏览器版本不支持,请下载Safari version 3及以上版本再使用网页编辑软件. (S1111)</Term>

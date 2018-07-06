@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">webeditcache 폴더가 발견되지 않습니다 (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">%1 디렉토리에 저장할수 없습니다.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">백그라운드 작업중인 %1 을 열려고 하고 있습니다.  잠시후 다시 시도해 주십시오.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">동작을 실행할수 없습니다. 파일 스토어에 사용가능한 새버전이 있습니다. 최신버전으로 다시 실행하십시오. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">웹브라우저가 기본적으로 오프라인 모드임으로 운영이 원할하지 않습니다. 웹브라우저모드를 온라인으로 한 후 다시 시도하십시오.</Term>
   <Term key="ERR_OLD_SAFARI">사파리 브라우저 버전은 지원하지 않습니다. 사파리 버전3을 다운로드하면, 웹에디터를 사용할 수 있습니다. (S1111)</Term>
