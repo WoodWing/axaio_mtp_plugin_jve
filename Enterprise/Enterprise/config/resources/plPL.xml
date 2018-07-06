@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">Nie znaleziono folderu bufora edycji dla sieci Web. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">Nie można zapisać w katalogu %1.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">%1, który próbujesz otworzyć jest obecnie w użyciu przez proces działający w tle. Poczekaj chwilę i spróbuj ponownie.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">Nie można wykonać operacji. W magazynie plików jest dostępna nowsza wersja. Pobierz najnowszą wersję i spróbuj ponownie. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Nie można wykonać tej operacji, ponieważ twoja przeglądarka sieciowa jest w trybie offline. Przełącz przeglądarkę sieciową w tryb online i spróbuj ponownie.</Term>
   <Term key="ERR_OLD_SAFARI">Ta wersja przeglądarki Safari nie jest obsługiwana. Pobierz przeglądarkę Safari w wersji 3 lub nowszej, aby uzyskać dostęp do programu Web Editor. (S1111)</Term>

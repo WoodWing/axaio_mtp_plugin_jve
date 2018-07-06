@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">Kein Webeditcache-Ordner gefunden. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">In das Verzeichnis %1 konnte nicht geschrieben werden.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">Das Element (%1), das Sie öffnen möchten, wird derzeit von einem Hintergrundprozess verwendet. Warten Sie einen Moment und versuchen Sie es erneut.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">Vorgang kann nicht ausgeführt werden. Im Dateispeicher steht eine neuere Version zur Verfügung. Rufen Sie die neueste Version ab und versuchen Sie es erneut. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Der Vorgang konnte nicht ausgeführt werden, da sich der Webbrowser derzeit im Offlinemodus befindet. Wechseln Sie in den Onlinemodus, und versuchen Sie es erneut.</Term>
   <Term key="ERR_OLD_SAFARI">Diese Version des Safari-Browsers wird nicht unterstützt. Laden Sie Safari in Version 3 oder höher herunter, um auf Web-Editor zuzugreifen. (S1111)</Term>

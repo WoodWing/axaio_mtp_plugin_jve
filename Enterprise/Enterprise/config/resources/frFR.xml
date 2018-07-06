@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">Aucun dossier webedit cache détecté. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">Impossible d’écrire dans le répertoire %1.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">Le/La %1que vous essayez d'ouvrir est actuellement en cours d'utilisation par un processus en arrière-plan. Veuillez patienter quelques instants puis réessayez.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">L’opération ne peut pas être exécutée. Une version plus récente est disponible dans le magasin de fichiers. Veuillez utiliser la dernière version et réessayer. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Opération impossible : votre navigateur Web est actuellement en mode hors ligne. Choisissez le mode en ligne et recommencez.</Term>
   <Term key="ERR_OLD_SAFARI">Cette version du navigateur Safari n’est pas prise en charge. Veuillez télécharger Safari 3 ou une version ultérieure pour accéder à l’éditeur Web. (S1111)</Term>

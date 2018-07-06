@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">Web-editorin välimuistikansiota ei löytynyt. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">Kirjoittaminen kansioon %1 epäonnistui.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">Kohde %1, jota yrität avata, on tällä hetkellä toisen taustaohjelman käytössä. Odota hetki ja yritä uudelleen.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">Toimintoa ei voida suorittaa. Uudempi versio on käytettävissä tiedostosäilössä. Hanki uusin versio ja yritä uudelleen. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Toimintoa ei voitu suorittaa, koska verkkoselaimesi on tällä hetkellä offline-tilassa. Vaihda verkkoselaimesi online-tilaan ja yritä uudelleen.</Term>
   <Term key="ERR_OLD_SAFARI">Tälle Safarin versiolle ei ole tukea. Lataa Safarin versio 3 tai uudempi päästäksesi verkkoeditoriin. (S1111)</Term>
