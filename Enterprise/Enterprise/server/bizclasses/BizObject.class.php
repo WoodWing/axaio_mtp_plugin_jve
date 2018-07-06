@@ -1346,8 +1346,7 @@ class BizObject
 				}
 			} else { // Different user and non-admin user.
 				$lockedByUser = BizUser::resolveFullUserName( $objectLock->getLockedByShortUserName() );
-				$msg = BizResources::localize('OBJ_LOCKED_BY') . ' ' . $lockedByUser;
-				throw new BizException( null, 'Client',  $id, $msg );
+				throw new BizException( 'ERR_OBJ_LOCKED_BY_USER', 'Client',  $id, null, array( $lockedByUser ) );
 			}
 
 			DBObjectFlag::unlockObjectFlags($id);

@@ -136,9 +136,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase 
 		// User 'Jim' tries to unlock the layout with client application A.
 		$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "Jim %timestamp%" );
 		$this->doLogOn();
-		$lockedByUserFullName = DBUser::getFullName( $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "John %timestamp%" ) );
-		$msg = BizResources::localize('OBJ_LOCKED_BY').' '.$lockedByUserFullName;
-		$this->unlockObjects( array( $this->testLayout->MetaData->BasicMetaData->ID ) , $msg );
+		$this->unlockObjects( array( $this->testLayout->MetaData->BasicMetaData->ID ) , '(S1147)' );
 		$this->doLogOff();
 
 		// User 'John' tries to unlock the layout with client application B.
