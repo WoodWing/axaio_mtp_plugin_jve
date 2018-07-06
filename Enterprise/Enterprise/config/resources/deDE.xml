@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">Soll diese Version heruntergeladen werden?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Die DPS Viewer-Version kann nicht auf 25 oder niedriger gesetzt werden, da die Zugangsebene der folgenden Dossiers auf 'Kostenlos' gesetzt ist (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Die Zugangsebene kann nicht geändert werden. Dazu ist DPS Viewer Version 26 oder höher erforderlich. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Anhang konnte nicht zu Drupal hochgeladen werden (S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Anhang konnte nicht zu Drupal hochgeladen werden (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Name ist bereits als Benutzer vorhanden (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Name ist bereits in Datenbank vorhanden (S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">Name ist bereits als Gruppe vorhanden (S1011)</Term>
