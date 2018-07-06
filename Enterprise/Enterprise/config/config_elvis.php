@@ -351,4 +351,4 @@ define('ELVIS_ENTERPRISE_VERSIONPREFIX', '0.');
 define('ELVIS_INTERNAL_USER_POSTFIX', ' (Elvis internal user)');
 define('ELVIS_CONTENTSOURCE_PUBLIC_PROXYURL', SERVERURL_ROOT.INETROOT.'/server/plugins/Elvis/restproxyindex.php');
 define('ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL', LOCALURL_ROOT.INETROOT.'/server/plugins/Elvis/restproxyindex.php');
-define('ELVIS_MINVERSION', '6.15.0.0'); // minimum required version // TODO: fine tune this version once known
+define('ELVIS_MINVERSION', '6.18.0.0'); // minimum required version
