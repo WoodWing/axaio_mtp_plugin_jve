@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">A pasta web-edit cache não foi encontrada. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">Não foi possível gravar no diretório %1.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">O %1 que você está tentando abrir está atualmente em uso por um processo em segundo plano. Aguarde alguns momentos e tente novamente.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">Não foi possível executar esta operação. Há uma versão mais nova disponível no repositório de arquivos (File Store). Obtenha esta versão mais recente e tente novamente. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">A operação não pôde ser realizada porque o navegador da Web está atualmente no modo off-line. Alterne o navegador da Web para o modo on-line e tente novamente.</Term>
   <Term key="ERR_OLD_SAFARI">Esta versão do browser Safari não é compatível. Por favor, faça o download da versão 3 ou maior para acessar o Editor Web. (S1111)</Term>
