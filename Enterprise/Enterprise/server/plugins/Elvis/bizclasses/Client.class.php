@@ -516,10 +516,10 @@ class Elvis_BizClasses_Client
 			if( $jsonError->errorname == 'LocalizedAccessDeniedException' ) { // let Elvis tell user which asset is locked
 				throw new BizException( '', 'Client', $detail,
 					$jsonError->message. ' (S1002)', null, 'INFO' ); // S-code from ERR_AUTHORIZATION
-			} else { // fallback to generic Access Denied error
-				throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
-					null, null, 'INFO' );
 			}
+			// fallback to generic Access Denied error
+			throw new BizException( 'ERR_AUTHORIZATION', 'Client', $detail,
+					null, null, 'INFO' );
 		}
 		if( $response->isNotFoundError() || $response->isGoneError() ) { // HTTP 404 or 410
 			$severity = $request->isNotFoundErrorSevere() ? 'ERROR' : 'INFO';
@@ -531,10 +531,10 @@ class Elvis_BizClasses_Client
 					throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', $detail, // S1036
 						null, array( $request->getSubjectEntity() ), $severity );
 				}
-			} else {
-				throw new BizException( 'ERR_NOTFOUND', 'Client', $detail, // S1029
-					null, null, $severity );
 			}
+			// fallback to generic Record Not Found error
+			throw new BizException( 'ERR_NOTFOUND', 'Client', $detail, // S1029
+				null, null, $severity );
 		}
 		if( $response->isRequestTimeoutError() ) { // HTTP 408
 			if( $request->getAttempt() <= 3 ) {
@@ -545,12 +545,16 @@ class Elvis_BizClasses_Client
 			}
 		}
 		if( $response->isConflictError() ) { // HTTP 409
+			$jsonError = $response->jsonBody();
+			if( $jsonError->errorname == 'CSLinkedToOtherSystemException' ) { // let Elvis tell user that asset is used by another Enterprise
+				throw new BizException( '', 'Client', $detail,
+					$jsonError->message. ' (S1038)', null, 'INFO' ); // S-code from ERR_SUBJECT_EXISTS
+			}
 			if( $request->getSubjectEntity() && $request->getSubjectName() ) {
 				throw new BizException( 'ERR_SUBJECT_EXISTS', 'Client', $detail, // S1038
 					null, array( $request->getSubjectEntity(), $request->getSubjectName(), 'INFO' ) );
-			} else {
-				throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
 			}
+			throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
 		}
 		if( $response->isClientProgrammaticError() ) { // all HTTP 4xx codes except the ones listed above
 			throw new Elvis_BizClasses_ClientException( $detail, 'ERROR' );
