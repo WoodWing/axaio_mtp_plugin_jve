@@ -96,7 +96,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
 
-		$this->checkUserEditRight( $lock, $rendition );
+		$this->checkUserEditRight( $object->MetaData->BasicMetaData->ID, $lock, $rendition );
 		$assetId = Elvis_BizClasses_AssetId::getAssetIdFromAlienId( $alienId );
 		$service = new Elvis_BizClasses_AssetService();
 		$hit = $service->retrieve( $assetId, $lock );
@@ -146,17 +146,37 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * customers that did not buy Elvis seats for their Enterprise users. To make it harder to hack this limitation,
 	 * all PHP files involved are ionCube Encoded. See Build/auto_build.sh.
 	 *
-	 * @param bool $lock Object is locked.
+	 * @param string $objectId
+	 * @param bool $lock Requested for a lock for editing.
 	 * @param string $rendition Requested rendition.
 	 * @throws BizException when the user has no rights to edit/lock Elvis assets.
 	 */
-	private function checkUserEditRight( $lock, $rendition )
+	private function checkUserEditRight( $objectId, $lock, $rendition )
 	{
-		if ( $lock && $rendition == 'native' ) {
+		if( $lock && $rendition == 'native' ) {
 			$restricted = Elvis_BizClasses_UserSetting::getRestricted();
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
-			if ( $restricted ) {
-				throw new BizException( 'ERR_AUTHORIZATION', 'Client' );
+			if( $restricted ) {
+				require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+				$serverJob = DBTicket::getContextualServerJob();
+				if( $serverJob ) {
+					require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
+					require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+					$bizJobConfig = new BizServerJobConfig();
+					$jobConfig = $bizJobConfig->findJobConfig( $serverJob->JobType, $serverJob->ServerType );
+					$userShortName = isset( $jobConfig->UserId ) ? DBUser::getShortNameByUserDbId( $jobConfig->UserId ) : '';
+					LogHandler::Log( 'ELVIS', 'WARN',
+						'A job of type '.$serverJob->JobType.' running in background tries to obtain a lock for '.
+						'editing for an object (id='.$objectId.'). This happened to be a shadow object linked to an Elvis asset. '.
+						'Because the user "'.$userShortName.'" configured to execute the job is unknown to Elvis, the '.
+						'ELVIS_DEFAULT_USER is selected to authorize at Elvis Server. That user is restricted and can read '.
+						'assets but can not edit assets. For optimization purposes of the Elvis integration, this restriction '.
+						'is remembered for the user configured for the job. To solve this problem, please add the user to '.
+						'Elvis and manually login with that user in Enterprise.'
+					);
+				}
+				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "{$objectId}(E)",
+					null, null, 'INFO' );
 			}
 		}
 	}
