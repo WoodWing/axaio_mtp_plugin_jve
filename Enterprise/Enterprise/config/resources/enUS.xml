@@ -992,6 +992,7 @@
   <Term key="ERR_WRONGPASS">Wrong user name or password (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Article conversion to WCML failed. (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Error parsing WWSettings.xml file. (S1075)</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Please add an image.</Term>
   <Term key="FACEBOOK_ERROR_ADD_MESSAGE">Please add a message.</Term>
   <Term key="FACEBOOK_ERROR_HELP_CONFIG_FIELD">Complete all configuration fields on the Publication Channel Settings page.</Term>
