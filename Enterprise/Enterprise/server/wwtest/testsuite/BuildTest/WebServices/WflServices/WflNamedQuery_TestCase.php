@@ -31,7 +31,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_TestCase exte
 
 	public function getDisplayName() { return 'NamedQuery - [DefaultArticleTemplate, Inbox]'; }
 	public function getTestGoals()   { return 'Checks if NamedQuery works well.'; }
-	public function getTestMethods() { return 'Perform NamedQuery for DefaultArticleTemplate and verify its reponse.'; }
+	public function getTestMethods() { return 'Perform NamedQuery for DefaultArticleTemplate, Inbox and verify its reponses.'; }
 	public function getPrio()        { return 106; }
 	
 	final public function runTest()
