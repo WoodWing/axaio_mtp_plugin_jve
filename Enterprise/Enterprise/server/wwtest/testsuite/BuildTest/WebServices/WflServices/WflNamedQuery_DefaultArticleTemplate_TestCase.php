@@ -89,7 +89,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_DefaultArticl
 	{
 		$nameQuery = 'DefaultArticleTemplate';
 		do {
-			if( $this->setupTestDataForDefaultArticleTemplateNamedQueryTest()) {
+			if( !$this->setupTestDataForDefaultArticleTemplateNamedQueryTest()) {
 				$this->setResult( 'ERROR', 'Could not find test data to test "'.$nameQuery.'" NamedQuery.',
 					'Please enable the "Setup test data" entry and try again.' );
 				break;
