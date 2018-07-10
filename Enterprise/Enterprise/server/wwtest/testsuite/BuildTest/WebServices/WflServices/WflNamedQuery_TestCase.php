@@ -3,15 +3,13 @@
  * @package Enterprise
  * @subpackage TestSuite
  * @since v7.4.0
+ * @since 10.4.2 Renamed the class from WflNamedQuery_DefaultArticleTemplate_TestCase to WflNamedQuery_TestCase.
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
  
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
-/**
- * @property mixed art
- */
-class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_DefaultArticleTemplate_TestCase extends TestCase
+class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_TestCase extends TestCase
 {
 	private $vars = null;
 	private $utils = null;
