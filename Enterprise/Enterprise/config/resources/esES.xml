@@ -552,7 +552,7 @@
   <Term key="ASK_DELETE_STICKY_REPLY">¿Confirma que desea eliminar esta respuesta?</Term>
   <Term key="ASK_ENTER_NAME">Introducir nombre:</Term>
   <Term key="ASK_FORCE_LOGOFF">¿Confirma que desea sacar del sistema a los usuarios seleccionados?</Term>
-  <Term key="ASK_LOGON">Inicie sesión con su nombre de usuario y la contraseña</Term>
+  <Term key="ASK_LOGON">Inicie sesión con su nombre de usuario y la contraseña.</Term>
   <Term key="ASK_OPEN_READONLY">Se está usando el artículo ¿Desea abrirlo como de sólo lectura?</Term>
   <Term key="ASK_OVERWRITE_NEW">Ya existe una nueva versión de este artículo en la base de datos. Si continúa editando y guardando este artículo, sobrescribirá la nueva versión.</Term>
   <Term key="ASK_REMOVE_EDITOR_ELEMENT">¿Está seguro de que desea eliminar este componente? Se perderá todo el contenido de este componente.</Term>
@@ -956,7 +956,7 @@
   <Term key="ERR_SOLR_SEARCH">Error de búsqueda Solr: %1 (S1061).</Term>
   <Term key="ERR_SOURCE_PUBLICATION_NOT_SPECIFIED">La {PUBLICATION} de origen no se ha especificado o la nueva {PUBLICATION} está en blanco. (S1084)</Term>
   <Term key="ERR_SOURCE_USER_NAME_NOT_SPECIFIED">El nombre de usuario de origen no se ha especificado o el nombre del nuevo usuario está en blanco. (S1087)</Term>
-  <Term key="ERR_SUBJECT_EXISTS">%1 %2 ya existe (S1038)</Term>
+  <Term key="ERR_SUBJECT_EXISTS">%1 %2 ya existe. (S1038)</Term>
   <Term key="ERR_SUBJECT_NOTEXISTS">%1 %2 no existe (S1056).</Term>
   <Term key="ERR_SUCCEEDED">Correcto</Term>
   <Term key="ERR_SUCCES">Se ha exportado con éxito:</Term>
@@ -988,9 +988,9 @@
   <Term key="ERR_USER_BEGINDATE">La cuenta de usuario aún no es válida.</Term>
   <Term key="ERR_USER_ENDDATE">La cuenta de usuario ya no es válida. (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Este nombre de usuario ya existe.</Term>
-  <Term key="ERR_USER_NAME_REQUIRED">Es necesario introducir el nombre de usuario</Term>
-  <Term key="ERR_WRONGLANG">Elija un idioma (S1052).</Term>
-  <Term key="ERR_WRONGPASS">Nombre de usuario o contraseña incorrectos (S1053)</Term>
+  <Term key="ERR_USER_NAME_REQUIRED">Es necesario introducir el nombre de usuario.</Term>
+  <Term key="ERR_WRONGLANG">Elija un idioma. (S1052)</Term>
+  <Term key="ERR_WRONGPASS">Nombre de usuario o contraseña incorrectos. (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Falló la conversión de artículo a WCML. (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Error traduciendo el archivo WWSettings.xml (S1075)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Por favor añada una imagen</Term>

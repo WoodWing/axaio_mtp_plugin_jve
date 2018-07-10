@@ -240,7 +240,7 @@
   <Term key="ACT_MORE_UPLOAD">Nowa wysyłka</Term>
   <Term key="ACT_MOVE">Przenieś do</Term>
   <Term key="ACT_MTP_MAINTENANCE">Obsługa tworzenia do wydrukowania</Term>
-  <Term key="ACT_MULT_PLACEMENT">Artykuł (lub jeden z jego komponentów) jest umieszczony więcej niż jeden raz w tej samej Edycji.</Term>
+  <Term key="ACT_MULT_PLACEMENT">Artykuł (lub jeden z jego komponentów) jest umieszczony więcej niż jeden raz w tej samej {EDITION}.</Term>
   <Term key="ACT_MYPROFILE">Mój profil</Term>
   <Term key="ACT_NAMED_QUERIES">Kwerendy nazwane</Term>
   <Term key="ACT_NAME_IS_INVALID">W nazwie istnieją nieprawidłowe znaki lub jest ona zbyt długa</Term>
@@ -552,7 +552,7 @@
   <Term key="ASK_DELETE_STICKY_REPLY">Czy na pewno usunąć tę odpowiedź?</Term>
   <Term key="ASK_ENTER_NAME">Podaj nazwę:</Term>
   <Term key="ASK_FORCE_LOGOFF">Czy na pewno wylogować wybranych użytkowników?</Term>
-  <Term key="ASK_LOGON">Zarejestruj się podając swoją nazwę użytkownika i hasło</Term>
+  <Term key="ASK_LOGON">Zarejestruj się podając swoją nazwę użytkownika i hasło.</Term>
   <Term key="ASK_OPEN_READONLY">Artykuł jest używany. Czy otworzyć w trybie tylko do odczytu?</Term>
   <Term key="ASK_OVERWRITE_NEW">W bazie danych już istnieje nowa wersja tego artykułu. Kontynuowanie edytowania i zapisywania tego artykułu spowoduje nadpisanie jego nowej wersji.</Term>
   <Term key="ASK_REMOVE_EDITOR_ELEMENT">Czy na pewno chcesz usunąć ten składnik? Cała zawartość tego składnika zostanie utracona.</Term>
@@ -956,7 +956,7 @@
   <Term key="ERR_SOLR_SEARCH">Błąd wyszukiwania: %1 (S1061).</Term>
   <Term key="ERR_SOURCE_PUBLICATION_NOT_SPECIFIED">Źródłowa {PUBLICATION} nie jest określona lub nowa {PUBLICATION} jest pusta. (S1084)</Term>
   <Term key="ERR_SOURCE_USER_NAME_NOT_SPECIFIED">Nazwa użytkownika źródłowego nie jest określona lub nazwa nowego użytkownika jest pusta. (S1087)</Term>
-  <Term key="ERR_SUBJECT_EXISTS">%1 %2 już istnieje (S1038)</Term>
+  <Term key="ERR_SUBJECT_EXISTS">%1 %2 już istnieje. (S1038)</Term>
   <Term key="ERR_SUBJECT_NOTEXISTS">%1 %2 nie istnieje (S1056).</Term>
   <Term key="ERR_SUCCEEDED">Zakończono pomyślnie</Term>
   <Term key="ERR_SUCCES">Wyeksportowano pomyślnie:</Term>
@@ -988,9 +988,9 @@
   <Term key="ERR_USER_BEGINDATE">Konto użytkownika nie jest jeszcze ważne</Term>
   <Term key="ERR_USER_ENDDATE">Konto użytkownika nie jest już ważne (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Nazwa użytkownika już istnieje.</Term>
-  <Term key="ERR_USER_NAME_REQUIRED">Wprowadź wymaganą nazwę użytkownika</Term>
-  <Term key="ERR_WRONGLANG">Wybierz język (S1052)</Term>
-  <Term key="ERR_WRONGPASS">Zła nazwa użytkownika lub złe hasło (S1053)</Term>
+  <Term key="ERR_USER_NAME_REQUIRED">Wprowadź wymaganą nazwę użytkownika.</Term>
+  <Term key="ERR_WRONGLANG">Wybierz język. (S1052)</Term>
+  <Term key="ERR_WRONGPASS">Zła nazwa użytkownika lub złe hasło. (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Konwersja artykułu do WCML nie powiodła się. (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Błąd analizy pliku WWSettings.xml. (S1075)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Dodaj obraz.</Term>
