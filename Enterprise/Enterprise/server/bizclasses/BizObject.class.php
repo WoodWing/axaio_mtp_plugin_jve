@@ -6218,13 +6218,13 @@ class BizObject
 	/**
 	 * Checks the if user is entitled to lock the objects.
 	 *
-	 * If the user is not entitled to one of the objects all oobjects will fail.
+	 * If the user is not entitled to one of the objects all objects will fail and BizException is thrown.
 	 *
 	 * @since 10.4.1
 	 * @param string $user
 	 * @param integer[] $objectIds
 	 * @return integer[] List of object ids which can be locked by the user.
-	 * @throws BizException
+	 * @throws BizException When user has no access to any of the objects.
 	 */
 	public static function checkAccessRightOnObjectLock( string $user, array $objectIds ): array
 	{

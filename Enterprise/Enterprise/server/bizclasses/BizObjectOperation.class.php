@@ -275,17 +275,22 @@ class BizObjectOperation
 	 * @param integer $objectId
 	 * @param BizObjectLock $objectLock
 	 * @return bool
-	 * @throws BizException
+	 * @throws BizException When either the object is not locked and cannot be locked by the acting user or the object is
+	 * locked by a different user.
 	 */
 	private static function lockObjectIfNotLockedYet( string $user, int $objectId, BizObjectLock $objectLock ): bool
 	{
 		$lockedByUs = false;
 		if( !$objectLock->isLocked() ) {
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-			$canBeLocked = BizObject::checkAccessRightOnObjectLock( $user, array( $objectId ) );
-			if( in_array( $objectId, $canBeLocked ) ) {
-				$objectLock->lockObject( $user );
-				$lockedByUs = true;
+			try {
+				$canBeLocked = BizObject::checkAccessRightOnObjectLock( $user, array( $objectId ) );
+				if( in_array( $objectId, $canBeLocked ) ) {
+					$objectLock->lockObject( $user );
+					$lockedByUs = true;
+				}
+			} catch ( BizException $e ) {
+				throw $e;
 			}
 		} else {
 			if( !$objectLock->isLockedByUser( $user ) ) {
