@@ -2,7 +2,7 @@
 /**
  * @package   Enterprise
  * @subpackage   TestSuite
- * @since      v10.4.1
+ * @since      v10.4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */
 
@@ -10,28 +10,28 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase extends TestCase
 {
-	/** @var WW_Utils_TestSuite $utils */
+	/** @var WW_Utils_TestSuite $testSuiteUtils */
 	private $testSuiteUtils = null;
 
-	/** @var string workflowTicket */
+	/** @var string $workflowTicket */
 	private $workflowTicket = '';
 
-	/** @var WW_TestSuite_Setup_WorkflowFactory */
+	/** @var WW_TestSuite_Setup_WorkflowFactory $workflowFactory */
 	private $workflowFactory;
 
-	/** @var int profileId */
+	/** @var int $profileId */
 	private $profileId;
 
-	/** @var FeatureProfile */
+	/** @var FeatureProfile $featureProfile */
 	private $featureProfile;
 
-	/** @var string workflowUser */
+	/** @var string $workflowUser */
 	private $workflowUser;
 
-	/** @var Object test Object */
+	/** @var Object $testLayout */
 	private $testLayout;
 
-	/** @var Attachment[] Layout files copied to the transfer server folder. */
+	/** @var Attachment[] $transferServerFiles Layout files copied to the transfer server folder. */
 	private $transferServerFiles = array();
 
 	/** @var BizTransferServer $transferServer */
@@ -43,7 +43,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase 
 	/** @var string $testStartTime Used for cleaning up of IDSA jobs.*/
 	private $testStartTime = null;
 
-	/** @var string name of the application */
+	/** @var string $appName Name of the application */
 	private $appName = '';
 
 	// Step#01: Fill in the TestGoals, TestMethods and Prio...
@@ -54,7 +54,8 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase 
 
 	public function getTestGoals()
 	{
-		return 'Checks if objects gets unlocked, but only if the user is entitled. For the "UnlockObjects" service only the user matters.';
+		return 'Checks if object can get unlocked only by the user who locks the object or the Brand Admin, ' .
+			'other users will not be allowed to do the unlock to this object.';
 	}
 
 	public function getTestMethods()
@@ -107,7 +108,8 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase 
 		$this->testSuiteUtils = new WW_Utils_TestSuite();
 		$this->vars = $this->getSessionVariables();
 		$admTicket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
-		$this->assertNotNull( $admTicket );
+		$message = 'Please enable the Setup test data test.';
+		$this->assertNotNull( $admTicket, $message );
 		require_once BASEDIR.'/server/wwtest/testsuite/Setup/WorkflowFactory.class.php';
 		$this->workflowFactory = new WW_TestSuite_Setup_WorkflowFactory( $this, $admTicket, $this->testSuiteUtils );
 		$this->workflowFactory->setConfig( $this->getWorkflowConfig() );
@@ -130,7 +132,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase 
 		$this->appName = 'Client-A';
 		$this->doLogOn();
 		$this->testLayout = $this->createLayout( 'Layout %timestamp%' );
-		$this->testLockObject();
+		$this->lockObject( $this->testLayout );
 		$this->doLogOff();
 
 		// User 'Jim' tries to unlock the layout with client application A.
@@ -149,7 +151,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase 
 		// User 'John' locks the layout with client application A.
 		$this->appName = 'Client-A';
 		$this->doLogOn();
-		$this->testLockObject();
+		$this->lockObject( $this->testLayout );
 		$this->doLogOff();
 
 		// Brand admin tries to unlock the layout with client application B.
@@ -158,15 +160,6 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase 
 		$this->doLogOn();
 		$this->unlockObjects( array( $this->testLayout->MetaData->BasicMetaData->ID ), null );
 		$this->doLogOff();
-	}
-
-	/**
-	 * Lock the object.
-	 *
-	 */
-	private function testLockObject()
-	{
-		$this->lockObject( $this->testLayout );
 	}
 
 	/**
@@ -240,24 +233,37 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase 
 	 */
 	private function teardownTest()
 	{
-		if( !$this->workflowTicket ) {
-			$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "John %timestamp%" );
-			$this->doLogOn();
-		}
 		if( $this->testLayout ) {
-			$errorReport = '';
-			$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $this->testLayout->MetaData->BasicMetaData->ID,
-				'Deleting layout for Lock Objects BuildTest.', $errorReport );
-			$this->testLayout = null;
+			if( $this->workflowTicket ) {
+				$this->doLogOff(); // LogOff since no idea this ticket belongs to which test user.
+			}
+			try {
+				$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "John %timestamp%" );
+				$message = "Failed retrieving user John to do logOn to delete test layout.";
+				$this->assertNotEquals( $this->workflowUser, "John %timestamp%", $message );
+				$this->doLogOn();
+				$errorReport = '';
+				$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $this->testLayout->MetaData->BasicMetaData->ID,
+					'Deleting layout for Lock Objects BuildTest.', $errorReport );
+				$this->testLayout = null;
+				$this->doLogOff();
+				$this->workflowFactory->teardownTestData();
+			} catch( BizException $e ) {
+				// Don't want to bail out here as we want to continue doing other cleaning ....
+				$message = "Failed clearing layout " . $this->testLayout . '. Please check log files for more information.';
+				$this->setResult( 'ERROR', $message  );
+			}
+			$this->workflowFactory = null;
 		}
-		$this->doLogOff();
+		if( $this->workflowFactory ) {
+			$this->workflowFactory->teardownTestData();
+		}
 		if( $this->transferServerFiles ) {
 			foreach( $this->transferServerFiles as $file ) {
 				$this->transferServer->deleteFile( $file->FilePath );
 			}
 			unset( $this->transferServerFiles );
 		}
-		$this->workflowFactory->teardownTestData();
 		$this->clearIdsServerJobsInTheQueue();
 	}
 

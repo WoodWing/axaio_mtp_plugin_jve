@@ -109,9 +109,11 @@ class BizObjectLock
 	}
 
 	/**
-	 * Checks if the current application is the sam as the application that locked the object.
+	 * Checks if the current application is the same as the application that locked the object.
 	 *
 	 * All Smart Mover clients are regarded as 'same', EN-90666.
+	 * - The versions of the Smart Mover clients are not checked.
+	 * - AppName is considered as smart mover app as long as the name contains 'mover-'.
 	 *
 	 * @since 10.4.2
 	 * @return bool
