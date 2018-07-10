@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">Nessuna cartella cache di modifica Web trovata. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">Impossibile scrivere nella directory %1.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">L'elemento %1 che si sta tentando di aprire è attualmente utilizzato da un processo in background. Attendere qualche minuto e riprovare.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">Impossibile eseguire l'operazione. È disponibile una versione più recente nell'archivio dei file. Installare tale versione, quindi riprovare. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Impossibile eseguire l'operazione perché il browser Web in uso è attualmente in modalità non in linea. Passare alla modalità in linea e riprovare.</Term>
   <Term key="ERR_OLD_SAFARI">Questo browser Safari non è supportato. Scaricare Safari 3 o versione successiva per accedere all'editor Web. (S1111)</Term>
