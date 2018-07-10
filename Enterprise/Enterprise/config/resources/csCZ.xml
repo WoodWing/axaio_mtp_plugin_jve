@@ -552,7 +552,7 @@
   <Term key="ASK_DELETE_STICKY_REPLY">Jste si jisti, že chcete tuto odpověď odstranit?</Term>
   <Term key="ASK_ENTER_NAME">Zadejte název:</Term>
   <Term key="ASK_FORCE_LOGOFF">Opravdu chcete odhlásit vybrané uživatele?</Term>
-  <Term key="ASK_LOGON">Přihlaste se prosím se svým uživatelským jménem a heslem</Term>
+  <Term key="ASK_LOGON">Přihlaste se prosím se svým uživatelským jménem a heslem.</Term>
   <Term key="ASK_OPEN_READONLY">Článek je používaný. Chcete ho otevřít pouze ke čtení?</Term>
   <Term key="ASK_OVERWRITE_NEW">V databázi již existuje nová verze tohoto článku. Pokud budete tento článek nadále upravovat a ukládat, tato nová verze se přepíše.</Term>
   <Term key="ASK_REMOVE_EDITOR_ELEMENT">Opravdu chcete odebrat tuto součást? Veškerý obsah této součásti bude ztracen.</Term>
@@ -956,7 +956,7 @@
   <Term key="ERR_SOLR_SEARCH">Chyba při hledání Solr: %1 (S1061).</Term>
   <Term key="ERR_SOURCE_PUBLICATION_NOT_SPECIFIED">Buď není specifikována zdrojová {PUBLICATION} nebo je nová {PUBLICATION} prázdná. (S1084)</Term>
   <Term key="ERR_SOURCE_USER_NAME_NOT_SPECIFIED">Buď není specifikováno zdrojové jméno uživatele nebo je nové jméno uživatele prázdné. (S1087)</Term>
-  <Term key="ERR_SUBJECT_EXISTS">%1 %2 již existuje (S1038)</Term>
+  <Term key="ERR_SUBJECT_EXISTS">%1 %2 již existuje. (S1038)</Term>
   <Term key="ERR_SUBJECT_NOTEXISTS">%1 %2 neexistuje (S1056).</Term>
   <Term key="ERR_SUCCEEDED">Úspěch</Term>
   <Term key="ERR_SUCCES">Úspěšně exportováno:</Term>
@@ -988,9 +988,9 @@
   <Term key="ERR_USER_BEGINDATE">Účet uživatele ještě není platný</Term>
   <Term key="ERR_USER_ENDDATE">Účet uživatele již není platný (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Uživatel s tímto jménem již existuje.</Term>
-  <Term key="ERR_USER_NAME_REQUIRED">Zadejte prosím vyžadované jméno uživatele</Term>
-  <Term key="ERR_WRONGLANG">Vyberte jazyk (S1052)</Term>
-  <Term key="ERR_WRONGPASS">Chybné jméno uživatele nebo heslo (S1053)</Term>
+  <Term key="ERR_USER_NAME_REQUIRED">Zadejte prosím vyžadované jméno uživatele.</Term>
+  <Term key="ERR_WRONGLANG">Vyberte jazyk. (S1052)</Term>
+  <Term key="ERR_WRONGPASS">Chybné jméno uživatele nebo heslo. (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Konvertování článku na WCML se nezdařilo. (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Chyba syntaktické analýzy souboru WWSettings.xml. (S1075)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Přidejte obrázek.</Term>

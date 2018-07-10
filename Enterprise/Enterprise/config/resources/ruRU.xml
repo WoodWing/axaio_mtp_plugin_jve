@@ -988,7 +988,7 @@
   <Term key="ERR_USER_BEGINDATE">Учетная запись пользователя еще недействительна</Term>
   <Term key="ERR_USER_ENDDATE">Учетная запись пользователя уже недействительна (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Имя пользователя уже существует.</Term>
-  <Term key="ERR_USER_NAME_REQUIRED">Необходимо имя пользователя, введите его</Term>
+  <Term key="ERR_USER_NAME_REQUIRED">Необходимо имя пользователя, введите его.</Term>
   <Term key="ERR_WRONGLANG">Выберите язык (S1052)</Term>
   <Term key="ERR_WRONGPASS">Неверное имя пользователя или пароль (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Не удалось преобразовать статью в WCML. (S1121)</Term>

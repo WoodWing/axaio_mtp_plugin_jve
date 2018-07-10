@@ -243,7 +243,7 @@
   <Term key="ACT_MULT_PLACEMENT">L'article (ou l'un de ses composants) est inséré plusieurs fois dans la même {EDITION}.</Term>
   <Term key="ACT_MYPROFILE">Mon profil</Term>
   <Term key="ACT_NAMED_QUERIES">Requêtes nommées</Term>
-  <Term key="ACT_NAME_IS_INVALID">Le nom contient des caractères incorrects ou est trop long</Term>
+  <Term key="ACT_NAME_IS_INVALID">Le nom contient des caractères incorrects ou est trop long.</Term>
   <Term key="ACT_NEW">Créer</Term>
   <Term key="ACT_NEW_DOSSIER">Nouveau {DOSSIER}</Term>
   <Term key="ACT_NEW_DOSSIER_TEMPLATE">Nouveau modèle de {DOSSIER}</Term>
@@ -956,7 +956,7 @@
   <Term key="ERR_SOLR_SEARCH">Erreur de recherche Solr : %1 (S1061).</Term>
   <Term key="ERR_SOURCE_PUBLICATION_NOT_SPECIFIED">La {PUBLICATION} source n’est pas spécifiée ou la nouvelle {PUBLICATION} n’a pas été renseignée. (S1084)</Term>
   <Term key="ERR_SOURCE_USER_NAME_NOT_SPECIFIED">Le nom de l’utilisateur source n’est pas spécifié ou le nom du nouvel utilisateur n’a pas été renseigné. (S1087)</Term>
-  <Term key="ERR_SUBJECT_EXISTS">%1 %2 existe déjà (S1038)</Term>
+  <Term key="ERR_SUBJECT_EXISTS">%1 %2 existe déjà. (S1038)</Term>
   <Term key="ERR_SUBJECT_NOTEXISTS">%1 %2 n'existe pas (S1056).</Term>
   <Term key="ERR_SUCCEEDED">Réussi(e)</Term>
   <Term key="ERR_SUCCES">Réussite de l'exportation de :</Term>
@@ -988,9 +988,9 @@
   <Term key="ERR_USER_BEGINDATE">Compte utilisateur pas encore valable</Term>
   <Term key="ERR_USER_ENDDATE">Compte utilisateur plus valable (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Le nom de l'utilisateur existe déjà.</Term>
-  <Term key="ERR_USER_NAME_REQUIRED">Nom d'utilisateur requis. Saisissez-en un</Term>
-  <Term key="ERR_WRONGLANG">Choisissez une langue (S1052).</Term>
-  <Term key="ERR_WRONGPASS">Nom d'utilisateur ou mot de passe incorrect (S1053)</Term>
+  <Term key="ERR_USER_NAME_REQUIRED">Nom d'utilisateur requis. Saisissez-en un.</Term>
+  <Term key="ERR_WRONGLANG">Choisissez une langue. (S1052)</Term>
+  <Term key="ERR_WRONGPASS">Nom d'utilisateur ou mot de passe incorrect. (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Échec de la conversion de l’article au format WCML. (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Erreur lors de l’analyse du fichier WWSettings.xml. (S1075)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Veuillez ajouter une image.</Term>
