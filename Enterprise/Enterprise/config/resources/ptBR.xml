@@ -243,7 +243,7 @@
   <Term key="ACT_MULT_PLACEMENT">Artigo (ou um de seus componentes) foi inserido mais de uma vez na mesma {EDITION}.</Term>
   <Term key="ACT_MYPROFILE">Meu perfil</Term>
   <Term key="ACT_NAMED_QUERIES">Consultas nomeadas</Term>
-  <Term key="ACT_NAME_IS_INVALID">O nome possui caracteres inválidos ou é muito longo</Term>
+  <Term key="ACT_NAME_IS_INVALID">O nome possui caracteres inválidos ou é muito longo.</Term>
   <Term key="ACT_NEW">Novo</Term>
   <Term key="ACT_NEW_DOSSIER">Novo {DOSSIER}</Term>
   <Term key="ACT_NEW_DOSSIER_TEMPLATE">Novo Modelo de {DOSSIER}</Term>
@@ -552,7 +552,7 @@
   <Term key="ASK_DELETE_STICKY_REPLY">Você quer excluir esta resposta?</Term>
   <Term key="ASK_ENTER_NAME">Digite o nome:</Term>
   <Term key="ASK_FORCE_LOGOFF">Tem certeza de que deseja fazer o log-out dos usuários selecionados?</Term>
-  <Term key="ASK_LOGON">Faça login com seu nome de usuário e senha</Term>
+  <Term key="ASK_LOGON">Faça login com seu nome de usuário e senha.</Term>
   <Term key="ASK_OPEN_READONLY">O artigo está em uso. Deseja abrí-lo no modo somente leitura?</Term>
   <Term key="ASK_OVERWRITE_NEW">Uma nova versão desse artigo já existe no banco de dados. Se continuar a editar e salvar esse artigo, ele susbtituirá a nova versão.</Term>
   <Term key="ASK_REMOVE_EDITOR_ELEMENT">Tem certeza que deseja remover este componente? Todo o conteúdo deste componente será pertido.</Term>
@@ -956,7 +956,7 @@
   <Term key="ERR_SOLR_SEARCH">Erro de pesquisa Solr: %1 (S1061).</Term>
   <Term key="ERR_SOURCE_PUBLICATION_NOT_SPECIFIED">A {PUBLICATION} de origem não foi específicada ou a nova {PUBLICATION} está em vazia. (S1084)</Term>
   <Term key="ERR_SOURCE_USER_NAME_NOT_SPECIFIED">O nome de usuário não foi específicado, ou está em branco. (S1087)</Term>
-  <Term key="ERR_SUBJECT_EXISTS">%1 %2 já existe (S1038)</Term>
+  <Term key="ERR_SUBJECT_EXISTS">%1 %2 já existe. (S1038)</Term>
   <Term key="ERR_SUBJECT_NOTEXISTS">%1 %2 não existe (S1056).</Term>
   <Term key="ERR_SUCCEEDED">Concluído com êxito</Term>
   <Term key="ERR_SUCCES">Exportado com êxito:</Term>
@@ -989,8 +989,8 @@
   <Term key="ERR_USER_ENDDATE">A conta do usuário não é mais válida (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">O nome do usuário já existe.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">O nome do usuário é obrigatório, preencha-o.</Term>
-  <Term key="ERR_WRONGLANG">Selecione um idioma (S1052).</Term>
-  <Term key="ERR_WRONGPASS">Nome de usuário ou senha errada (S1053)</Term>
+  <Term key="ERR_WRONGLANG">Selecione um idioma. (S1052).</Term>
+  <Term key="ERR_WRONGPASS">Nome de usuário ou senha errada. (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Conversão do artigo para WCML falhou. (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Erro na análise do WWSettings.xml. (S1075)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Favor adicionar uma imagem.</Term>
