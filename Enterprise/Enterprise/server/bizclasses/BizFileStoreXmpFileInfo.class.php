@@ -200,12 +200,18 @@ class BizFileStoreXmpFileInfo
 	 *   "Adobe InDesign CC 2014 (Macintosh)"    => 10.0
 	 *   "Adobe InDesign CC 2015 (Macintosh)"    => 11.0
 	 *   "Adobe InDesign CC 2017 (Macintosh)"    => 12.0
+	 *   "Adobe InDesign CC 13.1 (Macintosh)"    => 13.0
 	 *    etc, see server/serverinfo.php for newer versions.
 	 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	 * 
-	 * Note that the CreatorTool property contains a diplay version, such as "CS6".
+	 * Note that the CreatorTool property contains a display version, such as "CS6".
 	 * Therefor the ADOBE_VERSIONS_ALL option of the server/serverinfo.php file is used 
 	 * to map display versions to internal versions. For example "CS6" is mapped to "8.0".
+	 * From CC 2018 onwards Adobe changed the format of the version in XMP Creator Tool element.
+	 * Instead of "CC 2018" the internal <major>.<minor> version is used (e.g. "CC 13.1").
+	 * In this case the minimal version is returned, e.g. "13.0" instead of "13.1".
+	 * The version in the XMP Creator Tool element has either the <major>.<minor> (e.g. "7.0", "7.5" or "13.1" format or
+	 * the <suite> format (e.g. "6" (of CS6), "2014" of (CC 2014).
 	 *
 	 * @param string $xmpCreatorTool
 	 * @return string|null Internal InDesign document version, or NULL when not recognized.
@@ -216,41 +222,54 @@ class BizFileStoreXmpFileInfo
 		$versionMap = unserialize( ADOBE_VERSIONS_ALL );
 		$internalVersion = null;
 		$displayVersion = null;
-		
-		// Parse the CreatorTool XMP property value.
-		$pattern = '/Adobe InDesign ([A-Z]+)?[ ]*([0-9]*(\.[0-9]+)?)/';
-		$matches = array();
-		preg_match( $pattern, $xmpCreatorTool, $matches );
+
+		$matches = self::parseXmpCreaterToolString( $xmpCreatorTool );
 		if( count( $matches ) > 2 ) {
-			if( $matches[1] == 'CS' || $matches[1] == 'CC' ) {
-				$displayVersion = $matches[1].$matches[2]; // for example: CS6
-				// CS/CC versions are found in the keys !
+			if( isset( $matches[3] ) ) { // <major>.<minor> format
+				if( $matches[1] == 'CC' ) {
+					$internalVersion = $matches[2].'.0';
+				} else {
+					$internalVersion = $matches[2].$matches[3];
+				}
+				$displayVersion = (string)array_search( $internalVersion, $versionMap );
+			} else { // <suite> format
+				$displayVersion = $matches[1].$matches[2];
+				// CS/CC versions are found in the keys!
 				if( array_key_exists( $displayVersion, $versionMap ) ) {
-					$internalVersion = $versionMap[$displayVersion];
+					$internalVersion = $versionMap[ $displayVersion ];
 				}
-			} else {
-				$displayVersion = $matches[2]; // for example: 7.0
-				// Internal version are found in the values !
-				if( in_array( $displayVersion, $versionMap ) ) {
-					$internalVersion = $displayVersion;
-				}
-			} 
+			}
 		}
-		
+
 		// Log the detected version.
 		if( $internalVersion ) {
 			LogHandler::Log( __CLASS__, 'DEBUG', 'Found InDesign document version=['.$internalVersion.'].' );
 		} else {
 			if( $displayVersion ) {
-				LogHandler::Log( __CLASS__, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR',
 					'Found InDesign document version=['.$displayVersion.'] but this version is unknown. '.
 					'This version is derived from the XML field CreatorTool=['.$xmpCreatorTool.']. '.
-					'Matches found on regular expression: '.print_r($matches,true).
+					'Matches found on regular expression: '.print_r( $matches, true ).
 					'Please check the ADOBE_VERSIONS_ALL setting in the server/serverinfo.php file.' );
 			} else {
 				LogHandler::Log( __CLASS__, 'ERROR', 'Could not find InDesign document version.' );
 			}
 		}
 		return $internalVersion;
+	}
+
+	/**
+	 * Splits the XMP Creator Tool string in order to retrieve the version info.
+	 *
+	 * @param string $xmpCreatorTool
+	 * @return array
+	 */
+	private static function parseXmpCreaterToolString( string $xmpCreatorTool ): array
+	{
+		$pattern = '/Adobe InDesign ([A-Z]+)?[ ]*([0-9]*)(\.[0-9]+)?/';
+		$matches = array();
+		preg_match( $pattern, $xmpCreatorTool, $matches );
+
+		return $matches;
 	}
 }

@@ -243,7 +243,7 @@
   <Term key="ACT_MULT_PLACEMENT">Artikkeli (tai jokin sen komponenteista) on asetettu kerran tai usemmin samaan kohteeseen {EDITION}.</Term>
   <Term key="ACT_MYPROFILE">Profiilini</Term>
   <Term key="ACT_NAMED_QUERIES">Nimetyt kyselyt</Term>
-  <Term key="ACT_NAME_IS_INVALID">Nimessä on virheellisiä merkkejä tai se on liian pitkä</Term>
+  <Term key="ACT_NAME_IS_INVALID">Nimessä on virheellisiä merkkejä tai se on liian pitkä.</Term>
   <Term key="ACT_NEW">Uusi</Term>
   <Term key="ACT_NEW_DOSSIER">Uusi {DOSSIER}</Term>
   <Term key="ACT_NEW_DOSSIER_TEMPLATE">Uusi {DOSSIER} malli</Term>
@@ -956,7 +956,7 @@
   <Term key="ERR_SOLR_SEARCH">Solr-hakuvirhe: %1 (S1061).</Term>
   <Term key="ERR_SOURCE_PUBLICATION_NOT_SPECIFIED">Joko lähteen kohtaa {PUBLICATION} ei ole määritelty tai uusi {PUBLICATION} on jätetty tyhjäksi. (S1084)</Term>
   <Term key="ERR_SOURCE_USER_NAME_NOT_SPECIFIED">Joko lähteen käyttäjänimeä ei ole määritelty tai uusi käyttäjänimi on jätetty tyhjäksi. (S1087)</Term>
-  <Term key="ERR_SUBJECT_EXISTS">Kohde %1 %2 on jo olemassa (S1038)</Term>
+  <Term key="ERR_SUBJECT_EXISTS">Kohde %1 %2 on jo olemassa. (S1038)</Term>
   <Term key="ERR_SUBJECT_NOTEXISTS">Kohdetta %1 %2 ei ole olemassa (S1056).</Term>
   <Term key="ERR_SUCCEEDED">Onnistui</Term>
   <Term key="ERR_SUCCES">Viety onnistuneesti:</Term>
@@ -988,9 +988,9 @@
   <Term key="ERR_USER_BEGINDATE">Käyttäjätiliä ei ole vielä validoitu</Term>
   <Term key="ERR_USER_ENDDATE">Käyttäjätili ei ole enää voimassa (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Käyttäjänimi on jo olemassa.</Term>
-  <Term key="ERR_USER_NAME_REQUIRED">Kirjoita vaadittu käyttäjänimi</Term>
-  <Term key="ERR_WRONGLANG">Valitse kieli (S1052)</Term>
-  <Term key="ERR_WRONGPASS">Väärä käyttäjänimi tai salasana (S1053)</Term>
+  <Term key="ERR_USER_NAME_REQUIRED">Kirjoita vaadittu käyttäjänimi.</Term>
+  <Term key="ERR_WRONGLANG">Valitse kieli. (S1052)</Term>
+  <Term key="ERR_WRONGPASS">Väärä käyttäjänimi tai salasana. (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Artikkelin muunto WCML-muotoon epäonnistui. (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Virhe jäsentäessä tiedostoa WWSettings.xml (S1075)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Lisää kuva.</Term>

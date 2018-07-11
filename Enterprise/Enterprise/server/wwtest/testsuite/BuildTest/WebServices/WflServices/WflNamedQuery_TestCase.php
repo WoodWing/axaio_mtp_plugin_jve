@@ -3,15 +3,13 @@
  * @package Enterprise
  * @subpackage TestSuite
  * @since v7.4.0
+ * @since 10.4.2 Renamed the class from WflNamedQuery_DefaultArticleTemplate_TestCase to WflNamedQuery_TestCase.
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
  
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
-/**
- * @property mixed art
- */
-class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_DefaultArticleTemplate_TestCase extends TestCase
+class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_TestCase extends TestCase
 {
 	private $vars = null;
 	private $utils = null;
@@ -33,7 +31,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflNamedQuery_DefaultArticl
 
 	public function getDisplayName() { return 'NamedQuery - [DefaultArticleTemplate, Inbox]'; }
 	public function getTestGoals()   { return 'Checks if NamedQuery works well.'; }
-	public function getTestMethods() { return 'Perform NamedQuery for DefaultArticleTemplate and verify its reponse.'; }
+	public function getTestMethods() { return 'Perform NamedQuery for DefaultArticleTemplate, Inbox and verify its reponses.'; }
 	public function getPrio()        { return 106; }
 	
 	final public function runTest()

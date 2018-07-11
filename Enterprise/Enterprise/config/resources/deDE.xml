@@ -243,7 +243,7 @@
   <Term key="ACT_MULT_PLACEMENT">Artikel (oder einer seiner Komponenten) ist mehr als einmal in der {EDITION} vorhanden.</Term>
   <Term key="ACT_MYPROFILE">Eigenes Profil</Term>
   <Term key="ACT_NAMED_QUERIES">Systemabfragen</Term>
-  <Term key="ACT_NAME_IS_INVALID">Name enthält ungültige Zeichen oder ist zu lang</Term>
+  <Term key="ACT_NAME_IS_INVALID">Name enthält ungültige Zeichen oder ist zu lang.</Term>
   <Term key="ACT_NEW">Neu</Term>
   <Term key="ACT_NEW_DOSSIER">Neues {DOSSIER}</Term>
   <Term key="ACT_NEW_DOSSIER_TEMPLATE">Neue {DOSSIER}-Vorlage</Term>
@@ -956,7 +956,7 @@
   <Term key="ERR_SOLR_SEARCH">Solr-Suchfehler: %1 (S1061).</Term>
   <Term key="ERR_SOURCE_PUBLICATION_NOT_SPECIFIED">Quell-Name für {PUBLICATION} nicht angegeben oder neue {PUBLICATION} ist leer. (S1084)</Term>
   <Term key="ERR_SOURCE_USER_NAME_NOT_SPECIFIED">Quell-Benutzername nicht angegeben oder neuer Benutzername ist leer. (S1087)</Term>
-  <Term key="ERR_SUBJECT_EXISTS">%1 %2 bereits vorhanden (S1038)</Term>
+  <Term key="ERR_SUBJECT_EXISTS">%1 %2 bereits vorhanden. (S1038)</Term>
   <Term key="ERR_SUBJECT_NOTEXISTS">%1 %2 ist nicht vorhanden (S1056).</Term>
   <Term key="ERR_SUCCEEDED">Erfolgreich abgeschlossen</Term>
   <Term key="ERR_SUCCES">Erfolgreich exportiert:</Term>
@@ -989,8 +989,8 @@
   <Term key="ERR_USER_ENDDATE">Benuzterkonto ist nicht mehr gültig (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Benutzername besteht bereits.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Benutzername erforderlich, bitte ausfüllen.</Term>
-  <Term key="ERR_WRONGLANG">Sprache auswählen (S1052).</Term>
-  <Term key="ERR_WRONGPASS">Benutzername oder Kennwort falsch (S1053)</Term>
+  <Term key="ERR_WRONGLANG">Sprache auswählen. (S1052)</Term>
+  <Term key="ERR_WRONGPASS">Benutzername oder Kennwort falsch. (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Fehler bei der Artikelkonvertierung in WCML (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Fehler beim Parsen der Datei 'WWSettings.xml'. (S1075)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Fügen Sie ein Bild hinzu.</Term>
@@ -1144,7 +1144,7 @@
   <Term key="INFO_CLEANUP_PROPERTY">Sie können die Eigenschaften auf der %1-Seite bereinigen.</Term>
   <Term key="INFO_DOSSIER_PUBLISHED">{DOSSIER} %1 erfolgreich in %2 veröffentlicht</Term>
   <Term key="INFO_DOSSIER_TEMPLATES">{DOSSIER}-Vorlage</Term>
-  <Term key="INFO_DOSSIER_UNPUBLISHED">Veröffentlichung des Dossiers erfolgreich aufgehoben</Term>
+  <Term key="INFO_DOSSIER_UNPUBLISHED">Veröffentlichung des {DOSSIER} ist erfolgreich aufgehoben.</Term>
   <Term key="INFO_DOSSIER_UPDATED">{DOSSIER} %1 erfolgreich aktualisiert</Term>
   <Term key="INFO_END_TIME">Endzeit</Term>
   <Term key="INFO_MESS_LINK_UNUSED_PROP">Die Datenbank enthält benutzerdefinierte Eigenschaften, die nicht mehr vom %1-Zusatzmodul verwendet werden.</Term>

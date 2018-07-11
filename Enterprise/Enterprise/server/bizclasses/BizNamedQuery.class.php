@@ -76,7 +76,7 @@ class BizNamedQuery extends BizQueryBase
 			$searchSucces = false; //If search by (Solr) search engine is succesful skip database search.
 			$mode = self::getQueryMode($ticket, false);
 			require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
-			$hierarchicalSearch = self::determineHierarchicalSearch( $query, $hierarchical );
+			$hierarchicalSearch = self::determineHierarchicalSearch( strval( $query ), $hierarchical );
 			if (BizSearch::handleSearch( $query, $args, $firstEntry, $maxEntries, $mode, $hierarchicalSearch, $queryOrder, $minimalProps, null ) ) {
 				try {
 					$ret = BizSearch::search($query, $args, $firstEntry, $maxEntries, $mode, $hierarchicalSearch, $queryOrder, $minimalProps, null );
@@ -124,7 +124,7 @@ class BizNamedQuery extends BizQueryBase
 	 * @param bool|null $requestedHierarchical
 	 * @return bool
 	 */
-	private static function determineHierarchicalSearch( $query, $requestedHierarchical )
+	private static function determineHierarchicalSearch( string $query, ?bool $requestedHierarchical ):bool
 	{
 		$inbox = self::getInboxQueryName();
 		switch( $query ) {
