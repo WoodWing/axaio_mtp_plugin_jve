@@ -124,7 +124,7 @@ class BizNamedQuery extends BizQueryBase
 	 * @param bool|null $requestedHierarchical
 	 * @return bool
 	 */
-	private static function determineHierarchicalSearch( string $query, ?bool $requestedHierarchical ):bool
+	private static function determineHierarchicalSearch( string $query, ?bool $requestedHierarchical ): ?bool
 	{
 		$inbox = self::getInboxQueryName();
 		switch( $query ) {
