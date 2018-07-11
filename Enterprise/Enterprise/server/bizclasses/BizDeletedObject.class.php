@@ -160,7 +160,7 @@ class BizDeletedObject
 
 							// Check that the object is not checked out / locked, in which case we cannot remove the Object.
 							require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-							$objectLock = new BizObjectLock( $publishFormId );
+							$objectLock = new BizObjectLock( intval( $publishFormId ));
 							if ( $objectLock->isLocked() ) {
 								throw new BizException( 'ERR_LOCKED', 'Client', $id.':'.$publishFormId );
 							}
@@ -182,7 +182,7 @@ class BizDeletedObject
 
 								// Check that the object is not checked out / locked, in which case we cannot remove the Object.
 								require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-								$objectLock = new BizObjectLock( $relation->Child );
+								$objectLock = new BizObjectLock( intval( $relation->Child ));
 								if ( $objectLock->isLocked() ) {
 									throw new BizException( 'ERR_LOCKED', 'Client', $id.':'.$relation->Child );
 								}
@@ -437,7 +437,7 @@ class BizDeletedObject
 		LogHandler::Log( 'DeletedObjects', 'DEBUG', "objectOrItsParentLocked: id=$id, level=$recursionlevel" );
 		$dbDriver = DBDriverFactory::gen();
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		if( $objectLock->isLocked() ){
 			LogHandler::Log( 'DeletedObjects', 'DEBUG', "objectOrItsParentLocked: object $id is locked. (recursion level = $recursionlevel)" );
 			return true;
