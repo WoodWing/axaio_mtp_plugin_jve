@@ -26,9 +26,9 @@ class DBMetaData extends DBBase
 	{
 		if( !$pubIds ) $pubIds = 0;
 		$dbDriver = DBDriverFactory::gen();
-		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php'; 
+		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		$sth = DBProperty::getPropertiesSth( $pubIds );
-		if (!$sth) {
+		if( !$sth ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 		}
 
@@ -38,56 +38,58 @@ class DBMetaData extends DBBase
 		$isfirst = true;
 		$lastType = null;
 		$lastPubId = null;
-		while( ($row = $dbDriver->fetch($sth)) ) {
-			if ($isfirst || $lastPubId !== intval($row['publication']) || $lastType !== trim($row['objtype'])) {
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			if( $isfirst || $lastPubId !== intval( $row['publication'] ) || $lastType !== trim( $row['objtype'] ) ) {
 				if( $tmp != null ) {
-					if( is_array($pubIds) ) {
-						$ret[$lastPubId][] = $tmp;
+					if( is_array( $pubIds ) ) {
+						$ret[ $lastPubId ][] = $tmp;
 					} else {
 						$ret[] = $tmp;
 					}
 				}
-				$tmp = new ObjectTypeProperty(trim($row['objtype']));
+				$tmp = new ObjectTypeProperty( trim( $row['objtype'] ) );
 				$tmp->Properties = array();
-				$lastType = trim($row['objtype']);
-				$lastPubId = intval($row['publication']);
+				$lastType = trim( $row['objtype'] );
+				$lastPubId = intval( $row['publication'] );
 				$isfirst = false;
 			}
-			$list = explode(',', $row['valuelist']);
-			if( empty($list) ) {
+			$list = explode( ',', $row['valuelist'] );
+			if( empty( $list ) ) {
 				$list = null;
 			}
-			$category = trim($row['category']);
-			if( empty($category) ) {
+			$category = trim( $row['category'] );
+			if( empty( $category ) ) {
 				$category = null;
 			}
-			$defaultValue = trim($row['defaultvalue']);
-			if( empty($defaultValue) ) {
+			$defaultValue = trim( $row['defaultvalue'] );
+			if( empty( $defaultValue ) ) {
 				$defaultValue = null;
 			}
-			$minValue = trim($row['minvalue']);
-			if( empty($minValue) ) {
+			$minValue = trim( $row['minvalue'] );
+			if( empty( $minValue ) ) {
 				$minValue = null;
 			}
-			$maxValue = trim($row['maxvalue']);
-			if( empty($maxValue) ) {
+			$maxValue = trim( $row['maxvalue'] );
+			if( empty( $maxValue ) ) {
 				$maxValue = null;
 			}
 			$property = new PropertyInfo();
-			$property->Name           = $row['name'];
-			$property->DisplayName    = trim($row['dispname']);
-			$property->Category       = $category;
-			$property->Type           = trim($row['type']);
-			$property->DefaultValue   = $defaultValue;
-			$property->ValueList      = $list;
-			$property->MinValue       = $minValue;
-			$property->MaxValue       = $maxValue;
-			$property->PropertyValues = $row['maxlen'];
+			$property->Name = $row['name'];
+			$property->DisplayName = trim( $row['dispname'] );
+			$property->Category = $category;
+			$property->Type = trim( $row['type'] );
+			$property->DefaultValue = $defaultValue;
+			$property->ValueList = $list;
+			$property->MinValue = $minValue;
+			$property->MaxValue = $maxValue;
+			$property->MaxLength = intval( $row['maxlen'] );
+			$propertyValueArray = unserialize( $row['propertyvalues'] );
+			$property->PropertyValues = ( $propertyValueArray ) ? $propertyValueArray : array();
 			$tmp->Properties[] = $property;
 		}
 		if( $tmp != null ) {
-			if( is_array($pubIds) ) {
-				$ret[$lastPubId][] = $tmp;
+			if( is_array( $pubIds ) ) {
+				$ret[ $lastPubId ][] = $tmp;
 			} else {
 				$ret[] = $tmp;
 			}
