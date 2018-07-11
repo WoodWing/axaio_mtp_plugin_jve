@@ -119,10 +119,15 @@ class BizNamedQuery extends BizQueryBase
 	/**
 	 * Determine the hierarchical flag based on the $query type.
 	 *
+	 * @TODO
+	 * Ideally, this function should only return boolean. But in order not to break any existing
+	 * callers that deal with 'PublishFormTemplates', function currently returns bool or null. When
+	 * PublishFormTemplates support is removed, the function return value should be made to only bool.
+	 *
 	 * @since 10.4.2
 	 * @param string $query
 	 * @param bool|null $requestedHierarchical
-	 * @return bool
+	 * @return bool|null
 	 */
 	private static function determineHierarchicalSearch( string $query, ?bool $requestedHierarchical ): ?bool
 	{
