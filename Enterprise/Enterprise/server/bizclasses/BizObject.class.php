@@ -685,7 +685,7 @@ class BizObject
 		$state = $newRow['state'];
 
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		if( !$objectLock->isLocked() ) {
 			$sErrorMessage = BizResources::localize( "ERR_NOTLOCKED" ).' '.BizResources::localize( "SAVE_LOCAL" );
 			throw new BizException( null, 'Client', $id, $sErrorMessage );
@@ -855,7 +855,7 @@ class BizObject
 			foreach ($object->Relations as $relation) {
 				// If someone else has object lock, send notification
 				require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-				$objectLock = new BizObjectLock( $relation->Child );
+				$objectLock = new BizObjectLock( intval( $relation->Child ));
 				if ( $objectLock->isLockedByUser( $user ) ) {
 					new smartevent_updateobjectrelation(BizSession::getTicket(), $relation->Child, $relation->Type, $id, $newRow['name']);
 				}
@@ -1332,7 +1332,7 @@ class BizObject
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		if ( $objectLock->isLocked() ) { // Check if object has been locked in the first place (BZ#11254)
 			if( DBUser::isAdminUser( $user ) || // System Admin user.
 				DBUser::isPubAdmin( $user, $curr_row['publication'] ) || // Brand Admin user.
@@ -1441,7 +1441,7 @@ class BizObject
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		if( $objectLock->isLocked() && !$objectLock->isLockedBySameUserAndApplication( $user ) ) {
 			// If the object is not locked, just continue. But if it is locked then it must be locked by the current
 			// user/application combination to continue. See EN-90045.
@@ -1740,7 +1740,7 @@ class BizObject
 		require_once BASEDIR.'/server/bizclasses/BizEmail.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 
 		// Validate the requested Objects, we only support Objects that can be found in the database. Alien Objects will
 		// not be present in the database and will therefore be reported. We cannot handle Alien Objects for multi-
@@ -1762,7 +1762,7 @@ class BizObject
 			In case the object cannot be locked we report a standard error which will be placed in the Error reports.
 		*/
 		$user = BizSession::getShortUserName();
-		$lockedObjectIds = DBObjectLock::lockObjects( $invokedObjectIds, $user ); // TODO Add to BizObjectLock
+		$lockedObjectIds = BizObjectLock::lockObjects( $invokedObjectIds, $user );
 		$nonLockedObjectIds = array_diff( $invokedObjectIds, $lockedObjectIds );
 		if( $nonLockedObjectIds ) {
 			foreach( $nonLockedObjectIds as $nonLockedObjectId ) {
@@ -2214,11 +2214,11 @@ class BizObject
 
 			// Release lock
 			if( $lockedObjectIds ) { // Only release the objects where the lock is obtained by this function.
-				DBObjectLock::unlockObjects( $lockedObjectIds, $user ); // TODO Add to BizObjectLock
+				BizObjectLock::unlockObjectsByUser( $lockedObjectIds, $user );
 			}
 		} catch ( BizException $e ) {
 			if( $lockedObjectIds ) { // Only release the objects where the lock is obtained by this function.
-				DBObjectLock::unlockObjects( $lockedObjectIds, $user ); // TODO Add to BizObjectLock
+				BizObjectLock::unlockObjectsByUser( $lockedObjectIds, $user );
 			}
 			throw $e; // This should only happen when there's fatal error, thus bail out all the way after unlocking the objects.
 		}
@@ -3583,8 +3583,8 @@ class BizObject
 		$haveObjectIds = array_map( function( $hv ) { return $hv->ID; }, $haveVersions );
 		$checkedObjects = self::checkAccessRightOnObjectLock( $user, $haveObjectIds );
 		// Lock the objects, so that the version can no longer change by others in the meantime.
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-		$lockedObjectIds = DBObjectLock::lockObjects( $haveObjectIds, $user ); // TODO Add to BizObjectLock
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$lockedObjectIds = BizObjectLock::lockObjects( $haveObjectIds, $user );
 
 		// Grab the latest object versions from DB (for those object that could be locked).
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
@@ -3611,7 +3611,7 @@ class BizObject
 					}
 				}
 				if( $currentVersions[$haveVersion->ID] != $haveVersion->Version ) {
-					DBObjectLock::unlockObjects( array($haveVersion->ID), $user ); // TODO Add to BizObjectLock
+					BizObjectLock::unlockObjectsByUser( array($haveVersion->ID), $user );
 					unset( $lockedObjectIds[$haveVersion->ID] );
 					throw new BizException( 'ERR_OBJ_VERSION_MISMATCH', 'Client', $haveVersion->ID );
 				}
@@ -3651,7 +3651,7 @@ class BizObject
 		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 		DBObjectFlag::lockObjectFlags( $id );
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		$objectLock->lockObject( $user );
 
 		// Notify event plugins
@@ -4324,7 +4324,7 @@ class BizObject
 	public static function restoreLock( $user, $objId, $checkAccess = true)
 	{
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $objId );
+		$objectLock = new BizObjectLock( intval( $objId ));
 		if( !$objectLock->isLocked() ) {
 			self::getObject( $objId, $user, true, 'none', null, null, $checkAccess ); // lock, no content, BZ#17253 - checkAccess false when article created from template
 			// Note: We use getObject to trigger lock events, etc

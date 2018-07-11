@@ -4,38 +4,30 @@
  * @subpackage   BizClasses
  * @since      v10.3.1
  * @copyright   WoodWing Software bv. All Rights Reserved.
+ *
+ * The responsibility of this class is to provide the APIs to request the Object lock
+ * for a particular object ( ObjectId ).
+ * This class should hide the WW_DataClasses_ObjectLock dataclass from other business classes.
  */
-
-require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 
 class BizObjectLock
 {
+	/** @var int */
+	private $objectId;
 
-	/** @var int Id of the object to be locked/released */
-	private $objectId = null;
+	/** @var WW_DataClasses_ObjectLock|null  */
+	private $objectLock;
 
-	/** @var string Short name of the user on whose behalf the lock/release is done. */
-	private $shortUserName = '';
-
-	/** @var string IP-address of the client. */
-	private $ipAddress = '';
-
-	/** @var boolean lock for offline usage. */
-	private $lockOffLine = false;
-
-	/** @var string name of the client application. */
-	private $appName = '';
-
-	/** @var string version of the client application */
-	private $appVersion = false;
-
-	/** @var bool isLocked Is the object in the 'smart_objectlocks' table. */
-	private $isLocked = false;
-
-	public function __construct( $objectId )
+	/**
+	 * Constructor.
+	 *
+	 * @param int $objectId
+	 */
+	public function __construct( int $objectId )
 	{
-		$this->objectId = intval( $objectId );
-		$this->readLockAndUpdateProperties();
+		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
+		$this->objectId = $objectId;
+		$this->objectLock = DBObjectLock::readObjectLock( $objectId );
 	}
 
 	/**
@@ -51,29 +43,33 @@ class BizObjectLock
 		if( !$shortUserName ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Missing parameter $shortUserName for: '.__METHOD__.'().' );
 		}
-		$this->shortUserName = $shortUserName;
-		require_once BASEDIR.'/server/utils/UrlUtils.php';
-		$this->ipAddress = WW_Utils_UrlUtils::getClientIP();
-		$this->appName = BizSession::getClientName();
-		$this->appVersion = BizSession::getClientVersion();
-		$objectLock = $this->createObjectLockObject();
+		require_once BASEDIR . '/server/utils/UrlUtils.php';
+		require_once BASEDIR . '/server/dbclasses/DBObjectLock.class.php';
+		require_once BASEDIR . '/server/dataclasses/ObjectLock.class.php';
+		$objectLock = new WW_DataClasses_ObjectLock();
+		$objectLock->objectId = $this->objectId;
+		$objectLock->shortUserName = $shortUserName;
+		$objectLock->ipAddress = WW_Utils_UrlUtils::getClientIP();
+		$objectLock->lockOffLine = false;
+		$objectLock->appName = BizSession::getClientName();
+		$objectLock->appVersion = BizSession::getClientVersion();
 		DBObjectLock::insertObjectLock( $objectLock );
-		$this->isLocked = true;
+		$this->objectLock = $objectLock;
 	}
 
 	/**
 	 * Releases a locked object. No check is done if the object is locked on beforehand.
 	 *
-	 * @return bool|null
+	 * @return bool
 	 */
 	public function releaseLock()
 	{
-		$result = DBObjectLock::unlockObject( $this->objectId, null );
-		if( $result ) {
-			$this->isLocked = false;
+		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
+		$unlocked = (bool)DBObjectLock::unlockObject( $this->objectId );
+		if( $unlocked ) {
+			$this->objectLock = null;
 		}
-
-		return $result;
+		return $unlocked;
 	}
 
 	/**
@@ -83,7 +79,7 @@ class BizObjectLock
 	 */
 	public function isLocked()
 	{
-		return $this->isLocked;
+		return !is_null( $this->objectLock );
 	}
 
 	/**
@@ -105,7 +101,7 @@ class BizObjectLock
 	 */
 	public function isLockedByUser( string $shortUserName )
 	{
-		return ( $this->isLocked && ( strtolower( $this->shortUserName ) == strtolower( $shortUserName ) ) );
+		return ( $this->isLocked() && ( strtolower( $this->objectLock->shortUserName ) == strtolower( $shortUserName ) ) );
 	}
 
 	/**
@@ -121,11 +117,11 @@ class BizObjectLock
 	private function isSameApplication()
 	{
 		$same = false;
-		if( BizSession::isSmartMover( $this->appName ) && BizSession::isSmartMover( BizSession::getClientName() ) ) {
+		if( BizSession::isSmartMover( $this->objectLock->appName ) && BizSession::isSmartMover( BizSession::getClientName() ) ) {
 			$same = true;
 		} else {
-			$same = ( $this->appName == BizSession::getClientName() ) &&
-				( $this->appVersion == BizSession::getClientVersion() );
+			$same = ( $this->objectLock->appName == BizSession::getClientName() ) &&
+				( $this->objectLock->appVersion == BizSession::getClientVersion() );
 		}
 
 		return $same;
@@ -138,7 +134,7 @@ class BizObjectLock
 	 */
 	public function getLockedByShortUserName()
 	{
-		return $this->shortUserName;
+		return $this->objectLock->shortUserName;
 	}
 
 	/**
@@ -149,42 +145,75 @@ class BizObjectLock
 	 */
 	public function changeOnLineStatus( bool $onLineStatus )
 	{
-		return DBObjectLock::updateOnlineStatus( $this->objectId, $onLineStatus );
-	}
-
-	/**
-	 * Populates the stored properties to the member properties of the current object.
-	 */
-	private function readLockAndUpdateProperties()
-	{
-		$storedObjectLock = DBObjectLock::readObjectLock( $this->objectId );
-		if( $storedObjectLock ) {
-			$this->shortUserName = $storedObjectLock->shortUserName;
-			$this->ipAddress = $storedObjectLock->ipAddress;
-			$this->appVersion = $storedObjectLock->appVersion;
-			$this->appName = $storedObjectLock->appName;
-			$this->lockOffLine = $storedObjectLock->lockOffLine;
-			$this->isLocked = true;
-		} else {
-			$this->isLocked = false;
+		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
+		$updated = DBObjectLock::updateOnlineStatus( $this->objectId, $onLineStatus );
+		if( $updated ) {
+			$this->objectLock->lockOffLine = $onLineStatus;
 		}
+		return $updated;
 	}
 
 	/**
-	 * Based on the private properties a object is created that can be stored in the database.
+	 * Obtain lock for all the passed in object ids.
 	 *
-	 * @return stdClass
+	 * As function calls database in one call and does a multi-insertion, when any of the object is already locked, the
+	 * whole operation will fail. And therefore, function will attempt three times to get the lock for all the objects.
+	 * In the end, function will return a list of object ids which were locked only by this function. Objects that were
+	 * already locked before-hand will not be returned in the list.
+	 *
+	 * @since 10.4.2
+	 * @param array $objectIds
+	 * @param string $user
+	 * @return array List of object ids where the lock has been obtained by this function.
 	 */
-	private function createObjectLockObject()
+	public static function lockObjects( array $objectIds, string $user ): array
 	{
-		$objectLock = new stdClass();
-		$objectLock->objectId = $this->objectId;
-		$objectLock->shortUserName = $this->shortUserName;
-		$objectLock->ipAddress = $this->ipAddress;
-		$objectLock->appVersion = $this->appVersion;
-		$objectLock->appName = $this->appName;
-		$objectLock->lockOffLine = $this->lockOffLine;
+		require_once BASEDIR . '/server/utils/UrlUtils.php';
+		require_once BASEDIR . '/server/dbclasses/DBObjectLock.class.php';
+		require_once BASEDIR . '/server/dataclasses/ObjectLock.class.php';
 
-		return $objectLock;
+		$lockedObjIds = array();
+		if( $objectIds ) {
+			$ip = WW_Utils_UrlUtils::getClientIP();
+			$appName = BizSession::getClientName();
+			$appVersion = BizSession::getClientVersion();
+			for( $attempt=1; $attempt<=3; $attempt++ ) {
+				$objectIdsToLock = $objectIds;
+				if( $attempt > 1 ) { // At 1st attempt, try to lock all the passed in object ids, otherwise lock only those not yet locked.
+					$objectIdsToLock = DBObjectLock::getNotYetLockedObjectIds( $objectIds );
+				}
+				if( $objectIdsToLock ) {
+					$objectsToLock = array();
+					foreach( $objectIdsToLock as $objectIdToLock ) {
+						$objectLock = new WW_DataClasses_ObjectLock();
+						$objectLock->objectId = $objectIdToLock;
+						$objectLock->shortUserName = $user;
+						$objectLock->ipAddress = $ip;
+						$objectLock->appName = $appName;
+						$objectLock->appVersion = $appVersion;
+						$objectsToLock[] = $objectLock;
+					}
+					$lockedObjIds = DBObjectLock::lockObjects( $objectsToLock );
+					if( $lockedObjIds ) {
+						break; // Succeeded locking all.
+					}
+				}
+			}
+		}
+		return $lockedObjIds;
+	}
+
+	/**
+	 * Release a list of objects' lock given the object ids.
+	 *
+	 * @since 10.4.2
+	 * @param array $objectIds
+	 * @param string $user
+	 * @throws BizException
+	 */
+	public static function unlockObjectsByUser( array $objectIds, string $user ): void
+	{
+		require_once BASEDIR . '/server/dbclasses/DBObjectLock.class.php';
+		DBObjectLock::unlockObjectsByUser( $objectIds, $user );
 	}
 }

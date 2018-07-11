@@ -751,7 +751,7 @@ class BizVersion
 			$restoreVersion = $versions[0];
 
 			require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-			$objectLock = new BizObjectLock( $id );
+			$objectLock = new BizObjectLock( intval( $id ));
 			$objectLock->lockObject( $user );
 
 			// update object based on rc and restoreVersion
@@ -819,7 +819,7 @@ class BizVersion
 
 			// Release lock.
 			require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-			$objectLock = new BizObjectLock( $id );
+			$objectLock = new BizObjectLock( intval( $id ));
 			$objectLock->releaseLock();
 
 			$restored = true;
