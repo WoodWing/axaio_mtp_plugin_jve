@@ -27,7 +27,7 @@ class AutomatedPrintWorkflow_SysGetSubApplications extends SysGetSubApplications
 			require_once BASEDIR . '/server/interfaces/services/sys/DataClasses.php';
 			$subApp = new SysSubApplication();
 			$subApp->ID = 'SmartConnectionScripts_AutomatedPrintWorkflow';
-			$subApp->Version = '1.10';
+			$subApp->Version = '1.11';
 			$subApp->PackageUrl = SERVERURL_ROOT.INETROOT.'/server/plugins/AutomatedPrintWorkflow/idscripts.zip'; // download URL
 			$subApp->DisplayName = 'Automated Print Workflow';
 			$subApp->ClientAppName = $req->ClientAppName;
