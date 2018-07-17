@@ -262,8 +262,8 @@ class BizFileStoreXmpFileInfo
 	 *
 	 * Examples of how Creator Tool versions are split:
 	 * $xmpCreatorTool => 7.0: matches[0] => '7.0', matches[1] => '', $matches[2] => '7', $matches[3] => '.0'
-	 * $xmpCreatorTool => CS6: matches[0] => 'CS6', matches[1] => 'CS', $matches[2] => '6', $matches[3] => ''
-	 * $xmpCreatorTool => CC 2015: matches[0] => 'CC 2015', matches[1] => 'CC', $matches[2] => '2015', $matches[3] => ''
+	 * $xmpCreatorTool => CS6: matches[0] => 'CS6', matches[1] => 'CS', $matches[2] => '6'
+	 * $xmpCreatorTool => CC 2015: matches[0] => 'CC 2015', matches[1] => 'CC', $matches[2] => '2015'
 	 * $xmpCreatorTool => CC 13.1: matches[0] => 'CC 13.1', matches[1] => 'CC', $matches[2] => '13', $matches[3] => '.1'
 	 *
 	 * @param string $xmpCreatorTool
