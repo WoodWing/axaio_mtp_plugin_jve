@@ -224,15 +224,15 @@ class BizFileStoreXmpFileInfo
 		$displayVersion = null;
 
 		$matches = self::parseXmpCreaterToolString( $xmpCreatorTool );
-		if( count( $matches ) > 2 ) {
-			if( isset( $matches[3] ) ) { // <major>.<minor> format
+		if( count( $matches ) > 2 ) { // See self::parseXmpCreaterToolString() for more info.
+			if( isset( $matches[3] ) ) {
 				if( $matches[1] == 'CC' ) {
 					$internalVersion = $matches[2].'.0';
 				} else {
 					$internalVersion = $matches[2].$matches[3];
 				}
 				$displayVersion = (string)array_search( $internalVersion, $versionMap );
-			} else { // <suite> format
+			} else {
 				$displayVersion = $matches[1].$matches[2];
 				// CS/CC versions are found in the keys!
 				if( array_key_exists( $displayVersion, $versionMap ) ) {
@@ -241,7 +241,6 @@ class BizFileStoreXmpFileInfo
 			}
 		}
 
-		// Log the detected version.
 		if( $internalVersion ) {
 			LogHandler::Log( __CLASS__, 'DEBUG', 'Found InDesign document version=['.$internalVersion.'].' );
 		} else {
@@ -252,7 +251,7 @@ class BizFileStoreXmpFileInfo
 					'Matches found on regular expression: '.print_r( $matches, true ).
 					'Please check the ADOBE_VERSIONS_ALL setting in the server/serverinfo.php file.' );
 			} else {
-				LogHandler::Log( __CLASS__, 'ERROR', 'Could not find InDesign document version.' );
+				LogHandler::Log( __CLASS__, 'ERROR', 'Could not resolve the InDesign document version (CreatorTool=['.$xmpCreatorTool.']).' );
 			}
 		}
 		return $internalVersion;
@@ -260,6 +259,12 @@ class BizFileStoreXmpFileInfo
 
 	/**
 	 * Splits the XMP Creator Tool string in order to retrieve the version info.
+	 *
+	 * Examples of how Creator Tool versions are split:
+	 * $xmpCreatorTool => 7.0: matches[0] => '7.0', matches[1] => '', $matches[2] => '7', $matches[3] => '.0'
+	 * $xmpCreatorTool => CS6: matches[0] => 'CS6', matches[1] => 'CS', $matches[2] => '6', $matches[3] => ''
+	 * $xmpCreatorTool => CC 2015: matches[0] => 'CC 2015', matches[1] => 'CC', $matches[2] => '2015', $matches[3] => ''
+	 * $xmpCreatorTool => CC 13.1: matches[0] => 'CC 13.1', matches[1] => 'CC', $matches[2] => '13', $matches[3] => '.1'
 	 *
 	 * @param string $xmpCreatorTool
 	 * @return array
