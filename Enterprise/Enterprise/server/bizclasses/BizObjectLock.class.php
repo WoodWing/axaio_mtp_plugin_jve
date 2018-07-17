@@ -117,13 +117,14 @@ class BizObjectLock
 	private function isSameApplication()
 	{
 		$same = false;
-		if( BizSession::isSmartMover( $this->objectLock->appName ) && BizSession::isSmartMover( BizSession::getClientName() ) ) {
-			$same = true;
-		} else {
-			$same = ( $this->objectLock->appName == BizSession::getClientName() ) &&
-				( $this->objectLock->appVersion == BizSession::getClientVersion() );
+		if( $this->isLocked() ) {
+			if( BizSession::isSmartMover( $this->objectLock->appName ) && BizSession::isSmartMover( BizSession::getClientName() ) ) {
+				$same = true;
+			} else {
+				$same = ( $this->objectLock->appName == BizSession::getClientName() ) &&
+					( $this->objectLock->appVersion == BizSession::getClientVersion() );
+			}
 		}
-
 		return $same;
 	}
 
@@ -134,7 +135,7 @@ class BizObjectLock
 	 */
 	public function getLockedByShortUserName()
 	{
-		return $this->objectLock->shortUserName;
+		return $this->isLocked() ? $this->objectLock->shortUserName : null;
 	}
 
 	/**
@@ -209,7 +210,6 @@ class BizObjectLock
 	 * @since 10.4.2
 	 * @param array $objectIds
 	 * @param string $user
-	 * @throws BizException
 	 */
 	public static function unlockObjectsByUser( array $objectIds, string $user ): void
 	{

@@ -76,7 +76,7 @@ class DBObjectLock extends DBBase
 
 	/**
 	 * Given the list of column names, function returns its corresponding values
-	 * retreived from the list of passed in WW_DataClasses_ObjectLock.
+	 * retrieved from the list of passed in WW_DataClasses_ObjectLock.
 	 *
 	 * @since 10.4.2
 	 * @param string[] $columnNames
@@ -163,20 +163,39 @@ class DBObjectLock extends DBBase
 	/**
 	 * Unlocks an object.
 	 *
-	 * @param int $object
+	 * @param int $objectId
 	 * @return bool|null
 	 */
-	static public function unlockObject( int $object )
+	static public function unlockObject( int $objectId )
 	{
 		$where = "`object` = ? ";
-		$params = array( intval( $object ));
+		$params = array( intval( $objectId ));
 		return self::deleteRows( self::TABLENAME, $where, $params );
+	}
+
+	/**
+	 * Release a list of objects' lock given the object ids.
+	 *
+	 * Call this function instead of {@link: unlockObject()} when dealing with multiple objects.
+	 *
+	 * @deprecated since 10.4.2
+	 * @param int[] $objectIds List of object ids where the lock will be released.
+	 * @param string $user (short) User name.
+	 */
+	public static function unlockObjects( array $objectIds, $user )
+	{
+		LogHandler::log( __METHOD__, 'DEPRECATED', 'Please use unlockObjectsByUser() instead.' );
+		if( $objectIds ) {
+			$where = '`usr` = ? AND `object` IN ( '.implode( ',', $objectIds ).')';
+			$params = array( $user );
+			self::deleteRows( self::TABLENAME, $where, $params );
+		}
 	}
 
 	/**
 	 * Release a list of objects' lock given the object ids which are locked by $user.
 	 *
-	 * @since 10.4.2 Renamed the function name from unlockObjects to unlockObjectsByUser.
+	 * @since 10.4.2 Use this function instead of deprecated function unlockObjects().
 	 * @param array $objectIds List of object ids where the lock will be released.
 	 * @param string $user (short) User name.
 	 * @throws BizException When $user is empty.
