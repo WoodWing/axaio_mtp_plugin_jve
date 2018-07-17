@@ -83,8 +83,6 @@ class DBMetaData extends DBBase
 			$property->MinValue = $minValue;
 			$property->MaxValue = $maxValue;
 			$property->MaxLength = intval( $row['maxlen'] );
-			$propertyValueArray = unserialize( $row['propertyvalues'] );
-			$property->PropertyValues = ( $propertyValueArray ) ? $propertyValueArray : array();
 			$tmp->Properties[] = $property;
 		}
 		if( $tmp != null ) {
