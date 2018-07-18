@@ -27,6 +27,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 
 		$suiteOpts = unserialize( TESTSUITE );
 		$ticket = null;
+		$currentUser = null;
 		$userGroup = null;
 
 		$testPub = null;
@@ -44,6 +45,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 		
 		if( !is_null($response) ) {
 			$ticket = $response->Ticket;
+
+			$currentUser = $response->CurrentUser;
 
 			// Store first user group from user
 			$userGroup = !empty( $response->UserGroups ) ? $response->UserGroups[0] : null;
@@ -78,6 +81,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 		// This data is picked up by successor TestCase modules within this WflServices TestSuite.
 		$vars = array();
 		$vars['BuildTest_WebServices_WflServices']['ticket'] = $ticket;
+		$vars['BuildTest_WebServices_WflServices']['currentUser'] = $currentUser;
 		$vars['BuildTest_WebServices_WflServices']['userGroup'] = $userGroup;
 
 		$vars['BuildTest_WebServices_WflServices']['publication'] = $testPub;

@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">Хотите загрузить эту версию?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Не удается установить DPS Viewer версии 25 или ниже, так как для уровня доступа следующих дел указано значение Free (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Не удается изменить уровень доступа; требуется DPS Viewer версии 26 или выше. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Невозможно загрузить прикрепления в Drupal (S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Невозможно загрузить прикрепления в Drupal (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Это имя присвоено другому пользователю (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Имя уже существует в базе данных (S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">Это имя уже присвоено Группе Пользователей (S1011)</Term>
@@ -892,7 +892,7 @@
   <Term key="ERR_MIXED_STATUS_WITH_PERSONAL_STATUS">Невозможно направить файлы выбранному пользователю, так как статус одного или нескольких файлов является личным.</Term>
   <Term key="ERR_MODULE_CAN_NOT_BE_LOADED">Модуль не может быть загружен. (S1104)</Term>
   <Term key="ERR_MOVE_DOSSIER">Не удается переместить дело '%2' в другой выпуск, поскольку оно опубликовано для выпуска '%1'. Чтобы переместить дело, сначала необходимо отменить его публикацию.</Term>
-  <Term key="ERR_NAME_EXISTS">Имя уже существует в этом выпуске (S1025)</Term>
+  <Term key="ERR_NAME_EXISTS">Имя уже существует в этом {ISSUE} (S1025)</Term>
   <Term key="ERR_NAME_INVALID">Имя содержит недопустимые символы или слишком длинное (S1026)</Term>
   <Term key="ERR_NATIVE_WRONG_DES">Проблема: невозможно преренести внутренний файл в заданный каталог (S1027)</Term>
   <Term key="ERR_NONACTIVE_PLUGIN">Для этой функции требуется подключаемый к серверу модуль %1, однако он не включен. (S1060)</Term>
@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">Не найдена папка webeditcache. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">Запись в каталог невозможна%1.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">%1 , который вы пытаетесь открыть, сейчас используется фоновым процессом. Попробуйте снова через несколько минут.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">Невозможно выполнить операцию. В хранилище файлов доступна новая версия. Установите новую версию и повторите попытку. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Операция не может быть выполнена, так как Web-браузер работает в автономном режиме. Переключите Web-браузер в онлайн режим и попробуйте ещё раз.</Term>
   <Term key="ERR_OLD_SAFARI">Эта версия браузера Safari не поддерживается. Для получения доступа в Web Editor загрузите браузер Safari версии 3 или выше. (S1111)</Term>
@@ -987,7 +988,7 @@
   <Term key="ERR_USER_BEGINDATE">Учетная запись пользователя еще недействительна</Term>
   <Term key="ERR_USER_ENDDATE">Учетная запись пользователя уже недействительна (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Имя пользователя уже существует.</Term>
-  <Term key="ERR_USER_NAME_REQUIRED">Необходимо имя пользователя, введите его</Term>
+  <Term key="ERR_USER_NAME_REQUIRED">Необходимо имя пользователя, введите его.</Term>
   <Term key="ERR_WRONGLANG">Выберите язык (S1052)</Term>
   <Term key="ERR_WRONGPASS">Неверное имя пользователя или пароль (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Не удалось преобразовать статью в WCML. (S1121)</Term>

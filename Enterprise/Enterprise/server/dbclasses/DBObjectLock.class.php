@@ -55,59 +55,71 @@ class DBObjectLock extends DBBase
 	/**
 	 * Obtain lock for all the passed in objects.
 	 *
-	 * As function does a multi-insertion into database in one call, when any of the object is already locked, the
-	 * whole operation will fail. And therefore, function will attempt three times to get the lock for all the objects.
-	 * In the end, function will return a list of object ids which were locked only by this function. Objects that were
+	 * Function will return a list of object ids which were locked only by this function. Objects that were
 	 * already locked before-hand will not be returned in the list.
 	 *
-	 * @param int[] $objectIds List of object ids of which the function will obtain the lock.
-	 * @param string $user User short name.
-	 * @return array List of object ids where the lock has been obtained by this function.
+	 * @param WW_DataClasses_ObjectLock[] $objectsToLock
+	 * @return array Refer to function header above.
 	 */
-	public static function lockObjects( $objectIds, $user )
+	public static function lockObjects( array $objectsToLock ): array
 	{
 		$lockedObjIds = array();
-		if( $objectIds ) {
-
-			$dbDriver = DBDriverFactory::gen();
-			// Prepares the Db fields and its values.
-			// DB column Names.
+		if( $objectsToLock ) {
 			$columnNames = array( 'object', 'usr', 'timestamp', 'ip', 'appname', 'appversion' );
-
-			// Collecting DB column Values.
-			$nowStamp = $dbDriver->nowStamp();
-			$ip = WW_Utils_UrlUtils::getClientIP();
-
-			for( $attempt=1; $attempt<=3; $attempt++ ) {
-				$objectIdsToLock = $objectIds;
-				// At the very first attempt, just try to lock all the passed in object ids.
-				if( $attempt > 1 ) {
-					$where = '`object` IN ('.implode(',', $objectIds ).')';
-					$rows = DBBase::listRows( DBObjectLock::TABLENAME,  'object', null, $where, array( 'object' ) );
-					$alreadyLockedObjectIds = array_keys( $rows );
-					$objectIdsToLock = array_diff( $objectIds, $alreadyLockedObjectIds );
-				}
-				
-				if( $objectIdsToLock ) {
-					// E.g: $values = array( array(1,2,3,4), array(5,6,7,8) )
-					$values = array();
-					$appName = BizSession::getClientName();
-					$appVersion = BizSession::getClientVersion();
-					foreach( $objectIdsToLock as $objectIdToLock ) {
-						$values[] = array( $objectIdToLock, $user, $nowStamp, $ip, $appName, $appVersion );
-					}
-
-					// Try to obtain lock for all the objects at once.
-					// No error ($logExistsErr=false) is logged when the attempts failed, since it will throw BizException
-					// when the function fails to obtain objects' lock.
-					if( self::insertRows( self::TABLENAME, $columnNames, $values, true, true, false )) {
-						$lockedObjIds = $objectIdsToLock;
-						break; // When the query succeeded, quit.
-					}
-				}
+			$rowsValues = self::prepareMultiRowsValues( $columnNames, $objectsToLock );
+			if( self::insertRows( self::TABLENAME, $columnNames, $rowsValues, true, true, false )) {
+				$lockedObjIds = array_map( function( $objectToLock ) { return $objectToLock->objectId; }, $objectsToLock );
 			}
 		}
 		return $lockedObjIds;
+	}
+
+	/**
+	 * Given the list of column names, function returns its corresponding values
+	 * retrieved from the list of passed in WW_DataClasses_ObjectLock.
+	 *
+	 * @since 10.4.2
+	 * @param string[] $columnNames
+	 * @param WW_DataClasses_ObjectLock[] $objectsToLock
+	 * @return array
+	 */
+	private static function prepareMultiRowsValues( array $columnNames, array $objectsToLock ): array
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$nowStamp = $dbDriver->nowStamp();
+		$rowsValues = array();
+		if( $objectsToLock ) foreach( $objectsToLock as $objectToLock ) {
+			$row = self::objToRow( $objectToLock );
+			$rowValues = array();
+			if( $columnNames ) {
+				foreach( $columnNames as $columnName ) {
+					if( $columnName == 'timestamp' ) {
+						$rowValues[] = $nowStamp;
+					} else if( array_key_exists( $columnName, $row) ) {
+						$rowValues[] = $row[$columnName];
+					} else {
+						$rowValues[] = ''; // Should not happen
+					}
+				}
+				$rowsValues[] = $rowValues;
+			}
+		}
+		return $rowsValues;
+	}
+
+	/**
+	 * Check through the passed in object ids and return the object ids that are not yet locked.
+	 *
+	 * @since 10.4.2
+	 * @param array $objectIds
+	 * @return array List of object ids that are not yet locked.
+	 */
+	public static function getNotYetLockedObjectIds( array $objectIds )
+	{
+		$where = '`object` IN ('.implode(',', $objectIds ).')';
+		$rows = DBBase::listRows( self::TABLENAME,  'object', null, $where, array( 'object' ) );
+		$alreadyLockedObjectIds = array_keys( $rows );
+		return array_diff( $objectIds, $alreadyLockedObjectIds );
 	}
 
 	/**
@@ -138,38 +150,26 @@ class DBObjectLock extends DBBase
 	 *
 	 * @since 10.3.1
 	 * @param int $objectId
-	 * @return stdClass Object|null Returns the objectlock or null if not found.
+	 * @return WW_DataClasses_ObjectLock|null Returns the objectlock or null if not found.
 	 */
-	static public function readObjectLock( int $objectId )
+	static public function readObjectLock( int $objectId ): ?WW_DataClasses_ObjectLock
 	{
-		$objectLock = null;
 		$where = "`object` = ?";
 		$params = array( intval( $objectId ) );
 		$row = self::getRow( self::TABLENAME, $where, '*', $params );
-
-		if( $row ) {
-			$objectLock = self::rowToObj( $row );
-		}
-
-		return $objectLock;
+		return $row ? self::rowToObj( $row ) : null;
 	}
 
 	/**
-	 * Unlocks an object. The short user name is optional (and not realy needed).
+	 * Unlocks an object.
 	 *
-	 * @param int $object
-	 * @param string|null $usr
+	 * @param int $objectId
 	 * @return bool|null
 	 */
-	static public function unlockObject( int $object, $usr )
+	static public function unlockObject( int $objectId )
 	{
 		$where = "`object` = ? ";
-		$params = array( intval( $object ));
-		if ($usr) {
-			$where .= "AND `usr`= ?";
-			$params[] = strval( $usr );
-		}
-
+		$params = array( intval( $objectId ));
 		return self::deleteRows( self::TABLENAME, $where, $params );
 	}
 
@@ -178,14 +178,37 @@ class DBObjectLock extends DBBase
 	 *
 	 * Call this function instead of {@link: unlockObject()} when dealing with multiple objects.
 	 *
+	 * @deprecated since 10.4.2
 	 * @param int[] $objectIds List of object ids where the lock will be released.
 	 * @param string $user (short) User name.
 	 */
 	public static function unlockObjects( array $objectIds, $user )
 	{
+		LogHandler::log( __METHOD__, 'DEPRECATED', 'Please use unlockObjectsByUser() instead.' );
 		if( $objectIds ) {
 			$where = '`usr` = ? AND `object` IN ( '.implode( ',', $objectIds ).')';
 			$params = array( $user );
+			self::deleteRows( self::TABLENAME, $where, $params );
+		}
+	}
+
+	/**
+	 * Release a list of objects' lock given the object ids which are locked by $user.
+	 *
+	 * @since 10.4.2 Use this function instead of deprecated function unlockObjects().
+	 * @param array $objectIds List of object ids where the lock will be released.
+	 * @param string $user (short) User name.
+	 * @throws BizException When $user is empty.
+	 */
+	public static function unlockObjectsByUser( array $objectIds, string $user ): void
+	{
+		if( $objectIds ) {
+			if( !$user ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Server',
+					'Cannot unlock objects by user: empty user passed in.' );
+			}
+			$where = '`usr` = ? AND `object` IN ( '.implode( ',', $objectIds ).')';
+			$params = array( strval( $user ));
 			self::deleteRows( self::TABLENAME, $where, $params );
 		}
 	}
@@ -238,49 +261,11 @@ class DBObjectLock extends DBBase
 			$values = array( 'lockoffline' => '');
 		}
 		$where = '`object` = ?';
-		$params = array( intval( $objectId ));
+		$params = array( $objectId );
 
 		return self::updateRow( self::TABLENAME, $values, $where, $params );
 	}
 
-	/**
-	 * Get the row with $fields of TABLENAME where $where.
-	 * If more rows are found returns the first row found.
-	 *
-	 * @param string $where Indicates the condition or conditions that rows must satisfy to be selected.
-	 * @param mixed $fieldnames. Either an array containing the fieldnames to get or '*' in which case all fields are returned.
-	 * @param array $params, containing parameters to be substituted for the placeholders
-	 *        of the where clause. 
-	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
-	 *        Keys: DB fields. Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
-	 * @return array with values or null if no row found.
-	 */
-	public static function selectRow( $where, $fieldnames = '*', $params = array(), $orderBy = null)
-	{
-		$result = self::getRow( self::TABLENAME, $where, $fieldnames, $params, $orderBy );
-		return $result;
-	}		
-
-	/**
-	 * Removes locks of childs objects if they are locked by user acting from the
-	 * ip-address.
-	 * @param string $ipAddress
-	 * @param string $user
-	 * @param int $parent
-	 * @return mixed null if failure else true. 
-	 */
-	public static function deleteLocksOfChildren($ipAddress, $user, $parent)
-	{
-		$dbDriver = DBDriverFactory::gen();
-		$placements = $dbDriver->tablename('placements');
-		$where = "`ip` = ? AND `usr` = ? AND object IN ( SELECT `child` FROM $placements WHERE `type` = 'Placed' AND `parent` = ? )"; 
-		$params = array( strval( $ipAddress ), strval( $user ), intval( $parent ) );
-		$result = self::deleteRows(self::TABLENAME, $where, $params);
-
-		return $result;
-	}
-
-	
 	/**
 	 * Remove objects locks by user name
 	 * 
@@ -299,15 +284,20 @@ class DBObjectLock extends DBBase
 	 * Insert BizObjectLock object into smart_objectslock table.
 	 *
 	 * @since 10.3.1.
-	 * @param stdClass $objectLock
+	 * @param WW_DataClasses_ObjectLock $objectLock
 	 * @throws BizException In case of database error.
 	 * @return integer|boolean New inserted objectslock DB Id when record is successfully inserted; False otherwise.
 	 */
-	public static function insertObjectLock( $objectLock )
+	public static function insertObjectLock( WW_DataClasses_ObjectLock $objectLock )
 	{
 		$dbDriver = DBDriverFactory::gen();
-		$values = array( $objectLock->objectId, $objectLock->shortUserName, $dbDriver->nowStamp(), $objectLock->ipAddress,
-			$objectLock->appName, $objectLock->appVersion );
+		$values = array( intval( $objectLock->objectId ),
+							strval( $objectLock->shortUserName ),
+							$dbDriver->nowStamp(),
+							strval( $objectLock->ipAddress ),
+							strval( $objectLock->appName ),
+							strval( $objectLock->appVersion )
+		);
 		$columnNames = array( 'object', 'usr', 'timestamp', 'ip', 'appname', 'appversion' );
 		$result = self::insertRows( self::TABLENAME, $columnNames, array( $values ), true, true, false );
 		// self::inserRow() cannot be used as this method is not able to handle the timestamp column.
@@ -324,13 +314,13 @@ class DBObjectLock extends DBBase
 	}
 
 	/**
-	 * Converts a BizObjectLock instance into a DB objectslock record (array).
+	 * Convert an object lock data class into a DB row.
 	 *
 	 * @since 10.3.1
-	 * @param stdClass $obj
+	 * @param WW_DataClasses_ObjectLock $obj
 	 * @return array database row
 	 */
-	private static function objToRow( $obj )
+	private static function objToRow( WW_DataClasses_ObjectLock $obj ): array
 	{
 		$row = array();
 		if( !is_null( $obj->objectId ) ) {
@@ -345,36 +335,44 @@ class DBObjectLock extends DBBase
 		if( !is_null( $obj->lockOffLine ) ) {
 			$row['lockoffline'] = ( $obj->lockOffLine == true ? 'on' : '' );
 		}
-
 		if( !is_null( $obj->appName )) {
 			$row['appname'] = strval( $obj->appName );
 		}
-
 		if( !is_null( $obj->appVersion )) {
 			$row['appversion'] = strval( $obj->appVersion );
 		}
-
 		return $row;
 	}
 
 	/**
-	 * Converts  a DB objectslock record (array) into a BizObjectLock instance.
+	 * Convert a object lock DB row into data class.
 	 *
 	 * @since 10.3.1
 	 * @param array $row database row
-	 * @return stdClass Object
+	 * @return WW_DataClasses_ObjectLock
 	 */
-	private static function rowToObj( array $row )
+	private static function rowToObj( array $row ): WW_DataClasses_ObjectLock
 	{
-		$objectLock = new stdClass();
-		$objectLock->objectId = intval( $row['object'] );
-		$objectLock->shortUserName = $row['usr'];
-		$objectLock->ipAddress = $row['ip'];
-		$objectLock->lockOffLine = $row['lockoffline'] == 'on' ? true : false;
-		$objectLock->appName = $row['appname'];
-		$objectLock->appVersion = $row['appversion'];
-
+		require_once BASEDIR . '/server/dataclasses/ObjectLock.class.php';
+		$objectLock = new WW_DataClasses_ObjectLock();
+		if( array_key_exists( 'object', $row )) {
+			$objectLock->objectId = intval( $row['object'] );
+		}
+		if( array_key_exists( 'usr', $row )) {
+			$objectLock->shortUserName = $row['usr'];
+		}
+		if( array_key_exists( 'ip', $row )) {
+			$objectLock->ipAddress = $row['ip'];
+		}
+		if( array_key_exists( 'lockoffline', $row )) {
+			$objectLock->lockOffLine = $row['lockoffline'] == 'on' ? true : false;
+		}
+		if( array_key_exists( 'appname', $row )) {
+			$objectLock->appName = $row['appname'];
+		}
+		if( array_key_exists( 'appversion', $row )) {
+			$objectLock->appVersion = $row['appversion'];
+		}
 		return $objectLock;
 	}
-
 }

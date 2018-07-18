@@ -1,4 +1,4 @@
-﻿/*
+/*
 	- SCRIPT_ARG_KEYS -
 
 	A list of script argument keys reflecting one-on-one the keys which can be passed by Smart Connection.
@@ -200,12 +200,24 @@ function placeImage( docObject, operationObj ) {
 		docObject.viewPreferences.verticalMeasurementUnits = MeasurementUnits.POINTS;
 
 		// Determine rotation of the image. Later on this will be used to adapt scaling and translation.
-        	var image = curFrame.images.firstItem();
-        	var imageRotationAngle = image.rotationAngle;
-        	var rotM = (imageRotationAngle / 90 + 8) % 4;
-        	var rotCW = ( rotM === 1);
-        	var rotCCW = (rotM === 3);
-        	var rot180 = (rotM === 2);
+		var image;
+       	var imageRotationAngle = 0;
+       	var rotM = 0;
+       	var rotCW = 0;
+       	var rotCCW = 0;
+       	var rot180 = 0;
+		if (curFrame.images.length > 0) {
+        	image = curFrame.images.firstItem();
+        	imageRotationAngle = image.rotationAngle;
+        	rotM = (imageRotationAngle / 90 + 8) % 4;
+        	rotCW = ( rotM === 1);
+        	rotCCW = (rotM === 3);
+        	rot180 = (rotM === 2);
+ 		}
+    	else {
+			// pdf, eps and document placements are handled differently in the scripting model. These object types are skipped (EN-90757)
+                	app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage image is pdf or eps; rotation = 0>" );
+        }
        
 		// ********************
 		// Scaling.

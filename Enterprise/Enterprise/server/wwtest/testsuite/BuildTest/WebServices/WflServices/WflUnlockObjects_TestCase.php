@@ -2,36 +2,36 @@
 /**
  * @package   Enterprise
  * @subpackage   TestSuite
- * @since      v10.4.1
+ * @since      v10.4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */
 
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
-class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase extends TestCase
+class  WW_TestSuite_BuildTest_WebServices_WflServices_WflUnlockObjects_TestCase extends TestCase
 {
-	/** @var WW_Utils_TestSuite $utils */
+	/** @var WW_Utils_TestSuite $testSuiteUtils */
 	private $testSuiteUtils = null;
 
-	/** @var string workflowTicket */
+	/** @var string $workflowTicket */
 	private $workflowTicket = '';
 
-	/** @var WW_TestSuite_Setup_WorkflowFactory */
+	/** @var WW_TestSuite_Setup_WorkflowFactory $workflowFactory */
 	private $workflowFactory;
 
-	/** @var int profileId */
+	/** @var int $profileId */
 	private $profileId;
 
-	/** @var FeatureProfile */
+	/** @var FeatureProfile $featureProfile */
 	private $featureProfile;
 
-	/** @var string workflowUser */
+	/** @var string $workflowUser */
 	private $workflowUser;
 
-	/** @var Object test Object */
+	/** @var Object $testLayout */
 	private $testLayout;
 
-	/** @var Attachment[] Layout files copied to the transfer server folder. */
+	/** @var Attachment[] $transferServerFiles Layout files copied to the transfer server folder. */
 	private $transferServerFiles = array();
 
 	/** @var BizTransferServer $transferServer */
@@ -43,15 +43,19 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 	/** @var string $testStartTime Used for cleaning up of IDSA jobs.*/
 	private $testStartTime = null;
 
+	/** @var string $appName Name of the application */
+	private $appName = '';
+
 	// Step#01: Fill in the TestGoals, TestMethods and Prio...
 	public function getDisplayName()
 	{
-		return 'Lock Objects';
+		return 'Unlock Objects';
 	}
 
 	public function getTestGoals()
 	{
-		return 'Checks if objects get locked, but only if the user is entitled.';
+		return 'Checks if object can get unlocked only by the user who locks the object or the Brand Admin, ' .
+			'other users will not be allowed to do the unlock to this object.';
 	}
 
 	public function getTestMethods()
@@ -60,17 +64,18 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 			'<li>Scenario:</li>'.
 			'<li>Create users and groups, add access rights for these groups for a newly created brand.</li>'.
 			'<li>An object is created.</li>'.
-			'<li>Of this object the right to lock the object is tested.</li>'.
-			'<li>Also it it tested if the user can create an ObjectOperation on the layout. This also requires a lock.</li>'.
-			'<li>First by a user that is entitled.</li>'.
-			'<li>Next by a user that is not entitled. In this case an \'Access Denied\' error is exepeted.</li>'.
+			'<li>This object is locked by user "John" on client application A.</li>'.
+			'<li>This object is unlocked by user "Jim" on client application A. This fails.</li>'.
+			'<li>This object is unlocked by user "John" on client application B. This is successful.</li>'.
+			'<li>This object is locked again by user "John" on client application A.</li>'.
+			'<li>This object is unlocked by a brand admin user on client application B. This is successful.</li>'.
 			'<li>Test data is cleaned up.</li>'.
-		'</ol>';
+			'</ol>';
 	}
 
 	public function getPrio()
 	{
-		return 190;
+		return 195;
 	}
 
 	public function isSelfCleaning()
@@ -103,7 +108,8 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 		$this->testSuiteUtils = new WW_Utils_TestSuite();
 		$this->vars = $this->getSessionVariables();
 		$admTicket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
-		$this->assertNotNull( $admTicket );
+		$message = 'Please enable the Setup test data test.';
+		$this->assertNotNull( $admTicket, $message );
 		require_once BASEDIR.'/server/wwtest/testsuite/Setup/WorkflowFactory.class.php';
 		$this->workflowFactory = new WW_TestSuite_Setup_WorkflowFactory( $this, $admTicket, $this->testSuiteUtils );
 		$this->workflowFactory->setConfig( $this->getWorkflowConfig() );
@@ -116,76 +122,44 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 	/**
 	 * Test the lock object right on the created object.
 	 *
-	 * first log on with the user that has sufficient rights. Create the object. First lock the object by the user that
+	 * First log on with the user that has sufficient rights. Create the object. First lock the object by the user that
 	 * is entitled, next by a user that has not sufficient rights. In that case an 'S1002' error is expected.
 	 */
 	private function testWorkflowAccess()
 	{
+		// User 'John' creates the layout and locks with client application A.
 		$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "John %timestamp%" );
+		$this->appName = 'Client-A';
 		$this->doLogOn();
 		$this->testLayout = $this->createLayout( 'Layout %timestamp%' );
-		$this->testLockObject( null );
-		$this->testObjectOperation( null );
+		$this->lockObject( $this->testLayout );
 		$this->doLogOff();
+
+		// User 'Jim' tries to unlock the layout with client application A.
 		$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "Jim %timestamp%" );
 		$this->doLogOn();
-		$this->testLockObject( '(S1002)' );
-		$this->testObjectOperation( '(S1002)' );
+		$this->unlockObjects( array( $this->testLayout->MetaData->BasicMetaData->ID ) , '(S1147)' );
 		$this->doLogOff();
-	}
 
-	/**
-	 * Lock the object and unlock it afterwards.
-	 *
-	 * In case no error is expected for the LockObject call, pass in null, else the expected S-code.
-	 *
-	 * @param string|null $expectedError
-	 */
-	private function testLockObject( $expectedError )
-	{
-		$this->lockObject( $this->testLayout, $expectedError );
-		$this->unlockObjects( array( $this->testLayout->MetaData->BasicMetaData->ID ) );
-	}
+		// User 'John' tries to unlock the layout with client application B.
+		$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "John %timestamp%" );
+		$this->appName = 'Client-B';
+		$this->doLogOn();
+		$this->unlockObjects( array( $this->testLayout->MetaData->BasicMetaData->ID ), null );
+		$this->doLogOff();
 
-	/**
-	 * Tries to create an ObjectOperation on the layout. In order to be able to create the operation the user must lock
-	 * the layout first.
-	 * The created operation is removed and the corresponding job is cleaned when the test is teared down.
-	 *
-	 * @since 10.4.2
-	 * @param string|null $expectedError
-	 */
-	private function testObjectOperation( $expectedError )
-	{
-		require_once BASEDIR.'/server/services/wfl/WflCreateObjectOperationsService.class.php';
-		$request = new WflCreateObjectOperationsRequest();
-		$request->Ticket = $this->workflowTicket;
-		$request->HaveVersion = new ObjectVersion();
-		$request->HaveVersion->ID = $this->testLayout->MetaData->BasicMetaData->ID;
-		$request->HaveVersion->Version = $this->testLayout->MetaData->WorkflowMetaData->Version;
+		// User 'John' locks the layout with client application A.
+		$this->appName = 'Client-A';
+		$this->doLogOn();
+		$this->lockObject( $this->testLayout );
+		$this->doLogOff();
 
-		$operation = new ObjectOperation();
-		require_once  BASEDIR.'/server/utils/NumberUtils.class.php';
-		$operation->Id = NumberUtils::createGUID();
-		$operation->Type = 'AutomatedPrintWorkflow';
-		$operation->Name = 'ClearFrameContent';
-		$operation->Params = array();
-		$operation->Params[0] = new Param();
-		$operation->Params[0]->Name = 'EditionId';
-		$operation->Params[0]->Value = 0;
-		$operation->Params[1] = new Param();
-		$operation->Params[1]->Name = 'SplineId';
-		$operation->Params[1]->Value = 294;
-
-
-		$request->Operations = array( $operation );
-		/** @var WflCreateObjectOperationsResponse $response */
-		$response = $this->testSuiteUtils->callService( $this, $request, "Call: ". __METHOD__, $expectedError );
-
-		require_once BASEDIR.'/server/bizclasses/BizObjectOperation.class.php';
-		if( !is_null( $response ) ) {
-			BizObjectOperation::deleteOperations( $this->testLayout->MetaData->BasicMetaData->ID);
-		}
+		// Brand admin tries to unlock the layout with client application B.
+		$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "Brand Admin %timestamp%" );
+		$this->appName = 'Client-B';
+		$this->doLogOn();
+		$this->unlockObjects( array( $this->testLayout->MetaData->BasicMetaData->ID ), null );
+		$this->doLogOff();
 	}
 
 	/**
@@ -203,9 +177,8 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 	 * Call the LockObjects service.
 	 *
 	 * @param Object $object
-	 * @param null|string $expectedError
 	 */
-	private function lockObject( Object $object, $expectedError )
+	private function lockObject( Object $object )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflLockObjectsService.class.php';
 		$request = new WflLockObjectsRequest();
@@ -215,25 +188,26 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 		$request->HaveVersions[0]->ID = $object->MetaData->BasicMetaData->ID;
 		$request->HaveVersions[0]->Version = $object->MetaData->WorkflowMetaData->Version;
 
-		$response = $this->testSuiteUtils->callService( $this, $request, 'Lock Object.', $expectedError, false );
-		if( !$expectedError ) {
-			$this->assertInstanceOf( 'WflLockObjectsResponse', $response );
-		}
+		$response = $this->testSuiteUtils->callService( $this, $request, 'Lock Object.');
 	}
 
 	/**
-	 * Unlocks object locked by this test.
+	 * Unlock one (or more) objects.
 	 *
-	 * @param int[] $objectIds
+	 * @param array $objectIds
+	 * @param null|string $expectedError
 	 */
-	private function unlockObjects( array $objectIds )
+	private function unlockObjects( array $objectIds, ?string $expectedError )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflUnlockObjectsService.class.php';
 		$service = new WflUnlockObjectsService();
 		$request = new WflUnlockObjectsRequest();
 		$request->Ticket = $this->workflowTicket;
 		$request->IDs = $objectIds;
-		$service->execute( $request );
+		$response = $this->testSuiteUtils->callService( $this, $request, 'Unlock object.', $expectedError, false );
+		if( !$expectedError ) {
+			$this->assertInstanceOf( 'WflUnlockObjectsResponse', $response );
+		}
 	}
 
 	/**
@@ -246,6 +220,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 				$req->RequestInfo = array( 'FeatureProfiles' ); // request to resolve ticket only
 				$req->User = $this->workflowUser;
 				$req->Password = 'ww';
+				$req->ClientAppName = $this->appName ;
 			}
 		);
 		$response = $this->testSuiteUtils->wflLogOn( $this );
@@ -258,24 +233,37 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 	 */
 	private function teardownTest()
 	{
-		if( !$this->workflowTicket ) {
-			$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "John %timestamp%" );
-			$this->doLogOn();
-		}
 		if( $this->testLayout ) {
-			$errorReport = '';
-			$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $this->testLayout->MetaData->BasicMetaData->ID,
-				'Deleting layout for Lock Objects BuildTest.', $errorReport );
-			$this->testLayout = null;
+			if( $this->workflowTicket ) {
+				$this->doLogOff(); // LogOff since no idea this ticket belongs to which test user.
+			}
+			try {
+				$this->workflowUser = $this->workflowFactory->getAuthorizationConfig()->getUserShortName( "John %timestamp%" );
+				$message = "Failed retrieving user John to do logOn to delete test layout.";
+				$this->assertNotEquals( $this->workflowUser, "John %timestamp%", $message );
+				$this->doLogOn();
+				$errorReport = '';
+				$this->testSuiteUtils->deleteObject( $this, $this->workflowTicket, $this->testLayout->MetaData->BasicMetaData->ID,
+					'Deleting layout for Lock Objects BuildTest.', $errorReport );
+				$this->testLayout = null;
+				$this->doLogOff();
+				$this->workflowFactory->teardownTestData();
+			} catch( BizException $e ) {
+				// Don't want to bail out here as we want to continue doing other cleaning ....
+				$message = "Failed clearing layout " . $this->testLayout . '. Please check log files for more information.';
+				$this->setResult( 'ERROR', $message  );
+			}
+			$this->workflowFactory = null;
 		}
-		$this->doLogOff();
+		if( $this->workflowFactory ) {
+			$this->workflowFactory->teardownTestData();
+		}
 		if( $this->transferServerFiles ) {
 			foreach( $this->transferServerFiles as $file ) {
 				$this->transferServer->deleteFile( $file->FilePath );
 			}
 			unset( $this->transferServerFiles );
 		}
-		$this->workflowFactory->teardownTestData();
 		$this->clearIdsServerJobsInTheQueue();
 	}
 
@@ -319,9 +307,17 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 		"FixedPassword": false,
 		"EmailUser": false,
 		"EmailGroup": false
-	},{		
+	},{
 		"Name": "Jim %timestamp%",
-		"FullName": "Jim Parker %timestamp%",
+		"FullName": "Jim Jones %timestamp%",
+		"Password": "ww",
+		"Deactivated": false,
+		"FixedPassword": false,
+		"EmailUser": false,
+		"EmailGroup": false
+	},{
+		"Name": "Brand Admin %timestamp%",
+		"FullName": "Brand Administrator %timestamp%",
 		"Password": "ww",
 		"Deactivated": false,
 		"FixedPassword": false,
@@ -332,10 +328,7 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 		"Name": "CanLock %timestamp%",
 		"Admin": false
 	},{
-		"Name": "CannotLock %timestamp%",
-		"Admin": false
-	},{
-		"Name": "BrandAdmin %timestamp%",
+		"Name": "BrandAdmins %timestamp%",
 		"Admin": false
 	}],
 	"Memberships": [{
@@ -343,27 +336,23 @@ class  WW_TestSuite_BuildTest_WebServices_WflServices_WflLockObjects_TestCase ex
 		"UserGroup": "CanLock %timestamp%"
 	},{
 		"User": "Jim %timestamp%",
-		"UserGroup": "CannotLock %timestamp%"
+		"UserGroup": "CanLock %timestamp%"
+	},{
+		"User": "Brand Admin %timestamp%",
+		"UserGroup": "BrandAdmins %timestamp%"
 	}],
 	"AccessProfiles": [{
 		"Name": "CanLock %timestamp%",
 		"ProfileFeatures": ["View", "Read", "Write", "Open_Edit", "Delete", "Purge" ]
-	},{
-		"Name": "CannotLock %timestamp%",
-		"ProfileFeatures": ["View", "Read", "Write", "Delete", "Purge" ]
 	}],
 	"UserAuthorizations": [{
 		"Publication": "PubTest1 %timestamp%",
 		"UserGroup": "CanLock %timestamp%",
 		"AccessProfile": "CanLock %timestamp%"	
-	},{
-		"Publication": "PubTest1 %timestamp%",
-		"UserGroup": "CannotLock %timestamp%",
-		"AccessProfile": "CannotLock %timestamp%"	
 	}],
 	"AdminAuthorizations": [{
 		"Publication": "PubTest1 %timestamp%",
-		"UserGroup": "BrandAdmin %timestamp%"
+		"UserGroup": "BrandAdmins %timestamp%"
 	}],
 	"Objects":[{
 		"Name": "Layout %timestamp%",

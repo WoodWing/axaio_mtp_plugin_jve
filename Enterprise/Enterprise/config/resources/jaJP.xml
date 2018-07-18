@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">このバージョンをダウンロードしてもよろしいですか？</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">以下のドシエのアクセスレベルが自由に設定されているため、DPS Viewerをバージョン25またはそれ以下に設定できません。 (S1123):  %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">アクセスレベル: を変更できません。DPS Viewer のバージョン26またはそれ以降のバージョンが必要になります。 (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">アタッチメントはDrupalにアップロードができません。 (S1064) </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">アタッチメントはDrupalにアップロードができません。 (S1064)</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">この名前はユーザとしてすでに存在します(S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">この名前はすでにデータベースに存在します(S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">この名前はグループとしてすでに存在します(S1011)</Term>
@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">webedit cache フォルダが見つかりません (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">ディレクトリ %1 に書くことができませんでした。</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">開こうとしている%1は、別のバックグラウンド処理に使用されています。暫く待ってからもう一度お試しください。</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">旧バージョンを使用しているため、操作が実行できません。ファイルストアから新バージョンをインストールして、もう一度お試しください。 (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Webブラウザがオフライン状態のため操作できません。Webブラウザをオンライン状態にし、再試行してください。</Term>
   <Term key="ERR_OLD_SAFARI">このサファリのバージョンはサポート対象外です。Web EditorへのアクセスにはサファリVer.3以降をダウンロードしてください。(S1111)</Term>

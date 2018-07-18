@@ -866,7 +866,7 @@ class BizSession
 			if( $bAccessError === false ) { // user has access?
 				// change online status
 				require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-				$objectLock = new BizObjectLock( $id );
+				$objectLock = new BizObjectLock( intval( $id ));
 				if( $objectLock->isLockedByUser( $user )) {
 					if( !$objectLock->changeOnLineStatus( $bKeepLockForOffline ) ) {
 						throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
@@ -1370,5 +1370,17 @@ class BizSession
 			$enterpriseSystemId = !empty( $enterpriseSystemId ) && NumberUtils::validateGUID( $enterpriseSystemId ) ? $enterpriseSystemId : null;
 		}
 		return $enterpriseSystemId;
+	}
+
+	/**
+	 * Checks is the application is Smart Mover.
+	 *
+	 * @since 10.4.2
+	 * @param string $application
+	 * @return bool
+	 */
+	public static function isSmartMover( string $application ):bool
+	{
+		return (bool)stristr( $application, 'mover-' );
 	}
 }

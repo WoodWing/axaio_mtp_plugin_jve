@@ -243,7 +243,7 @@
   <Term key="ACT_MULT_PLACEMENT">Artikel (oder einer seiner Komponenten) ist mehr als einmal in der {EDITION} vorhanden.</Term>
   <Term key="ACT_MYPROFILE">Eigenes Profil</Term>
   <Term key="ACT_NAMED_QUERIES">Systemabfragen</Term>
-  <Term key="ACT_NAME_IS_INVALID">Name enthält ungültige Zeichen oder ist zu lang</Term>
+  <Term key="ACT_NAME_IS_INVALID">Name enthält ungültige Zeichen oder ist zu lang.</Term>
   <Term key="ACT_NEW">Neu</Term>
   <Term key="ACT_NEW_DOSSIER">Neues {DOSSIER}</Term>
   <Term key="ACT_NEW_DOSSIER_TEMPLATE">Neue {DOSSIER}-Vorlage</Term>
@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">Soll diese Version heruntergeladen werden?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Die DPS Viewer-Version kann nicht auf 25 oder niedriger gesetzt werden, da die Zugangsebene der folgenden Dossiers auf 'Kostenlos' gesetzt ist (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Die Zugangsebene kann nicht geändert werden. Dazu ist DPS Viewer Version 26 oder höher erforderlich. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Anhang konnte nicht zu Drupal hochgeladen werden (S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">Anhang konnte nicht zu Drupal hochgeladen werden (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Name ist bereits als Benutzer vorhanden (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Name ist bereits in Datenbank vorhanden (S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">Name ist bereits als Gruppe vorhanden (S1011)</Term>
@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">Kein Webeditcache-Ordner gefunden. (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">In das Verzeichnis %1 konnte nicht geschrieben werden.</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">Das Element (%1), das Sie öffnen möchten, wird derzeit von einem Hintergrundprozess verwendet. Warten Sie einen Moment und versuchen Sie es erneut.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">Vorgang kann nicht ausgeführt werden. Im Dateispeicher steht eine neuere Version zur Verfügung. Rufen Sie die neueste Version ab und versuchen Sie es erneut. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">Der Vorgang konnte nicht ausgeführt werden, da sich der Webbrowser derzeit im Offlinemodus befindet. Wechseln Sie in den Onlinemodus, und versuchen Sie es erneut.</Term>
   <Term key="ERR_OLD_SAFARI">Diese Version des Safari-Browsers wird nicht unterstützt. Laden Sie Safari in Version 3 oder höher herunter, um auf Web-Editor zuzugreifen. (S1111)</Term>
@@ -955,7 +956,7 @@
   <Term key="ERR_SOLR_SEARCH">Solr-Suchfehler: %1 (S1061).</Term>
   <Term key="ERR_SOURCE_PUBLICATION_NOT_SPECIFIED">Quell-Name für {PUBLICATION} nicht angegeben oder neue {PUBLICATION} ist leer. (S1084)</Term>
   <Term key="ERR_SOURCE_USER_NAME_NOT_SPECIFIED">Quell-Benutzername nicht angegeben oder neuer Benutzername ist leer. (S1087)</Term>
-  <Term key="ERR_SUBJECT_EXISTS">%1 %2 bereits vorhanden (S1038)</Term>
+  <Term key="ERR_SUBJECT_EXISTS">%1 %2 bereits vorhanden. (S1038)</Term>
   <Term key="ERR_SUBJECT_NOTEXISTS">%1 %2 ist nicht vorhanden (S1056).</Term>
   <Term key="ERR_SUCCEEDED">Erfolgreich abgeschlossen</Term>
   <Term key="ERR_SUCCES">Erfolgreich exportiert:</Term>
@@ -988,8 +989,8 @@
   <Term key="ERR_USER_ENDDATE">Benuzterkonto ist nicht mehr gültig (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Benutzername besteht bereits.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Benutzername erforderlich, bitte ausfüllen.</Term>
-  <Term key="ERR_WRONGLANG">Sprache auswählen (S1052).</Term>
-  <Term key="ERR_WRONGPASS">Benutzername oder Kennwort falsch (S1053)</Term>
+  <Term key="ERR_WRONGLANG">Sprache auswählen. (S1052)</Term>
+  <Term key="ERR_WRONGPASS">Benutzername oder Kennwort falsch. (S1053)</Term>
   <Term key="ERR_WWCX2WCML_FAILED">Fehler bei der Artikelkonvertierung in WCML (S1121)</Term>
   <Term key="ERR_WWSETTINGS_CORRUPT">Fehler beim Parsen der Datei 'WWSettings.xml'. (S1075)</Term>
   <Term key="FACEBOOK_ERROR_ADD_IMAGE">Fügen Sie ein Bild hinzu.</Term>
@@ -1143,7 +1144,7 @@
   <Term key="INFO_CLEANUP_PROPERTY">Sie können die Eigenschaften auf der %1-Seite bereinigen.</Term>
   <Term key="INFO_DOSSIER_PUBLISHED">{DOSSIER} %1 erfolgreich in %2 veröffentlicht</Term>
   <Term key="INFO_DOSSIER_TEMPLATES">{DOSSIER}-Vorlage</Term>
-  <Term key="INFO_DOSSIER_UNPUBLISHED">Veröffentlichung des Dossiers erfolgreich aufgehoben</Term>
+  <Term key="INFO_DOSSIER_UNPUBLISHED">Veröffentlichung des {DOSSIER} ist erfolgreich aufgehoben.</Term>
   <Term key="INFO_DOSSIER_UPDATED">{DOSSIER} %1 erfolgreich aktualisiert</Term>
   <Term key="INFO_END_TIME">Endzeit</Term>
   <Term key="INFO_MESS_LINK_UNUSED_PROP">Die Datenbank enthält benutzerdefinierte Eigenschaften, die nicht mehr vom %1-Zusatzmodul verwendet werden.</Term>

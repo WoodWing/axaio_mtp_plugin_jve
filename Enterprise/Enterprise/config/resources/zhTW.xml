@@ -842,7 +842,7 @@
   <Term key="ERR_DOWNLOAD_VERSION">是否確認刪除此版本?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">不能設置DPS Viewer 版本到25 或更低，因為以下文件夾的訪問權限級別設置為免費(S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">不能變更訪問權限級別; 這需DPS Viewer 版本26 或更高. (S1124)</Term>
-  <Term key="ERR_DRUPAL_UPLOAD_FAILED">不能升級附件至 Drupal (S1064). </Term>
+  <Term key="ERR_DRUPAL_UPLOAD_FAILED">不能升級附件至 Drupal (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">已經使用為用戶名字 (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">已經使用為資料庫名字 (S1010)</Term>
   <Term key="ERR_DUPLICATE_USRGRP">已經使用為組別名字 (S1011)</Term>
@@ -922,6 +922,7 @@
   <Term key="ERR_NO_WEBEDIT_MAP">找不到網上編輯緩衝檔夾 (S1110)</Term>
   <Term key="ERR_NO_WRITE_TO_DIR">不能寫到目錄%1。</Term>
   <Term key="ERR_OBJECT_BUSY_PROCESSING">這個 %1 您準備開啟的正由一個在背景執行的程序使用中. 請稍等一下並再試一次.</Term>
+  <Term key="ERR_OBJ_LOCKED_BY_USER">In use by %1. (S1147)</Term>
   <Term key="ERR_OBJ_VERSION_MISMATCH">操作不能被執行. 在文件存儲區有一個較新的版本. 請獲取最新版本，然後重試. (S1140)</Term>
   <Term key="ERR_OFFLINE_MODE">操作不被執行因為瀏覽器處於離線狀態，你切換瀏覽器至在線狀態並重試.</Term>
   <Term key="ERR_OLD_SAFARI">Safari 瀏覽器版本不支持，請下載Safari version 3及以上版本再進入網絡編輯. (S1111)</Term>

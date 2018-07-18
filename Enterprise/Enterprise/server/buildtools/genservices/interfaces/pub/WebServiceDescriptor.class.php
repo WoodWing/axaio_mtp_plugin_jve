@@ -11,18 +11,70 @@ require_once BASEDIR.'/server/buildtools/genservices/interfaces/WebServiceDescri
 
 class WW_BuildTools_GenServices_Interfaces_Pub_WebServiceDescriptor implements WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface
 {
-	final public function getServiceNameFull()  { return 'Publishing'; }
-	final public function getServiceNameShort() { return 'Pub'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/pub/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:EnterprisePublishing'; }
-	final public function getExclDataClasses()  { return array(); }
-	final public function getWflDataClasses()   { return array(); }
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/publishindex.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/EnterprisePublishing.wsdl'; }
-	final public function getProviderBasePath() { return BASEDIR.'/server'; }
-	final public function getPluginNameFull()   { return null; }
-	final public function getPluginNameShort()  { return null; }
+	final public function getServiceNameFull()
+	{
+		return 'Publishing';
+	}
+
+	final public function getServiceNameShort()
+	{
+		return 'Pub';
+	}
+
+	final public function getDataClassesFile()
+	{
+		return BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
+	}
+
+	final public function getDataClassPrefix()
+	{
+		return $this->getServiceNameShort();
+	}
+
+	final public function getNameSpace()
+	{
+		return 'urn:EnterprisePublishing';
+	}
+
+	final public function getExclDataClasses()
+	{
+		return array();
+	}
+
+	final public function getWflDataClasses()
+	{
+		return array();
+	}
+
+	final public function getSoapEntryPoint()
+	{
+		return "LOCALURL_ROOT.INETROOT.'/publishindex.php'";
+	}
+
+	final public function getExternalSoapEntryPoint()
+	{
+		return "SERVERURL_ROOT.INETROOT.'/publishindex.php'";
+	}
+
+	final public function getWsdlFilePath()
+	{
+		return BASEDIR.'/server/interfaces/EnterprisePublishing.wsdl';
+	}
+
+	final public function getProviderBasePath()
+	{
+		return BASEDIR.'/server';
+	}
+
+	final public function getPluginNameFull()
+	{
+		return null;
+	}
+
+	final public function getPluginNameShort()
+	{
+		return null;
+	}
 
 	final public function getUrlToFilePath($serviceName)
 	{

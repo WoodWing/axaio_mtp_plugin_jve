@@ -112,7 +112,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	private function testUserQueriesForMoverOverLogOnLogOff()
 	{
 		$otherClientAppName = $this->clientAppName; // temporary switch to Mover
-		$this->clientAppName = 'Mover_WflUserSettings_'.self::composeTimestampWithMs(); // must have Mover prefix
+		$this->clientAppName = 'Mover-WflUserSettings_'.self::composeTimestampWithMs(); // must have Mover prefix
 		$this->logOn( array( 'Settings' ) );
 		// Don't assertCount() here because the TESTSUITE user could be a real user having UserQuery settings for InDesign/InCopy.
 
