@@ -1,9 +1,7 @@
 <?php
 /**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/zf2 for the canonical source repository
- * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @link      http://github.com/zendframework/zend-math for the canonical source repository
+ * @copyright Copyright (c) 2005-2018 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
@@ -31,7 +29,7 @@ class Gmp implements AdapterInterface
         if (null === $base) {
             // scientific notation
             if (preg_match('#^(?:([1-9])\.)?([0-9]+)[eE]\+?([0-9]+)$#', $operand, $m)) {
-                if (!empty($m[1])) {
+                if (! empty($m[1])) {
                     if ($m[3] < mb_strlen($m[2], '8bit')) {
                         return false;
                     }
@@ -45,7 +43,9 @@ class Gmp implements AdapterInterface
             }
         }
 
-        set_error_handler(function () { /* Do nothing */}, \E_WARNING);
+        set_error_handler(function () {
+ /* Do nothing */
+        }, \E_WARNING);
         $res = gmp_init($sign . $operand, $base);
         restore_error_handler();
         if ($res === false) {

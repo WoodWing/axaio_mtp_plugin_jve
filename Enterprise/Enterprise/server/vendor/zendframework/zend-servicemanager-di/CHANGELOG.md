@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 1.2.0 - 2018-04-30
+
+### Added
+
+- [#16](https://github.com/zendframework/zend-servicemanager-di/pull/16) adds support for 7.2.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- [#16](https://github.com/zendframework/zend-servicemanager-di/pull/16) removes support for HHVM.
+
+### Fixed
+
+- Nothing.
+
 ## 1.1.1 - 2017-09-28
 
 ### Added
