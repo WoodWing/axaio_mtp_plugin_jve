@@ -153,7 +153,7 @@ class HtmlDocument
 				}
 				if( $isadmin ) { // to do: access profile
 					$menu .= '<a id="bullet" class="menu" href="'.$admindir.'actionpropertiesquery.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('QRY_SETUP').'</a><br/>';
-					$adminIcons[] = '<a href="'.$admindir.'actionpropertiesquery.php"><img src="'.$imagedir.'dialogs.gif" border="0" width="32" height="32"/><br/>'.BizResources::localize('QRY_SETUP').'</a>';
+					$adminIcons[] = '<a href="'.$admindir.'actionpropertiesquery.php"><img src="'.$imagedir.'querysetup.gif" border="0" width="32" height="32"/><br/>'.BizResources::localize('QRY_SETUP').'</a>';
 				}
 				if( $isadmin ) { // to do: access profile
 					$menu .= '<a id="bullet" class="menu" href="'.$admindir.'namedqueries.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('MNU_NAMED_QUERY').'</a><br/>';
