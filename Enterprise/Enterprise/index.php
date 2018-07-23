@@ -39,11 +39,24 @@ class WW_WorkflowServiceEntry extends WW_Services_Entry
 	 */
 	public function handleSoap( array $options )
 	{
-		require_once BASEDIR . '/server/protocols/soap/WflServer.php';
-		$server = new WW_SOAP_WflServer( BASEDIR . '/server/interfaces/SCEnterprise.wsdl', $options );
-		if (! $server->wsdlRequest()){
-			if (! $server->handle()){
+		require_once BASEDIR.'/server/protocols/soap/WflServer.php';
+		$server = new WW_SOAP_WflServer( BASEDIR.'/server/interfaces/SCEnterprise.wsdl', $options );
+		if( !$server->wsdlRequest() ) {
+			if( !$server->handle() ) {
 				require_once BASEDIR.'/server/secure.php'; // define ADMIN_INDEX_PAGE
+				$dbDriver = getDbDriverIfConnected();
+				if( !$dbDriver ) {
+					// The admin user might not have setup a table space yet or the DB is not running.
+					// In that case, show connection error and provide link to the dbadmin.php module to setup the DB.
+					raiseDbConnectionErrorAndProvideLinkToDbSetup();
+					exit();
+				}
+				if( !isDbInstalled( $dbDriver ) ) {
+					// The admin user might have prepared a clean database with an empty table space.
+					// In that case, show connection error and provide link to the dbadmin.php module to setup the DB.
+					raiseDbConnectionErrorAndProvideLinkToDbSetup();
+					exit();
+				}
 				header( 'Location: '.ADMIN_INDEX_PAGE );
 			}
 		}
