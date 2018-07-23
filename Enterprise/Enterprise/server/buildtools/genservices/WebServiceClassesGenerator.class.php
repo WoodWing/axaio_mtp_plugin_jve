@@ -1633,6 +1633,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$srvrOutTxt = str_replace( '/*CLASSMAPS*/', $classMaps, $srvrOutTxt );
 		$srvrOutTxt = str_replace( '/*NAMESPACE*/', $this->intfDescriptor->getNameSpace(), $srvrOutTxt );
 		$srvrOutTxt = str_replace( '/*ENTRYPOINT*/', $location, $srvrOutTxt );
+		$srvrOutTxt = str_replace( '/*EXTERNALENTRYPOINT*/', $this->intfDescriptor->getExternalSoapEntryPoint(), $srvrOutTxt );
 
 		// replace /*...*/ markers for client
 		$clntOutTxt = str_replace( '/*PACKAGENAME*/', $this->packageName, $clntOutTxt );

@@ -15,6 +15,7 @@ interface WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface
 	public function getExclDataClasses();
 	public function getWflDataClasses();
 	public function getSoapEntryPoint();
+	public function getExternalSoapEntryPoint();
 	public function getWsdlFilePath();
 	public function getProviderBasePath();
 	public function getPluginNameFull();

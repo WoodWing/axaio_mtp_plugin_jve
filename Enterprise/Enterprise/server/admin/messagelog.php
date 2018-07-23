@@ -7,7 +7,7 @@ require_once( BASEDIR.'/server/utils/HtmlPageNavigator.class.php' );
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 $ticket = checkSecure( 'admin' );
-$nav = new HtmlPageNavigator();
+$nav = new HtmlPageNavigator( '/server/admin/messagelog.php' );
 
 if (!$dbh = DBDriverFactory::gen()) die (BizResources::localize("ERR_DATABASE"));	
 $msg_db = $dbh->tablename('messagelog');

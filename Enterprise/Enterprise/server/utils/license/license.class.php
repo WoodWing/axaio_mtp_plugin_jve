@@ -1384,7 +1384,7 @@ class License
 				// can run at the same IDS machine, or even dispatched over different machines.
 				// We do not want to clear those ticket or else one job could break other running job half way!
 				if( stripos( $appname, 'indesign server' ) === false && // no IDS?
-					stripos( $appname, 'mover' ) !== 0 ) { // no Smart Mover? (It operates under "Mover" name followed by some process id.)
+					!BizSession::isSmartMover( $appname ) ) { // no Smart Mover? (It operates under "Mover" name followed by some process id.)
 					$id = $row[ 'id' ];
 					$sql = "DELETE FROM $db WHERE `id`=$id";
 					if( $this->mLicLog ) {
@@ -1501,7 +1501,7 @@ class License
 				// can run at the same IDS machine, or even dispatched over different machines.
 				// We do not want to clear those ticket or else one job could break other running job half way!
 				if( stripos( $iterAppName, 'indesign server' ) === false && // no IDS?
-					stripos( $iterAppName, 'mover' ) !== 0 ) { // no Smart Mover? (It operates under "Mover" name followed by some process id.)
+					!BizSession::isSmartMover( $iterAppName ) ) { // no Smart Mover? (It operates under "Mover" name followed by some process id.)
 					if( $this->mLicLog ) {
 						LogHandler::Log('license', 'INFO', $deleteReason );
 					}

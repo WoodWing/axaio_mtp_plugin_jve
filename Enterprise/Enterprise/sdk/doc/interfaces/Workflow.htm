@@ -17,7 +17,7 @@
 		td.fcc {} /* foot-comment-column */
 	</style>
 </head>
-<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Workflow interface - Enterprise v10.5</h1></td></table>
+<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Workflow interface - Enterprise v10.4</h1></td></table>
 <br/><h2>Web Services</h2>
 <div class="section"><h3>AddObjectLabels</h3><p> 
 				Assigns an existing dossier label to one or more objects it contains.
@@ -848,11 +848,9 @@
 					     This feature is used for dossier objects that can have an output rendition per edition/device. 
 					     When EditionId is left out, there are no edition/device specific renditions. 
 					     In that case, it should be read as: "for all editions/renditions". </td></tr>
-<tr><td class="bpc">ContentSourceFileLink</td><td class="btc">string*</td><td class="bcc"> v9.7.0: This file link is a direct reference to the location of the file on the Content Source. 
-						 It requires the client/user to logon to that Content Source.
-					</td></tr>
-<tr><td class="bpc">ContentSourceProxyLink</td><td class="btc">string*</td><td class="bcc"> v10.5.0: This proxy link is an indirect reference to the location of the file on the Content Source. 
-						 The file travels over a proxy server. This takes a little overhead but deals with authorization.
+<tr><td class="bpc">ContentSourceFileLink</td><td class="btc">string*</td><td class="bcc"> Since v9.7 the ContentSourceFileLink is added to enable returning references to files instead
+						 of the files themselves. The file link is a direct reference to the location of the file on
+						 the Content Source.
 					</td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="AttachmentContent"><h3>AttachmentContent</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
@@ -1504,7 +1502,7 @@
 <tr><td class="bpc">Slugline</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">Created</td><td class="btc">date (yyyy-mm-dd@hh:mm:ss)</td><td class="bcc"></td></tr>
 <tr><td class="bpc">Object</td><td class="btc">string</td><td class="bcc"> v4.2: object name </td></tr>
-<tr><td class="bpc">State</td><td class="btc"><a href="#State">State</a>*</td><td class="bcc"> v4.2: object status. nillable since 10.5 to support content sources having no workflow statuses. </td></tr>
+<tr><td class="bpc">State</td><td class="btc"><a href="#State">State</a></td><td class="bcc"> v4.2: object status </td></tr>
 <tr><td class="bpc">File</td><td class="btc"><a href="#Attachment">Attachment</a>*</td><td class="bcc"> v4.2: the rendition asked for </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="WorkflowMetaData"><h3>WorkflowMetaData</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
@@ -1657,6 +1655,6 @@
 <tr><td class="btc">"native"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"output"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"trailer"</td><td class="bcc"></td></tr>
-</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 4 Jul 2018</p>
-<p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2018 WoodWing Software bv. All rights reserved.</p></div>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 3 Jul 2018</p>
+<p style="font-size: 9pt;" align="right">Confidential, (c) 1998 WoodWing Software bv. All rights reserved.</p></div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>

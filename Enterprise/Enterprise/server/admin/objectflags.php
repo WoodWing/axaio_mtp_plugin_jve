@@ -7,7 +7,7 @@ require_once BASEDIR.'/server/utils/HtmlPageNavigator.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 $ticket = checkSecure( 'admin' );
-$nav = new HtmlPageNavigator();
+$nav = new HtmlPageNavigator( '/server/admin/objectflags.php' );
 
 if (!$dbh = DBDriverFactory::gen()) die (BizResources::localize("ERR_DATABASE"));	
 $flg_db = $dbh->tablename('objectflags');

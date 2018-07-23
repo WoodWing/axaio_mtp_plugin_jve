@@ -64,7 +64,7 @@ class WW_SOAP_PubServer extends WW_SOAP_Server
 			}
 			// replace default web service location with the real one
 			$contents = str_replace( 'http://127.0.0.1/Enterprise/publishindex.php', 
-				SERVERURL_ROOT.INETROOT.'/server/protocols/soap/PubServer.php', $contents ); // do not use SERVERURL_SCRIPT (or else "?wsdl" gets added to URL)
+				SERVERURL_ROOT.INETROOT.'/publishindex.php', $contents ); // do not use SERVERURL_SCRIPT (or else "?wsdl" gets added to URL)
 			header( 'Content-type: text/xml' );
 			header( 'Content-Length: '.strlen($contents) ); // required for PHP v5.3
 			print $contents;

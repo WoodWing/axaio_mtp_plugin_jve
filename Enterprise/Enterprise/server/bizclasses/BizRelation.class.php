@@ -2333,4 +2333,20 @@ class BizRelation
 	{
 		return count(self::getObjectRelations( $id, null, false, $related, false, false, $type )) > 0;
 	}
+
+	/**
+	 * Returns true if any of the child in $childIds is placed on any layout for more than or equal to $threshold times,
+	 * false otherwise.
+	 *
+	 * @since 10.4.2
+	 * @param int[] $childIds
+	 * @param int $threshold
+	 * @return bool
+	 */
+	public static function isAnyChildPlacedExceedAllowedThreshold( array $childIds, int $threshold=50 ):bool
+	{
+		require_once BASEDIR .'/server/dbclasses/DBObjectRelation.class.php';
+		$manifoldPlacedChildren = DBObjectRelation::childrenPlacedManifold( $childIds, $threshold );
+		return (bool)$manifoldPlacedChildren;
+	}
 }

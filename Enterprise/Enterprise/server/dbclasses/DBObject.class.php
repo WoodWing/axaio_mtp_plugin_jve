@@ -177,10 +177,14 @@ class DBObject extends DBBase
 		$db = $dbDriver->tablename("objects");
 		$user = $dbDriver->toDBString($user);
 
+		if( empty( $arr['creator'] )) {
+			$arr['creator']   = $user; // Only take $user when it is not provided.
+		}
+		if( empty( $arr['modifier'] )) {
+			$arr['modifier']  = $user; // Only take $user when it is not provided.
+		}
 		$arr['storename'] = $dbstorename;
-		$arr['creator']   = $user;
 		$arr['created']   = $created;
-		$arr['modifier']  = $user;
 		$arr['modified']  = $modified;
 
 		$sql = "INSERT INTO $db ( ";

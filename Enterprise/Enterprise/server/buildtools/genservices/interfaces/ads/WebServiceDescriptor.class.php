@@ -9,18 +9,70 @@ require_once BASEDIR.'/server/buildtools/genservices/interfaces/WebServiceDescri
 
 class WW_BuildTools_GenServices_Interfaces_Ads_WebServiceDescriptor implements WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface
 {
-	final public function getServiceNameFull()  { return 'AdmDatSrc'; }
-	final public function getServiceNameShort() { return 'Ads'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/ads/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:PlutusAdmin'; } // not used
-	final public function getExclDataClasses()  { return array(); }
-	final public function getWflDataClasses()   { return array(); }
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/datasourceadminindex.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/PlutusAdmin.wsdl'; }
-	final public function getProviderBasePath() { return BASEDIR.'/server'; }
-	final public function getPluginNameFull()   { return null; }
-	final public function getPluginNameShort()  { return null; }
+	final public function getServiceNameFull()
+	{
+		return 'AdmDatSrc';
+	}
+
+	final public function getServiceNameShort()
+	{
+		return 'Ads';
+	}
+
+	final public function getDataClassesFile()
+	{
+		return BASEDIR.'/server/interfaces/services/ads/DataClasses.php';
+	}
+
+	final public function getDataClassPrefix()
+	{
+		return $this->getServiceNameShort();
+	}
+
+	final public function getNameSpace()
+	{
+		return 'urn:PlutusAdmin';
+	} // not used
+
+	final public function getExclDataClasses()
+	{
+		return array();
+	}
+
+	final public function getWflDataClasses()
+	{
+		return array();
+	}
+
+	final public function getSoapEntryPoint()
+	{
+		return "LOCALURL_ROOT.INETROOT.'/datasourceadminindex.php'";
+	}
+
+	final public function getExternalSoapEntryPoint()
+	{
+		return "SERVERURL_ROOT.INETROOT.'/datasourceadminindex.php'";
+	}
+
+	final public function getWsdlFilePath()
+	{
+		return BASEDIR.'/server/interfaces/PlutusAdmin.wsdl';
+	}
+
+	final public function getProviderBasePath()
+	{
+		return BASEDIR.'/server';
+	}
+
+	final public function getPluginNameFull()
+	{
+		return null;
+	}
+
+	final public function getPluginNameShort()
+	{
+		return null;
+	}
 
 	final public function getUrlToFilePath($serviceName)
 	{

@@ -247,8 +247,8 @@ class SolrSearchEngine extends BizQuery
 			'fields'        => array('ID'),  // Fields returned by Solr. Inbox search only needs the object ID
 		));
 		if( !is_null($query) ) {
-			// Minimal properties needed for "Inbox' query. BZ#16495
-			$minimalPropsInbox = array('ID', 'Type', 'Name', 'State', 'Format', 'LockedBy', 'Category' ,'PublicationId', 'SectionId', 'StateId', 'PubChannelIds');
+			require_once BASEDIR . '/server/bizclasses/BizNamedQuery.class.php';
+			$minimalPropsInbox = BizNamedQuery::getMinimalPropsForInbox( $this->queryMode );
 			if ($this->minimalProps == null || empty($this->minimalProps)) {
 				$this->minimalProps = $minimalPropsInbox;
 			} else {

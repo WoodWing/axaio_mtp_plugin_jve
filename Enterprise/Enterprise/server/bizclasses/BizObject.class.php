@@ -571,6 +571,7 @@ class BizObject
 		$newObject->MetaData->BasicMetaData->DocumentID = null; // to be resolved by SC
 		$newObject->MetaData->BasicMetaData->Name = $object->MetaData->BasicMetaData->Name;
 		$newObject->MetaData->BasicMetaData->Type = $object->MetaData->BasicMetaData->Type;
+		$newObject->MetaData->BasicMetaData->Category = $object->MetaData->BasicMetaData->Category;
 		$newObject->MetaData->BasicMetaData->ContentSource = null;
 		$newObject->MetaData->WorkflowMetaData = new WorkflowMetaData(); // clear wfl props
 		$newObject->MetaData->WorkflowMetaData->State = $object->MetaData->WorkflowMetaData->State;
@@ -682,7 +683,7 @@ class BizObject
 		$state = $newRow['state'];
 
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		if( !$objectLock->isLocked() ) {
 			$sErrorMessage = BizResources::localize( "ERR_NOTLOCKED" ).' '.BizResources::localize( "SAVE_LOCAL" );
 			throw new BizException( null, 'Client', $id, $sErrorMessage );
@@ -852,7 +853,7 @@ class BizObject
 			foreach ($object->Relations as $relation) {
 				// If someone else has object lock, send notification
 				require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-				$objectLock = new BizObjectLock( $relation->Child );
+				$objectLock = new BizObjectLock( intval( $relation->Child ));
 				if ( $objectLock->isLockedByUser( $user ) ) {
 					new smartevent_updateobjectrelation(BizSession::getTicket(), $relation->Child, $relation->Type, $id, $newRow['name']);
 				}
@@ -1329,7 +1330,7 @@ class BizObject
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		if ( $objectLock->isLocked() ) { // Check if object has been locked in the first place (BZ#11254)
 			if( DBUser::isAdminUser( $user ) || // System Admin user.
 				DBUser::isPubAdmin( $user, $curr_row['publication'] ) || // Brand Admin user.
@@ -1343,8 +1344,7 @@ class BizObject
 				}
 			} else { // Different user and non-admin user.
 				$lockedByUser = BizUser::resolveFullUserName( $objectLock->getLockedByShortUserName() );
-				$msg = BizResources::localize('OBJ_LOCKED_BY') . ' ' . $lockedByUser;
-				throw new BizException( null, 'Client',  $id, $msg );
+				throw new BizException( 'ERR_OBJ_LOCKED_BY_USER', 'Client',  $id, null, array( $lockedByUser ) );
 			}
 
 			DBObjectFlag::unlockObjectFlags($id);
@@ -1439,7 +1439,7 @@ class BizObject
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		if( $objectLock->isLocked() && !$objectLock->isLockedBySameUserAndApplication( $user ) ) {
 			// If the object is not locked, just continue. But if it is locked then it must be locked by the current
 			// user/application combination to continue. See EN-90045.
@@ -1738,7 +1738,7 @@ class BizObject
 		require_once BASEDIR.'/server/bizclasses/BizEmail.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 
 		// Validate the requested Objects, we only support Objects that can be found in the database. Alien Objects will
 		// not be present in the database and will therefore be reported. We cannot handle Alien Objects for multi-
@@ -1760,7 +1760,7 @@ class BizObject
 			In case the object cannot be locked we report a standard error which will be placed in the Error reports.
 		*/
 		$user = BizSession::getShortUserName();
-		$lockedObjectIds = DBObjectLock::lockObjects( $invokedObjectIds, $user ); // TODO Add to BizObjectLock
+		$lockedObjectIds = BizObjectLock::lockObjects( $invokedObjectIds, $user );
 		$nonLockedObjectIds = array_diff( $invokedObjectIds, $lockedObjectIds );
 		if( $nonLockedObjectIds ) {
 			foreach( $nonLockedObjectIds as $nonLockedObjectId ) {
@@ -2212,11 +2212,11 @@ class BizObject
 
 			// Release lock
 			if( $lockedObjectIds ) { // Only release the objects where the lock is obtained by this function.
-				DBObjectLock::unlockObjects( $lockedObjectIds, $user ); // TODO Add to BizObjectLock
+				BizObjectLock::unlockObjectsByUser( $lockedObjectIds, $user );
 			}
 		} catch ( BizException $e ) {
 			if( $lockedObjectIds ) { // Only release the objects where the lock is obtained by this function.
-				DBObjectLock::unlockObjects( $lockedObjectIds, $user ); // TODO Add to BizObjectLock
+				BizObjectLock::unlockObjectsByUser( $lockedObjectIds, $user );
 			}
 			throw $e; // This should only happen when there's fatal error, thus bail out all the way after unlocking the objects.
 		}
@@ -3011,7 +3011,6 @@ class BizObject
 		}
 
 		// Create a new dossier for this newly copied object or assign it to a selected dossier (If applicable)
-		// @TODO: Is this fragment of code in used? Needs to be revised.
 		if (! is_null($relations)) {
 			foreach ($relations as $relation){
 				//Since it is Dossier - Object relation, the Object will always be the child while the Dossier being the Parent.
@@ -3053,8 +3052,7 @@ class BizObject
 					self::copyObjectLabelsForRelation($relation->Parent, $relation->Child, $newLabels);
 				}
 			}
-
-			BizRelation::createObjectRelations( $relations, $user, $id, false );
+			BizRelation::createObjectRelations( $relations, $user, $id, true );
 		}
 
 		// Copy also all relations to image-objects
@@ -3469,7 +3467,7 @@ class BizObject
 									'Library' => true,
 									'ArticleTemplate' => true,
 									);
-		if( isset($uniqueIssueTypes[$type])) { // Names must be unique within in the issue (for certain types). 
+		if( isset($uniqueIssueTypes[$type])) { // Names must be unique within in the issue (for certain types).
 			if ( $targets ) { // Names must be unique on (target)issue level.
 				$issueIds = array();
 				foreach( $targets as $target ) { // preparation: collect the issue ids
@@ -3477,14 +3475,14 @@ class BizObject
 						$issueIds[] = $target->Issue->Id;
 					}
 				}
-				if( $issueIds ) { 
+				if( $issueIds ) {
 					require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 					if( self::objectNameExists( $issueIds, $proposedName, $type, $id ) ) {
 						if( $restore || $applyAutoNaming === true ) { // When autonaming is true or restoring an object, unique name will be generated.
 							$proposedName = self::getUniqueObjectName( $id, $proposedName, $issueIds, $type, $restore );
 						} else {
 							throw new BizException( 'ERR_NAME_EXISTS', 'Client', $proposedName );
-						}	
+						}
 					}
 				}
 			}
@@ -3495,7 +3493,7 @@ class BizObject
 					if ( $relation->Type == 'Contained' ) {
 						$proposedName = DBObject::getUniqueNameForChildren( $relation->Parent, $proposedName, $type, $id );
 					}
-				}		
+				}
 			} else { // Existing object
 				require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
 				if ( !DBObjectRelation::getObjectRelations( $id, 'parents', null, false )) {
@@ -3583,8 +3581,8 @@ class BizObject
 		$haveObjectIds = array_map( function( $hv ) { return $hv->ID; }, $haveVersions );
 		$checkedObjects = self::checkAccessRightOnObjectLock( $user, $haveObjectIds );
 		// Lock the objects, so that the version can no longer change by others in the meantime.
-		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
-		$lockedObjectIds = DBObjectLock::lockObjects( $haveObjectIds, $user ); // TODO Add to BizObjectLock
+		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
+		$lockedObjectIds = BizObjectLock::lockObjects( $haveObjectIds, $user );
 
 		// Grab the latest object versions from DB (for those object that could be locked).
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
@@ -3611,7 +3609,7 @@ class BizObject
 					}
 				}
 				if( $currentVersions[$haveVersion->ID] != $haveVersion->Version ) {
-					DBObjectLock::unlockObjects( array($haveVersion->ID), $user ); // TODO Add to BizObjectLock
+					BizObjectLock::unlockObjectsByUser( array($haveVersion->ID), $user );
 					unset( $lockedObjectIds[$haveVersion->ID] );
 					throw new BizException( 'ERR_OBJ_VERSION_MISMATCH', 'Client', $haveVersion->ID );
 				}
@@ -3640,7 +3638,7 @@ class BizObject
 			BizEnterpriseEvent::createMultiObjectEvent( $lockedObjectIds, $metaDataValues );
 		}
 
-		// Return the ids of those objects that we locked by us and for which the caller 
+		// Return the ids of those objects that we locked by us and for which the caller
 		// has the latest version.
 		return array_keys( $lockedObjectIds );
 	}
@@ -3651,7 +3649,7 @@ class BizObject
 		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
 		DBObjectFlag::lockObjectFlags( $id );
-		$objectLock = new BizObjectLock( $id );
+		$objectLock = new BizObjectLock( intval( $id ));
 		$objectLock->lockObject( $user );
 
 		// Notify event plugins
@@ -3852,8 +3850,8 @@ class BizObject
 		DBElement::saveElements( $id, $objectelements );
 
 		// Before delete+create object relations, make sure to remove all InDesignArticles
-		// since this does a cascade delete of their object->placements, which may be 
-		// referenced through the relation->placements as well; Doing this after would 
+		// since this does a cascade delete of their object->placements, which may be
+		// referenced through the relation->placements as well; Doing this after would
 		// destroy the InDesignArticle placements set through the relations.
 		if( !$create && !is_null($object->InDesignArticles) ) {
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
@@ -4324,7 +4322,7 @@ class BizObject
 	public static function restoreLock( $user, $objId, $checkAccess = true)
 	{
 		require_once BASEDIR.'/server/bizclasses/BizObjectLock.class.php';
-		$objectLock = new BizObjectLock( $objId );
+		$objectLock = new BizObjectLock( intval( $objId ));
 		if( !$objectLock->isLocked() ) {
 			self::getObject( $objId, $user, true, 'none', null, null, $checkAccess ); // lock, no content, BZ#17253 - checkAccess false when article created from template
 			// Note: We use getObject to trigger lock events, etc
@@ -6101,8 +6099,8 @@ class BizObject
 	 */
 	static public function createSemaphoreForSaveLayout( $layoutId )
 	{
-		// Take 2 minutes because layouts can be quite large and they need to be copied 
-		// from the transfer server folder to the filestore. Note that the (DIME) file upload 
+		// Take 2 minutes because layouts can be quite large and they need to be copied
+		// from the transfer server folder to the filestore. Note that the (DIME) file upload
 		// time should NOT be taken into account here since that is already completed
 		// at the time the services is executed.
 		$lifeTime = 120;
@@ -6218,15 +6216,15 @@ class BizObject
 	/**
 	 * Checks the if user is entitled to lock the objects.
 	 *
-	 * If the user is not entitled to one of the objects all oobjects will fail.
+	 * If the user is not entitled to one of the objects all objects will fail and BizException is thrown.
 	 *
 	 * @since 10.4.1
 	 * @param string $user
 	 * @param integer[] $objectIds
 	 * @return integer[] List of object ids which can be locked by the user.
-	 * @throws BizException
+	 * @throws BizException When user has no access to any of the objects.
 	 */
-	private static function checkAccessRightOnObjectLock( string $user, array $objectIds ): array
+	public static function checkAccessRightOnObjectLock( string $user, array $objectIds ): array
 	{
 		$checkedObjects = array();
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';

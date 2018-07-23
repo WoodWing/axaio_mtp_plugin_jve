@@ -1351,8 +1351,8 @@ function main()
                 // sort all pages of found array by walking through pages ( must be pagesequence )
                 var myDocPages = myDoc.pages;
                 var myDocPagesLen = myDocPages.length;
-                var myDocPrefPageWidth = myDoc.documentPreferences.pageWidth;
-                var myDocPrefPageHeight = myDoc.documentPreferences.pageHeight;
+                var pageWidth = 0;
+                var pageHeight = 0;
                 var currentSectionIdx = 0;
                 var pgSecIdx = 0;
                 for( var pgIdx = 0; pgIdx < myDocPagesLen; pgIdx++, pgSecIdx++ )
@@ -1379,10 +1379,12 @@ function main()
                         var finalPageName = oPage.name;
                         // page order = start of section + page index within the section.
                         var pageOrder = section.pageNumberStart + pgSecIdx;
+                        pageWidth = oPage.bounds[3] -  oPage.bounds[1];
+                        pageHeight = oPage.bounds[2] -  oPage.bounds[0];
 
                         composeData.push( '\t\t<page side="' + pageSide2Text(oPage.side) +
                             '" name="' + escape(finalPageName) + '" sequence="' + (pgIdx+1) +
-                            '" width="' + myDocPrefPageWidth + '" height="' + myDocPrefPageHeight +
+                            '" width="' + pageWidth + '" height="' + pageHeight +
                             '" order= "' + pageOrder  + '"/>\n' );
                     }
                 }

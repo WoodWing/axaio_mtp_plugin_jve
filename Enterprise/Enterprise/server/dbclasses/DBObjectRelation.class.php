@@ -642,14 +642,14 @@ class DBObjectRelation extends DBBase
 		
 	}
 	/**
-	 * Checks if an object, used as child, has more than $manifold relations.
+	 * Checks if a list of objects, used as child, has more than $manifold relations.
 	 *
 	 * It is not about 'related' relations but especially  'placed' and 'contained'
 	 * relations.
 	 *
 	 * @param array $childIds 	Array of child ids.
 	 * @param int $manifold Threshold value for manifold placed objects.
-	 * @return array with the ids of manifold used child objects.
+	 * @return array List of child objects id of which its relations exceed $manifold relations.
 	 */
 	public static function childrenPlacedManifold( array $childIds, $manifold )
 	{

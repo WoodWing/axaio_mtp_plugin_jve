@@ -8,9 +8,13 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDSPreview_TestCase extends TestCase
 {
+	/** @var WW_Utils_TestSuite $globalUtils */
 	private $globalUtils = null;
+	/** @var BizTransferServer $transferServer */
 	private $transferServer = null;
+	/** @var string $ticket */
 	private $ticket = null;
+	/** @var string $user */
 	private $user = null;
 
 	// General properties
@@ -54,27 +58,27 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 	final public function runTest()
 	{
 		try {
-//			$this->setupTestData();
-//
-//			$this->testService001(); // WflCreateObjects
-//			$this->testService002(); // WflCreateObjects
-//			$this->testService003(); // WflCreateObjects
-//			$this->testService004(); // WflCreateObjects
-//			$this->testService005(); // WflCreateObjects
-//			$this->testService006(); // WflCreateObjects
-//			$this->testService007(); // WflSaveObjects
-//			$this->testService008(); // WflUnlockObjects
-//			$this->testService009(); // ObjectOperations
-//			$this->testService010(); // Jobindex.php
-//			$this->testService011(); // WflGetObjects
-//			$this->testService012(); // WflCreateArticleWorkspace
-//			$this->testService013(); // WflPreviewArticlesAtWorkspace
-//			$this->testService014(); // WflSaveObjects
-//			$this->testService015(); // WflDeleteArticleWorkspace
+			$this->setupTestData();
+
+			$this->testService001(); // WflCreateObjects
+			$this->testService002(); // WflCreateObjects
+			$this->testService003(); // WflCreateObjects
+			$this->testService004(); // WflCreateObjects
+			$this->testService005(); // WflCreateObjects
+			$this->testService006(); // WflCreateObjects
+			$this->testService007(); // WflSaveObjects
+			$this->testService008(); // WflUnlockObjects
+			$this->testService009(); // ObjectOperations
+			$this->testService010(); // Jobindex.php
+			$this->testService011(); // WflGetObjects
+			$this->testService012(); // WflCreateArticleWorkspace
+			$this->testService013(); // WflPreviewArticlesAtWorkspace
+			$this->testService014(); // WflSaveObjects
+			$this->testService015(); // WflDeleteArticleWorkspace
 		} catch( BizException $e ) {
 		}
 		// Remove all the test data objects and the test issue.
-//		$this->tearDownTestData();
+		$this->tearDownTestData();
 
 	}
 

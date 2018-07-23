@@ -24,12 +24,12 @@ class HtmlPageNavigator
 {
 	protected $thisurl = null;
 
-	public function __construct()
+	public function __construct( $source )
 	{
 		$this->backcount = @$_REQUEST['BackCount'];
 		if( $this->backcount == '' ) $this->backcount = 0;
 		$this->backcount -= 1;
-		$this->thisurl = INETROOT.'/server/utils/HtmlPageNavigator.class.php'.'?BackCount='.$this->backcount;
+		$this->thisurl = INETROOT.$source.'?BackCount='.$this->backcount;
 	}
 
 	public function GetBackIconButton()
