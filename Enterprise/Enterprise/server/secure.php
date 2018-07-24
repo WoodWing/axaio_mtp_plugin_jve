@@ -51,9 +51,9 @@ function checkSecure( $app = null, $userPwdExpir = null, $redir=true, $ticket=nu
 					raiseDbConnectionErrorAndProvideLinkToDbSetup();
 					exit();
 				}
+				header( 'Location: '.LOGINPHP );
+				exit();
 			}
-			header( 'Location: '.LOGINPHP );
-			exit();
 		}
 		try {
 			$user = BizSession::checkTicket( $ticket );
