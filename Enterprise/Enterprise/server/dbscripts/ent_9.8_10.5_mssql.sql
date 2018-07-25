@@ -263,8 +263,6 @@ EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_settings'
 SET @sql = 'ALTER TABLE smart_settings DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_settings ALTER COLUMN   [id] bigint NOT NULL ;
-ALTER TABLE [smart_states] ADD 
-  [skipidsa] char(2) NOT NULL  default '';
 CREATE  INDEX [cost_states] ON [smart_states]([code], [state]) ;
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_tickets', @columnName = 'id', @constraintName = @constraintName OUTPUT
@@ -483,7 +481,6 @@ DROP INDEX [smart_indesignserverjobs].[objid_indesignserverjobs] ;
 ALTER TABLE smart_indesignserverjobs ALTER COLUMN   [objid] bigint NOT NULL ;
 CREATE  INDEX [objid_indesignserverjobs] ON [smart_indesignserverjobs]([objid]) ;
 ALTER TABLE [smart_indesignserverjobs] ADD DEFAULT (0) FOR [objid];
-CREATE  INDEX [lt_indesignserverjobs] ON [smart_indesignserverjobs]([locktoken]) ;
 ALTER TABLE [smart_serverplugins] ADD 
   [dbprefix] varchar(10) NOT NULL  default '',
   [dbversion] varchar(10) NOT NULL  default '';
@@ -541,4 +538,4 @@ ALTER TABLE [smart_objectrelationlabels] ADD PRIMARY KEY ([labelid], [childobjid
 CREATE  INDEX [objrellabels_childobjid] ON [smart_objectrelationlabels]([childobjid]) ;
 ALTER TABLE [smart_objectrelationlabels] ADD DEFAULT ('0') FOR [childobjid];
 DROP PROCEDURE [dbo].[SCE_GetConstraintName];
-UPDATE [smart_config] set [value] = '10.4' where [name] = 'version';
+UPDATE [smart_config] set [value] = '10.5' where [name] = 'version';

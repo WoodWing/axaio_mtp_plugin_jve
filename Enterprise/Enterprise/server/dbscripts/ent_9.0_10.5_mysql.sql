@@ -1,7 +1,4 @@
 ALTER TABLE `smart_actionproperties`
-ADD   `parentfieldid` int(11) NOT NULL  default '0',
-ADD   `documentid` varchar(512) NOT NULL  default '',
-ADD   `initialheight` int(4) NOT NULL  default '0',
 ADD   `multipleobjects` char(2) NOT NULL  default '';
 ALTER TABLE `smart_actionproperties` CHANGE `orderid`   `orderid` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_authorizations`
@@ -20,8 +17,6 @@ ADD   `appname` varchar(200) NOT NULL  default '',
 ADD   `appversion` varchar(200) NOT NULL  default '';
 ALTER TABLE `smart_objectlocks` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectlocks` CHANGE `object`   `object` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_objectrelations`
-ADD   `parenttype` varchar(20) NOT NULL  default '';
 ALTER TABLE `smart_objectrelations` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectrelations` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelations` CHANGE `child`   `child` bigint(11) NOT NULL  default '0';
@@ -40,7 +35,6 @@ ALTER TABLE `smart_objectrenditions` CHANGE `objid`   `objid` bigint(11) NOT NUL
 ALTER TABLE `smart_pages` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_pages` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_placements`
-ADD   `formwidgetid` varchar(200) NOT NULL  default '',
 ADD   `frametype` varchar(20) NOT NULL  default '',
 ADD   `splineid` varchar(200) NOT NULL  default '';
 ALTER TABLE `smart_placements` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
@@ -77,22 +71,15 @@ CREATE TABLE `smart_objectoperations` (
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `objid_objectoperations` ON `smart_objectoperations`(`objid`) ;
 ALTER TABLE `smart_properties`
-ADD   `adminui` varchar(2) NOT NULL  default 'on',
-ADD   `propertyvalues` blob NOT NULL ,
-ADD   `minresolution` varchar(200) NOT NULL  default '',
-ADD   `maxresolution` varchar(200) NOT NULL  default '',
-ADD   `publishsystem` varchar(64) NOT NULL  default '',
-ADD   `templateid` bigint(11) NOT NULL  default 0,
 ADD   `termentityid` int(11) NOT NULL  default '0',
 ADD   `suggestionentity` varchar(200) NOT NULL  default '';
-ALTER TABLE `smart_properties` CHANGE `maxlen`   `maxlen` bigint(8) NOT NULL  default '0';
+ALTER TABLE `smart_properties` CHANGE `templateid`   `templateid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_publications`
 ADD   `calculatedeadlines` char(2) NOT NULL  default '';
 ALTER TABLE `smart_publobjects` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_routing` CHANGE `routeto`   `routeto` varchar(255) NOT NULL  default '';
 ALTER TABLE `smart_settings` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_states`
-ADD   `readyforpublishing` char(2) NOT NULL  default '',
 ADD   `phase` varchar(40) NOT NULL  default 'Production',
 ADD   `skipidsa` char(2) NOT NULL  default '';
 CREATE  INDEX `cost_states` ON `smart_states`(`code`, `state`) ;
@@ -267,8 +254,4 @@ CREATE TABLE `smart_objectrelationlabels` (
   PRIMARY KEY (`labelid`, `childobjid`)
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `objrellabels_childobjid` ON `smart_objectrelationlabels`(`childobjid`) ;
-ALTER TABLE `smart_channeldata`
-ADD   `publication` int(11) NOT NULL  default '0',
-ADD   `pubchannel` int(11) NOT NULL  default '0';
-ALTER TABLE `smart_channeldata` DROP PRIMARY KEY, ADD PRIMARY KEY (`publication`, `pubchannel`, `issue`, `section`, `name`);
-UPDATE `smart_config` set `value` = '10.4' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.5' where `name` = 'version';

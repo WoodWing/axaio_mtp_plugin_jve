@@ -122,6 +122,11 @@ CREATE  INDEX `puob_publplchist` ON `smart_publishedplcmtshist`(`publishid`, `ob
 ALTER TABLE `smart_targeteditions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_targeteditions` CHANGE `targetid`   `targetid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_indesignservers`
+ADD   `prio1` char(2) NOT NULL  default 'on',
+ADD   `prio2` char(2) NOT NULL  default 'on',
+ADD   `prio3` char(2) NOT NULL  default 'on',
+ADD   `prio4` char(2) NOT NULL  default 'on',
+ADD   `prio5` char(2) NOT NULL  default 'on',
 ADD   `locktoken` varchar(40) NOT NULL  default '';
 ALTER TABLE `smart_indesignserverjobs`
 ADD   `jobid` varchar(40) NOT NULL  default '',
@@ -133,6 +138,7 @@ ADD   `jobcondition` int(11) NOT NULL  default 0,
 ADD   `jobprogress` int(11) NOT NULL  default 0,
 ADD   `attempts` int(11) NOT NULL  default 0,
 ADD   `pickuptime` varchar(30) NOT NULL  default '',
+ADD   `prio` mediumint(1) NOT NULL  default '3',
 ADD   `ticketseal` varchar(40) NOT NULL  default '',
 ADD   `ticket` varchar(40) NOT NULL  default '',
 ADD   `actinguser` varchar(40) NOT NULL  default '',
@@ -141,23 +147,28 @@ ADD   `servicename` varchar(32) NOT NULL  default '',
 ADD   `context` varchar(64) NOT NULL  default '';
 ALTER TABLE `smart_indesignserverjobs` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_indesignserverjobs` CHANGE `errormessage`   `errormessage` varchar(1024) NOT NULL  default '';
+CREATE  INDEX `prid_indesignserverjobs` ON `smart_indesignserverjobs`(`prio`, `jobid`) ;
 CREATE  INDEX `ts_indesignserverjobs` ON `smart_indesignserverjobs`(`ticketseal`) ;
 CREATE  INDEX `ttjtstrt_indesignserverjobs` ON `smart_indesignserverjobs`(`ticket`, `jobtype`, `starttime`, `readytime`) ;
 CREATE  INDEX `jp_indesignserverjobs` ON `smart_indesignserverjobs`(`jobprogress`) ;
 CREATE  INDEX `jspr_indesignserverjobs` ON `smart_indesignserverjobs`(`jobstatus`, `prio`, `queuetime`) ;
 CREATE  INDEX `lt_indesignserverjobs` ON `smart_indesignserverjobs`(`locktoken`) ;
 ALTER TABLE `smart_indesignserverjobs` CHANGE `id` `id` int(11) NOT NULL, DROP PRIMARY KEY, ADD PRIMARY KEY (`jobid`);
-ALTER TABLE `smart_indesignserverjobs` DROP INDEX `prid_indesignserverjobs`, ADD INDEX `prid_indesignserverjobs` (`prio`, `jobid`) ;
 ALTER TABLE `smart_indesignserverjobs` DROP `id`;
 ALTER TABLE `smart_indesignserverjobs` DROP `exclusivelock`;
+ALTER TABLE `smart_serverjobs`
+ADD   `errormessage` varchar(1024) NOT NULL  default '';
 ALTER TABLE `smart_serverplugins`
 ADD   `dbprefix` varchar(10) NOT NULL  default '',
 ADD   `dbversion` varchar(10) NOT NULL  default '';
+ALTER TABLE `smart_semaphores`
+ADD   `lifetime` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_semaphores` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_placementtiles` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_placementtiles` CHANGE `placementid`   `placementid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectlabels` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectlabels` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_objectlabels` CHANGE `name`   `name` varchar(250) NOT NULL  default '';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `labelid`   `labelid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `childobjid`   `childobjid` bigint(11) NOT NULL  default '0';
-UPDATE `smart_config` set `value` = '10.4' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.5' where `name` = 'version';

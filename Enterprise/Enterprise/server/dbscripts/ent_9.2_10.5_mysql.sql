@@ -1,5 +1,3 @@
-ALTER TABLE `smart_actionproperties`
-ADD   `multipleobjects` char(2) NOT NULL  default '';
 ALTER TABLE `smart_actionproperties` CHANGE `orderid`   `orderid` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_authorizations`
 ADD   `bundle` int(11) NOT NULL  default '0';
@@ -70,14 +68,8 @@ CREATE TABLE `smart_objectoperations` (
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `objid_objectoperations` ON `smart_objectoperations`(`objid`) ;
-ALTER TABLE `smart_properties`
-ADD   `termentityid` int(11) NOT NULL  default '0',
-ADD   `suggestionentity` varchar(200) NOT NULL  default '';
 ALTER TABLE `smart_properties` CHANGE `templateid`   `templateid` bigint(11) NOT NULL  default 0;
-ALTER TABLE `smart_publications`
-ADD   `calculatedeadlines` char(2) NOT NULL  default '';
 ALTER TABLE `smart_publobjects` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_routing` CHANGE `routeto`   `routeto` varchar(255) NOT NULL  default '';
 ALTER TABLE `smart_settings` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_states`
 ADD   `phase` varchar(40) NOT NULL  default 'Production',
@@ -87,30 +79,9 @@ ALTER TABLE `smart_tickets`
 ADD   `masterticketid` varchar(40) NOT NULL  default '';
 ALTER TABLE `smart_tickets` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 CREATE  INDEX `mtid_tickets` ON `smart_tickets`(`masterticketid`) ;
-
-CREATE TABLE `smart_termentities` (
-  `id` int(11) NOT NULL  auto_increment,
-  `name` varchar(255) NOT NULL  default '',
-  `provider` varchar(40) NOT NULL  default '',
-  `publishsystemid` varchar(40) NOT NULL  default '',
-  PRIMARY KEY (`id`)
-) DEFAULT CHARSET=utf8;
-CREATE  INDEX `te_name` ON `smart_termentities`(`name`) ;
-CREATE  INDEX `te_provider` ON `smart_termentities`(`provider`) ;
-CREATE  INDEX `te_termentity` ON `smart_termentities`(`name`, `provider`) ;
-
-CREATE TABLE `smart_terms` (
-  `entityid` bigint(11) NOT NULL  default '0',
-  `displayname` varchar(255) NOT NULL  default '',
-  `normalizedname` varchar(255) NOT NULL  default '',
-  `ligatures` varchar(255) NOT NULL  default '',
-  PRIMARY KEY (`entityid`, `displayname`)
-) DEFAULT CHARSET=utf8;
-CREATE  INDEX `tm_entityid` ON `smart_terms`(`entityid`) ;
-CREATE  INDEX `tm_normalizedname` ON `smart_terms`(`entityid`, `normalizedname`) ;
+ALTER TABLE `smart_terms` CHANGE `entityid`   `entityid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_users`
 ADD   `importonlogon` char(2) NOT NULL  default '';
-ALTER TABLE `smart_users` CHANGE `pass`   `pass` varchar(128) NOT NULL  default '';
 ALTER TABLE `smart_mtpsentobjects` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_messagelog` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_objectflags` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
@@ -129,23 +100,12 @@ ALTER TABLE `smart_appsessions` CHANGE `templateid`   `templateid` bigint(11) NO
 ALTER TABLE `smart_appsessions` CHANGE `layoutid`   `layoutid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_dsqueryplacements` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_dsobjupdates` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_channels`
-ADD   `suggestionprovider` varchar(64) NOT NULL  default '',
-ADD   `publishsystemid` varchar(40) NOT NULL  default '';
-ALTER TABLE `smart_issues`
-ADD   `calculatedeadlines` char(2) NOT NULL  default '';
 ALTER TABLE `smart_targets` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_targets` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_targets` CHANGE `objectrelationid`   `objectrelationid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_publishhistory`
-ADD   `user` varchar(255) NOT NULL  default '';
 ALTER TABLE `smart_publishhistory` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_publishhistory` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_pubpublishedissues` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
-ALTER TABLE `smart_publishedobjectshist`
-ADD   `objectname` varchar(255) NOT NULL  default '',
-ADD   `objecttype` varchar(40) NOT NULL  default '',
-ADD   `objectformat` varchar(128) NOT NULL  default '';
 ALTER TABLE `smart_publishedobjectshist` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_publishedobjectshist` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_publishedobjectshist` CHANGE `publishid`   `publishid` bigint(11) NOT NULL  default '0';
@@ -194,7 +154,6 @@ ALTER TABLE `smart_indesignserverjobs` CHANGE `objid`   `objid` bigint(11) NOT N
 ALTER TABLE `smart_indesignserverjobs` CHANGE `errormessage`   `errormessage` varchar(1024) NOT NULL  default '';
 ALTER TABLE `smart_indesignserverjobs` CHANGE `servermajorversion`   `minservermajorversion` mediumint(9) NOT NULL  default '0';
 ALTER TABLE `smart_indesignserverjobs` CHANGE `serverminorversion`   `minserverminorversion` mediumint(9) NOT NULL  default '0';
-CREATE  INDEX `objid_indesignserverjobs` ON `smart_indesignserverjobs`(`objid`) ;
 CREATE  INDEX `prid_indesignserverjobs` ON `smart_indesignserverjobs`(`prio`, `jobid`) ;
 CREATE  INDEX `ts_indesignserverjobs` ON `smart_indesignserverjobs`(`ticketseal`) ;
 CREATE  INDEX `ttjtstrt_indesignserverjobs` ON `smart_indesignserverjobs`(`ticket`, `jobtype`, `starttime`, `readytime`) ;
@@ -239,19 +198,9 @@ ADD   `lifetime` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_semaphores` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_placementtiles` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_placementtiles` CHANGE `placementid`   `placementid` bigint(11) NOT NULL  default '0';
-
-CREATE TABLE `smart_objectlabels` (
-  `id` bigint(11) NOT NULL  auto_increment,
-  `objid` bigint(11) NOT NULL  default '0',
-  `name` varchar(250) NOT NULL  default '',
-  PRIMARY KEY (`id`)
-) DEFAULT CHARSET=utf8;
-CREATE  INDEX `objlabels_objid` ON `smart_objectlabels`(`objid`) ;
-
-CREATE TABLE `smart_objectrelationlabels` (
-  `labelid` bigint(11) NOT NULL  default '0',
-  `childobjid` bigint(11) NOT NULL  default '0',
-  PRIMARY KEY (`labelid`, `childobjid`)
-) DEFAULT CHARSET=utf8;
-CREATE  INDEX `objrellabels_childobjid` ON `smart_objectrelationlabels`(`childobjid`) ;
-UPDATE `smart_config` set `value` = '10.4' where `name` = 'version';
+ALTER TABLE `smart_objectlabels` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
+ALTER TABLE `smart_objectlabels` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_objectlabels` CHANGE `name`   `name` varchar(250) NOT NULL  default '';
+ALTER TABLE `smart_objectrelationlabels` CHANGE `labelid`   `labelid` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_objectrelationlabels` CHANGE `childobjid`   `childobjid` bigint(11) NOT NULL  default '0';
+UPDATE `smart_config` set `value` = '10.5' where `name` = 'version';

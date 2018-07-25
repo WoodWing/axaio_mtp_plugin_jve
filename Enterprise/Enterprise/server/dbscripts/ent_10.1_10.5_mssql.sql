@@ -524,4 +524,4 @@ ALTER TABLE [smart_objectrelationlabels] ADD PRIMARY KEY ([labelid], [childobjid
 CREATE  INDEX [objrellabels_childobjid] ON [smart_objectrelationlabels]([childobjid]) ;
 ALTER TABLE [smart_objectrelationlabels] ADD DEFAULT ('0') FOR [childobjid];
 DROP PROCEDURE [dbo].[SCE_GetConstraintName];
-UPDATE [smart_config] set [value] = '10.4' where [name] = 'version';
+UPDATE [smart_config] set [value] = '10.5' where [name] = 'version';
