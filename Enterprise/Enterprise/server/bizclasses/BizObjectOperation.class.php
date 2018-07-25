@@ -11,8 +11,6 @@
  * are assumed to be processed and so they are removed (from DB). When the layout object
  * is purged from Trash Can, the operations are cascade deleted from DB.
  *
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v9.8
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

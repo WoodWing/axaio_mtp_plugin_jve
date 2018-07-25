@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v4.2
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
@@ -5976,22 +5974,22 @@ class BizObject
 	 *
 	 * @param string $alienId
 	 * @param string $userToCheck
-	 * @return AdmUser
+	 * @return AdmUser|null
 	 * @throws BizException in case of an error
 	 */
 	private static function getOrCreateResolvedUser( $alienId, $userToCheck )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizLDAP.class.php';
-		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 
 		// The user is not found (check for username or fullname)
-		if ( is_null( DBUser::findUser( null, $userToCheck, $userToCheck) ) ) {
+		if( is_null( DBUser::findUser( null, $userToCheck, $userToCheck ) ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizLDAP.class.php';
 			if( BizLDAP::isInstalled() ) {
-				$userObj = self::completeUserFromContentSource($alienId, $userToCheck);
-				return DBUser::createUserObj($userObj);
+				$userObj = self::completeUserFromContentSource( $alienId, $userToCheck );
+				return DBUser::createUserObj( $userObj );
 			} else {
-				throw new BizException('ERR_INVALID_PROPERTY', 'Client', 'Unknown user: ' . $userToCheck);
+				throw new BizException( 'ERR_INVALID_PROPERTY', 'Client', 'Unknown user: '.$userToCheck );
 			}
 		}
 		return null;

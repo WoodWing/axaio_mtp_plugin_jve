@@ -4,8 +4,6 @@
  *
  * It supports multiple phases per operation, each having its own progress bar.
  *
- * @package Enterprise
- * @subpackage ServerPlugins
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

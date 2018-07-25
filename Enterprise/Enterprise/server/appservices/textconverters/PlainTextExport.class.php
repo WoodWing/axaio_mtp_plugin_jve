@@ -5,8 +5,6 @@
  * Converts from collection of XHTML frames that have been edit in TinMCE frames back into plain text format.
  * See {@link TextExport} interface for more details.
  *
- * @package SCEnterprise
- * @subpackage WebEditor
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

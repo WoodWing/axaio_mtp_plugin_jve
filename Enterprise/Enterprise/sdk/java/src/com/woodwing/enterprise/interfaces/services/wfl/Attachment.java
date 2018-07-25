@@ -22,6 +22,8 @@ public class Attachment  implements java.io.Serializable {
 
     private java.lang.String contentSourceFileLink;
 
+    private java.lang.String contentSourceProxyLink;
+
     public Attachment() {
     }
 
@@ -32,7 +34,8 @@ public class Attachment  implements java.io.Serializable {
            java.lang.String filePath,
            java.lang.String fileUrl,
            java.lang.String editionId,
-           java.lang.String contentSourceFileLink) {
+           java.lang.String contentSourceFileLink,
+           java.lang.String contentSourceProxyLink) {
            this.rendition = rendition;
            this.type = type;
            this.content = content;
@@ -40,6 +43,7 @@ public class Attachment  implements java.io.Serializable {
            this.fileUrl = fileUrl;
            this.editionId = editionId;
            this.contentSourceFileLink = contentSourceFileLink;
+           this.contentSourceProxyLink = contentSourceProxyLink;
     }
 
 
@@ -182,6 +186,26 @@ public class Attachment  implements java.io.Serializable {
         this.contentSourceFileLink = contentSourceFileLink;
     }
 
+
+    /**
+     * Gets the contentSourceProxyLink value for this Attachment.
+     * 
+     * @return contentSourceProxyLink
+     */
+    public java.lang.String getContentSourceProxyLink() {
+        return contentSourceProxyLink;
+    }
+
+
+    /**
+     * Sets the contentSourceProxyLink value for this Attachment.
+     * 
+     * @param contentSourceProxyLink
+     */
+    public void setContentSourceProxyLink(java.lang.String contentSourceProxyLink) {
+        this.contentSourceProxyLink = contentSourceProxyLink;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof Attachment)) return false;
@@ -214,7 +238,10 @@ public class Attachment  implements java.io.Serializable {
               this.editionId.equals(other.getEditionId()))) &&
             ((this.contentSourceFileLink==null && other.getContentSourceFileLink()==null) || 
              (this.contentSourceFileLink!=null &&
-              this.contentSourceFileLink.equals(other.getContentSourceFileLink())));
+              this.contentSourceFileLink.equals(other.getContentSourceFileLink()))) &&
+            ((this.contentSourceProxyLink==null && other.getContentSourceProxyLink()==null) || 
+             (this.contentSourceProxyLink!=null &&
+              this.contentSourceProxyLink.equals(other.getContentSourceProxyLink())));
         __equalsCalc = null;
         return _equals;
     }
@@ -254,6 +281,9 @@ public class Attachment  implements java.io.Serializable {
         }
         if (getContentSourceFileLink() != null) {
             _hashCode += getContentSourceFileLink().hashCode();
+        }
+        if (getContentSourceProxyLink() != null) {
+            _hashCode += getContentSourceProxyLink().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -305,6 +335,13 @@ public class Attachment  implements java.io.Serializable {
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("contentSourceFileLink");
         elemField.setXmlName(new javax.xml.namespace.QName("", "ContentSourceFileLink"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("contentSourceProxyLink");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "ContentSourceProxyLink"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setMinOccurs(0);
         elemField.setNillable(true);

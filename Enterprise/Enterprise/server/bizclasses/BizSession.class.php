@@ -1,9 +1,7 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	BizServices
- * @since 		v4.2
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @since      v4.2
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * There are PHP sessions and web service ‘sessions', which are quite different.
  * A PHP session is started to handle an incoming service request. However,
@@ -22,8 +20,12 @@
 
 class BizSession
 {
+	/** @var array Session user info. Contains a full DB row (all fields) of the smart_users table of the acting user. */
 	private static $userRow;
-	private static $userName;	// Set after logon and when ticket is checked
+
+	/** @var string|bool Enterprise System ID (GUID) */
+	private static $enterpriseSystemId = false;
+	
 	/**
 	 * BZ#22501.
 	 * To keep track how many sessions are running.
@@ -57,7 +59,6 @@ class BizSession
 	private static $sessionCache = array();
 	/**
 	 * The namespace used by BizSession in $_SESSION
-	 *
 	 */
 	const SESSION_NAMESPACE = 'WW_Biz_Session';
 
@@ -72,13 +73,13 @@ class BizSession
 	static private $directCommit = false;
 
 	/**
-	 * getShortUserName
+	 * Return the short name of the session user.
 	 *
-	 * @return string	short user name
+	 * @return string	User's short name.
 	 */
 	public static function getShortUserName()
 	{
-		return self::$userName;
+		return self::$userRow['user'];
 	}
 
 	/**
@@ -126,14 +127,9 @@ class BizSession
 	 */
 	public static function getUserInfo( $key )
 	{
-		// get user info from DB if we don't have it yet
-		if( !isset(self::$userRow) || self::getShortUserName() != self::$userRow['user'] ) { // EN-84724
-			require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-			$row = DBUser::getUser( self::getShortUserName() );
-			if( !$row ) { // Whether FALSE (empty) or NULL (error), bail out if we couldn't get user info:
-				throw new BizException( 'ERR_NOTFOUND', 'Client', self::getShortUserName() );
-			}
-			self::$userRow = $row;
+		if( !self::$userRow ) {
+			$detail = __METHOD__.' called before initializing BizSession class.';
+			throw new BizException( 'ERR_ERROR', 'Client', $detail );
 		}
 		switch( $key )
 		{
@@ -161,14 +157,9 @@ class BizSession
 	 */
 	public static function getUser()
 	{
-		// get user info from DB if we don't have it yet
-		if( !isset(self::$userRow) || self::getShortUserName() != self::$userRow['user'] ) { // EN-84724
-			require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-			$row = DBUser::getUser( self::getShortUserName() );
-			if( !$row ) { // Whether FALSE (empty) or NULL (error), bail out if we couldn't get user info:
-				throw new BizException( 'ERR_NOTFOUND', 'Client', self::getShortUserName() );
-			}
-			self::$userRow = $row;
+		if( !self::$userRow ) {
+			$detail = __METHOD__.' called before initializing BizSession class.';
+			throw new BizException( 'ERR_ERROR', 'Client', $detail );
 		}
 
 		// Remove the # prefix from color.
@@ -187,6 +178,26 @@ class BizSession
 		$user->TrackChangesColor = $trackChangesColor;
 		$user->EmailAddress = self::$userRow['email'];
 		return $user;
+	}
+
+	/**
+	 * Repopulates the cached user info (self::$userRow) in case $userShort was not cached before.
+	 *
+	 * @since 10.5.0
+	 * @param string $userShort
+	 * @throws BizException
+	 */
+	private static function initUserInfo( $userShort )
+	{
+		// get user info from DB if we don't have it yet
+		if( !self::$userRow || $userShort != self::$userRow['user'] ) {
+			require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+			$row = DBUser::getUser( $userShort );
+			if( !$row ) { // Whether FALSE (empty) or NULL (error), bail out if we couldn't get user info:
+				throw new BizException( 'ERR_NOTFOUND', 'Client', $userShort );
+			}
+			self::$userRow = $row;
+		}
 	}
 
 	/**
@@ -228,7 +239,6 @@ class BizSession
 		// Note that the $user variable will be updated here (and set to the short user name)
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		self::$userRow = DBUser::checkUser( $user ); // normalizes $user ! 
-		self::$userName = $user;
 
 		// If empty password, create standard password, to avoid differences in crypt
 		$pass = self::getUserInfo('pass');
@@ -318,6 +328,14 @@ class BizSession
 
 	/**
 	 * Sets or updates the ticket cookie for the webservices.
+	 *
+	 * For example, the user could run CS and the CS Management Console client applications in the same web browser and so:
+	 * - The web browser lets both clients share the same connection URL to this Enterprise Server.
+	 * - Each client will have its own ticket. The user is logged in twice to Enterprise and takes two seats.
+	 * - There are two tickets stored in the cookie jar. That is why the tickets entry is a collection of tickets.
+	 * - Enterprise Server has to find out which of the two tickets should be picked by checking the client app name.
+	 *
+	 * Note that the Publication Overview and the Trash Can apps are sub-apps of CS and so they share the same ticket with CS.
 	 *
 	 * @since 10.2.0
 	 * @param string $ticket
@@ -413,10 +431,8 @@ class BizSession
 		self::startSession($ticketid);
 		self::setRunMode( self::RUNMODE_SYNCHRON );
 
-		// Store username that is accessible via public getShortUserName:
-		if( !isset(self::$userName) ) {
-			self::$userName = $shortUser;
-		}
+		// Clear the cached $userRow to make sure the getUserInfo() function (re)builds it from DB.
+		self::initUserInfo( $shortUser );
 		$userId = self::getUserInfo('id');
 
 		// Support cookie enabled sessions for JSON clients that run multiple web applications which need to share the
@@ -568,6 +584,9 @@ class BizSession
 		// Add the ContentSourceFileLinks feature to the FeatureSet.
 		self::addFeatureForContentSourceFileLinks( $serverInfo );
 
+		// Add the ContentSourceProxyLinks feature to the FeatureSet.
+		self::addFeatureForContentSourceProxyLinks( $serverInfo );
+
 		// Add Output Devices to the FeatureSet.
 		require_once BASEDIR.'/server/bizclasses/BizAdmOutputDevice.class.php';
 		$bizDevice = new BizAdmOutputDevice();
@@ -600,7 +619,7 @@ class BizSession
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 
 		// check ticket (and get user)
-		$shortUserName = self::checkTicket( $ticket, 'LogOff' );
+		$shortUserName = self::checkTicket( $ticket );
 
 		// Handle messages read/deleted by user.
 		if( $messageList ) {
@@ -637,9 +656,11 @@ class BizSession
 	}
 
 	/**
-	 * Returns the language of the user who has just logged on. <br>
+	 * Returns the language of the user who has just logged on.
+	 *
 	 * When language of user is not set, the configured CompanyLanguage is taken.
 	 * If both not set, the default language 'enUS' is returned.
+	 *
 	 * Note: The function {@link logOn} should be called first.
 	 *
 	 * @return string
@@ -662,66 +683,95 @@ class BizSession
 	 * Throws an exception in case ticket is invalid, with detail set to 'SCEntError_InvalidTicket'.
 	 *
 	 * @param string $ticket Ticket to validate
-	 * @param string $service Service to validate the ticket for, default ''.
-	 * @param bool $extend Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
-	 *                     Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
+	 * @param string $service Not used. Deprecated since 10.5.0.
+	 * @param bool $extend Not used. Deprecated since 10.5.0.
 	 * @return string Short user name of the active user of the session.
 	 * @throws BizException When ticket not valid.
 	 */
-	public static function checkTicket( $ticket, $service='', $extend = true )
+	public static function checkTicket( $ticket, $service = null, $extend = null )
 	{
-		// All web applications validate their ticket before they start operating,
-		// but most of them do not start a session. Here we do a lazy start to avoid
-		// connectors being called through ticketExpirationReset() without valid session.
+		// Report deprecated way of calling this function.
+		if( !is_null( $service ) || !is_null( $extend ) ) {
+			LogHandler::Log( __METHOD__, 'DEPRECATED',
+				'The $service and $extend parameters should no longer be provided since 10.5.0.' );
+		}
+
+		// All web applications validate their ticket before they start operating, but most of them do not start a session.
+		// Here we do a lazy start to avoid validation without having a valid session.
 		if( !self::isStarted() ) {
 			self::startSession( $ticket );
 		}
 
+		$dbSession = self::getDbSession( $ticket );
+		$ticketRow = $dbSession->getSessionTicketRow();
+		// L> Note that $ticketRow is null for server jobs, which is by design. The DBTicket::checkTicket() below deals with that.
+
 		// Throw error when ticket is not (or no longer) valid.
-		require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-		self::$userName = DBTicket::checkTicket( $ticket, $service, $extend );
-		if( !self::$userName ) {
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+		if( !DBTicket::checkTicket( $ticket, $ticketRow ) ) {
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 		}
+		self::$userRow = $dbSession->getSessionUserRow();
+		self::$enterpriseSystemId = $dbSession->getEnterpriseSystemId();
 
-		// Language was not correctly loaded when called from soap-client, so making sure 
-		// language is correctly loaded here.
-		self::loadUserLanguage(self::$userName);
+		// Language was not correctly loaded when called from soap-client, so making sure it is correctly loaded here.
+		self::loadUserLanguage( self::$userRow['user'] );
 
-		if( $service && !self::isFeatherLightService( $service ) ) {
-			// Ask connectors if they have a valid ticket for their integrated system as well.
-			$connectorTicketsValid = true;
-			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
-			$connRetVals = array();
-			BizServerPlugin::runDefaultConnectors( 'Session', null,
-				'ticketExpirationReset', array( $ticket, self::$userName ), $connRetVals );
-			if( $connRetVals ) foreach( $connRetVals as $connName => $connRetVal ) {
-				if( $connRetVal === false ) {
-					LogHandler::Log( 'BizSession', 'INFO', 'Server Plug-in connector '.$connName.' indicates '.
-						'through ticketExpirationReset() that the integrated system has no valid '.
-						'ticket for the current user. Therefore the Enterprise ticket will be made '.
-						'invalid as well to let the user (re)logon to obtain ticket for both systems.' );
-					$connectorTicketsValid = false;
-					break;
-				}
-			}
+		return self::$userRow['user'];
+	}
 
-			// When integrated system has no ticket, make Enterprise ticket invalid as well.
-			// That forces clients to (re)login and obtain a seat for both Enterprise and
-			// the remote system again.
-			if( !$connectorTicketsValid ) {
-				try {
-					require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
-					$bizTicket = new BizTicket();
-					$bizTicket->deleteTicketAndAffiliatedStructures( $ticket );
-				} catch( BizException $e ) {
-					// Do nothing, error is already added to the log, no need to stop.
-				}
-				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
-			}
-		}
+	/**
+	 * Provide access entry point to some contextual session data read from DB.
+	 *
+	 * @since 10.5.0
+	 * @param string $ticket
+	 * @return WW_DbClasses_Session (singleton)
+	 */
+	private static function getDbSession( $ticket )
+	{
+		require_once( BASEDIR.'/server/dbclasses/DBTicket.class.php' );
+		$serverJob = DBTicket::getContextualServerJob();
+		return WW_DbClasses_Session::getInstance( $ticket, $serverJob );
+	}
 
-		return self::$userName;
+	/**
+	 * Return list of buckets that contain data as cached in the local folder of the application server.
+	 *
+	 * @since 10.5.0
+	 * @return array Map of local cache ids (logical names) and versions (GUIDs)
+	 */
+	public static function getLocalCacheBuckets()
+	{
+		$dbSession = self::getDbSession( self::getTicket() );
+		return $dbSession->getLocalCacheBuckets();
+	}
+
+	/**
+	 * Create and return a new bucket version (regardless whether the bucket already exists in the local cache).
+	 *
+	 * @since 10.5.0
+	 * @param string $bucketId
+	 * @return string The bucket version (GUID).
+	 * @throws BizException
+	 */
+	public static function forceCreateBucketVersionInLocalCache( string $bucketId )
+	{
+		$dbSession = self::getDbSession( self::getTicket() );
+		return $dbSession->forceCreateBucketVersionInLocalCache( $bucketId );
+	}
+
+	/**
+	 * Return a bucket version. When the bucket is not present in the local cache yet, create it.
+	 *
+	 * @since 10.5.0
+	 * @param string $bucketId
+	 * @return string The bucket version (GUID).
+	 * @throws BizException
+	 */
+	public static function getOrCreateBucketVersionInLocalCache( string $bucketId )
+	{
+		$dbSession = self::getDbSession( self::getTicket() );
+		return $dbSession->getOrCreateBucketVersionInLocalCache( $bucketId );
 	}
 
 	/**
@@ -991,8 +1041,7 @@ class BizSession
 	}
 
 	/**
-	 * Adds the ContentSourceFileLinks feature when any of the content source plugins
-	 * has enabled this feature.
+	 * Add the ContentSourceFileLinks feature when any of the Content Source plug-ins has enabled this feature.
 	 *
 	 * @since 9.7.0
 	 * @param ServerInfo $serverInfo Holds a FeatureSet to update.
@@ -1011,6 +1060,27 @@ class BizSession
 		}
 		if( count($contentSources) > 0 ) {
 			$serverInfo->FeatureSet[] = new Feature( 'ContentSourceFileLinks', implode($contentSources, ',') );
+		}
+	}
+
+	/**
+	 * Adds the ContentSourceProxyLinks_<ContentSource> features for each of the Content Source plug-ins that provides a proxy.
+	 *
+	 * @since 10.5.0
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to update.
+	 */
+	private static function addFeatureForContentSourceProxyLinks( ServerInfo $serverInfo )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+
+		/** @var ContentSource_EnterpriseConnector[] $connectors */
+		$connectors = BizServerPlugin::searchConnectors( 'ContentSource', null );
+		if( $connectors ) foreach( $connectors as $connectorClassName => $connector ) {
+			$baseUrl = BizServerPlugin::runConnector( $connector, 'getContentSourceProxyLinksBaseUrl', array() );
+			if( $baseUrl ) {
+				$contentSource = $connector->getContentSourceId();
+				$serverInfo->FeatureSet[] = new Feature( 'ContentSourceProxyLinks_'.$contentSource, $baseUrl );
+			}
 		}
 	}
 
@@ -1356,20 +1426,23 @@ class BizSession
 	}
 
 	/**
-	 * Get the Enterprise System ID from the config table.
+	 * Return the Enterprise System ID.
 	 *
 	 * @return string|null $flagValue Enterprise System ID, null when it is not set.
 	 */
 	public static function getEnterpriseSystemId()
 	{
-		static $enterpriseSystemId = false;
-		if( $enterpriseSystemId === false ) {
-			require_once BASEDIR . '/server/dbclasses/DBConfig.class.php';
-			require_once BASEDIR . '/server/utils/NumberUtils.class.php';
+		if( self::$enterpriseSystemId === false ) {
+			require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+			require_once BASEDIR.'/server/utils/NumberUtils.class.php';
 			$enterpriseSystemId = DBConfig::getValue( 'enterprise_system_id' );
-			$enterpriseSystemId = !empty( $enterpriseSystemId ) && NumberUtils::validateGUID( $enterpriseSystemId ) ? $enterpriseSystemId : null;
+			if( $enterpriseSystemId && NumberUtils::validateGUID( $enterpriseSystemId ) ) {
+				self::$enterpriseSystemId = $enterpriseSystemId;
+			} else {
+				self::$enterpriseSystemId = null; // not using false to avoid retries reading from DB (as done above)
+			}
 		}
-		return $enterpriseSystemId;
+		return self::$enterpriseSystemId;
 	}
 
 	/**

@@ -969,7 +969,7 @@
 					<element name="Slugline"	type="xsd:string"/>
 					<element name="Created"		type="xsd:dateTime"/>
 					<element name="Object"		type="xsd:string"/> 						<!-- v4.2: object name -->
-					<element name="State"		type="tns:State"/> 							<!-- v4.2: object status -->
+					<element name="State"		type="tns:State" 	    nillable="true"/>	<!-- v4.2: object status. nillable since 10.5 to support content sources having no workflow statuses. -->
 					<element name="File"		type="tns:Attachment"	nillable="true"/>	<!-- v4.2: the rendition asked for -->
 				</all>
 			</complexType>
@@ -1007,9 +1007,13 @@
 					     In that case, it should be read as: "for all editions/renditions". -->
 
 					<element name="ContentSourceFileLink" type="xsd:string" nillable="true" minOccurs="0" maxOccurs="1"/>
-					<!-- Since v9.7 the ContentSourceFileLink is added to enable returning references to files instead
-						 of the files themselves. The file link is a direct reference to the location of the file on
-						 the Content Source.
+					<!-- v9.7.0: This file link is a direct reference to the location of the file on the Content Source. 
+						 It requires the client/user to logon to that Content Source.
+					-->
+					
+					<element name="ContentSourceProxyLink" type="xsd:string" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<!-- v10.5.0: This proxy link is an indirect reference to the location of the file on the Content Source. 
+						 The file travels over a proxy server. This takes a little overhead but deals with authorization.
 					-->
 				</all>
 			</complexType>

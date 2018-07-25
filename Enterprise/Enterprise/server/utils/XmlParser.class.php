@@ -2,8 +2,6 @@
 /**
  * Helper class reading schema files, validating them against XML doc, and logging any errors.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @package Enterprise
- * @subpackage Planning Services
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 

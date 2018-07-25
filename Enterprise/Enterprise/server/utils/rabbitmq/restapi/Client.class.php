@@ -4,8 +4,6 @@
  *
  * Wraps a curl based adapter within a Zend http client.
  *
- * @package     Enterprise
- * @subpackage  Utils
  * @since       v10.0.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

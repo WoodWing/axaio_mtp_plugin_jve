@@ -1,7 +1,5 @@
 <?php
 /**
- * @package    Enterprise
- * @subpackage TestSuite
  * @since      v10.2.0 This module is a replacement for the old wwtest/testcli.php and wwtest/testphpcodingcli.php scripts.
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *

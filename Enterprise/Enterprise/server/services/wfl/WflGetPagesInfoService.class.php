@@ -2,8 +2,6 @@
 /**
  * GetPagesInfo Workflow service.
  *
- * @package SCEnterprise
- * @subpackage Services
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

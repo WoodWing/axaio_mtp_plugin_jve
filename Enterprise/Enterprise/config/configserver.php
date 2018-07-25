@@ -1838,6 +1838,9 @@ $loader = new Zend\Loader\StandardAutoloader(array(
 ));
 $loader->register();
 
+require_once BASEDIR.'/server/utils/Autoloader.class.php';
+WW_Utils_Autoloader::register();
+
 require_once BASEDIR.'/server/utils/LogHandler.class.php';
 LogHandler::init();
 

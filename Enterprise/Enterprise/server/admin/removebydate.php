@@ -5,11 +5,8 @@ require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/apps/functions.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
-$ticket = checkSecure('publadmin');
+checkSecure( 'publadmin' );
 $tpl = HtmlDocument::loadTemplate( 'removebydate.htm' );
-
-require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-$user = DBTicket::checkTicket( $ticket );
 
 $inPub = isset($_POST['Publication']) ? intval($_POST['Publication']) : 0;
 $inCategory = isset($_POST['Category']) ? intval($_POST['Category']) : 0;
@@ -59,7 +56,11 @@ if($directdel === true) {
 				try {
 					require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
 					$service = new WflDeleteObjectsService();
-					$service->execute( new WflDeleteObjectsRequest( $ticket, $ids, $permanent ) );
+					$request = new WflDeleteObjectsRequest();
+					$request->Ticket = BizSession::getTicket();
+					$request->IDs = $ids;
+					$request->Permanent = $permanent;
+					$service->execute( $request );
 
 					$succeed = true;
 					$sErrorMessage = BizResources::localize("ERR_SUCCESS_DELETE");
@@ -96,7 +97,11 @@ if ($del === true) {
 	try {
 		require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
 		$service = new WflDeleteObjectsService();
-		$service->execute( new WflDeleteObjectsRequest( $ticket, $delete, $permanent ) );
+		$request = new WflDeleteObjectsRequest();
+		$request->Ticket = BizSession::getTicket();
+		$request->IDs = $delete;
+		$request->Permanent = $permanent;
+		$service->execute( $request );
 	} catch( BizException $e ) {
 		$message = $e->getMessage();
 		$sErrorMessage = BizResources::localize('ERR_DELETE');
@@ -121,7 +126,7 @@ if ($del === true) {
 $comboBoxPub = '<select name="Publication" style="width:150px" onchange="submit();">';
 $comboBoxPub .= "<option></option>";
 require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-$pubs = BizPublication::getPublications( $user );
+$pubs = BizPublication::getPublications( BizSession::getShortUserName() );
 foreach( $pubs as $pub ) {
 	if( $pub->Id != $inPub ) {
 		$comboBoxPub .= '<option value="'.$pub->Id.'">'.formvar($pub->Name).'</option>';
@@ -239,7 +244,7 @@ if( ($inPub > 0 || $inPub = -1) && ($inCategory > 0 || $inCategory = -1) ) { // 
 				while (($row = $dbDriver->fetch($h))) {
 					$IDs[] = $row['id'];
 				}
-				$txt = showfiles( $ticket, $IDs );
+				$txt = showfiles( $IDs );
 			}
 		}
 
@@ -302,13 +307,17 @@ function RemoveByDateSQL( $inPub, $inCategory, $inArticle, $inImage, $inVideo, $
 	return $sql;
 }
 
-function showfiles( $ticket, $IDs )
+function showfiles( $IDs )
 {
 	require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 	try {
-		$req = new WflGetObjectsRequest( $ticket, $IDs, false, 'none', null );
+		$request = new WflGetObjectsRequest();
+		$request->Ticket = BizSession::getTicket();
+		$request->IDs = $IDs;
+		$request->Lock = false;
+		$request->Rendition = 'none';
 		$service = new WflGetObjectsService();
-		$resp = $service->execute( $req );
+		$resp = $service->execute( $request );
 		$objects = $resp->Objects;
 	} catch( BizException $e ) {
 		return $e->getMessage();

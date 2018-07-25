@@ -3,8 +3,6 @@
  * Generic SOAP Server for Enterprise. It uses PHP SoapServer and can
  * handle DIME attachments.
  * 
- * @package 	Enterprise
- * @subpackage 	SOAP
  * @since 		v6.1
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

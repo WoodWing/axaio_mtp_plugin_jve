@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @package Enterprise
- * @subpackage Workflow Services
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
@@ -1592,7 +1590,7 @@ class VersionInfo
 	 * @param string               $Slugline             
 	 * @param string               $Created              
 	 * @param string               $Object               
-	 * @param State                $State                
+	 * @param State                $State                Nullable.
 	 * @param Attachment           $File                 Nullable.
 	 */
 	public function __construct( $Version=null, $User=null, $Comment=null, $Slugline=null, $Created=null, $Object=null, $State=null, $File=null)
@@ -1628,6 +1626,7 @@ class Attachment
 	public $FileUrl;
 	public $EditionId;
 	public $ContentSourceFileLink;
+	public $ContentSourceProxyLink;
 
 	/**
 	 * @param string               $Rendition            
@@ -1637,8 +1636,9 @@ class Attachment
 	 * @param string               $FileUrl              Nullable.
 	 * @param string               $EditionId            Nullable.
 	 * @param string               $ContentSourceFileLink Nullable.
+	 * @param string               $ContentSourceProxyLink Nullable.
 	 */
-	public function __construct( $Rendition=null, $Type=null, $Content=null, $FilePath=null, $FileUrl=null, $EditionId=null, $ContentSourceFileLink=null)
+	public function __construct( $Rendition=null, $Type=null, $Content=null, $FilePath=null, $FileUrl=null, $EditionId=null, $ContentSourceFileLink=null, $ContentSourceProxyLink=null)
 	{
 		$this->Rendition            = $Rendition;
 		$this->Type                 = $Type;
@@ -1647,6 +1647,7 @@ class Attachment
 		$this->FileUrl              = $FileUrl;
 		$this->EditionId            = $EditionId;
 		$this->ContentSourceFileLink = $ContentSourceFileLink;
+		$this->ContentSourceProxyLink = $ContentSourceProxyLink;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflAttachment'; } // AMF object type mapping

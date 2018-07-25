@@ -2,8 +2,6 @@
 /**
  * Provides the options configured for the TESTSUITE define in the configserver.php file.
  *
- * @package     Enterprise
- * @subpackage  Testsuite
  * @since 	    v10.0.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

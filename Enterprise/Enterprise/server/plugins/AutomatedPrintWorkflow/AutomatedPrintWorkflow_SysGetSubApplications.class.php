@@ -2,8 +2,6 @@
 /**
  * Provides a download URL of the 'idscripts' archive that SC uses during its logon phase.
  *
- * @package 	Enterprise
- * @subpackage 	ServerPlugins
  * @since 		v9.8
  * @copyright	WoodWing Software bv. All Rights Reserved.
  */

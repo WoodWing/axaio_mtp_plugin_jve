@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package 	Flickr Bulk Import for Enterprise
  * @since 		v6.1
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *

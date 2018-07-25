@@ -2,8 +2,6 @@
 /**
  * MultiSetObjectProperties Workflow service.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v9.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

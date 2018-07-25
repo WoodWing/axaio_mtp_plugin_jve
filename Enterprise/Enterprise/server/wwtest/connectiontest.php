@@ -101,11 +101,15 @@
 	$port = $_POST[ 'port' ];
 
 ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title>Enterprise - Test page</title>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Enterprise - Test page</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
 		<link rel="stylesheet" href="../../config/templates/woodwingmain.css" type="text/css" />
 		<link rel="icon" href="../../config/images/favicon.ico" type="image/x-icon" />
 		<link rel="shortcut icon" href="../../config/images/favicon.ico" type="image/x-icon" />

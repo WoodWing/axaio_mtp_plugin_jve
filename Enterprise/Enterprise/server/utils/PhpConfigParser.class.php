@@ -9,8 +9,6 @@
  * So make sure you have included the PHP files before using this parser.
  * Values can be retrieved in array of arrays. See {@link ParseDefineValues()}.
  * 
- * @package Enterprise
- * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -3,8 +3,6 @@
  * Utils class that helps to determine whether or not a given IP network address matches
  * with given ranges of network IP addresses. Supports IPv4 and IPv6 addresses and ranges.
  *
- * @package 	Enterprise
- * @subpackage 	Utils
  * @since 		v9.5
  * @copyright	WoodWing Software bv. All Rights Reserved.
  */

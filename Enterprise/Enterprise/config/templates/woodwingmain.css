@@ -21,7 +21,6 @@ body { color: #333; font-size: 11pt; font-family: helvetica, arial, sans-serif; 
 orangeonblack { color: #f90; font-size: 11pt; font-family: helvetica, arial, sans-serif; line-height: 14pt; background-color: #000; }
 p {  }
 td { }
-li { list-style-type: none; list-style-image: none; list-style-position: inherit; display: inherit; white-space: inherit; }
 a#bullet img {height: 7px; width: 14px; background: url(../images/bullet_gray.gif) top left no-repeat;}
 a#bullet:hover img {background: url(../images/bullet_orange.gif) top left no-repeat;}
 img { border: 0px; }

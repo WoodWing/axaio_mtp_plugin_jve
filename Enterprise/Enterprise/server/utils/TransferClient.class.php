@@ -9,8 +9,6 @@
  * the same 'layer'. They are each other co-workers; One does the file transfers and the
  * other does the service operations.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

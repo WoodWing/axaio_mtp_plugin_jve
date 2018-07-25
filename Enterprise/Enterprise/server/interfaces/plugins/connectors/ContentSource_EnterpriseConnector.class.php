@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	ServerPlugins
  * @since 		v6.0
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *
@@ -71,14 +69,24 @@ require_once BASEDIR.'/server/interfaces/plugins/DefaultConnector.class.php';
 abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 {
 	/**
-	 * Determines whether or not a content source request should return file links or the actual files.
+	 * Determines whether or not a content source request should return file links.
 	 *
-	 * This property is set to false by default for backwards compatibility with existing content source
-	 * plugins and older Enterprise Server versions.
+	 * This property is set to false by default for backwards compatibility with existing content source server plug-ins
+	 * and older Enterprise Server versions.
 	 *
 	 * @var bool $isFileLinksRequested
 	 */
 	public $isFileLinksRequested = false;
+
+	/**
+	 * Determines whether or not a content source request should return proxy links.
+	 *
+	 * This property is set to false by default for backwards compatibility with existing content source server plug-ins
+	 * and older Enterprise Server versions.
+	 *
+	 * @var bool $isProxyLinksRequested
+	 */
+	public $isProxyLinksRequested = false;
 
 	/**
 	 * Returns a unique identifier for this content source implementation.
@@ -500,13 +508,12 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * This function is called by the core server in order to determine whether the plugin
-	 * supports requests for file links.
+	 * When the user does logon, the core server calls this function to determine whether or not this content source
+	 * server plug-in supports proxy links. If so, it returns the ContentSourceProxyLinks feature to the client application.
 	 *
-	 * By default any content source connector does not support requests for file links.
-	 * This can be overruled by the connector by implementing this function.
+	 * By default this feature is disabled. It can be overruled by the connector by implementing this function.
 	 *
-	 * @since 9.7
+	 * @since 9.7.0
 	 * @return bool
 	 */
 	public function isContentSourceFileLinksSupported()
@@ -515,13 +522,9 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * For services that support content source file links, it is checked on every call
-	 * whether file links are requested.
+	 * When retrieving a shadow object, the core server calls this function to determine whether file links are requested.
 	 *
-	 * If they are, this method is called from the core server in order to communicate to
-	 * the content source connector that file links are requested instead of content files.
-	 *
-	 * @since 9.7
+	 * @since 9.7.0
 	 */
 	public function requestedContentSourceFileLinks()
 	{
@@ -529,14 +532,59 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * Returns whether or not content source file links are asked for in the current request.
+	 * Indicates whether or not content source file links are requested for in the current web service.
 	 *
-	 * @since 9.7
+	 * @since 9.7.0
 	 * @return bool
 	 */
 	public function isContentSourceFileLinksRequested()
 	{
 		return $this->isFileLinksRequested;
+	}
+
+	/**
+	 * When the user does logon, the core server calls this function to determine whether or not this Content Source
+	 * supports proxy links. If so, it returns the ContentSourceProxyLinks_<ContentSource> feature to the client application.
+	 *
+	 * By default this function returns null to indicate this feature is disabled, and so the File Transfer Server is used
+	 * to let client applications download shadow objects. For that case, in context of the getShadowObject2() function,
+	 * the Content Source connector should populate the Attachment->FilePath which gets automatically resolved into
+	 * Attachment->FileUrl by the core server, as provided to the client application.
+	 *
+	 * Nevertheless, when a proxy server is provided by the Content Source plug-in, this function should be implemented by
+	 * the connector providing the public base URL of the proxy server that is accessible to client applications.
+	 * In that case, in context of the getShadowObject2() function, the Content Source plug-in should provide a file
+	 * download URL through the file Attachment->ContentSourceProxyLink instead.
+	 *
+	 * @since 10.5.0
+	 * @return string|null The proxy URL, or null when no proxy available.
+	 */
+	public function getContentSourceProxyLinksBaseUrl()
+	{
+		return null;
+	}
+
+	/**
+	 * When retrieving a shadow object, the core server calls this function to determine whether proxy links are requested.
+	 * See requestedContentSourceProxyLinks() function for more info.
+	 *
+	 * @since 10.5.0
+	 */
+	public function requestedContentSourceProxyLinks()
+	{
+		$this->isProxyLinksRequested = true;
+	}
+
+	/**
+	 * Indicates whether or not Content Source proxy links are requested for in the current web service.
+	 * See requestedContentSourceProxyLinks() function for more info.
+	 *
+	 * @since 10.5.0
+	 * @return bool
+	 */
+	public function isContentSourceProxyLinksRequested()
+	{
+		return $this->isProxyLinksRequested;
 	}
 
 	/**

@@ -16,8 +16,6 @@
 ****************************************************************************/
 
 /**
- * @package 	Demo Server Plugins
- * @subpackage 	SMS plugin
  * @since 		v6.2
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *

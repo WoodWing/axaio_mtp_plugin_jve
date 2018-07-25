@@ -1,6 +1,6 @@
 <?php
 require_once dirname( __FILE__ ).'/../../config/config.php';
-require_once BASEDIR.'/server/secure.php'; // set $sLanguage_code
+require_once BASEDIR.'/server/secure.php'; // set $sLanguage_code, define ADMIN_INDEX_PAGE
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 // Guess language for login screen, in order of preference
@@ -22,12 +22,6 @@ $logout = isset( $_REQUEST['logout'] );
 $parMessage = isset( $_REQUEST['message'] ) ? $_REQUEST['message'] : '';
 $message    = '';
 
-// Determine if this logon page was redirected by another page, or that this is the first time calling.
-// When $redir=false this is the first time calling. When $redir=true, this is the first redirection.
-// When $redir=-N this is the Nth time calling the logon page (e.g. badly typed named/password).
-$redir = array_key_exists( 'redir', $_REQUEST ) ? $_REQUEST['redir'] : 'false';
-$redir = ( $redir == 'true' ) ? -1 : $redir;
-
 // LOGOUT
 if( $logout ) {
 	$ticket = checkSecure();
@@ -48,7 +42,13 @@ $passExpired = false;
 $userLimitAdmin = false;
 $licenseAdmin = false;
 if( !empty( $login ) && !empty( $user ) ) // && !empty($password))
-{	
+{
+	if( !hasRights( DBDriverFactory::gen(), $user ) &&
+		!publRights( DBDriverFactory::gen(), $user ) ) {
+		header( 'Location: '.NORIGHT );
+		exit();
+	}
+
 	require_once BASEDIR.'/server/utils/UrlUtils.php';
 	$server		= 'Enterprise Server';
 	$clientip = WW_Utils_UrlUtils::getClientIP();
@@ -156,40 +156,24 @@ if( !$loginsucceed ) {
 		$messageList .= '<font size=2 color="#00aa00">'.formvar( $parMessage ).'</font><br/>';
 	}
 	$tpl = str_replace( '<!--MESSAGE-->', $messageList, $tpl );
-	$redir--; // remember each post/submit to jump back to initiator page at once (see else part below)
-	$tpl = str_replace( '<!--PAR:REDIR-->', formvar( $redir ), $tpl );
 	$tpl .= "<script language='javascript'>document.forms[0].usr.focus();</script>";
 	$tpl .= $showDialogs;
 	$tpl .= "\n".$errNoJavascript;
 	print HtmlDocument::buildDocument( $tpl, false );
 } else {  // Is succeed.
-	$shortusername = BizSession::getShortUserName();
-	$isadmin = hasRights( DBDriverFactory::gen(), $shortusername, 'Web' );
-	$ispubladmin = publRights( DBDriverFactory::gen(), $shortusername );
-	if( $isadmin || $ispubladmin ) { // admin user
-		define( 'STARTHTM', '../admin/index.php' );
-	} else { // normal user
-		define( 'STARTHTM', '../apps/index.php' );
-	}
-	
 	$sLanguage_code = BizSession::getUserLanguage();
 	setLogCookie( "language", $sLanguage_code ); // remember for next requests
 	setLogCookie( "ticket", $ticket );
-	setLogCookie( 'debuglevel', LogHandler::getDebugLevel() );
 
 	// Bug: IIS5 needs a body when setting a cookie.
 	//      If there is no body, the cookie will be ignored.
-	//      That's why we don't use: header("Location: ".STARTHTM);
+	//      That's why we don't use: header("Location: ".ADMIN_INDEX_PAGE);
 	print '<html><body>';
 	if( $message ) {
 		$message = str_replace( "'", "\\'", $message ); // Bugfix: Messages with single quotes are NOT shown at all!
 		print '<script language="javascript">alert("'.$message.'");</script>';
 	}
-	if( $redir != 'false' ) { // Logon originated from other page? Let's go back then...
-		print '<script language="javascript">top.location.replace("'.STARTHTM.'");</script>';
-	} else { // Initial logon? Let's start at the index page...
-		print '<script language="javascript">top.location.replace("'.STARTHTM.'");</script>';
-	}
+	print '<script language="javascript">top.location.replace("'.ADMIN_INDEX_PAGE.'");</script>';
 	print $errNoJavascript;
 	print '</body></html>';
 }

@@ -14,8 +14,6 @@
  * For example, the package can be store into a checkbox:
  *   <input id="myid" value="PACKAGE" type="checkbox">
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

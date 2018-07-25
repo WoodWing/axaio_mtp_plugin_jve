@@ -2,8 +2,6 @@
 /**
  * PublishForm Utilities.
  *
- * @package Enterprise
- * @subpackage BizClasses
  * @since v9.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -1,7 +1,5 @@
 <?php
 /**
- * @package     SCEnterprise
- * @subpackage  DBClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */
@@ -934,95 +932,92 @@ class DBUser extends DBBase
 		return $modifyusergroups;
 	}
 
-	/*
-     * Add Users to Group
-     *
-     * Returns nothing
-     *
-     * @param array $usrId user id that added to group
-     * @param array $grpId group id that user will be added to
-     *
-     */
+	/**
+	 * Make a user member of a user group.
+	 *
+	 * @deprecated 10.5.0 Please use addUserToGroup() instead.
+	 * @param integer $grpId
+	 * @param integer $usrId
+	 */
 	public static function addUsersToGroup( $usrId, $grpId )
 	{
-		$usrId = intval($usrId); //Convert to integer
-		$grpId = intval($grpId); //Convert ot integer
-
-		$where = '`usrid` = ? AND `grpid` = ?';
-		$params = array($usrId, $grpId);
-		$usergrpvalue = array();
-
-		$usergrpvalue['usrid'] = $usrId;
-		$usergrpvalue['grpid'] = $grpId;
-
-		// Checking whether it is an existing usergrp 
-		$existingusergroup = self::getRow('usrgrp', $where, 'Id', $params );
-		if($existingusergroup){}
-		else {
-			self::insertRow('usrgrp', $usergrpvalue);
-		}
+		self::addUserToGroup( $grpId, $usrId );
 	}
 
-	/*
-	 * Remove Users from Group
+	/**
+	 * Remove a user from a user group.
 	 *
-	 * Returns nothing
-	 *
-	 * @param array $usrId user id that remove from group
-	 * @param array $grpId group id that user will be remove from
-	 *
+	 * @deprecated 10.5.0 Please use removeUserFromGroup() instead.
+	 * @param integer $usrId
+	 * @param integer $grpId
 	 */
 	public static function removeUsersFromGroup( $usrId, $grpId )
 	{
-		$where = 'usrid = ? AND grpid = ?';
-		self::deleteRows('usrgrp', $where, array( intval( $usrId), intval( $grpId) ) );
+		self::removeUserFromGroup( $grpId, $usrId );
 	}
 
-	/*
-     * Add Groups to User
-     *
-     * Returns nothing
-     *
-     * @param array $grpId group id that added to user
-     * @param array $usrId user id that group will be added to
-     *
-     */
+	/**
+	 * Make a user member of a user group.
+	 *
+	 * @deprecated 10.5.0 Please use addUserToGroup() instead.
+	 * @param integer $grpId
+	 * @param integer $usrId
+	 */
 	public static function addGroupsToUser( $grpId, $usrId )
 	{
-		$grpId = intval($grpId); //Convert to integer
-		$usrId = intval($usrId); //Convert to integer
-
-		$where = '`usrid` = ? AND `grpid` = ? ';
-		$params = array($usrId, $grpId);
-		$usergrpvalue = array();
-
-		$usergrpvalue['usrid'] = $usrId;
-		$usergrpvalue['grpid'] = $grpId;
-
-		// Checking whether it is an existing usergrp 
-		$existingusergroup = self::getRow('usrgrp', $where, 'Id', $params);
-		if($existingusergroup){}
-		else {
-			self::insertRow('usrgrp', $usergrpvalue);
-		}
+		self::addUserToGroup( $grpId, $usrId );
 	}
 
-	/*
-	 * Remove Groups from User
+	/**
+	 * Remove a user from a user group.
 	 *
-	 * Returns nothing
-	 *
-	 * @param array $grpId group id that remove from user
-	 * @param array $usrId user id that group will be remove from
-	 *
+	 * @deprecated 10.5.0 Please use removeUserFromGroup() instead.
+	 * @param integer $grpId
+	 * @param integer $usrId
 	 */
 	public static function removeGroupsFromUser( $grpId, $usrId )
 	{
-		$where = 'usrid = ? AND grpid = ? ';
-
-		self::deleteRows('usrgrp', $where, array( intval( $usrId), intval( $grpId) ) );
+		self::removeUserFromGroup( $grpId, $usrId );
 	}
 
+	/**
+	 * Make a user member of a user group.
+	 *
+	 * @since 10.5.0
+	 * @param integer $grpId
+	 * @param integer $usrId
+	 */
+	public static function addUserToGroup( $grpId, $usrId )
+	{
+		$grpId = intval( $grpId );
+		$usrId = intval( $usrId );
+
+		$where = '`usrid` = ? AND `grpid` = ? ';
+		$params = array( $usrId, $grpId );
+		$membershipExists = (bool)self::getRow( 'usrgrp', $where, array( 'id' ), $params );
+
+		if( !$membershipExists ) {
+			$row = array(
+				'usrid' => $usrId,
+				'grpid' => $grpId
+			);
+			self::insertRow( 'usrgrp', $row );
+		}
+	}
+
+	/**
+	 * Remove a user from a user group.
+	 *
+	 * @since 10.5.0
+	 * @param integer $grpId
+	 * @param integer $usrId
+	 */
+	public static function removeUserFromGroup( $grpId, $usrId )
+	{
+		$where = 'usrid = ? AND grpid = ? ';
+		$params = array( intval( $usrId ), intval( $grpId ) );
+		self::deleteRows( 'usrgrp', $where, $params );
+	}
 
 	/**
 	 *  Converts user object value to an array
@@ -1495,6 +1490,38 @@ class DBUser extends DBBase
 		$params = array( $userShort );
 		$row = self::getRow( self::TABLENAME, $where, array('id'), $params );
 		return isset($row['id']) ? $row['id'] : null;
+	}
+
+	/**
+	 * Retrieve the full name of a given, given either the short name or the full name.
+	 *
+	 * @since 10.5.0
+	 * @param string $userShortOrFullName
+	 * @return string|null The full name.
+	 */
+	public static function getFullNameByShortOrFullName( string $userShortOrFullName )
+	{
+		$select = array( 'fullname' );
+		$where = '`user` = ? OR `fullname` = ?';
+		$params = array( strval( $userShortOrFullName ), strval( $userShortOrFullName ) );
+		$row = self::getRow( self::TABLENAME, $where, $select, $params );
+		return $row ? $row['fullname'] : null;
+	}
+
+	/**
+	 * Retrieve the short name of a given, given either the short name or the full name.
+	 *
+	 * @since 10.5.0
+	 * @param string $userShortOrFullName
+	 * @return string|null The short name.
+	 */
+	public static function getShortNameByShortOrFullName( string $userShortOrFullName )
+	{
+		$select = array( 'user' );
+		$where = '`user` = ? OR `fullname` = ?';
+		$params = array( strval( $userShortOrFullName ), strval( $userShortOrFullName ) );
+		$row = self::getRow( self::TABLENAME, $where, $select, $params );
+		return $row ? $row['user'] : null;
 	}
 
 	/**

@@ -1,6 +1,4 @@
 #!/bin/sh
-# @package      Enterprise
-# @subpackage   Build
 # @since        9.5
 # @copyright    WoodWing Software bv. All Rights Reserved.
 #
@@ -304,7 +302,7 @@ function updateResourceFiles {
 	fi
 
 	echo "${step}2: Retrieve timestamp of last update from local resource file for ${product} plugin."
-	resLastUpdate=$( cat "${SOURCE_BASE}{$dir}${product}/resources/_lastupdate.txt" )
+	resLastUpdate=$( cat "${SOURCE_BASE}${dir}${product}/resources/_lastupdate.txt" )
 	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
 		echo "${step}3: Repository and TMS are in sync. No update needed."
 	else
@@ -429,7 +427,7 @@ function step2c_updateResourceFilesForMaintenanceMode {
 # (that resides in the resource folder) which allows us to compare timestamps and skip submits.
 #
 function step2d_updateResourceFilesForElvis {
-	updateResourceFiles Elvis plugins/release/ step2d 124
+	updateResourceFiles Elvis Enterprise/server/plugins/ step2d 124
 }
 
 #
@@ -579,10 +577,15 @@ function step5_ionCubeEncodePhpFiles {
 		Enterprise/server/bizclasses/BizPublishing.class.php \
 		Enterprise/server/bizclasses/BizSemaphore.class.php \
 		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
-		plugins/release/Elvis/Elvis_WflLogOn.class.php \
-		plugins/release/Elvis/Elvis_ContentSource.class.php \
-		plugins/release/Elvis/util/ElvisSessionUtil.php \
+		Enterprise/server/plugins/Elvis/Elvis_WflLogOn.class.php \
+		Enterprise/server/plugins/Elvis/Elvis_ContentSource.class.php \
+		Enterprise/server/plugins/Elvis/bizclasses/UserSetting.class.php \
+		Enterprise/server/plugins/Elvis/bizclasses/Client.class.php \
+		Enterprise/server/plugins/Elvis/bizclasses/CurlClient.class.php \
+		Enterprise/server/plugins/Elvis/dbclasses/Token.class.php \
 	"
+	# Note that the Elvis server plug-in classes listed above are ionCubed to hide the use and implementation of the
+	# 'Restricted' functions provided by the Elvis_BizClasses_UserSetting class.
 	for icFoldersOrFile in ${icFoldersOrFiles}; do
 		${PHP_EXE} "${ES_PHP_ENCODER}" ${ioncubeEncodeParams} --encodelevel=1 --phppath="${icFoldersOrFile}"
 	done
@@ -632,7 +635,7 @@ function step7_zipExternalModules {
 	echo "step7b: Zipping release plug-ins ..."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
 	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "AdobeDps2" "${WORKSPACE}/artifacts" "Adobe_AEM_Build_${ADOBEDPS2_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
-	plugins="Facebook Twitter WordPress Drupal8 Elvis"
+	plugins="Facebook Twitter WordPress Drupal8"
 	for plugin in ${plugins}; do
 		# For Drupal 8 we want to modify the name to indicate this is the plugin (and not the module)
 		if [ "${plugin}" == "Drupal8" ]; then

@@ -2,8 +2,6 @@
 require_once BASEDIR . "/server/dbclasses/DBBase.class.php";
 
 /**
- * @package    Enterprise
- * @subpackage DBClasses
  * @since      v10.1.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *

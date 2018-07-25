@@ -4,8 +4,6 @@
  * This util can be used for performance optimization purposes, security and shipping. <br/>
  * Logging is echoed to HTML output (browser screen).
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

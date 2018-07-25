@@ -6,8 +6,6 @@
  * - webappid: The application id unique within the server plug-in.
  * - pluginname: Internal name of the server plug-in that ships the web app.
  *
- * @package 	Enterprise
- * @subpackage 	Core
  * @since 		v8.2
  * @copyright	WoodWing Software bv. All Rights Reserved.
  */

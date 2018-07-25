@@ -1,9 +1,7 @@
 <?php
 
 /**
- * @package 	Enterprise
- * @subpackage 	ServerPlugins
- * @since 		v8.0
+ * @since 		8.0.0
  * @copyright	WoodWing Software bv. All Rights Reserved.
  * 
  * This is a temporary TrashCan utility solution while our clients (CS/ID/IC) are not supporting this feature(yet).

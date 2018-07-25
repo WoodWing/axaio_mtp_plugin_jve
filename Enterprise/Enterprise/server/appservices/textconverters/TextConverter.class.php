@@ -5,8 +5,6 @@
  * Based on a given file format, it creates a TextImport or TextExport that deals with the format. <br>
  * Supported formats are plain text and InCopy. <br>
  *
- * @package SCEnterprise
- * @subpackage WebEditor
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

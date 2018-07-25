@@ -10,9 +10,7 @@ require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 set_time_limit(3600);
 
 // Validate user, access rights and ticket.
-require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-$ticket = checkSecure('publadmin');
-DBTicket::checkTicket( $ticket );
+checkSecure( 'publadmin' );
 
 // Retrieve request parameters.
 $serverPlugin = isset($_REQUEST['serverplugin']) ? trim($_REQUEST['serverplugin']) : '';
@@ -193,7 +191,6 @@ class ServerPluginCustomPropertyCleanupApp
 
 			$message = BizResources::localize('ACT_MESS_SUCCES_UNUSED_PROP');
 		}  catch( BizException $e ) {
-			$e = $e;
 			$message = '<font color="red">'.$e->getMessage().'<br/>'.$e->getDetail().'</font>';
 		}
 		return $message;

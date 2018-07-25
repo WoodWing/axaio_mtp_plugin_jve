@@ -3,8 +3,6 @@
 /**
  * EnterprisePlugin class for Facebook.
  *
- * @package	     Enterprise
- * @subpackage	 ServerPlugins
  * @since		 v7.6
  * @copyright	 WoodWing Software bv. All Rights Reserved.
  */

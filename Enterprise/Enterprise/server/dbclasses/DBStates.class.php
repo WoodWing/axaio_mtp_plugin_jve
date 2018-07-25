@@ -2,8 +2,6 @@
 /**
  * Handles access to the smart_states table.
  *
- * @package Enterprise
- * @subpackage DBClasses
  * @since v9.6
  * @copyright WoodWing Software bv. All Rights Reserved.
  *

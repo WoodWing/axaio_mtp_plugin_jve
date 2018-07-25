@@ -8,8 +8,6 @@
  * Insert a new row with name = 'enterprise_system_id' and value = GUID in the smart_config table.
  * 
  *
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v9.2.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

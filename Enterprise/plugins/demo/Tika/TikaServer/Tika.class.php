@@ -16,8 +16,6 @@
 ****************************************************************************/
 
 /**
- * @package 	Enterprise
- * @subpackage 	ServerPlugin
  * @since 		v7.0
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *
@@ -239,8 +237,6 @@ class Tika
 /**
  * Tika_XmlParser class
  *
- * @package Enterprise
- * @subpackage ServerPlugins
  * @since v7.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  * 

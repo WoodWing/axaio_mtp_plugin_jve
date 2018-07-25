@@ -6,8 +6,6 @@
  *
  * Use "dbgen.php?verbose=full" to dump all generated SQL on screen too.
  *
- * @package 	Enterprise
- * @subpackage 	Admin
  * @since 		v4.2
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

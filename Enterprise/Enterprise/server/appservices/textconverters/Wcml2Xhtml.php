@@ -4,8 +4,6 @@
  * Converts WCML (WoodWing InCopy XML) article into XHTML 1.1 format using CSS 2.1.
  * WCML is a container that bundles multiple ICML (InCopy XML) formatted files.
  *
- * @package Enterprise
- * @subpackage WebEditor
  * @since v7.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

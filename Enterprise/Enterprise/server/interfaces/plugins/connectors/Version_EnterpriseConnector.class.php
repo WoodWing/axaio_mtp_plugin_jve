@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage  ServerPlugins
  * @since 		v8.3
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *
@@ -13,9 +11,9 @@ require_once BASEDIR.'/server/interfaces/plugins/DefaultConnector.class.php';
 
 abstract class Version_EnterpriseConnector extends DefaultConnector
 {
-
 	/**
-	 * Gives a connector control over the creation of new version of an object.
+	 * Give a connector control over the creation of new version of an object.
+	 *
 	 * @param int $objectId Id of the object
 	 * @param string $sourceVersion (<major>.<minor>)
 	 * @param string $nextVersion (<major>.<minor>)
@@ -27,7 +25,8 @@ abstract class Version_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * Gives a connector control over the delete of a version of an object.
+	 * Give a connector control over the delete of a version of an object.
+	 *
 	 * @param int $objectId Id of the object
 	 * @param string $version (<major>.<minor>)
 	 * @param string $storeName Reference to the filestore.
@@ -37,15 +36,14 @@ abstract class Version_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * Content Sources are free to set their own version. If the Content Source wants to overwrite the version
-	 * number of Enterprise true should be returned.
+	 * Enable a Content Source plug-in to overwrite the object version numbers of Enterprise.
+	 *
 	 * This method should only be implemented by Content Source plug-ins.
 	 *
 	 * @return array with index the content source id and value true/false.
 	 */
 	public function useContentSourceVersion()
 	{
-		return array( 'ContentSourceId' => false);
+		return array();
 	}
-
 }

@@ -1,7 +1,5 @@
 <?php
 /**
- * @package Enterprise
- * @subpackage Utils
  * @since v7.6.7
  * @copyright WoodWing Software bv. All Rights Reserved.
  *

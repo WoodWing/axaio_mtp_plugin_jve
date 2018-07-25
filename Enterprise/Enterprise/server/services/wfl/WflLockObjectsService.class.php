@@ -2,8 +2,6 @@
 /**
  * LockObjects Workflow service.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v9.7
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

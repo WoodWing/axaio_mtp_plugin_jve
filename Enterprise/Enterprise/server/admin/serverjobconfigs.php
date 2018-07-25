@@ -6,8 +6,7 @@ require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/TemplateSection.php';
 
-$ticket = checkSecure('admin');
-$sessionUser = DBTicket::checkTicket( $ticket );
+checkSecure('admin' );
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
@@ -133,7 +132,7 @@ if ( $action == 'edit' /*|| $action == 'add'*/ ) {
 	$sectionObj = new WW_Utils_HtmlClasses_TemplateSection( 'JOBCONFIG_RECORD' );
 	$sectionTxt = $sectionObj->getSection( $txt );
 	$jobConfigTxt = $sectionObj->fillInRecordFields( $sectionTxt, $jobConfig, true ); // true = edit mode
-	$jobConfigTxt = WW_Admin_ServerJobConfigs::buildUsersCombo( $jobConfig, $jobConfigTxt, $sessionUser );
+	$jobConfigTxt = WW_Admin_ServerJobConfigs::buildUsersCombo( $jobConfig, $jobConfigTxt );
 	$txt = $sectionObj->replaceSection( $txt, $jobConfigTxt );
 }
 
@@ -169,7 +168,7 @@ class WW_Admin_ServerJobConfigs
 	 * @param string $jobConfigTxt Template fragment that contains the JOBCONFIG_USERCOMBO template section to be replaced with the combo
 	 * @return string Template fragment with users combo filled in.
 	 */
-	public static function buildUsersCombo( ServerJobConfig $jobConfig, $jobConfigTxt, $sessionUser )
+	public static function buildUsersCombo( ServerJobConfig $jobConfig, $jobConfigTxt )
 	{
 		$sectionObj = new WW_Utils_HtmlClasses_TemplateSection( 'JOBCONFIG_USERCOMBO' );
 		$sectionTxtCol = '';
@@ -179,7 +178,7 @@ class WW_Admin_ServerJobConfigs
 		} else {
 			// Get users from DB
 			require_once BASEDIR.'/server/bizclasses/BizAdmUser.class.php';
-			$users = BizAdmUser::listUsersObj( $sessionUser, null, null, null, $jobConfig->SysAdmin );
+			$users = BizAdmUser::listUsersObj( BizSession::getShortUserName(), null, null, null, $jobConfig->SysAdmin );
 			
 			// Check if user configured (before) is still a valid user at the DB
 			$found = false;

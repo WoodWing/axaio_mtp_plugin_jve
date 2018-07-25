@@ -2,8 +2,6 @@
 /**
  * DataSource SOAP server.
  *
- * @package Enterprise
- * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 

@@ -3,8 +3,6 @@
 /**
  * Business logic to cache user settings per client application.
  *
- * @package     Enterprise
- * @subpackage  BizClasses
  * @since       10.3.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

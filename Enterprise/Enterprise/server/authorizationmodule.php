@@ -23,18 +23,26 @@ class authorizationmodule
 	 * @param integer $categoryId The Category Id, formerly know as section ( 0 means all Categories ).
 	 * @param string $type The object type of the workflow status.
 	 * @param integer $stateId The workflow status Id ( 0 means all states ).
-	 * @param bool $isSessionUser Used to indicate a different user. No longer needed because rights are cached per user.
+	 * @param bool $isSessionUser Deprecated. Not used.
 	 */
 	public function getRights( $user, $publ = null, $issue = null, $categoryId= null, $type = null, $stateId = null, $isSessionUser = true )
 	{
 		if( $isSessionUser == false ) {
-			LogHandler::Log( __FUNCTION__, 'WARN',
-				'Parameter $isSessionUser is obsolete since version 9.9.0. Caller must not pass the parameter.' );
+			LogHandler::Log( __METHOD__, 'DEPRECATED',
+				'Parameter $isSessionUser is obsolete since version 10.0.0. Caller must not pass the parameter.' );
 		}
 
 		$this->rights = $this->getRightsCached( $user, $publ, $issue, $categoryId, $type, $stateId, $isSessionUser );
 		$this->user = $user;
-		$this->userFullName = DBUser::getCachedUserFullName( $user );
+
+		// To resolve the full name of the user, prefer the session user cache since all info of that users is cached already
+		// while the DBUser keeps track of its own cache for any user, regardless the session user.
+		if( $user === BizSession::getShortUserName() ) {
+			$this->userFullName = BizSession::getUserInfo( 'fullname' );
+		} else {
+			require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
+			$this->userFullName = DBUser::getCachedUserFullName( $user );
+		}
 	}
 
 	/**
@@ -47,9 +55,9 @@ class authorizationmodule
 	 * @param integer $categoryId The Category Id, formerly know as section ( 0 means all Categories ).
 	 * @param string $type The object type of the workflow status.
 	 * @param integer $stateId The workflow status Id ( 0 means all states ).
-	 * @param bool $isSessionUser Used to indicate a different user. No longer needed because rights are cached per user.
+	 * @param bool $isSessionUser Deprecated. Not used.
 	 * @return array Authorizations of the user on the specified /brand/workflow stateId/category level.
-	 * @since 9.9.0 (Moved from DBUser.class.php)
+	 * @since 10.0.0 (Moved from DBUser.class.php)
 	 */
 	public function getRightsCached( $user, $publ, $issue, $categoryId, $type, $stateId, $isSessionUser = true )
 	{

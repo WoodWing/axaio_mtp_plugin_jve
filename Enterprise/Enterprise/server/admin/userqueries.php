@@ -4,11 +4,8 @@ require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
-$ticket = checkSecure('admin');
+checkSecure( 'admin' );
 $tpl = HtmlDocument::loadTemplate( 'userqueries.htm' );
-
-require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-$user = DBTicket::checkTicket( $ticket );
 
 // Get form params
 $inUser = isset($_POST['user']) ? $_POST['user'] : '';

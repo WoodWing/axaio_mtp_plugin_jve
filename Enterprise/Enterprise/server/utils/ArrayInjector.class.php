@@ -36,8 +36,6 @@
  *
  * Note that PHP does not offer standard functions to insert before/after an existing item referenced by a key.
  *
- * @package    Enterprise
- * @subpackage Utils
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

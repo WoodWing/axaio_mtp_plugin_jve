@@ -14,8 +14,6 @@
  * called with a correct $edition(id) parameter. So calling the method with $edition(id) = 0 is incorrect in that case.
  * It is up to caller to pass the correct id.
  *
- * @package 	SCEnterprise
- * @subpackage 	DBClasses
  * @since 		v5.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

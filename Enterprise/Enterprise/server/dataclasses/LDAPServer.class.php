@@ -6,8 +6,6 @@
  * A list of LDAP servers is configured in the configserver.php file.<br>
  * That way, client applications can let end-users validate their password through LDAP.<br>
  * 
- * @package SCEnterprise
- * @subpackage DataClasses
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -2,8 +2,6 @@
 /**
  * Implements a PHP semaphore at database level.
  *
- * @package 	Enterprise
- * @subpackage 	DBClasses
  * @since 		v7.5
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

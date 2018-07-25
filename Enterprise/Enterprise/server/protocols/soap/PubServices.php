@@ -2,8 +2,6 @@
 /**
  * Publishes dossiers with contained content.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v6.1
  * @copyright WoodWing Software bv. All Rights Reserved.
  *

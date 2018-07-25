@@ -327,7 +327,7 @@ public class VersionInfo  implements java.io.Serializable {
         elemField.setFieldName("state");
         elemField.setXmlName(new javax.xml.namespace.QName("", "State"));
         elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "State"));
-        elemField.setNillable(false);
+        elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("file");

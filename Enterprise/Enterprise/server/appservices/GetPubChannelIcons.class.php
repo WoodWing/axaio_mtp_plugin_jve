@@ -4,8 +4,6 @@
  *
  * When an error occurs a BizException will be thrown.<br>
  * 
- * @package Enterprise
- * @subpackage BizServices
  * @since v7.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

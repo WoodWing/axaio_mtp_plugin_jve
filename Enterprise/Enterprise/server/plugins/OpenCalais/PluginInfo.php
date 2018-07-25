@@ -2,8 +2,6 @@
 /**
  * OpenCalais server plugin info.
  *
- * @package     Enterprise
- * @subpackage  ServerPlugins
  * @since       v9.1.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

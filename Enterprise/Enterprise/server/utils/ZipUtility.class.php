@@ -3,8 +3,6 @@
  * Includes two wrapper classes; one for the built-in ZipArchive class and one for the zip/unzip
  * command line tools. Also includes a factory class to create the one of those wrapper classes.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

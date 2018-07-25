@@ -5,8 +5,6 @@
  * Checks all properties of service requests and reponse objects of Enterprise interfaces.
  * It does name, type, nillable, existence checking.
  *
- * @package 	Enterprise
- * @subpackage 	Services
  * @since 		v8.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

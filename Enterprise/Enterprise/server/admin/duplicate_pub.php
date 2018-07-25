@@ -6,10 +6,7 @@ require_once BASEDIR.'/server/apps/functions.php';
 require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
-$ticket = checkSecure('admin');
-
-require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-$user = DBTicket::checkTicket( $ticket );
+checkSecure('admin');
 
 // Get params
 $inPub = isset($_REQUEST['ID']) ? intval($_REQUEST['ID']) : 0; // Publication id of the copy source

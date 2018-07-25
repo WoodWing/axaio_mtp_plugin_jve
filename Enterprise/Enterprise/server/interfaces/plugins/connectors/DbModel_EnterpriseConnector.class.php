@@ -7,8 +7,6 @@
  * During build time of the plug-in, SQL scripts should be generated from the DB model with help of the dbgen.php tool.
  * The core server takes care of the installation through the admin pages and validation through the Health Check.
  *
- * @package    Enterprise
- * @subpackage ServerPlugins
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

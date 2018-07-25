@@ -5,8 +5,6 @@
  * See TestSuiteInterfaces.php for more details about the TestSuite concept.
  * Checks FileStore related options: ATTACHMENTDIRECTORY, EXPORTDIRECTORY, TEMPDIRECTORY
  *
- * @package SCEnterprise
- * @subpackage TestSuite
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

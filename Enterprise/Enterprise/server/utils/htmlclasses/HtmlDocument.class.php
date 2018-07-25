@@ -3,8 +3,6 @@
  * Utility class to build HTML documenta based on HTML master templates.
  * This is especially used by web/admin applications.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
@@ -93,11 +91,13 @@ class HtmlDocument
 			$txt = str_replace("<!--PAGEWIDTH-->", $flexwidth ? '100%' : '800', $txt);
 			$txt = str_replace("<!--INETROOT-->", INETROOT, $txt);
 
+			require_once BASEDIR . '/server/utils/VersionUtils.class.php';
+			$txt = str_replace( '<!--SERVER_VERSION-->', VersionUtils::getVersionDigits( SERVERVERSION, 4 ), $txt );
+
 			// Add Stylesheet(CSS) Includes
 			$webappLinks = '';
 			if( $cssUrls ) foreach( $cssUrls as $cssUrl ) {
 				$webappLinks .= '<link href="'.$cssUrl.'" rel="stylesheet" type="text/css" media="all" />' . "\r\n";
-
 			}
 			$txt = str_replace("<!--WEBAPP_LINKS-->", $webappLinks, $txt );
 

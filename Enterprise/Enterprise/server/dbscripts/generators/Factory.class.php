@@ -3,8 +3,6 @@
 /**
  * Factory for SQL script generators.
  *
- * @package Enterprise
- * @subpackage DbScripts/Generators
  * @since 10.2.0
  **/
 

@@ -19,6 +19,7 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _FileUrl:String;
 		private var _EditionId:String;
 		private var _ContentSourceFileLink:String;
+		private var _ContentSourceProxyLink:String;
 
 		public function WflAttachment() {
 		}
@@ -70,6 +71,13 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set ContentSourceFileLink(ContentSourceFileLink:String):void {
 			this._ContentSourceFileLink = ContentSourceFileLink;
+		}
+
+		public function get ContentSourceProxyLink():String {
+			return this._ContentSourceProxyLink;
+		}
+		public function set ContentSourceProxyLink(ContentSourceProxyLink:String):void {
+			this._ContentSourceProxyLink = ContentSourceProxyLink;
 		}
 
 	}

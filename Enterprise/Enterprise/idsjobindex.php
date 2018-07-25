@@ -1,7 +1,5 @@
 <?php
 /**
- * @package Enterprise
- * @subpackage Core
  * @since v9.7.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  *

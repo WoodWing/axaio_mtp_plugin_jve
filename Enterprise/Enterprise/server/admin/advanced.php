@@ -19,7 +19,6 @@ if( isset( $_GET['clearopcache'] ) && $_GET['clearopcache'] == 1 ) {
 	checkSecure('admin');
 
 	// Just clear the Zend OPcache right away.
-	require_once BASEDIR .'/server/utils/ZendOpcache.php';
 	$isCleared = WW_Utils_ZendOpcache::clearOPcache();
 
 	// Report whether or not the cache could be cleared.

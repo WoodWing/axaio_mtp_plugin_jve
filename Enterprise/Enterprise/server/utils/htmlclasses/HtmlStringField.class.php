@@ -5,8 +5,6 @@
  *
  *	@todo This class is not documented yet.
  *
- * @package     Enterprise
- * @subpackage  HtmlClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

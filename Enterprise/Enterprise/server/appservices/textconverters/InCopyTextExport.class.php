@@ -5,8 +5,6 @@
  * Converts from collection of XHTML frames that have been edit in TinMCE frames back into InCopy (XML).
  * See {@link TextExport} interface for more details. 
  *
- * @package Enterprise
- * @subpackage WebEditor
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -5,8 +5,6 @@
  * Converts from plain text format to collection of XHTML frames that can be edit in TinMCE frames.
  * See {@link TextImport} interface for more details.
  *
- * @package Enterprise
- * @subpackage WebEditor
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

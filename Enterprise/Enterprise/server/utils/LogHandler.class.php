@@ -6,8 +6,6 @@
  * Under the OUTPUTDIRECTORY folder, it creates a <YYMMDD> subfolder where under a client IP subfolder is created.
  * Inside, it does logging for that client calling. The DEBUGLEVELS option tells the granularity of logs made (per client IP).
  * 
- * @package Enterprise
- * @subpackage Logging
  * @since v3.x
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -2,8 +2,6 @@
 /**
  * Class for publishing a Dossier to Facebook.
  *
- * @package    Enterprise
- * @subpackage ServerPlugins
  * @since      v7.6
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *

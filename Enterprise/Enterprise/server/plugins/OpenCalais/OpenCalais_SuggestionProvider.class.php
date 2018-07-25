@@ -4,8 +4,6 @@
  * More information about response formats etc. is available at:
  * http://developer.permid.org/open-calais-api/open-calais-tagging-user-guide/
  *
- * @package     Enterprise
- * @subpackage  ServerPlugins
  * @since       v9.1.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

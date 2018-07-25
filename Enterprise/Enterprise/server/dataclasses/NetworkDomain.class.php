@@ -6,8 +6,6 @@
  * A list of domains is configured in the configserver.php file.<br>
  * That way, client applications can let end-users type DNS suffixes which are matched with the domains.<br>
  * 
- * @package SCEnterprise
- * @subpackage DataClasses
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

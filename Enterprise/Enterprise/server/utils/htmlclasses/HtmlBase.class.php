@@ -8,8 +8,6 @@
  * @todo If needed: better implement (partly rethink) validation in derived classes.
  * @todo Implement check for the $Name being unique.
  *
- * @package     Enterprise
- * @subpackage  HtmlClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

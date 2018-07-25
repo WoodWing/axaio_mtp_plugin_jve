@@ -2,8 +2,6 @@
 /**
  * UnlockObjects workflow business service.
  *
- * @package SCEnterprise
- * @subpackage WorkflowServices
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
