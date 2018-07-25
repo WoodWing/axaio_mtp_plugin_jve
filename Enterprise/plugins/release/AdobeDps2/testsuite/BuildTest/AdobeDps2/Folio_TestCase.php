@@ -58,7 +58,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 	/** @var AdobeDps2_Utils  $dpsUtils */
 	private $dpsUtils = null;
 
-	public function getDisplayName() { return 'Adobe DPS folios (Disabled)'; }
+	public function getDisplayName() { return 'Adobe DPS folios'; }
 	public function getTestGoals()   { return 'Creates and updates articles (folio files) to test the Adobe DPS integration.'; }
 	public function getTestMethods() { return
 		'Does the following steps:
@@ -77,28 +77,28 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 	
 	final public function runTest()
 	{
-//		try {
-//			$this->setupTestData();
-//
-//			// Clear the queue from pending AdobeDps2 jobs.
-//			$this->deletePendingJobs();
-//
-//			// Layout create- and save operations.
-//			$this->createLayoutObject();
-//			$this->saveLayoutWithLayoutStatus();
-//			$this->saveLayoutWithReadyPublishLayoutStatus();
-//			$this->deleteAdobeDpsArticleAndSaveLayoutWithReadyPublishLayoutStatus( true ); // unlock layout
-//
-//			// Layout property tests.
-//			$this->setLayoutProperties();
-//			$this->createObjectForMultiSetTests();
-//			$this->sendToNextStatus();
-//			$this->multisetLayoutProperties();
-//
-//		} catch( BizException $e ) {
-//		}
-//
-//		$this->tearDownTestData();
+		try {
+			$this->setupTestData();
+
+			// Clear the queue from pending AdobeDps2 jobs.
+			$this->deletePendingJobs();
+
+			// Layout create- and save operations.
+			$this->createLayoutObject();
+			$this->saveLayoutWithLayoutStatus();
+			$this->saveLayoutWithReadyPublishLayoutStatus();
+			$this->deleteAdobeDpsArticleAndSaveLayoutWithReadyPublishLayoutStatus( true ); // unlock layout
+
+			// Layout property tests.
+			$this->setLayoutProperties();
+			$this->createObjectForMultiSetTests();
+			$this->sendToNextStatus();
+			$this->multisetLayoutProperties();
+
+		} catch( BizException $e ) {
+		}
+
+		$this->tearDownTestData();
 	}
 	
 	/**
