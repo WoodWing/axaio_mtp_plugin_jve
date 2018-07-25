@@ -1328,10 +1328,10 @@ class BizServerPlugin
 	 * Enables (activates) a given server plug-in. The plug-in must have been installed before.
 	 *
 	 * @param string $pluginName
-	 * @return PluginInfoData Info of the invoked plug-in.
+	 * @return PluginInfoData|null Info of the invoked plug-in, or null if plug-in was not found in DB.
 	 * @throws BizException On DB error.
 	 */
-	static public function activatePluginByName( string $pluginName ) : PluginInfoData
+	static public function activatePluginByName( string $pluginName ): ?PluginInfoData
 	{
 		$pluginInfo = self::getInstalledPluginInfo( $pluginName );
 		if( $pluginInfo ) {
@@ -1349,10 +1349,10 @@ class BizServerPlugin
 	 * Disables (deactivates) a given server plug-in. The plug-in must have been installed before.
 	 *
 	 * @param string $pluginName
-	 * @return PluginInfoData Info of the invoked plug-in.
+	 * @return PluginInfoData|null Info of the invoked plug-in, or null if plug-in was not found in DB.
 	 * @throws BizException On DB error.
 	 */
-	static public function deactivatePluginByName( string $pluginName ) : PluginInfoData
+	static public function deactivatePluginByName( string $pluginName ): ?PluginInfoData
 	{
 		$pluginInfo = self::getInstalledPluginInfo( $pluginName );
 		if( $pluginInfo ) {
