@@ -38,6 +38,9 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 			Elvis_BizClasses_UserSetting::clearRestricted();
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 			Elvis_DbClasses_Token::delete( BizSession::getShortUserName() );
+			// At the first modify ( property or asset ) action, the 'cache' is refreshed, EN-90272.
+			require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
+			DBUserSetting::deleteSettingsByName( BizSession::getShortUserName(), 'ElvisContentSource', array( 'EditableFields' ) );
 		}
 
 		// Add the feature to the feature set of the logon response.
