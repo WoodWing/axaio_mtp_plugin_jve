@@ -112,7 +112,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		require_once BASEDIR.'/server/bizclasses/BizServerJob.class.php';
 		$this->bizServerJob = new BizServerJob();
 
-		require_once BASEDIR . '/server/wwtest/testsuite/BuildTest/AdobeDps2/Utils.class.php';
+		require_once __DIR__ . '/Utils.class.php';
 		$this->dpsUtils = new AdobeDps2_Utils( $this );
 
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
