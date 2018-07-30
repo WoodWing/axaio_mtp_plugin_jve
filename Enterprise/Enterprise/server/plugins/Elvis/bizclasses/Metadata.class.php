@@ -128,7 +128,9 @@ class Elvis_BizClasses_Metadata
 		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
 			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 			$fieldInfos = $client->fieldInfo();
-			$editableFields = $this->extractEditableFieldsFromFieldInfos( $fieldInfos );
+			if( $fieldInfos ) {
+				$editableFields = $this->extractEditableFieldsFromFieldInfos( $fieldInfos );
+			}
 			Elvis_BizClasses_UserSetting::setEditableFields( $editableFields );
 		}
 
@@ -217,7 +219,7 @@ class Elvis_BizClasses_Metadata
 	 *
 	 * @return string[] metadata to return
 	 */
-	public function getMetadataToReturn() : array
+	public function getMetadataToReturn(): array
 	{
 		if( !isset( $this->metadataToReturn ) ) {
 			$this->initFieldHandlers();
@@ -305,16 +307,16 @@ class Elvis_BizClasses_Metadata
 	}
 
 	/**
-	 * Extracts the fields that are marked as editable from the response returned by the fieldinfo web service.
+	 * Extract the fields that are marked as editable.
 	 *
 	 * @since 10.1.8
 	 * @param stdClass $fieldInfos
-	 * @return array
+	 * @return string[]
 	 */
-	private function extractEditableFieldsFromFieldInfos( stdClass $fieldInfos )
+	private function extractEditableFieldsFromFieldInfos( stdClass $fieldInfos ): array
 	{
 		$editableFields = array();
-		if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
+		foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
 			if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
 				( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
 			) {

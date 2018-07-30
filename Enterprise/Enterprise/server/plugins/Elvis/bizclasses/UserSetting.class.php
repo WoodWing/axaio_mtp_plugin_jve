@@ -105,4 +105,15 @@ class Elvis_BizClasses_UserSetting
 		}
 		self::setUserSetting( 'EditableFields', serialize( $editableFields ) );
 	}
+
+	/**
+	 * Clear those Elvis fields that are editable by user.
+	 *
+	 * @since 10.5.0
+	 */
+	public static function clearEditableFields()
+	{
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		$bizUserSettings->deleteSettingsByName( BizSession::getShortUserName(), 'ElvisContentSource', array( 'EditableFields' ) );
+	}
 }
