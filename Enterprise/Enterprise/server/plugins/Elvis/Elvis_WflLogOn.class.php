@@ -37,6 +37,9 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 			// fallback user (ELVIS_DEFAULT_USER) will be used as fallback for which the restricted flag will be raised again.
 			Elvis_BizClasses_UserSetting::clearRestricted();
 			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
+			Elvis_BizClasses_UserSetting::clearEditableFields();
+			// EN-90272; to prevent that the editable fieds are outdated, first delete them and refresh them later on
+			// when the user modifies metadata.
 			Elvis_DbClasses_Token::delete( BizSession::getShortUserName() );
 		}
 
