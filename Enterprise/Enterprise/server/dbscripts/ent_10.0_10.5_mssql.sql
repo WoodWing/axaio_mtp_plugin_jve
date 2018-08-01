@@ -303,6 +303,7 @@ ALTER TABLE smart_messagelog ALTER COLUMN   [objid] bigint NOT NULL ;
 CREATE  INDEX [oimtpa_messagelog] ON [smart_messagelog]([objid], [messagetype], [page]) ;
 CREATE  INDEX [oimtd_messagelog] ON [smart_messagelog]([objid], [messagetypedetail]) ;
 ALTER TABLE [smart_messagelog] ADD DEFAULT (0) FOR [objid];
+CREATE  INDEX [tmid_messagelog] ON [smart_messagelog]([threadmessageid]) ;
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objectflags', @columnName = 'objid', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_objectflags DROP CONSTRAINT ' + @constraintName

@@ -744,6 +744,7 @@ CREATE  INDEX [oimtpa_messagelog] ON [smart_messagelog]([objid], [messagetype], 
 CREATE  INDEX [oimtd_messagelog] ON [smart_messagelog]([objid], [messagetypedetail]) ;
 CREATE  INDEX [mi_messagelog] ON [smart_messagelog]([msgid]) ;
 CREATE  INDEX [uid_messagelog] ON [smart_messagelog]([userid]) ;
+CREATE  INDEX [tmid_messagelog] ON [smart_messagelog]([threadmessageid]) ;
 
 CREATE TABLE [smart_objectflags] (
   [objid] bigint NOT NULL  default '0',

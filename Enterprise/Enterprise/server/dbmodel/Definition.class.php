@@ -1677,6 +1677,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 						array ('v' => '4.2', 'name' => 'oimtd_messagelog', 	'fields' => 'objid, messagetypedetail', ),
 						array ('v' => '4.2', 'name' => 'mi_messagelog', 	'fields' => 'msgid'),
 						array ('v' => '8.0', 'name' => 'uid_messagelog', 	'fields' => 'userid'),
+						array ('v' => '10.5', 'name' => 'tmid_messagelog', 	'fields' => 'threadmessageid'),
 					),
 					'inserts' => array(
 					),

@@ -113,6 +113,7 @@ ADD   `importonlogon` char(2) NOT NULL  default '';
 ALTER TABLE `smart_users` CHANGE `pass`   `pass` varchar(128) NOT NULL  default '';
 ALTER TABLE `smart_mtpsentobjects` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_messagelog` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
+CREATE  INDEX `tmid_messagelog` ON `smart_messagelog`(`threadmessageid`) ;
 ALTER TABLE `smart_objectflags` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 
 CREATE TABLE `smart_featureaccess` (
