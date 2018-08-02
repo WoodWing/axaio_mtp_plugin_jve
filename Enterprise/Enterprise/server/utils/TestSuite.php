@@ -2137,8 +2137,8 @@ class WW_Utils_TestSuite
 			$client->setParameterGet( array(
 												'createrecurringjob' => $serverJobName,
 											   'maxexectime', $maxExecTime ) );
-			$client->setOptions( array( 'timeout' => $maxExecTime + 5, 'connecttimeout' => 5 ) );
 			// 'timeout' must exceed the execution time to give the client time to return to caller.
+			$client->setOptions( array( 'timeout' => $maxExecTime + 5, 'connecttimeout' => 5 ) );
 			$client->send();
 			$response = $client->getResponse();
 			if( !$response->isSuccess() ) {
@@ -2169,8 +2169,8 @@ class WW_Utils_TestSuite
 			$client->setParameterGet( array(
 												'maxexectime' => $maxExecTime,
 												'maxjobprocesses'=> $maxProcessJobs ) );
-			$client->setOptions( array( 'timeout' => $maxExecTime + 5, 'connecttimeout' => 5 ) );
 			// 'timeout' must exceed the execution time to give the client time to return to caller.
+			$client->setOptions( array( 'timeout' => $maxExecTime + 5, 'connecttimeout' => 5 ) );
 			$client->send();
 			$response = $client->getResponse();
 			if( !$response->isSuccess() ) {
