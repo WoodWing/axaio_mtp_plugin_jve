@@ -41,15 +41,7 @@ class BizServerInfo
 		$serverInfos = array(); // Array of servers that we will return
 		if( $servers ) foreach( $servers as $serverInfo ) {
 			$cryptkey = '';
-			if( defined('ENCRYPTION_PUBLICKEY_PATH') ) {
-				require_once BASEDIR.'/server/utils/PasswordEncryption.class.php';
-				$pe = new PasswordEncryption( $serverInfo->CryptKey, null );
-				if( $pe->ValidatePublicKey() === FALSE ) {
-					throw new BizException( '', 'Server', '', $pe->GetLastError() );
-				}
-				$cryptkey = $pe->GetPublicKey();
-			}
-			if( isset($cryptkey) && strlen($cryptkey) > 0 ) { 
+			if( isset($cryptkey) && strlen($cryptkey) > 0 ) {
 				$serverInfo->CryptKey = $cryptkey;
 			} else {
 				$serverInfo->CryptKey = null;

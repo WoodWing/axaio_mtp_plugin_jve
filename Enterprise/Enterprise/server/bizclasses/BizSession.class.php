@@ -216,17 +216,6 @@ class BizSession
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizLDAP.class.php';
 		DBlog::logService( $user, 'LogOn' );
-		// Decode the user typed password
-		// Although server has given public encryption key to client application, this does *not* imply
-		// client did (or supports) encryption. That means we might receive encrypted- or just plain text passwords here!
-		if( defined('ENCRYPTION_PRIVATEKEY_PATH') ) {
-			require_once BASEDIR.'/server/utils/PasswordEncryption.class.php';
-			$pe = new PasswordEncryption( null, ENCRYPTION_PRIVATEKEY_PATH );
-			if( $pe->ValidatePrivateKey() === FALSE ) {
-				throw new BizException( $pe->GetLastError(), 'Server', '' );
-			}
-			$password = $pe->DecryptPrivatePassword( $password );
-		}
 
 		// When LDAP is configured, create user when needed and add/remove his/her groups.
 		if( BizLDAP::isInstalled() === true ) {
