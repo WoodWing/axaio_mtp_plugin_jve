@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	utils
  * @since 		v9.7
  * @deprecated v10.1.0 This file is deprecated and should be removed with v11.
  * @copyright 	WoodWing Software bv. All Rights Reserved.

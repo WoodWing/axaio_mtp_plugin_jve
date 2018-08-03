@@ -2,8 +2,6 @@
 /**
  * ModifyWorkflowUserGroupAuthorizations Admin service.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v10.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

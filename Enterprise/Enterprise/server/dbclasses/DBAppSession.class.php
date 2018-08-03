@@ -10,8 +10,6 @@
  * For all methods, use hasError() to find out if method has failed.
  * When failed, use getError() to find out error details.
  *
- * @package     SCEnterprise
- * @subpackage  DBClasses
  * @since       v5.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

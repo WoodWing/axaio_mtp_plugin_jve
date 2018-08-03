@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	TransferServer
  * @since 		v8
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  * 
@@ -125,33 +123,16 @@ class TransferEntry
 			header('Status: 400 Bad Request - '.$message );
 			LogHandler::Log( 'TransferServer', 'ERROR', $message );
 			exit( $message );
-		} else {
-			BizSession::setTicketCookieForClientIdentifier($ticket);
 		}
-		
-		// The ticket validation takes around 50ms because of the db UPDATE statement.
-		// This is very expensive in context of Publication Overview whereby hundreds
-		// of thumbs are downloaded. Therefore the ticket validation time is saved in the 
-		// session data. When the last saved time is less than one minute ago, the ticket
-		// validation through db is skipped.
-		$validateTicket = true;
-		session_id( $ticket );
-		$sessionVars = self::getSessionVariables();
-		if( isset($sessionVars['TicketValidationStamp']) ) {
-			$lastSec = intval($sessionVars['TicketValidationStamp']);
-			$nowSec = time(); // the number of seconds since the Unix Epoch (1970)
-			if( $nowSec - $lastSec < 60 ) { // last ticket update was less than one minute ago?
-				$validateTicket = false;
-			}
-		}
+		BizSession::setTicketCookieForClientIdentifier( $ticket );
+		BizSession::startSession( $ticket );
+		BizSession::setServiceName( 'FileTransfer' );
 
 		// The OPTIONS call is send by a web browser as a pre-flight for a CORS request.
 		// This request doesn't send or receive any information. There is no need to validate the ticket,
 		// and when the OPTIONS calls returns an error the error can't be validated within an application.
 		// This is a restriction by web browsers.
-		if ( $httpMethod == 'OPTIONS' ) {
-			$validateTicket = false;
-		}
+		$validateTicket = $httpMethod !== 'OPTIONS';
 		
 		// Validate ticket. This implicitly updates ticket expiration date, which is wanted
 		// since clients might do a long upload of many files and then call CreateObjects.
@@ -163,8 +144,7 @@ class TransferEntry
 		// (Clients should check for the SCEntError_InvalidTicket key since 403 is not unique.)
 		// The new ticket obtained should be set to the upload/download URL to try again.
 		if( $validateTicket ) {
-			require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-			$user = DBTicket::checkTicket( $ticket, 'FileTransfer' );
+			$user = BizSession::checkTicket( $ticket );
 			if( !$user ) {
 				$message = 'Ticket expired. Please relogin. (SCEntError_InvalidTicket)';
 				header('HTTP/1.1 403 Forbidden');
@@ -173,11 +153,6 @@ class TransferEntry
 				exit( $message );
 			}
 			unset( $user );
-			
-			// Remember when we already have validated and updated the ticket expiration.
-			$sessionVars = array();
-			$sessionVars['TicketValidationStamp'] = time();
-			self::setSessionVariables( $sessionVars );
 		}
 				
 		// Anti hijack check (e.g. block people messing around on the file system with .. or *)
@@ -216,7 +191,6 @@ class TransferEntry
 			}
 		}
 		
-		BizSession::setServiceName( 'FileTransfer' );
 		PerformanceProfiler::startProfile( 'Entry point', 1 );
 		$msg = "Incoming HTTP {$httpMethod} request\r\nTicket=[{$ticket}] File GUID=[{$fileguid}]";
 		if( $format ) {
@@ -710,46 +684,4 @@ class TransferEntry
 			LogHandler::Log( 'TransferServer', 'DEBUG', $message );
 		}
 	}*/
-
-	/**
-	 * Set multiple session variables.
-	 * This function open the session, sets variables, saves and closes the
-	 * session. This way an other process won't be locked.
-	 *
-	 * Please note: with concurrent processes the last call to
-	 * setSessionVariables will overrule the earlier one
-	 *
-	 * @param array $variables key values pairs
-	 */
-	private static function setSessionVariables( array $variables )
-	{
-		session_start();
-		if( !isset( $_SESSION[self::SESSION_NAMESPACE] ) ) {
-			$_SESSION[self::SESSION_NAMESPACE] = array();
-		}
-		foreach( $variables as $key => $value ) {
-			$_SESSION[self::SESSION_NAMESPACE][$key] = $value;
-		}
-		session_write_close();
-	}
-
-	/**
-	 * Get mulitple session variables.
-	 * This function open the session, gets variables and closes the
-	 * session. This way an other process won't be locked.
-	 * 
-	 * @return array key value pairs
-	 */
-	private static function getSessionVariables()
-	{
-		$variables = array();
-		session_start();
-		if( isset( $_SESSION[self::SESSION_NAMESPACE] ) ) {
-			foreach( $_SESSION[self::SESSION_NAMESPACE] as $key => $value ) {
-				$variables[$key] = $value;
-			}
-		}
-		session_write_close();
-		return $variables;
-	}
 }

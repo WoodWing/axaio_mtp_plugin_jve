@@ -2,8 +2,6 @@
 /**
  * Business class which manages localization of resource strings as shown in GUI.
  *
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v5.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

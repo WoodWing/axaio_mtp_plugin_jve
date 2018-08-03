@@ -6,8 +6,6 @@
  *	May also represent a combination of <input> or <select> or other html-types.
  *	The derived field-class must take care of drawing the html and handling input.
  *
- *	@package     Enterprise
- *	@subpackage  HtmlClasses
  *	@since       v4.2
  *	@copyright   WoodWing Software bv. All Rights Reserved.
  */

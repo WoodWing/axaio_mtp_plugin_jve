@@ -2,8 +2,6 @@
 /**
  * Suggestions Workflow service.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v9.1
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

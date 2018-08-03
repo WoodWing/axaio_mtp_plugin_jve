@@ -18,9 +18,7 @@ require_once BASEDIR.'/server/bizclasses/BizStorage.php'; // FileStorage
 require_once BASEDIR.'/server/secure.php';
 	
 // Check if acting user has system admin rights.
-$ticket = checkSecure();
 checkSecure('admin');
-/*$user =*/ DBTicket::checkTicket( $ticket );
 
 // check publication rights
 $pubId = array_key_exists( 'pubid', $_REQUEST ) ? intval( $_REQUEST['pubid'] ) : 0;
@@ -121,9 +119,9 @@ class DBBrandFileStorageSizeCalculator extends DBBase
 		$this->filesToBeCopied = array();
 	}
 	
-	public function calculate( $pubId, $issId, $ticket )
+	public function calculate( $pubId, $issId )
 	{
-		$objRows = $this->calculateObjects( $pubId, $issId, $ticket );
+		$objRows = $this->calculateObjects( $pubId, $issId );
 		$this->calculatePages( $objRows );
 		$this->calculateVersions( $objRows );
 		
@@ -136,7 +134,7 @@ class DBBrandFileStorageSizeCalculator extends DBBase
 		
 	}
 
-	private function queryObjects( $pubId, $issueId, $workflow, $ticket )
+	private function queryObjects( $pubId, $issueId, $workflow )
 	{
 		// Query DB for all dossiers that are assigned to the given issue.
 		require_once BASEDIR.'/server/services/wfl/WflQueryObjectsService.class.php';
@@ -147,7 +145,7 @@ class DBBrandFileStorageSizeCalculator extends DBBase
 		);
 
 		$request = new WflQueryObjectsRequest();
-		$request->Ticket = $ticket;
+		$request->Ticket = BizSession::getTicket();
 		$request->Params = $params;
 		$request->FirstEntry = 1;
 		$request->MaxEntries = 0;		
@@ -183,7 +181,7 @@ class DBBrandFileStorageSizeCalculator extends DBBase
 	/**
 	 * Calculate the total file size at FileStore referenced from smart_objects and smart_deletedobjects tables.
 	 */
-	private function calculateObjects( $pubId, $issId, $ticket )
+	private function calculateObjects( $pubId, $issId )
 	{
 		$objRows = array();
 		$tables = array( 'objects' => true, 
@@ -197,7 +195,7 @@ class DBBrandFileStorageSizeCalculator extends DBBase
 				$rows = DBBase::listRows( $table, 'id', null, $where, $fields, $params );
 				$objRows = $this->iterateObjRows( $rows, $table, $objRows );
 			} else {
-				$objIds = $this->queryObjects( $pubId, $issId, $workflow, $ticket );
+				$objIds = $this->queryObjects( $pubId, $issId, $workflow );
 				$index = 0;
 				$numObjToRetrieve = 10;
 				for( $ctr=1; $ctr<=count( $objIds ); $ctr+=$numObjToRetrieve ) {
@@ -479,7 +477,7 @@ class DBBrandFileStorageSizeCalculator extends DBBase
 if( $pubId && $issId ) {
 	// Calculate storage size selected brand.
 	$calc = new DBBrandFileStorageSizeCalculator();
-	$calc->calculate( $pubId, $issId, $ticket );
+	$calc->calculate( $pubId, $issId );
 	
 	// Report the statistics to admin user.
 	echo $calc->reportStatisticsAsHtmlTable();

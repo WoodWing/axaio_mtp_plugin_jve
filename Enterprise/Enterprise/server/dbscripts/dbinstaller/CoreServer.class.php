@@ -2,8 +2,6 @@
 /**
  * Installer for the database of Enterprise server core. See base class for more details.
  *
- * @package    Enterprise
- * @subpackage dbscripts
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

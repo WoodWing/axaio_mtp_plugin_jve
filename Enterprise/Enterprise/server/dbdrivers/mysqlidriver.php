@@ -2,8 +2,6 @@
 /**
  * Translates DBMS independent calls to MySQL specific calls.
  *
- * @package 	Enterprise
- * @subpackage 	DBDrivers
  * @since 		v3.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

@@ -9,8 +9,6 @@
  * Although this is a more generic class, it is currently used by server
  * plugin-ins only to offer admin web apps at the Integrations admin page. 
  *
- * @package Enterprise
- * @subpackage Core
  * @since v8.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

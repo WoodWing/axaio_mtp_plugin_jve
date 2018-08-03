@@ -7,12 +7,9 @@ require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
 
-$ticket = checkSecure('publadmin');
+checkSecure('publadmin');
 $tpl = HtmlDocument::loadTemplate( 'removesection.htm' );
 $objectmap = getObjectTypeMap();
-
-require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-$user = DBTicket::checkTicket( $ticket );
 
 // Retrieve value of the combo boxes
 $inPub     = isset($_REQUEST['Publication']) ? intval($_REQUEST['Publication']) : 0;
@@ -56,7 +53,7 @@ if ($del === true) {
 	// Move objects to different Section
 	if ($moveObjIds) foreach( $moveObjIds as $counter => $id) {
 		try {
-			$req = new WflGetObjectsRequest( $ticket, array($id), false, 'none', null );
+			$req = new WflGetObjectsRequest( BizSession::getTicket(), array($id), false, 'none', null );
 			$service = new WflGetObjectsService();
 			$getObjectsResp = $service->execute( $req );
 			$objects = $getObjectsResp->Objects;
@@ -69,7 +66,7 @@ if ($del === true) {
 			$object->MetaData->BasicMetaData->Category = new Category( $newSection[$counter] );
 			try {
 				require_once BASEDIR.'/server/services/wfl/WflSetObjectPropertiesService.class.php';
-				$req = new WflSetObjectPropertiesRequest( $ticket, $id, $object->MetaData, $object->Targets );
+				$req = new WflSetObjectPropertiesRequest( BizSession::getTicket(), $id, $object->MetaData, $object->Targets );
 				$service = new WflSetObjectPropertiesService();
 				$service->execute( $req );
 			} catch( BizException $e ) {
@@ -86,7 +83,7 @@ if ($del === true) {
 			$service = new WflDeleteObjectsService();
 
 			$deleteObjectsReq = new WflDeleteObjectsRequest();
-			$deleteObjectsReq->Ticket = $ticket;
+			$deleteObjectsReq->Ticket = BizSession::getTicket();
 			$deleteObjectsReq->IDs = $deleteObjIds;
 			$deleteObjectsReq->Permanent = true;
 
@@ -120,14 +117,14 @@ if ($del === true) {
 	try {
 		require_once BASEDIR.'/server/services/wfl/WflQueryObjectsService.class.php';
 		$service = new WflQueryObjectsService();
-		$result = $service->execute( new WflQueryObjectsRequest( $ticket, $queryParams, 
+		$result = $service->execute( new WflQueryObjectsRequest( BizSession::getTicket(), $queryParams,
 									null, null, null, null, 
 									reqPropsForRemoveSection(), null ) );
 		$maxnum_results = sizeof($result->Rows);
 		if( $sectionID && ($maxnum_results == 0) ) {
 			require_once BASEDIR.'/server/services/adm/AdmDeleteSectionsService.class.php';
 			$service = new AdmDeleteSectionsService();
-			$request = new AdmDeleteSectionsRequest( $ticket, $inPub, $inIssue, array( $sectionID ) );
+			$request = new AdmDeleteSectionsRequest( BizSession::getTicket(), $inPub, $inIssue, array( $sectionID ) );
 			$service->execute( $request );
 		}
 	} catch( BizException $e ) {
@@ -147,7 +144,7 @@ $comboBoxPub = '<select name="Publication" style="width:150px" onchange="submit(
 $comboBoxPub .= '<option></option>';	
 
 require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-$pubs = BizPublication::getPublications( $user );
+$pubs = BizPublication::getPublications( BizSession::getShortUserName() );
 foreach( $pubs as $pub ) {
 	if( $pub->Id != $inPub ) {
 		$comboBoxPub .= '<option value="'.$pub->Id.'">'.formvar($pub->Name).'</option>';
@@ -166,7 +163,7 @@ $comboBoxSect .= '<option></option>';
 
 // comboBoxNewSection used later on to select new section for objects that are moved
 $comboBoxNewSection = "<option selected></option>";
-$sections = BizPublication::getSections( $user, $inPub, $inIssue, 'flat', true );
+$sections = BizPublication::getSections( BizSession::getShortUserName(), $inPub, $inIssue, 'flat', true );
 foreach( $sections as $section ) {
 	if( $section->Id != $inSection ) {
 		$comboBoxSect .= '<option value="'.$section->Id.'">'.formvar($section->Name).'</option>';
@@ -197,14 +194,14 @@ $tpl = str_replace ('<!--COMBOOBJTYPE-->',$comboBoxObjType, $tpl);
 
 	
 if( $inPub && $inSection ) {
-	$txt = showfiles( $ticket, $inPub, $inSection, $inObjType, $comboBoxNewSection );
+	$txt = showfiles( $inPub, $inSection, $inObjType, $comboBoxNewSection );
 	$tpl = str_replace ("<!--CONTENT-->", $txt, $tpl);
 }
 
 	
 print HtmlDocument::buildDocument($tpl, true, $err);
 
-function showfiles( $ticket, $publ, $section, $objType, $comboBoxNewSection )
+function showfiles( $publ, $section, $objType, $comboBoxNewSection )
 {
 	$objTypes = getObjectTypeMap();
 
@@ -217,7 +214,7 @@ function showfiles( $ticket, $publ, $section, $objType, $comboBoxNewSection )
 	try {
 		require_once BASEDIR.'/server/services/wfl/WflQueryObjectsService.class.php';
 		$service = new WflQueryObjectsService();
-		$resp = $service->execute( new WflQueryObjectsRequest( $ticket, $queryParams, 
+		$resp = $service->execute( new WflQueryObjectsRequest( BizSession::getTicket(), $queryParams,
 									null, null, null, null,
 									reqPropsForRemoveSection(), null ) );
 	} catch( BizException $e ) {

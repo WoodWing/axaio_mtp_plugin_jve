@@ -2,8 +2,6 @@
 /**
  * Publishing Utils class
  *
- * @package Enterprise
- * @subpackage utils
  * @since v9.0.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

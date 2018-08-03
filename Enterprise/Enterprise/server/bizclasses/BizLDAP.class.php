@@ -5,8 +5,6 @@
  *
  * Uses LDAP server to determine if user has access to Enterprise system.<br>
  * 
- * @package Enterprise
- * @subpackage BizClasses
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */ 

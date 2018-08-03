@@ -2,8 +2,6 @@
 /**
  * GetRelatedPagesInfo Workflow service.
  *
- * @package    Enterprise
- * @subpackage Services
  * @since      v10.4.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

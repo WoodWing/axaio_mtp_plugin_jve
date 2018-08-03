@@ -3,8 +3,6 @@
 /**
  * Class that can help reading a DB model definition.
  *
- * @package    Enterprise
- * @subpackage DbModel
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

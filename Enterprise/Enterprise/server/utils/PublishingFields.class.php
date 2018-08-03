@@ -4,8 +4,6 @@
  *
  * It does mathematical operations to collection, without implementing biz logic.
  *
- * @package Enterprise
- * @subpackage ServerPlugins
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

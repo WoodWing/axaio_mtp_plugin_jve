@@ -2,8 +2,6 @@
 /**
  * Implements DB querying of actionproperties.
  * 
- * @package 	SCEnterprise
- * @subpackage 	DBClasses
  * @since 		v6.5
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

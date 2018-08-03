@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	BizServices
  * @since 		v4.2
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
@@ -15,8 +13,7 @@ class BizServerInfo
 	static public function getServerInfo()
 	{
 		return new ServerInfo( SERVERNAME, SERVERURL, SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY,
-							   SERVERVERSION, unserialize(SERVERFEATURES), 
-							   defined('ENCRYPTION_PUBLICKEY_PATH') ? ENCRYPTION_PUBLICKEY_PATH : null );
+							   SERVERVERSION, unserialize(SERVERFEATURES) );
 	}
 
 	/**
@@ -43,15 +40,7 @@ class BizServerInfo
 		$serverInfos = array(); // Array of servers that we will return
 		if( $servers ) foreach( $servers as $serverInfo ) {
 			$cryptkey = '';
-			if( defined('ENCRYPTION_PUBLICKEY_PATH') ) {
-				require_once BASEDIR.'/server/utils/PasswordEncryption.class.php';
-				$pe = new PasswordEncryption( $serverInfo->CryptKey, null );
-				if( $pe->ValidatePublicKey() === FALSE ) {
-					throw new BizException( '', 'Server', '', $pe->GetLastError() );
-				}
-				$cryptkey = $pe->GetPublicKey();
-			}
-			if( isset($cryptkey) && strlen($cryptkey) > 0 ) { 
+			if( isset($cryptkey) && strlen($cryptkey) > 0 ) {
 				$serverInfo->CryptKey = $cryptkey;
 			} else {
 				$serverInfo->CryptKey = null;

@@ -4,8 +4,6 @@
  * This class is automatically read and run by TestSuiteFactory class.
  * See TestSuiteInterfaces.php for more details about the TestSuite concept.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
@@ -298,7 +296,6 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 	private function checkOpcacheExtension()
 	{
 		if( OS != 'WIN' ) { // For Windows there are no prebuild packages yet. Do not check on that platform.
-			require_once BASEDIR . '/server/utils/ZendOpcache.php';
 			$isInstalled = WW_Utils_ZendOpcache::isOpcacheInstalled();
 			if( !$isInstalled ) {
 				$help = 'See <a href="https://redirect.woodwing.com/v1/?path=enterprise-server/'.ONLINEHELP_SERVER_MAJOR_VERSION.'/help/zend-opcache" '.

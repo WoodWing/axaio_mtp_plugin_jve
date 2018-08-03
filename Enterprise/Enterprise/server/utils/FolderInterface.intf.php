@@ -4,8 +4,6 @@
  * Callback interface called by FolderUtils::scanDirForFiles function. <br/>
  * Used to iterate through child files and folders of a specified root folder. <br/>
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
 */

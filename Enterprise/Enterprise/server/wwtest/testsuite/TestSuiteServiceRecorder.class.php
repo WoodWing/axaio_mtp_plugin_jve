@@ -3,8 +3,6 @@
 /**
  * Enterprise Service Recorder to ease creating Test Suite modules (for automatic testing).
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  *

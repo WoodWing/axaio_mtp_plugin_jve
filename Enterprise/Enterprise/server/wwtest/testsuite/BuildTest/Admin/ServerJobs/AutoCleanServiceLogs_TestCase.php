@@ -1,7 +1,5 @@
 <?php
 /**
- * @package Enterprise
- * @subpackage TestSuite
  * @since v10.1.7
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
@@ -159,9 +157,9 @@ class WW_TestSuite_BuildTest_Admin_ServerJobs_AutoCleanServiceLogs_TestCase exte
 	{
 		$cleanServiceLogJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AutoCleanServiceLogs' ) );
 		$this->assertCount( 0, $cleanServiceLogJobs );
-		$result = $this->testSuiteUtils->callCreateServerJob( $this, 'AutoCleanServiceLogs' );
+		$result = $this->testSuiteUtils->callCreateServerJob( $this, 'AutoCleanServiceLogs', 30 );
 		$this->assertTrue( $result, 'AutoCleanServiceLogs Server Job cannot be created.' );
-		$result = $this->testSuiteUtils->callRunServerJobs( $this, 1 );
+		$result = $this->testSuiteUtils->callRunServerJobs( $this, 30, 1 );
 		$this->assertTrue( $result, 'Server Job cannot be executed.' );
 		$cleanServiceLogJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AutoCleanServiceLogs' ) );
 		$this->assertCount( 1, $cleanServiceLogJobs );

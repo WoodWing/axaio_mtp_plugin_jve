@@ -3,8 +3,6 @@
  * PublicationManager provides access to information about our publication structure.
  * For ease of use, all fucntions can be suppressed from throwing exceptions
  * 
- * @package 	SCEnterprise
- * @subpackage 	BizServices
  * @since 		v4.2
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

@@ -4,8 +4,6 @@
  * through app icon shown at the the Integrations admin page.
  *
  *
- * @package Enterprise
- * @subpackage ServerPlugins
  * @since v8.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

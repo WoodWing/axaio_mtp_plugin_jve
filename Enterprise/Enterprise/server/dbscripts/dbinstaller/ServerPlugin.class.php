@@ -2,8 +2,6 @@
 /**
  * Installer for the databases of server plugins. See base class for more details.
  *
- * @package    Enterprise
- * @subpackage dbscripts
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
@@ -77,7 +75,8 @@ class WW_DbScripts_DbInstaller_ServerPlugin extends WW_DbScripts_DbInstaller_Bas
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		$pluginInfo = BizServerPlugin::getInstalledPluginInfo( $this->pluginName );
 		$pluginFolder = BizServerPlugin::getPluginFolder( $pluginInfo );
-		return $pluginFolder.'dbscripts/dbupgrades/';
+		$upgradesFolder = $pluginFolder.'dbscripts/dbupgrades/';
+		return file_exists( $upgradesFolder ) ? $upgradesFolder : null;
 	}
 
 	/**

@@ -11,8 +11,6 @@
  * All folders under those roots can be seen a test suites that be tagged by users to 
  * participate with the test run or untagged to exclude from test runs.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
@@ -388,7 +386,7 @@ abstract class TestCase implements TestModule
 		}
 	
 		$this->setResult( 'ERROR', $message, '', false ); // suppress logging since that is done by BizException too
-		throw new BizException( null, 'Server', null, $message ); 
+		throw new BizException( null, 'Server', null, $message );
 	}
 
 	/**
@@ -403,10 +401,8 @@ abstract class TestCase implements TestModule
 	public function assertContains( $needle, $haystack, $message = '' )
 	{
 		if( !in_array( $needle, $haystack ) ) {
-			if( !$message ) {
-				$message = "The haystack does not contain $needle, which is unexpected.";
-			}
-			$this->throwError( $message );
+			$error = "The haystack does not contain $needle, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -426,7 +422,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $haystackClassOrObject, $haystackAttributeName ) ) {
 			$this->assertCount( $needle, $haystackClassOrObject->$haystackAttributeName, $message );
 		} else {
-			$this->throwError( "Object $haystackClassOrObject has no property $haystackAttributeName." );
+			$error = "Object $haystackClassOrObject has no property $haystackAttributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -442,10 +439,8 @@ abstract class TestCase implements TestModule
 	public function assertNotContains( $needle, $haystack, $message = '' )
 	{
 		if( in_array( $needle, $haystack ) ) {
-			if( !$message ) {
-				$message = "The haystack does contain $needle, which is unexpected.";
-			}
-			$this->throwError( $message );
+			$error = "The haystack does contain $needle, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -465,7 +460,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $haystackClassOrObject, $haystackAttributeName ) ) {
 			$this->assertNotContains( $needle, $haystackClassOrObject->$haystackAttributeName, $message );
 		} else {
-			$this->throwError( "Object $haystackClassOrObject has no property $haystackAttributeName." );
+			$error = "Object $haystackClassOrObject has no property $haystackAttributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -482,10 +478,8 @@ abstract class TestCase implements TestModule
 	{
 		$actualCount = count( $haystack );
 		if( $actualCount != $expectedCount ) {
-			if( !$message ) {
-				$message = "The haystack contains $actualCount elements, but expected is $expectedCount elements.";
-			}
-			$this->throwError( $message );
+			$error = "The haystack contains $actualCount elements, but expected is $expectedCount elements.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -505,7 +499,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $haystackClassOrObject, $haystackAttributeName ) ) {
 			$this->assertCount( $expectedCount, $haystackClassOrObject->$haystackAttributeName, $message );
 		} else {
-			$this->throwError( "Object $haystackClassOrObject has no property $haystackAttributeName." );
+			$error = "Object $haystackClassOrObject has no property $haystackAttributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}	
 	
@@ -522,10 +517,8 @@ abstract class TestCase implements TestModule
 	{
 		$actualCount = count( $haystack );
 		if( $actualCount == $expectedCount ) {
-			if( !$message ) {
-				$message = "The haystack contains $actualCount elements, which is unexpected.";
-			}
-			$this->throwError( $message );
+			$error = "The haystack contains $actualCount elements, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -545,7 +538,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $haystackClassOrObject, $haystackAttributeName ) ) {
 			$this->assertNotCount( $expectedCount, $haystackClassOrObject->$haystackAttributeName, $message );
 		} else {
-			$this->throwError( "Object $haystackClassOrObject has no property $haystackAttributeName." );
+			$error = "Object $haystackClassOrObject has no property $haystackAttributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}	
 	
@@ -561,10 +555,8 @@ abstract class TestCase implements TestModule
 	public function assertEquals( $expected, $actual, $message = '' )
 	{
 		if( $expected != $actual ) {
-			if( !$message ) {
-				$message = "The expected value $expected does not equals the actual value $actual, which is unexpected.";
-			}
-			$this->throwError( $message );
+			$error = "The expected value $expected does not equals the actual value $actual, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -583,7 +575,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $classOrObject, $attributeName ) ) {
 			$this->assertEquals( $expected, $classOrObject->$attributeName, $message );
 		} else {
-			$this->throwError( "Object $classOrObject has no property $attributeName." );
+			$error = "Object $classOrObject has no property $attributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -599,10 +592,8 @@ abstract class TestCase implements TestModule
 	public function assertNotEquals( $expected, $actual, $message = '' )
 	{
 		if( $expected == $actual ) { // this check was fixed in EN-89534
-			if( !$message ) {
-				$message = "The expected value $expected equals the actual value $actual, which is unexpected.";
-			}
-			$this->throwError( $message );
+			$error = "The expected value $expected equals the actual value $actual, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -621,7 +612,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $classOrObject, $attributeName ) ) {
 			$this->assertNotEquals( $expected, $classOrObject->$attributeName, $message );
 		} else {
-			$this->throwError( "Object $classOrObject has no property $attributeName." );
+			$error = "Object $classOrObject has no property $attributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -637,10 +629,8 @@ abstract class TestCase implements TestModule
 	function assertGreaterThan( $expected, $actual, $message = '' )
 	{
 		if( !($actual > $expected) ) {
-			if( !$message ) {
-				$message = "The value $actual is not greater than $expected, which is unexpected.";
-			}
-			$this->throwError( $message );
+			$error = "The value $actual is not greater than $expected, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -659,7 +649,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $classOrObject, $attributeName ) ) {
 			$this->assertGreaterThan( $expected, $classOrObject->$attributeName, $message );
 		} else {
-			$this->throwError( "Object $classOrObject has no property $attributeName." );
+			$error = "Object $classOrObject has no property $attributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -675,10 +666,8 @@ abstract class TestCase implements TestModule
 	function assertGreaterThanOrEqual( $expected, $actual, $message = '' )
 	{
 		if( !($actual >= $expected) ) {
-			if( !$message ) {
-				$message = "The value $actual is not greater than nor equal to $expected, which is unexpected.";
-			}
-			$this->throwError( $message );
+			$error = "The value $actual is not greater than nor equal to $expected, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -697,7 +686,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $classOrObject, $attributeName ) ) {
 			$this->assertGreaterThanOrEqual( $expected, $classOrObject->$attributeName, $message );
 		} else {
-			$this->throwError( "Object $classOrObject has no property $attributeName." );
+			$error = "Object $classOrObject has no property $attributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -715,16 +705,12 @@ abstract class TestCase implements TestModule
 		if( is_object( $actual ) ) {
 			$actualClass = get_class( $actual );
 			if( $actualClass != $expected ) {
-				if( !$message ) {
-					$message = "Expected object class is $expected but actual is $actualClass.";
-				}
-				$this->throwError( $message );
+				$error = "Expected object class is $expected but actual is $actualClass.";
+				$this->throwError( trim( $message.' '.$error ) );
 			}
 		} else {
-			if( !$message ) {
-				$message = "Expected object class is $expected but actual is not an object.";
-			}
-			$this->throwError( $message );
+			$error = "Expected object class is $expected but actual is not an object.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -742,10 +728,8 @@ abstract class TestCase implements TestModule
 		if( is_object( $actual ) ) {
 			$actualClass = get_class( $actual );
 			if( $actualClass == $expected ) {
-				if( !$message ) {
-					$message = "Expected object class is not $expected but the actual is.";
-				}
-				$this->throwError( $message );
+				$error = "Expected object class is not $expected but the actual is.";
+				$this->throwError( trim( $message.' '.$error ) );
 			}
 		}
 	}
@@ -763,10 +747,8 @@ abstract class TestCase implements TestModule
 	{
 		$actualType = gettype( $actual );
 		if( $actualType != $expected ) {
-			if( !$message ) {
-				$message = "Expected type is $expected but the actual is $actualType.";
-			}
-			$this->throwError( $message );
+			$error = "Expected type is $expected but the actual is $actualType.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -785,7 +767,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $classOrObject, $attributeName ) ) {
 			$this->assertInternalType( $expected, $classOrObject->$attributeName, $message );
 		} else {
-			$this->throwError( "Object $classOrObject has no property $attributeName." );
+			$error = "Object $classOrObject has no property $attributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -802,10 +785,8 @@ abstract class TestCase implements TestModule
 	{
 		$actualType = gettype( $actual );
 		if( $actualType == $expected ) {
-			if( !$message ) {
-				$message = "Expected type is not $expected but the actual is.";
-			}
-			$this->throwError( $message );
+			$error = "Expected type is not $expected but the actual is.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -824,7 +805,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $classOrObject, $attributeName ) ) {
 			$this->assertNotInternalType( $expected, $classOrObject->$attributeName, $message );
 		} else {
-			$this->throwError( "Object $classOrObject has no property $attributeName." );
+			$error = "Object $classOrObject has no property $attributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -840,10 +822,8 @@ abstract class TestCase implements TestModule
 	function assertLessThan( $expected, $actual, $message = '' )
 	{
 		if( !($actual < $expected) ) {
-			if( !$message ) {
-				$message = "The value $actual is not less than $expected, which is unexpected.";;
-			}
-			$this->throwError( $message );
+			$error = "The value $actual is not less than $expected, which is unexpected.";;
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -862,7 +842,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $classOrObject, $attributeName ) ) {
 			$this->assertLessThan( $expected, $classOrObject->$attributeName, $message );
 		} else {
-			$this->throwError( "Object $classOrObject has no property $attributeName." );
+			$error = "Object $classOrObject has no property $attributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -878,10 +859,8 @@ abstract class TestCase implements TestModule
 	function assertLessThanOrEqual( $expected, $actual, $message = '' )
 	{
 		if( !($actual <= $expected) ) {
-			if( !$message ) {
-				$message = "The value $actual is not less than nor equal to $expected, which is unexpected.";;
-			}
-			$this->throwError( $message );
+			$error = "The value $actual is not less than nor equal to $expected, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -900,7 +879,8 @@ abstract class TestCase implements TestModule
 		if( property_exists( $classOrObject, $attributeName ) ) {
 			$this->assertLessThanOrEqual( $expected, $classOrObject->$attributeName, $message );
 		} else {
-			$this->throwError( "Object $classOrObject has no property $attributeName." );
+			$error = "Object $classOrObject has no property $attributeName.";
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 	
@@ -915,10 +895,8 @@ abstract class TestCase implements TestModule
 	public function assertNull( $actual, $message = '' )
 	{
 		if( !is_null( $actual ) ) {
-			if( !$message ) {
-				$message = 'Data expected to be null, but the actual is set.';
-			}
-			$this->throwError( $message );
+			$error = 'Data expected to be null, but the actual is set.';
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -933,10 +911,8 @@ abstract class TestCase implements TestModule
 	public function assertNotNull( $actual, $message = '' )
 	{
 		if( is_null( $actual ) ) {
-			if( !$message ) {
-				$message = 'Data expected not to be null, but the actual is null.';
-			}
-			$this->throwError( $message );
+			$error = 'Data expected not to be null, but the actual is null.';
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -951,10 +927,8 @@ abstract class TestCase implements TestModule
 	public function assertTrue( $condition, $message = '' )
 	{
 		if( $condition !== true ) {
-			if( !$message ) {
-				$message = 'Condition expected to be true, which is not the case.';
-			}
-			$this->throwError( $message );
+			$error = 'Condition expected to be true, which is not the case.';
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -969,10 +943,8 @@ abstract class TestCase implements TestModule
 	public function assertNotTrue( $condition, $message = '' )
 	{
 		if( $condition === true ) {
-			if( !$message ) {
-				$message = 'Condition expected to be not true, which is not the case.';
-			}
-			$this->throwError( $message );
+			$error = 'Condition expected to be not true, which is not the case.';
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -987,10 +959,8 @@ abstract class TestCase implements TestModule
 	public function assertFalse( $condition, $message = '' )
 	{
 		if( $condition !== false ) {
-			if( !$message ) {
-				$message = 'Condition expected to be false, which is not the case.';
-			}
-			$this->throwError( $message );
+			$error = 'Condition expected to be false, which is not the case.';
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -1005,10 +975,8 @@ abstract class TestCase implements TestModule
 	public function assertNotFalse( $condition, $message = '' )
 	{
 		if( $condition === false ) {
-			if( !$message ) {
-				$message = 'Condition expected to be not false, which is not the case.';
-			}
-			$this->throwError( $message );
+			$error = 'Condition expected to be not false, which is not the case.';
+			$this->throwError( trim( $message.' '.$error ) );
 		}
 	}
 
@@ -1029,6 +997,91 @@ abstract class TestCase implements TestModule
 		}
 		$this->assertInstanceOf( 'BizException', $e );
 		$this->assertEquals( $expectedErrorCode, $e->getErrorCode() );
+	}
+
+	/**
+	 * Asserts that a version is smaller than to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not smaller than $expected
+	 */
+	function assertVersionSmallerThan( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '<' ) ) {
+			$error = "The version $actual is not smaller than $expected, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
+		}
+	}
+
+	/**
+	 * Asserts that a version is smaller than or equal to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not smaller than nor equal to $expected
+	 */
+	function assertVersionSmallerThanOrEqual( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '<=' ) ) {
+			$error = "The version $actual is not smaller than nor equal to $expected, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
+		}
+	}
+
+	/**
+	 * Asserts that a version is equal to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not equal than $expected
+	 */
+	function assertVersionEqual( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '=' ) ) {
+			$error = "The version $actual is not equal to $expected, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
+		}
+	}
+
+	/**
+	 * Asserts that a version is greater than to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not greater than $expected
+	 */
+	function assertVersionGreaterThan( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '>' ) ) {
+			$error = "The version $actual is not greater than $expected, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
+		}
+	}
+
+	/**
+	 * Asserts that a version is greater than or equal to another version.
+	 *
+	 * @since 10.5.0
+	 * @param string $expected
+	 * @param string $actual
+	 * @param string $message
+	 * @throws BizException if $actual is not greater than nor equal to $expected
+	 */
+	function assertVersionGreaterThanOrEqual( $expected, $actual, $message = '' )
+	{
+		if( !version_compare( $actual, $expected, '>=' ) ) {
+			$error = "The version $actual is not greater than nor equal to $expected, which is unexpected.";
+			$this->throwError( trim( $message.' '.$error ) );
+		}
 	}
 }
 

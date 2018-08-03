@@ -2,8 +2,6 @@
 /**
  * PreviewArticlesAtWorkspace Workflow service.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v9.4
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

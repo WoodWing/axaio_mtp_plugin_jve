@@ -1,7 +1,5 @@
 <?php
 /**
- * @package    Enterprise
- * @subpackage AxaioMadeToPrint
  * @since      v10.1.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *

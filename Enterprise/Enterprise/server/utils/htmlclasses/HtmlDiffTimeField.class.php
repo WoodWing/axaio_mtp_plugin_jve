@@ -7,8 +7,6 @@
  * @todo Implement fields for other time-units.
  * @todo Implement flags for selecting the fields for time-units.
  *
- * @package     Enterprise
- * @subpackage  HtmlClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

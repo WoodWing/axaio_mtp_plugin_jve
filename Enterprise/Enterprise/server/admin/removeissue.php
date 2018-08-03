@@ -15,8 +15,8 @@ set_time_limit(3600);
 
 // Validate user, access rights and ticket.
 require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-$ticket = checkSecure('publadmin');
-$user = DBTicket::checkTicket( $ticket );
+checkSecure('publadmin');
+$user = BizSession::getShortUserName();
 $objectmap = getObjectTypeMap();
 
 // Retrieve value of the combo boxes.
@@ -72,7 +72,7 @@ if( $directdel === true ||            // Did admin user press delete button, wit
 				}
 			} elseif( $directdel === true ) {
 				// Query for objects as admin user has selected publication, issue and object type.
-				$qoResp = doQueryObjects( $ticket, $inPub, $inIssue, $inObjType );
+				$qoResp = doQueryObjects( $inPub, $inIssue, $inObjType );
 				// Bugfix: $inObjType was not passed... and so *all* objects were removed,
 				//         even when user has just one object type selected !!!
 			
@@ -107,7 +107,7 @@ if( $directdel === true ||            // Did admin user press delete button, wit
 				require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
 				$service = new WflDeleteObjectsService();
 				$deleteObjectsReq = new WflDeleteObjectsRequest();
-				$deleteObjectsReq->Ticket = $ticket;
+				$deleteObjectsReq->Ticket = BizSession::getTicket();
 				$deleteObjectsReq->IDs = $deleteObjIds;
 				$deleteObjectsReq->Permanent = true; // delete permanent, or else we still can't delete the issue!
 				$deleteObjectsReq->Areas = array('Workflow');
@@ -161,7 +161,11 @@ if( $directdel === true ||            // Did admin user press delete button, wit
 					}
 					
 					try {
-						$req = new WflSetObjectPropertiesRequest( $ticket, $id, $object->MetaData, $object->Targets );
+						$request = new WflSetObjectPropertiesRequest();
+						$request->Ticket = BizSession::getTicket();
+						$request->ID = $id;
+						$request->MetaData = $object->MetaData;
+						$request->Targets = $object->Targets;
 						$service = new WflSetObjectPropertiesService();
 						$service->execute( $req );
 					} catch( BizException $e ) { // Set props failed.
@@ -179,7 +183,7 @@ if( $directdel === true ||            // Did admin user press delete button, wit
 		if( $succeed == true ) { // No error on object deletions/movings above?
 			try {			
 				// Check if there are no objects left for the issue, so this time query for *all* object types.
-				$qoResp = doQueryObjects( $ticket, $inPub, $inIssue, '' );
+				$qoResp = doQueryObjects( $inPub, $inIssue, '' );
 				if( $qoResp && count($qoResp->Rows) == 0 ) { // No objects related anymore?
 		
 					// Resolve issue name before we delete it.
@@ -188,9 +192,12 @@ if( $directdel === true ||            // Did admin user press delete button, wit
 		
 					// Remove the entire issue definition (with every definition in it; statuses, sections, etc)
 					require_once BASEDIR.'/server/services/adm/AdmDeleteIssuesService.class.php';
+					$request = new AdmDeleteIssuesRequest();
+					$request->Ticket = BizSession::getTicket();
+					$request->PublicationId = $inPub;
+					$request->IssueIds = array( $inIssue );
 					$service = new AdmDeleteIssuesService();
-					$request = new AdmDeleteIssuesRequest( $ticket, $inPub, array( $inIssue ) );
-					$service->execute($request);
+					$service->execute( $request );
 
 					// Inform admin user.
 					$message = BizResources::localize('ERR_SUCCESS_DELETED') . ' ' . formvar($issueRow['name']);
@@ -258,7 +265,7 @@ $tpl = str_replace ("<!--COMBOOBJTYPE-->",$comboBoxObjType, $tpl);
 
 // Show the object selection as HTML table and inject at HTML template to show end user.
 if( $inPub && $inIssue ) {
-	$txt = showFiles( $ticket, $inPub, $inIssue, $inObjType, $issues, $summaryRows, $summaryDeletedRows, $show );
+	$txt = showFiles( $inPub, $inIssue, $inObjType, $issues, $summaryRows, $summaryDeletedRows, $show );
 	$tpl = str_replace ("<!--CONTENT-->", $txt, $tpl);
 }
 
@@ -295,11 +302,15 @@ function reindexObject( $objectId){
  *
  * @return array|object[] $objects The array of retrieved objects or an empty array if none were found.
  */
-function getObjects( array $objIds){
-	$ticket = checkSecure('publadmin');
-	$req = new WflGetObjectsRequest( $ticket, $objIds, false, 'none', array('Targets', 'MetaData', 'Relations') );
+function getObjects( array $objIds ) {
+	$request = new WflGetObjectsRequest();
+	$request->Ticket = BizSession::getTicket();
+	$request->IDs = $objIds;
+	$request->Lock = false;
+	$request->Rendition = 'none';
+	$request->RequestInfo = array( 'Targets', 'MetaData', 'Relations' );
 	$service = new WflGetObjectsService();
-	$response = $service->execute( $req );
+	$response = $service->execute( $request );
 	$objects = ( $response && $response->Objects ) ? $response->Objects : array();
 	return $objects;
 }
@@ -309,7 +320,6 @@ function getObjects( array $objIds){
  *
  * It allows end user to select action per listed object; move or delete.
  *
- * @param string $ticket User's session ticket.
  * @param string $pubId Publication (id) that owns the issue.
  * @param string $issueId Issue (id) to show objects for.
  * @param string $objType Object type to show objects for. Empty to show all types.
@@ -319,7 +329,7 @@ function getObjects( array $objIds){
  *
  * @return string HTML stream representing the objects table (or summary) to show.
  */
-function showFiles( $ticket, $pubId, $issueId, $objType, $issues, $summaryRows, $summaryDeletedRows, $show )
+function showFiles( $pubId, $issueId, $objType, $issues, $summaryRows, $summaryDeletedRows, $show )
 {
 	$txt = '';
 	$totalWflObjcts = count( $summaryRows );
@@ -356,7 +366,7 @@ function showFiles( $ticket, $pubId, $issueId, $objType, $issues, $summaryRows, 
 					BizResources::localize('ACT_PURGE_OBJ_INFORM_MSG'). $objectLists;
 
 		}
-		$qoResp = doQueryObjects( $ticket, $pubId, $issueId, 'Dossier' );
+		$qoResp = doQueryObjects( $pubId, $issueId, 'Dossier' );
 		$dossierIds = array();
 		if( $qoResp && isset($qoResp->Rows) && count($qoResp->Rows) > 0 ) {
 			$colIndexes = queryObjectsColumnIndexes( reqPropsForRemoveIssue(), $qoResp->Columns );
@@ -422,7 +432,7 @@ function showFiles( $ticket, $pubId, $issueId, $objType, $issues, $summaryRows, 
 				$objectmap = getObjectTypeMap();
 				$elements = array();
 				try {
-					$qoResp = doQueryObjects( $ticket, $pubId, $issueId, $objType );
+					$qoResp = doQueryObjects( $pubId, $issueId, $objType );
 					if( $qoResp && isset($qoResp->Rows) && count($qoResp->Rows) > 0 ) { // Any object found?
 						$colIndexes = queryObjectsColumnIndexes( reqPropsForRemoveIssue(), $qoResp->Columns );
 						foreach( $qoResp->Rows as $row ) {
@@ -617,14 +627,13 @@ function reqPropsForRemoveIssue()
 /**
  * Function returns the objects related to an issue.
  *
- * @param string  $ticket  Session ticket
  * @param integer $pubId   Id of publication that owns the issue.
  * @param integer $issueId Issue id
  * @param integer $objType Object type. Empty for all types.
  *
  * @return object WflQueryObjectsResponse
 */
-function doQueryObjects( $ticket, $pubId, $issueId, $objType )
+function doQueryObjects( $pubId, $issueId, $objType )
 {	
 	// query objects from publ/issue
 	$queryParams = array();
@@ -633,10 +642,13 @@ function doQueryObjects( $ticket, $pubId, $issueId, $objType )
 	if( $objType ) $queryParams[] = new QueryParam ('Type', '=', $objType);
 
 	require_once BASEDIR.'/server/services/wfl/WflQueryObjectsService.class.php';
+	$request = new WflQueryObjectsRequest();
+	$request->Ticket = BizSession::getTicket();
+	$request->Params = $queryParams;
+	$request->MaxEntries = 0; // return all objects, independent of DBMAXQUERY
+	$request->MinimalProps = reqPropsForRemoveIssue();
 	$service = new WflQueryObjectsService();
-	return $service->execute( new WflQueryObjectsRequest( $ticket, $queryParams, 
-								null, 0 /* return all objects, independent of MAXQuery*/, null, null,
-								reqPropsForRemoveIssue(), null ) );
+	return $service->execute( $request );
 }
 
 

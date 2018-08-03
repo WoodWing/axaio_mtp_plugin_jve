@@ -185,7 +185,6 @@ class PublishFormArticleSelector_EnterprisePlugin extends EnterprisePlugin
 			// 'PubPublishing_EnterpriseConnector',
 			// 'Search_EnterpriseConnector',
 			// 'ServerJob_EnterpriseConnector',
-			// 'Session_EnterpriseConnector',
 			// 'Spelling_EnterpriseConnector',
 			// 'WebApps_EnterpriseConnector',
 

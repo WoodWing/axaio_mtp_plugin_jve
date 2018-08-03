@@ -2,8 +2,6 @@
 /**
  * Provides access to the publish data of an issue. 
  * 
- * @package 	Enterprise
- * @subpackage  DBClasses
  * @since 		v7.5
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

@@ -2,8 +2,6 @@
 /**
  * Class derived from HmtlAnyField that represents a field for entering a valid date.
  *
- * @package     Enterprise
- * @subpackage  HtmlClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *

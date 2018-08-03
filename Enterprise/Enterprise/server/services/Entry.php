@@ -2,8 +2,6 @@
 /**
  * Abstract service entry point for Enterprise.
  * 
- * @package 	Enterprise
- * @subpackage 	Core
  * @since 		v8.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

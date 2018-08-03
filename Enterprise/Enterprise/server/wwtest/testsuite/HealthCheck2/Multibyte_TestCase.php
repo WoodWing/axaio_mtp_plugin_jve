@@ -6,8 +6,6 @@
  *
  * Since v7.0 this test is rewritten to replace PEAR SOAP client with PHP SOAP client.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

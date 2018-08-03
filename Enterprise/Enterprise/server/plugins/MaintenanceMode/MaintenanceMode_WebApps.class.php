@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage MaintenanceMode
  * @since 		v10.0.3
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *

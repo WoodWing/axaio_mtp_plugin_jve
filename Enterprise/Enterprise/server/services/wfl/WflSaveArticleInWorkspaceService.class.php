@@ -2,8 +2,6 @@
 /**
  * SaveArticleInWorkspace Workflow service.
  *
- * @package Enterprise
- * @subpackage Services
  * @since v7.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -2,8 +2,6 @@
 /**
  * Interface for spelling checker implementations in Enterprise Server
  *
- * @package Enterprise
- * @subpackage Core
  * @since v7.4
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

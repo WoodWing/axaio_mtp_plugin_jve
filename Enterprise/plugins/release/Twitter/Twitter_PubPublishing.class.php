@@ -3,8 +3,6 @@
 /**
  * Publishing connector to post messages to Twitter.
  *
- * @package        Enterprise
- * @subpackage       ServerPlugins
  * @since          v7.6
  * @copyright      WoodWing Software bv. All Rights Reserved.
  */

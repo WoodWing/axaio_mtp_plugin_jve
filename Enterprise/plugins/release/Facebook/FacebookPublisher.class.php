@@ -8,8 +8,6 @@ require_once dirname(__FILE__) . '/WW_Facebook.class.php';
  * Note: some methods for un-publishing are missing, this is because not all the un-publish steps are supported by the
  * Facebook Graph API at the time of this writing.
  *
- * @package	 Enterprise
- * @subpackage	 ServerPlugins
  * @since		 v7.6
  * @copyright	 WoodWing Software bv. All Rights Reserved.
  */

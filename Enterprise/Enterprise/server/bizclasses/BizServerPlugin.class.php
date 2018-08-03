@@ -14,6 +14,8 @@ class InternalError_EnterprisePlugin extends EnterprisePlugin
 
 class BizServerPlugin
 {
+	const LOCAL_CACHE_BUCKET = 'ServerPluginConnectors';
+
 	/**
 	 * Queries all server plug-in infos ($pluginInfos) from DB and instantiates plug-in
 	 * objects ($pluginObjs) from it. Since it reads all the PluginInfo.php files from
@@ -105,7 +107,23 @@ class BizServerPlugin
 	static private function getConnectorsFromDB( $interface, $type, &$connectors, &$connInfos, $activeOnly = true, $installedOnly = true )
 	{
 		// create connector info data instances
-		$connInfos = self::getConnectorInfosFromDB( $interface, $type, $activeOnly, $installedOnly );
+		$itemId = $interface.'_'.$type;
+		if( $activeOnly && $installedOnly && // let's optimize for the most obvious filters only
+			BizSession::getTicket() ) {       // without ticket there is no cache (e.g. exclude LogOn, GetServers, etc)
+			$cache = WW_BizClasses_LocalCache::getInstance();
+			$connInfosData = $cache->readBucketItemData( self::LOCAL_CACHE_BUCKET, $itemId );
+		} else {
+			$cache = null;
+			$connInfosData = false;
+		}
+		if( $connInfosData === false ) {
+			$connInfos = self::getConnectorInfosFromDB( $interface, $type, $activeOnly, $installedOnly );
+			if( $cache ) {
+				$cache->writeBucketItemData( self::LOCAL_CACHE_BUCKET, $itemId, serialize( $connInfos ) );
+			}
+		} else {
+			$connInfos = unserialize( $connInfosData );
+		}
 
 		// create connector instances
 		if( $connInfos ) foreach( $connInfos as $connInfo ) {
@@ -1147,6 +1165,9 @@ class BizServerPlugin
 
 		// Save changed PluginInfoData to db
 		self::storePluginsAtDB( $pluginObjs, $pluginInfos, $connObjs, $connInfos );
+
+		// Change version of the bucket to invalidate all its items (connector info query results).
+		WW_BizClasses_LocalCache::getInstance()->resetBucket( self::LOCAL_CACHE_BUCKET );
 	}
 	
 	/**
@@ -1248,9 +1269,9 @@ class BizServerPlugin
 	 * Checks if a certain server plug-in is installed and enabled (active).
 	 *
 	 * @param string $pluginName Internal unique name of server plug-in
-	 * @return true if installed and enabled, else false
+	 * @return bool true if installed and enabled, else false
 	 */
-	static public function isPluginActivated( $pluginName )
+	static public function isPluginActivated( string $pluginName ) : bool
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		$pluginInfo = BizServerPlugin::getInstalledPluginInfo( $pluginName );
@@ -1307,10 +1328,10 @@ class BizServerPlugin
 	 * Enables (activates) a given server plug-in. The plug-in must have been installed before.
 	 *
 	 * @param string $pluginName
-	 * @return PluginInfoData Info of the invoked plug-in.
+	 * @return PluginInfoData|null Info of the invoked plug-in, or null if plug-in was not found in DB.
 	 * @throws BizException On DB error.
 	 */
-	static public function activatePluginByName( $pluginName )
+	static public function activatePluginByName( string $pluginName ): ?PluginInfoData
 	{
 		$pluginInfo = self::getInstalledPluginInfo( $pluginName );
 		if( $pluginInfo ) {
@@ -1319,6 +1340,8 @@ class BizServerPlugin
 				self::activatePlugin( $pluginObj, $pluginInfo );
 			}
 		}
+		// Change version of the bucket to invalidate all its items (connector info query results).
+		WW_BizClasses_LocalCache::getInstance()->resetBucket( self::LOCAL_CACHE_BUCKET );
 		return $pluginInfo;
 	}
 	
@@ -1326,10 +1349,10 @@ class BizServerPlugin
 	 * Disables (deactivates) a given server plug-in. The plug-in must have been installed before.
 	 *
 	 * @param string $pluginName
-	 * @return PluginInfoData Info of the invoked plug-in.
+	 * @return PluginInfoData|null Info of the invoked plug-in, or null if plug-in was not found in DB.
 	 * @throws BizException On DB error.
 	 */
-	static public function deactivatePluginByName( $pluginName )
+	static public function deactivatePluginByName( string $pluginName ): ?PluginInfoData
 	{
 		$pluginInfo = self::getInstalledPluginInfo( $pluginName );
 		if( $pluginInfo ) {
@@ -1338,6 +1361,8 @@ class BizServerPlugin
 				self::deactivatePlugin( $pluginObj, $pluginInfo );
 			}
 		}
+		// Change version of the bucket to invalidate all its items (connector info query results).
+		WW_BizClasses_LocalCache::getInstance()->resetBucket( self::LOCAL_CACHE_BUCKET );
 		return $pluginInfo;
 	}
 
@@ -1377,9 +1402,8 @@ class BizServerPlugin
 	 * @param EnterprisePlugin $pluginObj
 	 * @param PluginInfoData $pluginInfo
 	 * @throws BizException $e On installation failure or DB error.
-	 * @throws null
 	 */
-	static public function activatePlugin( EnterprisePlugin &$pluginObj, PluginInfoData &$pluginInfo )
+	static private function activatePlugin( EnterprisePlugin &$pluginObj, PluginInfoData &$pluginInfo ) : void
 	{
 		if( !$pluginInfo->IsInstalled || !$pluginInfo->IsActive ) {
 			$e = null;
@@ -1424,9 +1448,7 @@ class BizServerPlugin
 	 * @param PluginInfoData $pluginInfo
 	 * @throws BizException on DB error.
 	 */
-	static public function deactivatePlugin(
-		/** @noinspection PhpUnusedParameterInspection */ EnterprisePlugin &$pluginObj,
-		PluginInfoData &$pluginInfo )
+	static private function deactivatePlugin( EnterprisePlugin &$pluginObj,	PluginInfoData &$pluginInfo ) : void
 	{
 		if( $pluginInfo->IsActive ) {
 			try {

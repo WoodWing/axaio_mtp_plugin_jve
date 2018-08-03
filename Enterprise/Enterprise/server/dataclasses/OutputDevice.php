@@ -2,8 +2,6 @@
 /**
  * Data class of an Output Device (for publishing).
  *
- * @package Enterprise
- * @subpackage DataClasses
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

@@ -4,8 +4,6 @@
  * This class is automatically read and run by TestSuiteFactory class.
  * See TestSuiteInterfaces.php for more details about the TestSuite concept.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v7.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
@@ -261,7 +259,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 		}
 
 		// Check if the core exists, and is up and running.
-		$url = SOLR_SERVER_URL . '/admin/cores?action=STATUS';
+		$url = SOLR_SERVER_URL . '/admin/cores?action=STATUS&wt=xml';
 
 		$config = file_get_contents($url);
 
@@ -727,7 +725,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	private function getVersion($extended = false)
 	{
 		// Get Solr 6 system info.
-		$url = SOLR_SERVER_URL .'/admin/info/system';
+		$url = SOLR_SERVER_URL .'/admin/info/system?wt=xml';
 		$config = file_get_contents($url);
 
 		// Retrieve the Solr version number.
@@ -749,7 +747,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 		// Found nothing? Try get the Solr 3 version number instead
 		if( $versionNumber == $default ) {
 			try {
-				$url = SOLR_SERVER_URL . '/admin/registry.jsp';
+				$url = SOLR_SERVER_URL . '/admin/registry.jsp?wt=xml';
 				$config = file_get_contents($url);
 
 				// Retrieve the Solr version number.
@@ -836,7 +834,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	private function isVersionSupported( $version )
 	{
 		$supported = false;
-		if( version_compare( $version, '6.2.1', '>=' ) && version_compare( $version, '6.3.0', '<' ) ) {
+		if( version_compare( $version, '7.4.0', '==' ) ) {
 			$supported = true;
 		}
 
@@ -850,6 +848,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	 */
 	private function getSupportedVersionInfo()
 	{
-		return '6.2.1 - 6.2.x';
+		return '7.4.0';
 	}
 }

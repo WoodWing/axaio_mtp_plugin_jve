@@ -7,8 +7,6 @@
  * Since 10.2 the class SysFeatureProfile is renamed to ProfileFeatureAccess and moved
  * from server/bizclasses/BizAccessFeatureProfiles.class.php into this file.
  *
- * @package    Enterprise
- * @subpackage DataClasses
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @package Enterprise
- * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
@@ -2402,7 +2400,6 @@ class WflVersionInfoValidator
 		}
 		if( $validator->checkExist( $datObj, 'State' ) ) {
 			$validator->enterPath( 'State' );
-			$validator->checkNull( $datObj->State );
 			if( !is_null( $datObj->State ) ) {
 				$validator->checkType( $datObj->State, 'State' );
 				WflStateValidator::validate( $validator, $datObj->State );
@@ -2473,6 +2470,13 @@ class WflAttachmentValidator
 			$validator->enterPath( 'ContentSourceFileLink' );
 			if( !is_null( $datObj->ContentSourceFileLink ) ) {
 				$validator->checkType( $datObj->ContentSourceFileLink, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'ContentSourceProxyLink' ) ) {
+			$validator->enterPath( 'ContentSourceProxyLink' );
+			if( !is_null( $datObj->ContentSourceProxyLink ) ) {
+				$validator->checkType( $datObj->ContentSourceProxyLink, 'string' );
 			}
 			$validator->leavePath();
 		}

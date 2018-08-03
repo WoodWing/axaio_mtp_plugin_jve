@@ -7,8 +7,6 @@
  *
  * Generators are called for each element of WW_DbModel_Definition and return code by their txt() method.
  *
- * @package Enterprise
- * @subpackage DbScripts/Generators
  * @since 10.2.0
  **/
 

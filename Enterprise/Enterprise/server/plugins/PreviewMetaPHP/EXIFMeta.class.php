@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	PreviewMetaPHP
  * @since 		v6.1
  * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
  * @copyright	WoodWing Software bv. All Rights Reserved.

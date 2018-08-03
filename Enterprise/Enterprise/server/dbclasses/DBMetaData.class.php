@@ -2,8 +2,6 @@
 /**
  * Implements DB side of custom meta data (properties) and usage (dialog setup / action properties)
  * 
- * @package 	SCEnterprise
- * @subpackage 	DBClasses
  * @since 		v4.2
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

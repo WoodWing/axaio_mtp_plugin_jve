@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	ServerPlugins
  * @since 		v9.5.1
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *

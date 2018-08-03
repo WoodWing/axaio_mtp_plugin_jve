@@ -3,8 +3,6 @@
 /**
  * Methods to calculate time date differences, add/deduct time/dates etc.
  *
- * @package 	Enterprise
- * @subpackage 	utils
  * @since 		v5.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
@@ -136,7 +134,7 @@ class DateTimeFunctions
 	 * Converts a iso-datetime-string to Unix-seconds
 	 *
 	 * @param string $t iso-formatted datetime-string
-	 * @return int Number of unix-seconds
+	 * @return int|bool Number of unix-seconds, or false if argument is invalid.
 	 */
 	static public function iso2time( $t ) 
 	{

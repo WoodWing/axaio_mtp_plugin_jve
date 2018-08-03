@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v6
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
@@ -46,7 +44,7 @@ class BizAccess
 	/**
 	 * Checks if the current user has specified rights to an object, based on given object properties.
 	 *
-	 * @obsoleted since 9.4, please use {@link:checkRightsForObjectProps()} instead.
+	 * @deprecated since 9.4, please use {@link:checkRightsForObjectProps()} instead.
 	 * @param array $objProps Array of object properties (Biz props, mixed case)
 	 * @param string $rights String with rights to check, each character is a right that is needed
 	 * @throws BizException when session user has no rights
@@ -54,7 +52,7 @@ class BizAccess
 	 */
 	static public function checkRights( $objProps, $rights )
 	{
-		Log::LogHandler( 'BizAccess', 'WARN', 'The checkRights() function is obsoleted. '.
+		LogHandler::Log( 'BizAccess', 'DEPRECATED', 'The checkRights() function is obsoleted. '.
 			'Please call the checkRightsForObjectProps() function instead.' );
 
 		$issueId = array_key_exists( 'IssueId', $objProps) ? $objProps['IssueId'] : 0; // See Note#001
@@ -126,7 +124,7 @@ class BizAccess
 	/**
 	 * Checks if the session user has specified rights to an object, based on given object metadata and targets.
 	 *
-	 * @obsoleted since 9.4, please use {@link:checkRightsForMetaDataAndTargets()} instead.
+	 * @deprecated since 9.4, please use {@link:checkRightsForMetaDataAndTargets()} instead.
 	 * @param MetaData $meta Object metadata
 	 * @param Target[] $targets Object targets
 	 * @param string $rights String with rights to check, each character is a right that is needed
@@ -135,23 +133,12 @@ class BizAccess
 	 */
 	static public function checkRightsMetaDataTargets( MetaData $meta, array $targets, $rights )
 	{
-		Log::LogHandler( 'BizAccess', 'WARN', 'The checkRightsMetaDataTargets() function is obsoleted. '.
+		LogHandler::Log( 'BizAccess', 'DEPRECATED', 'The checkRightsMetaDataTargets() function is obsoleted. '.
 			'Please call the checkRightsForMetaDataAndTargets() function instead.' );
 
 		$issueId = count($targets) > 0 ? $targets[0]->Issue->Id : 0; // See Note#001
-		return self::checkRightsForParams(
-			BizSession::getShortUserName(),
-			$rights,
-			self::THROW_ON_DENIED,
-			$meta->BasicMetaData->Publication->Id,
-			$issueId,
-			$meta->BasicMetaData->Category->Id,
-			$meta->BasicMetaData->Type,
-			$meta->WorkflowMetaData->State->Id,
-			$meta->BasicMetaData->ID,
-			$meta->BasicMetaData->ContentSource,
-			$meta->BasicMetaData->DocumentID,
-			$meta->WorkflowMetaData->RouteTo );
+		return self::checkRightsForMetaDataAndIssue( BizSession::getShortUserName(), $rights,
+			self::THROW_ON_DENIED, $meta, $issueId );
 	}
 
 	/**
@@ -170,6 +157,23 @@ class BizAccess
 		$user, $rights, $throwException, MetaData $meta, array $targets )
 	{
 		$issueId = count($targets) > 0 ? $targets[0]->Issue->Id : 0; // See Note#001
+		return self::checkRightsForMetaDataAndIssue( $user, $rights, $throwException, $meta, $issueId );
+	}
+
+	/**
+	 * Check if the user has specific rights to an object, based on given object metadata and overrule issue.
+	 *
+	 * @since 10.5.0
+	 * @param string $user Short user name.
+	 * @param string $rights String with rights to check, each character is a right that is needed
+	 * @param bool $throwException Whether or not to throw BizException when no access.
+	 * @param MetaData $meta Object metadata
+	 * @param integer $issueId ID of the overrule issue. Zero when object is targeted for none or normal issues. See Note#001.
+	 * @throws BizException when session user has no rights
+	 * @return bool Whether or not the session user has the requested rights.
+	 */
+	static public function checkRightsForMetaDataAndIssue( $user, $rights, $throwException, MetaData $meta, $issueId )
+	{
 		return self::checkRightsForParams(
 			$user, $rights, $throwException,
 			$meta->BasicMetaData->Publication->Id,
@@ -199,7 +203,7 @@ class BizAccess
 	 * @return bool Whether or not session user has rights.
 	 */
 	static public function checkRightsForBrandContext( $user, $rights, $throwException,
-	                                                   $brandId, $issueId = null, $categoryId = null, $objectType = null, $statusId = null )
+	   $brandId, $issueId = null, $categoryId = null, $objectType = null, $statusId = null )
 	{
 		$objectId = null;
 		$contentSource = null;
@@ -231,8 +235,7 @@ class BizAccess
 	 * @return bool Whether or not session user has rights.
 	 */
 	static public function checkRightsForParams( $user, $rights, $throwException,
-	                                             $brandId, $issueId, $categoryId, $objectType, $statusId,
-	                                             $objectId, $contentSource, $documentId, $routeTo )
+	   $brandId, $issueId, $categoryId, $objectType, $statusId, $objectId, $contentSource, $documentId, $routeTo )
 	{
 		// Check authorization
 		global $globAuth;

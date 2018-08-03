@@ -1,7 +1,5 @@
 <?php
 /**
- * @package   Enterprise
- * @subpackage   ServerPlugins
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *
  * Autocomplete provider connector interface to help end-user fill in dialog property values.

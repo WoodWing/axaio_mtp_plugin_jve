@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v4.2, refactored in v6.1
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

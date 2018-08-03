@@ -5,8 +5,6 @@
  * See TestSuiteInterfaces.php for more details about the TestSuite concept.
  * Checks the Transfer Server settings made at the configserver.php file.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

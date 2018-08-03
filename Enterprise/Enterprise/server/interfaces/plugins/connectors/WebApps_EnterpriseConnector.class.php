@@ -21,8 +21,6 @@
  *
  * The order of the
  *
- * @package Enterprise
- * @subpackage Core
  * @since v8.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

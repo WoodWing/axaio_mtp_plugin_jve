@@ -3,8 +3,6 @@
  * Utility class to build HTML document based on HTML fragments (sections) taken from a HTML template.
  * This is especially used by web/admin applications.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

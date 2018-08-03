@@ -3,8 +3,6 @@
 /**
  * Class that can contruct a DB model definition provided by the core server and/or by the server plugins.
  *
- * @package    Enterprise
- * @subpackage DbModel
  * @since      10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

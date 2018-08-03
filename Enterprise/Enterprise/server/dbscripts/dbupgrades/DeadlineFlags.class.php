@@ -28,8 +28,6 @@
  * bound to the issue, they are not part of the complicated deadline calculation
  * and therefore are not seen as a trigger to raise the deadline flag.
  *
- * @package 	Enterprise
- * @subpackage 	BizClasses
  * @since 		v9.2.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

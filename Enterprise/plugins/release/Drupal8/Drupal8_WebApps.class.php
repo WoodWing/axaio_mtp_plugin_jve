@@ -4,8 +4,6 @@
  *
  * Called by the core once the application icon on the Integrations admin page is clicked.
  *
- * @package Enterprise
- * @subpackage ServerPlugins
  * @since v9.0.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

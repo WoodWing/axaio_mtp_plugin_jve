@@ -1,7 +1,5 @@
 <?php
 /**
- * @package     SCEnterprise
- * @subpackage  DBClasses
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */
 

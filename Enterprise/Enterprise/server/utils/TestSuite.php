@@ -371,9 +371,9 @@ class WW_Utils_TestSuite
 			}
 			if( $response ) {
 				if( $expectedErrorCodeOrMsgKey ) { // Should not come here as error is expected!!
-					$message = '<b>Test: </b>'.$stepInfo.'<br/>'.
-							'<b>The service response was unexpected: </b>Success!<br/>'.
-							'<b>Expected response: </b>'.$expectedErrorCodeOrMsgKey.'.';
+					$message = 'Test: '.$stepInfo.PHP_EOL.
+							'The service response was unexpected: Success!'.PHP_EOL.
+							'Expected response: '.$expectedErrorCodeOrMsgKey.'.';
 					if( $throwException ) {
 						$testCase->throwError( $message );
 					} else {
@@ -401,10 +401,10 @@ class WW_Utils_TestSuite
 				
 				// Expect an error here, but is the error same as the $expectedError?
 				if( $sysError != $expectedError ) {
-					$message = '<b>Test: </b>'.$stepInfo.'<br/>'.
-								'<b>The service response was unexpected: </b>'.$e->getMessage().
-								' (Detail: '.$e->getDetail().')<br/>'.
-								'<b>Expected response: </b>'.$expectedErrorCodeOrMsgKey.'.';
+					$message = 'Test:'.$stepInfo.PHP_EOL.
+								'The service response was unexpected: '.$e->getMessage().
+								' (Detail: '.$e->getDetail().')'.PHP_EOL.
+								'Expected response: '.$expectedErrorCodeOrMsgKey.'.';
 					if( $throwException ) {
 						$testCase->throwError( $message );
 					} else {
@@ -412,10 +412,10 @@ class WW_Utils_TestSuite
 					}
 				}				
 			} else { // No error expected
-				$message =  '<b>Test: </b>'.$stepInfo.'<br/>'.
-							'<b>The service response was unexpected: </b>'.$e->getMessage().
-							' (Detail: '.$e->getDetail().')<br/>'.
-							'<b>Expected response: </b>Success!';
+				$message =  'Test: '.$stepInfo.PHP_EOL.
+							'The service response was unexpected: '.$e->getMessage().
+							' (Detail: '.$e->getDetail().')'.PHP_EOL.
+							'Expected response: Success!';
 				if( $throwException ) {
 					$testCase->throwError( $message );
 				} else {
@@ -929,9 +929,9 @@ class WW_Utils_TestSuite
 	 *
 	 * @param TestCase $testCase The test module calling this function.
 	 * @param string $pluginName Server Plug-in to activate.
-	 * @return TRUE when activated. FALSE when no action taken. NULL on activation error.
+	 * @return bool TRUE when activated. FALSE when no action taken. NULL on activation error.
 	 */
-	public function activatePluginByName( TestCase $testCase, $pluginName )
+	public function activatePluginByName( TestCase $testCase, string $pluginName ): ?bool
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		if( BizServerPlugin::isPluginActivated( $pluginName ) ) {
@@ -963,9 +963,9 @@ class WW_Utils_TestSuite
 	 *
 	 * @param TestCase $testCase The test module calling this function.
 	 * @param string $pluginName Server Plug-in to deactivate.
-	 * @return TRUE when deactivated. FALSE when no action taken. NULL on deactivation error.
+	 * @return bool TRUE when deactivated. FALSE when no action taken. NULL on deactivation error.
 	 */
-	public function deactivatePluginByName( TestCase $testCase, $pluginName )
+	public function deactivatePluginByName( TestCase $testCase, string $pluginName ): ?bool
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		if( !BizServerPlugin::isPluginActivated( $pluginName ) ) {
@@ -1926,7 +1926,7 @@ class WW_Utils_TestSuite
 	 */
 	public function removeUserMemberships( TestCase $testCase, $ticket, $userId, $groupId )
 	{
-		require_once BASEDIR.'/server/services/adm/AdmAddUsersToGroupService.class.php';
+		require_once BASEDIR.'/server/services/adm/AdmRemoveUsersFromGroupService.class.php';
 		$request = new AdmRemoveUsersFromGroupRequest();
 		$request->Ticket = $ticket;
 		$request->GroupId = $groupId;
@@ -2126,30 +2126,19 @@ class WW_Utils_TestSuite
 	 * @since 10.1.7
 	 * @param TestCase $testCase
 	 * @param string $serverJobName
+	 * @param int $maxExecTime The max execution time of jobindex.php in seconds.
 	 * @return bool
 	 */
-	public function callCreateServerJob( TestCase $testCase, $serverJobName )
+	public function callCreateServerJob( TestCase $testCase, $serverJobName, $maxExecTime )
 	{
-		// For zendframework v2.5.3: Make sure that the Execution timeout (CURLOPT_TIMEOUT) is set in the 'curloptions' key.
-		// If we would simply call $client->setOptions( 'timeout' => $operationTimeout ) the Curl Adapter would apply the
-		// same value for 'CURLOPT_TIMEOUT' and 'CURLOPT_CONNECTTIMEOUT' which is not wanted.
 		$result = true;
 		try {
-			$client = new Zend\Http\Client();
-			$client->setUri( LOCALURL_ROOT.INETROOT.'/jobindex.php' );
-			$client->setMethod( Zend\Http\Request::METHOD_GET );
+			$client = $this->createClientToCallJobIndex();
 			$client->setParameterGet( array(
-				'createrecurringjob' => $serverJobName,
-				//'XDEBUG_SESSION_START' => 'PHPSTORM',
-				// L> To debug a job, uncomment the above and clear the TESTSUITE['SoapUrlDebugParams'] option.
-			) );
-			$client->setOptions( array(
-				'timeout' => null, // trick to allow overruling CURLOPT_TIMEOUT / CURLOPT_CONNECTTIMEOUT
-				'adapter' => 'Zend\Http\Client\Adapter\Curl',
-				'curloptions' => array(
-					CURLOPT_CONNECTTIMEOUT => 5,
-					CURLOPT_TIMEOUT => 5
-				) ) );
+												'createrecurringjob' => $serverJobName,
+											   'maxexectime' => $maxExecTime ) );
+			// 'timeout' must exceed the execution time to give the client time to return to caller.
+			$client->setOptions( array( 'timeout' => $maxExecTime + 5, 'connecttimeout' => 5 ) );
 			$client->send();
 			$response = $client->getResponse();
 			if( !$response->isSuccess() ) {
@@ -2168,35 +2157,20 @@ class WW_Utils_TestSuite
 	 *
 	 * @since 10.1.7
 	 * @param TestCase $testCase
+	 * @param int $maxExecTime The max execution time of jobindex.php in seconds.
 	 * @param int $maxProcessJobs Max number of jobs to execute.
 	 * @return bool
 	 */
-	public function callRunServerJobs( TestCase $testCase, $maxProcessJobs = 1 )
+	public function callRunServerJobs( TestCase $testCase, $maxExecTime, $maxProcessJobs )
 	{
 		$result = true;
 		try {
-			// For zendframework v2.5.3: Make sure that the Execution timeout (CURLOPT_TIMEOUT) is set in the 'curloptions' key.
-			// If we would simply call $client->setOptions( 'timeout' => $operationTimeout ) the Curl Adapter would apply the
-			// same value for 'CURLOPT_TIMEOUT' and 'CURLOPT_CONNECTTIMEOUT' which is not wanted.
-
-			$maxExecTime = 60;
-			$client = new Zend\Http\Client();
-			$client->setUri( LOCALURL_ROOT.INETROOT.'/jobindex.php' );
-			$client->setMethod( Zend\Http\Request::METHOD_GET );
+			$client = $this->createClientToCallJobIndex();
 			$client->setParameterGet( array(
-				'maxjobprocesses' => 10,
-				'maxexectime' => $maxExecTime,
-				'processmaxjobs' => $maxProcessJobs,
-				//'XDEBUG_SESSION_START' => 'PHPSTORM',
-				// L> To debug a job, uncomment the above and clear the TESTSUITE['SoapUrlDebugParams'] option.
-			) );
-			$client->setOptions( array(
-				'timeout' => null, // trick to allow overruling CURLOPT_TIMEOUT / CURLOPT_CONNECTTIMEOUT
-				'adapter' => 'Zend\Http\Client\Adapter\Curl',
-				'curloptions' => array(
-					CURLOPT_CONNECTTIMEOUT => 5,
-					CURLOPT_TIMEOUT => $maxExecTime + 2 // Add two seconds to allow the jobindex to finish before curl finishes.
-				) ) );
+												'maxexectime' => $maxExecTime,
+												'maxjobprocesses'=> $maxProcessJobs ) );
+			// 'timeout' must exceed the execution time to give the client time to return to caller.
+			$client->setOptions( array( 'timeout' => $maxExecTime + 5, 'connecttimeout' => 5 ) );
 			$client->send();
 			$response = $client->getResponse();
 			if( !$response->isSuccess() ) {
@@ -2232,6 +2206,20 @@ class WW_Utils_TestSuite
 				$bizServerJob->deleteJob( $jobId );
 			}
 		}
+	}
+
+	/**
+	 * Create HTTP client to call the jobindex.php.
+	 *
+	 * @since 10.5.0
+	 * @return \Zend\Http\Client
+	 */
+	private function createClientToCallJobIndex(): \Zend\Http\Client
+	{
+		$client = new Zend\Http\Client();
+		$client->setUri( LOCALURL_ROOT.INETROOT.'/jobindex.php' );
+		$client->setMethod( Zend\Http\Request::METHOD_GET );
+		return $client;
 	}
 
 }

@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @package     Enterprise
- * @subpackage  DBClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */
@@ -11,7 +9,6 @@ class DBBase
 {
 	private static $dbErrorMsg;
 	private static $isErrorSet;
-	public static $ExceptionOnError = false;
 	protected static $UniqueId = null;
 	protected static $TempIdsTables = null;
 
@@ -89,16 +86,11 @@ class DBBase
 	 * Raises a DB error.
 	 *
 	 * @param string $error
-	 * @throws BizException Throws BizException when the flag to throw BizException is set to true.
 	 */
 	static protected function setError( $error )
 	{
 		self::$dbErrorMsg = $error;
 		self::$isErrorSet = true;
-		
-		if (self::$ExceptionOnError) {
-			throw new BizException('ERR_DATABASE', 'Server', $error);
-		}
 	}
 	
 	/**
@@ -368,43 +360,46 @@ class DBBase
 	}
 
 	/**
-	 * Get the row with $fields in table $tablename where $where.
+	 * Get the row with $fields in table $tableNames where $where.
+	 *
 	 * If more rows are found returns the first row found.
 	 *
-	 * @param string $tablename
+	 * What is exactly returned depends on the value of $fieldNames:
+	 * - '*' -> returns one row/array containing values for all defined table fields.
+	 * - An array with field names -> returns one row/array containing values for the specified fields only.
+	 *    L> for example: array( 'id', 'user' )
+	 *        L> becomes: SELECT `id`, `user` FROM ...
+	 * - [Since 10.5.0] An array with field names at params and table var names at keys -> returns one row/array containing values for the specified fields only.
+	 *    L> for example: array( 'm' => array( '*' ), 'u' => array( 'id', 'user' ) )
+	 *        L> becomes: SELECT m.*, u.`id`, u.`user` FROM ...
+	 * - [Since 10.5.0] The same as above but now providing an alias for each field  -> returns one row/array containing values for the specified field aliases.
+	 *    L> for example: array( 'u' => array( 'ID' => 'id', 'UserName' => 'user' ) )
+	 *        L> becomes: SELECT u.`id` AS 'ID', u.`user` AS 'UserName' FROM ...
+	 *
+	 * @param string|array $tableNames One table name. Can also be a list of table names: array( 'u' => 'users', 'm' => 'messages' )
 	 * @param string $where
-	 * @param mixed $fieldnames. Either an array containing the fieldnames to get or '*' in which case all fields are returned.
+	 * @param mixed $fieldNames. See function description.
 	 * @param array $params, containing parameters to be substituted for the placeholders
 	 *        of the where clause. 
 	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
 	 *        Keys: DB fields. Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
-	 * @param string|array $blob Chunck of data to store at DB. It will be converted to a DB string here.
-	 *                           One blob can be passed or multiple. If muliple are passed $blob is an array.
+	 * @param string|array $blob Chunk of data to store at DB. It will be converted to a DB string here.
+	 *                           One blob can be passed or multiple. If multiple are passed $blob is an array.
 	 * @return array with params or null if no row found.
+	 * @throws BizException In case of database connection error or when bad arguments provided.
 	 */
-	static public function getRow( $tablename, $where, $fieldnames = '*', $params = array(), $orderBy = null, $blob=null )
+	static public function getRow( $tableNames, $where, $fieldNames = '*', $params = array(), $orderBy = null, $blob=null )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
-		$tablename = $dbDriver->tablename( $tablename );
-		
-		$sql = '';
-		if( is_array( $fieldnames ) ) {
-			$sql .= " SELECT ";
-			$comma = '';
-			foreach( $fieldnames as $fieldname ) {
-				$dbfield = self::toColname( $fieldname );
-				$sql .= $comma . $dbfield;
-				$comma = ', ';
-			}
-		} else {
-			$sql .= " SELECT * ";
-		}
-		
-		$sql .= " FROM $tablename ";
+
+		$sql = self::composeSelectClause( $fieldNames );
+		$sql .= self::composeFromClause( $tableNames, $dbDriver );
+
 		if( trim( $where ) != '' ) {
 			$sql .= " WHERE $where ";
 		}
+
 		if( !is_null( $orderBy ) ) {
 			$sql = self::addOrderByClause( $sql, $orderBy );
 			$sql = $dbDriver->limitquery( $sql, 0, 1 );
@@ -429,17 +424,26 @@ class DBBase
 	}
 
 	/**
-	 * List all rows from $tablename where $where.
-	 * What is exactly returned depends on the value of $fieldnames:
-	 * - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
-	 * - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with params.
-	 * - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with params in $fieldnames.
-	 * - An array with field names at params and table var names at keys -> for example: array( 'm' => array( '*' ), 'u' => array( 'id', 'user' ) )
+	 * List all rows from $tableNames where $where.
+	 *
+	 * What is exactly returned depends on the value of $fieldNames:
+	 * - Either null or false -> returns an array of rows indexed by the value in $keyCol, each containing the name ($nameCol) of the row.
+	 * - Either '*' or true -> returns an array of rows indexed by the value in $keyCol, each containing an array with params.
+	 * - An array with field names -> returns an array of rows indexed by the value in $keyCol, each containing an array with params in $fieldNames.
+	 *    L> for example: array( 'id', 'user' )
+	 *        L> becomes: SELECT `id`, `user` FROM ...
+	 * - An array with field names at params and table var names at keys -> returns the same structure as above.
+	 *    L> for example: array( 'm' => array( '*' ), 'u' => array( 'id', 'user' ) )
+	 *        L> becomes: SELECT m.*, u.`id`, u.`user` FROM ...
+	 * - [Since 10.5.0] The same as above but now providing an alias for each field  -> returns the same structure as above, but now field aliases instead of field names.
+	 *    L> for example: array( 'u' => array( 'ID' => 'id', 'UserName' => 'user' ) )
+	 *        L> becomes: SELECT u.`id` AS 'ID', u.`user` AS 'UserName' FROM ...
+	 *
 	 * @param string|array $tableNames One table name. Can also be a list of table names: array( 'u' => 'users', 'm' => 'messages' )
-	 * @param string $keycol  Used as keys at the result array. Leave empty to use [0...N-1] array keys. 
-	 * @param string $namecol
+	 * @param string $keyCol  Used as keys at the result array. Leave empty to use [0...N-1] array keys.
+	 * @param string $nameCol
 	 * @param string $where Indicates the condition or conditions that rows must satisfy to be selected.
-	 * @param mixed  $fieldnames, see function description
+	 * @param mixed  $fieldNames, see function description
 	 * @param array  $params ,containing parameters to be substituted for the placeholders
 	 *        of the where clause.
 	 * @param array|null $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
@@ -451,67 +455,30 @@ class DBBase
 	 * @param string|null $having Indicates the condition or conditions that the grouped by rows must satisfy to be selected.
 	 * @param bool $logSQL [Since 10.1.6/10.3.0] Whether or not the resulting SQL must be logged.
 	 * @return array of rows (see function description) or null on failure (use getError() for details)
-	 * @throws BizException In case of database connection error.
+	 * @throws BizException In case of database connection error or when bad arguments provided.
 	 */
 	static public function listRows(
-		$tableNames, $keycol, $namecol, $where, $fieldnames = '*', $params = array(), $orderBy = null, $limit = null,
+		$tableNames, $keyCol, $nameCol, $where, $fieldNames = '*', $params = array(), $orderBy = null, $limit = null,
 		$groupBy = null, $having = null, $logSQL = true )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
-		$sql = '';
-		
-		// Build the SELECT clause.
-		if( $fieldnames === '*' || $fieldnames === true ) {
-			$sql .= ' SELECT * ';
-		} else if( empty($fieldnames) || $fieldnames === false ) {
-			$sql .= ' SELECT ';
-			$comma = '';
-			if( !empty($keycol) ) {
-				$sql .= self::toColname($keycol).' ';
-				$comma = ', ';
+
+		if( empty( $fieldNames ) || $fieldNames === false ) {
+			$fieldNames = array();
+			if( !empty( $keyCol ) ) {
+				$fieldNames[] = $keyCol;
 			}
-			if( !empty($namecol) ) {
-				$sql .= $comma.' '.self::toColname($namecol).' ';
+			if( !empty( $nameCol ) ) {
+				$fieldNames[] = $nameCol;
 			}
-		} else if( is_array($fieldnames) ) {
-			$sql .= ' SELECT ';
-			$comma = '';
-			foreach( $fieldnames as $tableVar => $value ) {
-				if( is_string( $tableVar ) && is_array( $value ) ) {
-					foreach( $value as $fieldname ) {
-						$dbfield = ($fieldname == '*') ? $tableVar.'.*' : $tableVar.'.'.self::toColname($fieldname);
-						$sql .= $comma . $dbfield;
-						$comma = ', ';
-					}
-				} else {
-					$fieldname = $value;
-				$dbfield = ($fieldname == '*') ? '*' : self::toColname($fieldname);
-				$sql .= $comma . $dbfield;
-				$comma = ', ';
-			}
-			}
-		} else {
-			self::setError( BizResources::localize('ERR_ARGUMENT') );
-			return null;
+		} else if( $fieldNames === true ) {
+			$fieldNames = '*';
 		}
-		
-		// Build the FROM clause.
-		if( is_array( $tableNames ) ) {
-			$sql .= ' FROM ';
-			$comma = '';
-			foreach( $tableNames as $tableVar => $tableName ) {
-				$tableName = $dbDriver->tablename( $tableName );
-				$sql .= $comma.$tableName.' '.$tableVar;
-				$comma = ', ';
-			}
-			$sql .= ' ';
-		} else {
-			$tableNames = $dbDriver->tablename( $tableNames );
-			$sql .= " FROM $tableNames ";
-		}
-		
-		// Build the WHERE clause.
+
+		$sql = self::composeSelectClause( $fieldNames );
+		$sql .= self::composeFromClause( $tableNames, $dbDriver );
+
 		if( trim( $where ) != '' ) {
 			$sql .= " WHERE $where ";
 		}
@@ -527,8 +494,7 @@ class DBBase
 			$sql = self::addOrderByClause( $sql, $orderBy );
 		}
 
-		// Do not extend the query after the limit is added.
-		if ( !is_null( $limit ) ) {
+		if ( !is_null( $limit ) ) { // Do not extend the query after the limit is added.
 			$sql = self::addLimitByClause( $dbDriver, $sql, $limit );
 		}
 
@@ -538,7 +504,74 @@ class DBBase
 			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
 			return null;
 		}
-		return self::fetchResults( $sth, $keycol, true );
+		return self::fetchResults( $sth, $keyCol, true );
+	}
+
+	/**
+	 * Compose a SELECT clause for a list of field names.
+	 *
+	 * @since 10.5.0
+	 * @param string|array $fieldNames See function header of getRow().
+	 * @return string The SELECT clause.
+	 * @throws BizException when no field names provided.
+	 */
+	private static function composeSelectClause( $fieldNames )
+	{
+		$sqlParts = array();
+		if( $fieldNames === '*' ) {
+			$sqlParts[] = '*';
+		} else if( is_array( $fieldNames ) ) {
+			foreach( $fieldNames as $tableVar => $tableFields ) {
+				if( is_string( $tableVar ) && is_array( $tableFields ) ) {
+					foreach( $tableFields as $fieldLabel => $fieldName ) {
+						if( $fieldName == '*' ) {
+							$dbField = $tableVar.'.*';
+						} else {
+							$dbField = $tableVar.'.'.self::toColname( $fieldName );
+							if( is_string( $fieldLabel ) ) {
+								$dbField .= " AS '{$fieldLabel}'";
+							}
+						}
+						$sqlParts[] = $dbField;
+					}
+				} else {
+					$fieldName = $tableFields;
+					$dbField = ( $fieldName == '*' ) ? '*' : self::toColname( $fieldName );
+					$sqlParts[] = $dbField;
+				}
+			}
+		} else {
+			$detail = 'No field names provided for SELECT clause.';
+			throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
+		}
+		return ' SELECT '.implode(', ', $sqlParts ).' ';
+	}
+
+	/**
+	 * Compose a FROM clause for a list of table names.
+	 *
+	 * @since 10.5.0
+	 * @param string|array $tableNames One table name. Can also be a list of table names: array( 'u' => 'users', 'm' => 'messages' )
+	 * @param WW_DbDrivers_DriverBase $dbDriver
+	 * @return string The FROM clause.
+	 * @throws BizException when no table names provided.
+	 */
+	private static function composeFromClause( $tableNames, $dbDriver )
+	{
+		$sqlParts = array();
+		if( is_array( $tableNames ) ) {
+			foreach( $tableNames as $tableVar => $tableName ) {
+				$tableName = $dbDriver->tablename( $tableName );
+				$sqlParts[] = $tableName.' '.$tableVar;
+			}
+		} elseif( $tableNames ) {
+			$tableNames = $dbDriver->tablename( $tableNames );
+			$sqlParts[] = $tableNames;
+		} else {
+			$detail = 'No table names provided for FROM clause.';
+			throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
+		}
+		return ' FROM '.implode(', ', $sqlParts ).' ';
 	}
 
 	/**

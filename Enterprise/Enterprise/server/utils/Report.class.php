@@ -6,8 +6,6 @@
  * and optionally all reported information can be logged.
  * MVC tip: This could help separating biz logics (Model/Control) from UI (View).
  *
- * @package Enterprise
- * @subpackage utils
  * @since v9.0.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

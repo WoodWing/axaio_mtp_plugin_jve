@@ -3,8 +3,6 @@
  * returns the username for logging in with MadeToPrint.
  * Enables the use of MadeToPrint with different servers
  *
- * @package SCEnterprise
- * @subpackage MadeToPrint
  * @since v6.x
  * @copyright axaio software. All Rights Reserved.
  */

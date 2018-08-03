@@ -3,8 +3,6 @@
  * Generic JSON Server for Enterprise.
  * It extends Zend's JSON server to log services and to return service map (SMD).
  * 
- * @package 	Enterprise
- * @subpackage 	JSON
  * @since 		v8.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

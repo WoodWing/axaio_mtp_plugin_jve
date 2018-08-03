@@ -3,8 +3,6 @@
 /**
  * Utils to compare versions.
  *
- * @package Enterprise
- * @subpackage utils
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

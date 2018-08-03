@@ -9,8 +9,6 @@
  * For this reason (maximum size of an integer) only 32 flags can be used in one instance of Flags.
  * If you need more flags than 32, create a new instance of Flags and manage that separately.
 
- * @package     Enterprise
- * @subpackage  Utils
  * @since       v5.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
  */

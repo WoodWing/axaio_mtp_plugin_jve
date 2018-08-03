@@ -1,7 +1,5 @@
 <?php
 /**
- * @package 	SCEnterprise
- * @subpackage 	ServerPlugins
  * @since 		v6.1
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *

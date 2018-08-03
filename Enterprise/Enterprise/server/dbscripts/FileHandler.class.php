@@ -6,8 +6,6 @@
  * The dbscripts folder of the core server is located at Enterprise/server/dbscripts.
  * Aside to that, any server plug-in could also provide a dbscripts folder.
  *
- * @package    Enterprise
- * @subpackage DbScripts
  * @since      v10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

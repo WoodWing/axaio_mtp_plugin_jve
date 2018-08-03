@@ -5,8 +5,6 @@
  *
  * Since 10.2 the class named 'MssqlGenerator' was renamed and moved from dbmodel.php into here.
  *
- * @package Enterprise
- * @subpackage DbScripts/Generators
  * @since 10.2.0
  */
 

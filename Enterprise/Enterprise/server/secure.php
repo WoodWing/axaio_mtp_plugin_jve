@@ -13,34 +13,58 @@ $sLanguage_code = BizUser::validUserLanguage( getOptionalCookie('language') );
 define ('COOKIETIMEOUT', 86400); // =3600*24
 define ('LOGINPHP', SERVERURL_ROOT.INETROOT.'/server/apps/login.php');		// must be absolute (for apps in subdirs)
 define ('NORIGHT', SERVERURL_ROOT.INETROOT.'/server/apps/noright.php');
+define ('ADMIN_INDEX_PAGE', SERVERURL_ROOT.INETROOT.'/server/admin/index.php');
 
-function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=null)
+/**
+ * Retrieve and validate the session ticket.
+ *
+ * Redirect to the Login page if user has no ticket.
+ * Redirect to the Access Denied page when user has no $app rights.
+ *
+ * @param string|null $app 'admin' to check system admin rights, 'publadmin' to check brand admin rights, NULL to validate ticket only.
+ * @param string|null $userPwdExpir Provide user short name to skip ticket validation, or NULL to validate ticket.
+ * @param bool $redir Deprecated since 10.5.0
+ * @param string|null $ticket Provide the ticket to validate, or NULL to take ticket from the cookie jar.
+ * @return string The valid ticket.
+ */
+function checkSecure( $app = null, $userPwdExpir = null, $redir=true, $ticket=null )
 {
 	global $ispubladmin;
 	global $isadmin;
 	global $globUser;
 
-
-	try {
-		$dbDriver = DBDriverFactory::gen();
-		// The admin user might have prepared a clean database with an empty table space.
-		// In that case, we detect and redirect to the dbadmin.php module to setup the DB.
-		if( !$dbDriver->tableExists( 'config' ) ) { // Just pick the smart_config table.
-			throw new BizException( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE', 'Server', '' );
-		}
-	} catch( BizException $e ) {
-		echo $e->getMessage() . '<br/>';
-		echo 'Please check if your database is running.<br/>';
-		echo 'Or, click <a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/dbadmin.php'.'">here</a> to check your database setup.<br/>';
+	$dbDriver = getDbDriverIfConnected();
+	if( !$dbDriver ) {
+		// The admin user might not have setup a table space yet or the DB is not running.
+		// In that case, show connection error and provide link to the dbadmin.php module to setup the DB.
+		raiseDbConnectionErrorAndProvideLinkToDbSetup();
 		exit();
 	}
 
 	if( empty($userPwdExpir) ) {
-		$ticket = $ticket != null ? $ticket : getLogCookie('ticket',$redir);
+		if( !$ticket ) {
+			$ticket = getLogCookie('ticket' );
+			if( !$ticket ) {
+				if( !isDbInstalled( $dbDriver ) ) {
+					// The admin user might have prepared a clean database with an empty table space.
+					// In that case, show connection error and provide link to the dbadmin.php module to setup the DB.
+					raiseDbConnectionErrorAndProvideLinkToDbSetup();
+					exit();
+				}
+				header( 'Location: '.LOGINPHP );
+				exit();
+			}
+		}
 		try {
 			$user = BizSession::checkTicket( $ticket );
 		} catch( BizException $e ) {
 			$user = '';
+			if( !isDbInstalled( $dbDriver ) ) {
+				// The admin user might have prepared a clean database with an empty table space.
+				// In that case, show connection error and provide link to the dbadmin.php module to setup the DB.
+				raiseDbConnectionErrorAndProvideLinkToDbSetup();
+				exit();
+			}
 		}
 	} else {
 		$user = $userPwdExpir;
@@ -48,11 +72,7 @@ function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=nul
 
 	// no user means: invalid ticket (eg logged out) or expired ticket
 	if (!$user) {
-		if( $redir ) {
-			header( 'Location: '.LOGINPHP.'?redir=true' );
-		} else {
-			header( 'Location: '.LOGINPHP );
-		}
+		header( 'Location: '.LOGINPHP );
 		exit();
 	}
 
@@ -86,36 +106,87 @@ function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=nul
 	exit();
 }
 
-function getOptionalCookie( $key )
+/**
+ * Return the DB driver, only when a DB connection could be made.
+ *
+ * @since 10.5.0
+ * @return WW_DbDrivers_DriverBase|null DB driver, or null when no DB connection.
+ */
+function getDbDriverIfConnected()
 {
-	if(array_key_exists($key, $_COOKIE)){
-		return $_COOKIE[$key]; // cookie may not exist
+	$dbDriver = null;
+	try {
+		$dbDriver = DBDriverFactory::gen();
+	} catch( BizException $e ) { // typically ERR_COULD_NOT_CONNECT_TO_DATEBASE (S1003)
+	}
+	return $dbDriver;
+
+}
+
+/**
+ * Detect if the DB is installed.
+ *
+ * @since 10.5.0
+ * @param WW_DbDrivers_DriverBase $dbDriver
+ * @return bool
+ */
+function isDbInstalled( WW_DbDrivers_DriverBase $dbDriver )
+{
+	return $dbDriver->tableExists( 'config' ); // Just pick the smart_config table.
+}
+
+/**
+ * Show a DB connection error and provide a HTML link that opens the DB setup page.
+ *
+ * @since 10.5.0
+ */
+function raiseDbConnectionErrorAndProvideLinkToDbSetup()
+{
+	echo BizResources::localize( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE' ) . '<br/>';
+	echo 'Please check if your database is running.<br/>';
+	echo 'Or, click <a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/dbadmin.php'.'">here</a> to check your database setup.<br/>';
+}
+
+/**
+ * Get cookie value from cookie jar.
+ *
+ * @param string $cookieName
+ * @return string|null The cookie value, or NULL when the cookie does not exist.
+ */
+function getOptionalCookie( $cookieName )
+{
+	if( array_key_exists( $cookieName, $_COOKIE ) ) {
+		return $_COOKIE[ $cookieName ];
 	}
 	return null;
 }
 
-function getLogCookie( $cookie, $redir=true )
+/**
+ * Get cookie value and refresh the cookie.
+ *
+ * @param string $cookieName
+ * @return string|null The cookie value, or NULL when the cookie does not exist.
+ */
+function getLogCookie( $cookieName )
 {
-	@$key = getOptionalCookie($cookie);
-	if (!$key) {
-		if( $redir ) {
-			header( 'Location: '.LOGINPHP.'?redir=true' );
-		} else {
-			header( 'Location: '.LOGINPHP );
-		}
-		exit();
+	$cookieValue = getOptionalCookie( $cookieName );
+	if( $cookieValue ) {
+		setLogCookie( $cookieName, $cookieValue ); // refresh cookie
 	}
-
-	// refresh cookie
-	setLogCookie($cookie, $key);
-
-	return $key;
+	return $cookieValue;
 }
 
-function setLogCookie( $cookie, $key )
+/**
+ * Save a cookie in the cookie jar. Reset the cookie expiration to be valid for the next 24h.
+ *
+ * @param string $cookieName
+ * @param string $cookieValue
+ */
+function setLogCookie( $cookieName, $cookieValue )
 {
-	$tm = time()+COOKIETIMEOUT;
-	setcookie( $cookie, $key, $tm, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
+	$expire = time() + COOKIETIMEOUT;
+	setcookie( $cookieName, $cookieValue, $expire, INETROOT, null,
+		COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
 }
 
 function webauthorization($feature)
@@ -131,94 +202,136 @@ function webauthorization($feature)
 	}
 }
 
-function getauthorizations($dbh, $user, $feature = 0)
+/**
+ * Query user authorizations.
+ *
+ * @param WW_DbDrivers_DriverBase $dbh
+ * @param string $userShort
+ * @param int $feature The feature id to query authorizations for. Zero (0) to query authorizations for all features.
+ * @return resource|null DB handle that can be used to fetch results. Null when SQL failed.
+ */
+function getauthorizations( $dbh, $userShort, $feature = 0 )
 {
-	$dbu = $dbh->tablename("users");
-	$dbx = $dbh->tablename("usrgrp");
-	$dba = $dbh->tablename("authorizations");
-	$dbpv = $dbh->tablename("profilefeatures");
+	$dbu = $dbh->tablename( 'users' );
+	$dbx = $dbh->tablename( 'usrgrp' );
+	$dba = $dbh->tablename( 'authorizations' );
+	$dbpv = $dbh->tablename( 'profilefeatures' );
 
-	$user = $dbh->toDBString($user);
-
-	$sql = "select pv.`feature` as `feature` from $dbu u, $dbx x, $dba a, $dbpv pv where u.`id` = x.`usrid` and x.`grpid` = a.`grpid` and a.`profile` = pv.`profile` and u.`user` = '$user' ";
-	if ($feature) $sql .= " and pv.`feature` = $feature";
-	if (!$feature) {
-		$sql .= " group by pv.`feature`"; // Group by is needed when more than one feature is selected. Group by has a performance drawback. BZ#22116.
+	$sql =
+		'SELECT pv.`feature` AS `feature` '.
+		"FROM $dbu u, $dbx x, $dba a, $dbpv pv ".
+		'WHERE u.`id` = x.`usrid` AND x.`grpid` = a.`grpid` AND a.`profile` = pv.`profile` AND u.`user` = ? ';
+	$params = array( strval( $userShort ) );
+	if( $feature ) {
+		$sql .= " AND pv.`feature` = ?";
+		$params[] = intval( $feature );
+		$sql = $dbh->limitquery( $sql, 0, 1 );
 	} else {
-		$sql = $dbh->limitquery($sql, 0, 1);
+		// GROUP BY is needed when no feature is selected and so multiple features could be returned.
+		// GROUP BY has a performance drawback. BZ#22116.
+		$sql .= " GROUP BY pv.`feature`";
 	}
-	$sth = $dbh->query($sql);
+	$sth = $dbh->query( $sql, $params );
 
 	return $sth;
 }
 
-function hasRights($dbdr, $user, $app=null)
+/**
+ * Tells whether or not a user has system administration rights.
+ *
+ * @param WW_DbDrivers_DriverBase|null $dbdr Not used. Deprecated since 10.5.0.
+ * @param string $userShort
+ * @param string|null $app Not used. Deprecated since 10.5.0.
+ * @return bool
+ */
+function hasRights( $dbdr, $userShort, $app=null )
 {
-	$db1 = $dbdr->tablename("users");
-	$db2 = $dbdr->tablename("usrgrp");
-	$db3 = $dbdr->tablename("groups");
-
-	$user = $dbdr->toDBString($user);
-
-	$sql = "select u.`disable` as `disable`, g.`admin` as `admin` from $db1 u, $db2 x, $db3 g where u.`user` = '$user' and u.`id` = x.`usrid` and g.`id` = x.`grpid`";
-
-	$sth = $dbdr->query($sql);
-	if (!$sth) return false;
-
-	// check each row
-	while( ($row = $dbdr->fetch($sth)) ) {
-		if (trim($row['disable']) == '' && trim($row['admin']) != '') return true;
-	}
-	return false;
+	require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+	$select = array( 'u' => array( 'id' ) );
+	$from = array( 'u' => 'users', 'x' => 'usrgrp', 'g' => 'groups' );
+	$where = 'u.`user` = ? AND u.`id` = x.`usrid` AND g.`id` = x.`grpid` AND u.`disable` = ? AND g.`admin` != ?';
+	$params = array( strval( $userShort ), '', '' );
+	return (bool) DBBase::getRow( $from, $where, $select, $params );
 }
 
-function publRights($dbdr, $user)
-{
-	global $adminforpubl;
-	$isadmin = hasRights( $dbdr, $user);
-	if ($isadmin) return true;			// check only if user is not global admin
-
-	$db1 = $dbdr->tablename("users");
-	$db2 = $dbdr->tablename("usrgrp");
-	$db3 = $dbdr->tablename("groups");
-	$db4 = $dbdr->tablename("publadmin");
-
-	$user = $dbdr->toDBString($user);
-
-	$sql = "select u.`disable` as `disable`, pa.`publication` as `publ` from $db1 u, $db2 x, $db3 g, $db4 pa where u.`user` = '$user' and u.`id` = x.`usrid` and g.`id` = x.`grpid` and g.`id` = pa.`grpid`";
-
-	$sth = $dbdr->query($sql);
-	if (!$sth) return false;
-
-	// check each row
-	$adminforpubl = array();
-	while( ($row = $dbdr->fetch($sth)) ) {
-		if (trim($row['disable']) == '') {
-			$adminforpubl[] = $row['publ'];
-		}
-	}
-	return sizeof($adminforpubl);
-}
-
-function checkPublAdmin($publ, $keepaway = true)
+/**
+ * Tells whether or not a user has brand administration rights.
+ *
+ * @param WW_DbDrivers_DriverBase|null $dbdr Not used. Deprecated since 10.5.0.
+ * @param string $user Short name of user
+ * @return bool
+ */
+function publRights( $dbdr, $user )
 {
 	global $adminforpubl;
 	global $isadmin;
 
-	if ($isadmin) return true;			// check only if user is not global admin
+	// If user has system administration rights, he/she is implicitly brand admin for all brands.
+	if( is_null( $isadmin ) ) {
+		$isadmin = hasRights( null, $user );
+	}
+	if( $isadmin ) {
+		return true;
+	}
 
-	$ret = in_array($publ, $adminforpubl);
+	// Retrieve all brand ids for which the user is admin for.
+	require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+	$select = array( 'pa' => array( 'publ' => 'publication' ) );
+	$from = array( 'u' => 'users', 'x' => 'usrgrp', 'g' => 'groups', 'pa' => 'publadmin' );
+	$where = 'u.`user` = ? AND u.`id` = x.`usrid` AND g.`id` = x.`grpid` AND g.`id` = pa.`grpid` AND u.`disable` = ? ';
+	$params = array( strval( $user ), '' );
+	$rows = DBBase::listRows( $from, '', '', $where, $select, $params );
 
-	if ($keepaway && !$ret) {
-		header("Location: ".NORIGHT);
+	// Compose global list of brand ids the user is admin for.
+	$adminforpubl = array();
+	if( $rows ) foreach( $rows as $row ) {
+		$adminforpubl[] = $row['publ'];
+	}
+	return sizeof( $adminforpubl ) > 0;
+}
+
+/**
+ * Validate whether the user passed into the publRights() function is brand admin for the given publication.
+ *
+ * @param integer $publicationId
+ * @param bool $redirectAndExitWhenAccessDenied Whether to exit and redirect to the Access Denied page in case no access.
+ * @return bool When $redirectAndExitWhenAccessDenied is FALSE, the return value indicates whether the user has access.
+ */
+function checkPublAdmin( $publicationId, $redirectAndExitWhenAccessDenied = true )
+{
+	global $adminforpubl;
+	global $isadmin;
+
+	// If user has system administration rights, he/she is implicitly brand admin for all brands.
+	if( $isadmin ) {
+		return true;
+	}
+
+	$ret = in_array( $publicationId, $adminforpubl );
+
+	if( $redirectAndExitWhenAccessDenied && !$ret ) {
+		header( "Location: ".NORIGHT );
 		exit();
 	}
 
 	return $ret;
 }
 
+/**
+ * Return the user short name and ticket expiration for a given ticket.
+ *
+ * @deprecated 10.5.0
+ * @param WW_DbDrivers_DriverBase $dbdr
+ * @param string $ticket
+ * @param string $expire Returns ticket expiration in ISO datetime notation.
+ * @return string|null
+ */
 function getuser( $dbdr, $ticket, &$expire )
 {
+	LogHandler::log( __METHOD__, 'DEPRECATED',
+		'This function is no longer supported since 10.5.0 and may be removed in future versions.'.
+		'Please use DBTicket::DBuserticket() instead.'
+	);
 	if($dbdr == null){
 		$dbdr = DBDriverFactory::gen();
 	}

@@ -4,8 +4,6 @@
  *
  * Wraps a curl based adapter within a Zend http client.
  *
- * @package     Enterprise
- * @subpackage  AdobeDps2
  * @since       v9.6
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *

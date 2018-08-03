@@ -3,8 +3,6 @@
 /**
  * Contains helper functions for the ContentSource tests.
  *
- * @package 	Enterprise
- * @subpackage 	Testsuite
  * @since 		v9.2.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

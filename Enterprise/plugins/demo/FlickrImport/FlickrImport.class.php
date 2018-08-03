@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @package 	Enterprise
- * @subpackage 	FlickrImport
  * @since 		v6.1
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *

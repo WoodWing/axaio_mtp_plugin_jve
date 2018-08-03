@@ -3,8 +3,6 @@
  * Implements DB querying of properties and property usages.
  * Customizations made in Dialog Setup and MetaData maintenance pages are respected.
  * 
- * @package 	Enterprise
- * @subpackage 	DBClasses
  * @since 		v5.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

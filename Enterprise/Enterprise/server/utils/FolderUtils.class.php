@@ -2,26 +2,42 @@
 /*
  * Utility class for handling folders.
  *
- * @package Enterprise
- * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
  
 class FolderUtils
 {
+	/**
+	 * Creates a directory path recursively when it does not exists yet.
+	 *
+	 * @since 10.5.0
+	 * @param string $dirName Full path name that needs to be created. Use forward slashes.
+	 * @param integer|null $mode The mask to apply to the created folder. Provide ordinal value, such as 0x775.
+	 *                           Provide NULL to take over access rights from parent folder.
+	 * @return bool TRUE when the directory already exists or when it could be created, else FALSE.
+	 */
+	static public function ensureDirExists( $dirName, $mode = null ) : bool
+	{
+		if( file_exists( $dirName ) ) {
+			return true;
+		}
+		return self::mkFullDir( $dirName, $mode );
+	}
+
 	/*
-	 * Creates a directory path for many levels, like mkdir does for one level only.
+	 * Creates a directory path recursively.
 	 *
 	 * Since 9.5 no longer 0770 is taken as default mode. Instead, the access rights are
 	 * taken over from the parental folder. That makes access easier for system admins
 	 * who typically are no member of the www group.
 	 *
 	 * @param string $dirName Full path name that needs to be created. Use forward slashes.
-	 * @param integer $mode The mask to apply to the created folder. Provide ordinal value, such as 0x775.
+	 * @param integer|null $mode The mask to apply to the created folder. Provide ordinal value, such as 0x775.
+	 *                           Provide NULL to take over access rights from parent folder.
 	 * @return boolean Whether or not the folder could be created.
 	 */
-	static public function mkFullDir( $dirName, $mode = null )
+	static public function mkFullDir( $dirName, $mode = null ) : bool
 	{
 		$result = true;
 		$newDir = '';
@@ -189,16 +205,18 @@ class FolderUtils
 	}
 	
 	/**
-	 * Cleans up all files and subdirectories from a directory. Next the directory itself
-	 * is removed if choosen. A directory can only be removed if it is empty. So if cleaning up one
-	 * of the files or subdirectory fails the cleanup of the folder fails.
-	 * If the owner of the process has no access rights the clean up fails.
-	 * Optionaly a Unix timestamp can be passed in which case only files older than the passed time will be removed.
-	 * @param string $directory
-	 * @param boolean $removeTopFolder boolean whether the folder itself should be removed. Defaults to true.
-	 * @param int $olderThan if a file is last modified before the passed time, it will be removed (Unix timestamp). 
-	 * @return bool True if directory is removed else false.
+	 * Cleans up all files and subdirectories from a directory and optionally the directory itself.
+	 *
+	 * A directory can only be removed if it is empty. So if any file or subdirectory can not be removed, the
+	 * parental directories are not removed as well. This could happen because:
+	 * - the file is younger than the given $olderThan parameter
+	 * - the owner of the process has not enough access rights to remove the file or subdirectory
+	 *
 	 * @since 7.0.12
+	 * @param string $directory Full path of the directory to clean.
+	 * @param boolean $removeTopFolder Whether the folder itself should be removed.
+	 * @param int|null $olderThan Unix timestamp. Only remove files that are last modified before this timestamp. NULL to remove all.
+	 * @return bool TRUE if the entire directory is removed, else FALSE.
 	 */
 	public static function cleanDirRecursive( $directory, $removeTopFolder = true, $olderThan = null )
 	{

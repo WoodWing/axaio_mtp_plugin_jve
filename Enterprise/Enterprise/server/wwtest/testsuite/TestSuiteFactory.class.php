@@ -4,8 +4,6 @@
  * It can read all tests and return their descriptions telling admin users what those tests actually do.
  * The results from test runs and the descriptions can be returned in XML format.
  *
- * @package Enterprise
- * @subpackage TestSuite
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

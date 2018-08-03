@@ -4,8 +4,6 @@
  * In this demo, it will show the connector can decide whether to skip the job creation by core server.
  * Beside this, it will show the connector can overrule and extend the job property.
  *
- * @package Enterprise
- * @subpackage ServerPlugins
  * @since v9.8
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

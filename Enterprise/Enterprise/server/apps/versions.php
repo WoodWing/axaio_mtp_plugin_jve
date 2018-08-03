@@ -1,7 +1,5 @@
 <?php
 /**
- * @package    SCEnterprise
- * @subpackage versions
  * @since      v3
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *

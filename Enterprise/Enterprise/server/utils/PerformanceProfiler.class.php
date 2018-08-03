@@ -4,8 +4,6 @@
  *
  * Useful tool for all kind of profiling purposes, such as 3rd party integrations, SQL and PHP execution.
  * 
- * @package Enterprise
- * @subpackage Utils
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

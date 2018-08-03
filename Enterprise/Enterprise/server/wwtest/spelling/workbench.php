@@ -3,8 +3,6 @@
  * Test application for manually testing all kind of installed spelling integrations.
  * Those integrations are established through Server Plug-ins.
  *
- * @package Enterprise
- * @subpackage Core
  * @since v7.4
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

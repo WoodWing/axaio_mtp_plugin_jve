@@ -5,8 +5,6 @@
  *
  * Status: Experimental. Only MySQL supported.
  *
- * @package 	Enterprise
- * @subpackage 	DbScripts
  * @since 		v9.7
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

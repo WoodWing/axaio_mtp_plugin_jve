@@ -1,8 +1,6 @@
 <?php
 
 /**
- * @package Enterprise
- * @subpackage Services
  * @since v8.2.1
  * @copyright WoodWing Software bv. All Rights Reserved.
  * 

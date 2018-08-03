@@ -3,8 +3,6 @@
  * Implements DB querying of PropertyUsage objects from smart_actionproperties table.
  * Customizations made in Dialog Setup maintenance pages are reflected through PropertyUsage objects.
  * 
- * @package 	Enterprise
- * @subpackage 	DBClasses
  * @since 		v6.5
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */

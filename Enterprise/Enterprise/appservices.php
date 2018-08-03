@@ -8,8 +8,6 @@
  * Interfaces reside in the server/interfaces folder and are also found named based (assuming .wsdl postfix). <br>
  * SOAP requests are logged in DEBUG mode in the OUTPUTDIRECTORY/soap folder.
  *
- * @package Enterprise
- * @subpackage Core
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

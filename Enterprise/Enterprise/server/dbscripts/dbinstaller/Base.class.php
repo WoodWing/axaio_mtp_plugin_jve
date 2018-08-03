@@ -23,8 +23,6 @@
  * into here. It was changed into an abstract class to share logics between core server installation and server plugin
  * installation that also may have their own DB models.
  *
- * @package    Enterprise
- * @subpackage dbscripts
  * @since      v9.0.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

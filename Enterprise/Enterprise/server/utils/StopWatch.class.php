@@ -6,8 +6,6 @@
  * It tells how long it runs since start, excluding pause times.
  * Usefull tool for profiling and logging purposes.
  * 
- * @package Enterprise
- * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
  */

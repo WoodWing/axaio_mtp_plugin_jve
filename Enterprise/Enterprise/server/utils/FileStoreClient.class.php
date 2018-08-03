@@ -17,8 +17,6 @@
  * can only work in conjunction with web services that return those URLs, while the file URLs of the FileStore Server can
  * be composed client side.
  *
- * @package    Enterprise
- * @subpackage Utils
  * @since      v10.2
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

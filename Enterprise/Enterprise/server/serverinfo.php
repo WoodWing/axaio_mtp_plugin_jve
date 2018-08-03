@@ -9,7 +9,7 @@ define ('SERVERVERSION',	        getProductVersion(__DIR__));
 define ('SERVERVERSION_EXTRAINFO', getServerVersionExtraInfo(__DIR__)); // To be used for labels such as Prerelease and Daily
 
 // For internal use, to validate configurations:
-define ('SCENT_DBVERSION',	    '10.4' );
+define ('SCENT_DBVERSION',	    '10.5' );
 
 $supportedPhpVersions = array(
     // format   >>> meaning
@@ -26,7 +26,6 @@ define ('SCENT_MYSQLDB_MAXVERSION', '5.7');
 
 define ('ADOBE_VERSIONS',		serialize( array( // used to detect if installed IDS is supported by Enterprise
 	// Major/minor version, oldest version first, latest as last one.
-	'CC2014' => '10.0',
 	'CC2015' => '11.0',
 	'CC2017' => '12.0',
 	'CC2018' => '13.0',

@@ -1,7 +1,5 @@
 <?php
 /**
- * @package    Enterprise
- * @subpackage FileStore service
  * @since      v10.2
  * @copyright  WoodWing Software bv. All Rights Reserved.
  * 
@@ -134,11 +132,8 @@ class WW_FileIndex
 			header('Status: 400 Bad Request - '.$message );
 			LogHandler::Log( 'TransferServer', 'ERROR', $message );
 			exit( $message );
-		} else {
-			// Update the ticket cookie
-			BizSession::setTicketCookieForClientIdentifier($this->httpParams['ticket']);
 		}
-
+		BizSession::setTicketCookieForClientIdentifier( $this->httpParams['ticket'] );
 
 		$this->httpParams['rendition'] = isset($_GET['rendition']) ? $_GET['rendition'] : null;
 		$this->httpParams['objectid'] = isset($_GET['objectid']) ? intval($_GET['objectid']) : null;
@@ -192,13 +187,11 @@ class WW_FileIndex
 	 */
 	private function handleGet()
 	{
-		// Validate ticket. Explicitly request NOT to update ticket expiration date to save time (since DB updates
-		// are expensive). We assume this is settled through regular web services anyway, such as GetObject which are
-		// needed anyway to find out which files are there to download.
+		// Setup an Enterprise Server session.
 		try {
-			$user = BizSession::checkTicket( $this->httpParams['ticket'], 'FileStore', false );
-			BizSession::setServiceName( 'FileStore' );
 			BizSession::startSession( $this->httpParams['ticket'] );
+			BizSession::setServiceName( 'FileStore' );
+			$user = BizSession::checkTicket( $this->httpParams['ticket'] );
 		} catch( BizException $e ) {
 			throw WW_FileIndex_HttpException::createFromBizException( $e );
 		}
