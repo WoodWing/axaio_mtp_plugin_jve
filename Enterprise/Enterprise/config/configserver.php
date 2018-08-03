@@ -1163,7 +1163,7 @@ if( !defined('APPLICATION_SERVERS') ) {
 	define( 'APPLICATION_SERVERS', serialize( array(
 	   //  ServerInfo( Name, URL [, Developer] [, Implementation] [, Technology] [, Version] [, array of Feature] [, Cryptkey (file path)] )
 	   new ServerInfo( SERVERNAME, SERVERURL, SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY, SERVERVERSION,
-	                  unserialize(SERVERFEATURES), defined('ENCRYPTION_PUBLICKEY_PATH') ? ENCRYPTION_PUBLICKEY_PATH : null ), // this server
+	                  unserialize(SERVERFEATURES) ), // this server
 	   new ServerInfo( 'WoodWing.net', 'http://demo.woodwing.net/Enterprise/index.php',
 	                  SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY,
 	                  '', 	// version unknown - may not be null

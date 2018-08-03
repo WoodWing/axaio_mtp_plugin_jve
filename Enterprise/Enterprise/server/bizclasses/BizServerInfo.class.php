@@ -13,8 +13,7 @@ class BizServerInfo
 	static public function getServerInfo()
 	{
 		return new ServerInfo( SERVERNAME, SERVERURL, SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY,
-							   SERVERVERSION, unserialize(SERVERFEATURES), 
-							   defined('ENCRYPTION_PUBLICKEY_PATH') ? ENCRYPTION_PUBLICKEY_PATH : null );
+							   SERVERVERSION, unserialize(SERVERFEATURES) );
 	}
 
 	/**
