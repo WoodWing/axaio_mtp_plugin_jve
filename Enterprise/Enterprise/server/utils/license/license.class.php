@@ -397,29 +397,6 @@ class License
 				} else if ( $dbstampunix ) {
 					$dbstamp = $this->mLicenseString->unix2WWTimeStr( $dbstampunix );
 				}
-		/*
-				else
-				{
-					//Try to convert to the UNIX time
-					//Note: this can go wrong: see test.php; 1-12-2007 can be december or january?
-					$dbstampunix = strtotime( $dbstamp );
-					if ( $dbstampunix !== false ) {
-						$dbstamp = $dbstampunix;
-					}
-				}
-		*/
-
-/*
-				//As discussed with Flip, we ignore the creation date of the root filestore
-				//Also because of the fact that the creation date doesn't really exists in Unix... :-((
-
-				$dir = ATTACHMENTDIRECTORY;
-				$fstampRoot = filectime( $dir );
-				if ( !$fstampRoot )
-					$fstampRoot = '';
-				else
-					$fstampRoot = $this->mLicenseString->unix2WWTimeStr( $fstampRoot );
-*/
 
 				if ( !$this->initDirectories() )
 					return false;
@@ -446,15 +423,6 @@ class License
 			}
 			case 2:
 			{
-				/*
-					Return: max id (smart_objects) | 
-							current number of smart_objects | 
-							Filestore harddisk size | 
-							current Filestore usage | 
-							current time | 
-							creation time of last smart object | 
-							mac addresses [,]
-				*/
 				$key2Arr = Array();
 		
 				//Max id smart_objects
@@ -493,36 +461,8 @@ class License
 					$key2Arr[ 5 ] = '';
 				}
 				
-				//mac address:
 				$key2Arr[ 6 ] = '';
 				$macstr = '';
-				/* 
-				//SourceGuardian specific
-				if ( function_exists( 'sg_get_mac_addresses' ))
-				{
-					$macs = sg_get_mac_addresses();
-					$n = count( $macs );
-					for ( $i=0; $i<$n; $i++ )
-					{
-						if ( $i > 0 )
-							$macstr .= ',';
-						$m = $macs[ $i ];
-						$m = str_replace( ':', '', $m );
-						$m = str_replace( chr(0), '', $m );
-						$macstr .= $m;
-					}
-				}
-				*/
-
-				/*
-				//Ioncube specific:
-				//However, the ioncube_server_data is unhandy, and can not be used to specify the mac address.
-				if ( function_exists( 'ioncube_server_data' ))
-				{
-					$macstr = ioncube_server_data();
-				}
-				*/
-
 				$key2Arr[ 6 ] = $macstr;
 		
 				return implode( '|', $key2Arr );
@@ -548,20 +488,12 @@ class License
 					case 'mssql': $code = 1; break;
 				}
 				$key3Arr[ 1 ] = $code;
-
 				$key3Arr[ 2 ] = DBSELECT;
-				
 				$key3Arr[ 3 ] = DBSERVER;
-				
 				$key3Arr[ 4 ] = $this->getHostName();
-
 				$key3Arr[ 5 ] = ATTACHMENTDIRECTORY;
-
 				$key3Arr[ 6 ] = $this->getServerNameOrAddr();
 				
-				//Operation system: php_uname()
-
-//				print "<br>x=" . implode( '|', $key3Arr );
 				return implode( '|', $key3Arr );
 				break;
 			}
@@ -1730,63 +1662,6 @@ class License
 	}
 	
 	/**
-	 * Check whether someone has logged on AFTER the given timestamp by inspecting
-	 * both the tickets table (logon field) AND the users table (lastlogondate field).
-	 * If so, someone tries to fool us by only copying old license information over a
-	 * newer database. This may also happen if someone only recovers certain tables
-	 * from a backup; one should recover the complete database, not only certain tables.
-	 * 
-	 * @param string timestamp 
-	 * @return boolean success (no problem)
-	 */
-	private function checkUsingOldLicense( $timestamp )
-	{
-		$db = $this->mDBDriver->tablename("tickets");
-		$t = date("Y-m-d\\TH:i:s", $timestamp );
-
-		$sql = "SELECT `id` FROM $db WHERE `logon` > '$t'";
-
-		//Ignore the installation footprint, only check the logon of a real user
-		$user = $this->mInstallTicketID;
-		$appname = $this->mInstallTicketID;
-		$sql .= " AND `usr` != '$user' AND `appname` != '$appname'";
-
-		$sth = $this->mDBDriver->query($sql, array(), null, $this->mLicLog );
-		if ( $sth ) {
-			$row = $this->mDBDriver->fetch($sth);
-			if( $row ) {
-				$id = $row['id'];
-				if ( $id ) {
-					if( $this->mLicLog ) {
-						$errorMessage = 'Ticket id ['.$id.'] too old';
-						LogHandler::Log('license', 'ERROR', $errorMessage);
-					}
-					return false;
-				}
-			}
-		}
-
-		$db = $this->mDBDriver->tablename("users");
-		$sql = "SELECT `id` FROM $db WHERE `lastlogondate` > '$t'";
-		$sth = $this->mDBDriver->query($sql, array(), null, $this->mLicLog ); //false: do not write in the log file
-		if ( $sth ) {
-			$row = $this->mDBDriver->fetch($sth);
-			if( $row ) {
-				$id = $row['id'];
-				if ( $id ) {
-					if( $this->mLicLog ) {
-						$errorMessage = 'User id ['.$id.'] logged on later';
-						LogHandler::Log('license', 'ERROR', $errorMessage);
-					}
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-	
-	/**
 	 * Remove tickets from the tickets table 
 	 * If productcode and/or appserial are not empty: use these fields to filter.
 	 * 
@@ -1914,15 +1789,10 @@ class License
 					//Very first time and no database field found yet?
 					$mainErrorCode = WW_LICENSE_ERR_NOLICENSE6;
 					break;
-				
 				case WWL_ERR_DB:
 					//Also show the database error text in the error message
 					$errorMessage = BizResources::localize('ERR_DATABASE' );
 					break;
-
-				//Semaphore directory not writable at once?
-				//case WWL_ERR_FILESTORE_SYSDIR:
-				//default:
 			}
 
 			return $this->handleError(	$mainErrorCode, 
@@ -1938,7 +1808,6 @@ class License
 
 		//Generic test for Enterprise Server: the 'hardware ID' should match the 'hardware ID'(key1) in the license
 		$key1db = $this->getLicenseField( "key1" );
-//		print "key1db=$key1db";
 		if ( $key1db === false )
 		{
 			return $this->handleError(	WW_LICENSE_ERR_NOLICENSE1, 
@@ -2089,7 +1958,6 @@ class License
 			$errorstart = $this->mLicenseString->WWTimeStr2Unix( $errorstart );
 		$errormaxobj = $arr[ 'errormaxobj' ];
 		
-		//AAA 2007-7
 		//Obtain the testflags from the license if possible
 		if ( isset( $arr[ 'testflags' ] ))
 			$this->mTestFlags = $arr[ 'testflags' ];
@@ -2137,7 +2005,6 @@ class License
 			$tmpErrorCode = WWL_ERR_KEY1_MISMATCH1;
 		}
 		
-		// AAA 2007-7
 		// Let clients logon that have a different 'appserial' than the serial on the Enterprise Server (for a certain product)
 		// Scenario: an InDesign client C1 with serial A
 		//	 SCE Server S1 with serial A
@@ -2295,42 +2162,6 @@ class License
 			$tmpErrorCode = WWL_ERR_EXPIRED;
 		}
 
-/*
-	//AAA, 2007-6-13
-	//Don't check using an old license anymore
-	//1) The hack to check is not very logical: reg 200, unreg 100, restore FS (Productinfo only) + DB config table only to use the old 200 license again
-	//   To use the old 200 license, the hacker had better restore an old backup
-	//2) The situation can also be caused by 'normal' usage somehow.
-	
-		$checkUsingOldLicense = ($productcode == PRODUCTKEY);
-		if ( $checkUsingOldLicense )
-		{
-			$timestamp = 0;
-			$maxobj = 0;
-			$created = 0;
-			//Get the obj id at the moment all was well (the last valid logon, or installation time) 
-			if ( $this->getLastLocalVerifiedDate( $timestamp, $maxobj, $created ))
-			{
-				if ( $timestamp && !$this->checkUsingOldLicense( $timestamp ) )
-				{
-					//1) Relaxed: just enter demo mode by setting tmpErrorCode 
-					//$tmpErrorCode = WWL_ERR_OLDLICENSE;
-
-					//2) Strict: return an error and don't allow login...
-					if ( $productcode == PRODUCTKEY )
-					{
-						$productcode = ''; //logoff all users;
-						$appserial = '';//logoff all users;
-					}
-					return $this->handleError(	WW_LICENSE_ERR_OLDLICENSE, 
-												$errorMessage, 
-												'', true, $productcode, $appserial );
-				}
-			}
-		}
-*/
-		
-
 		//In case the mismatch situation is found for the very first time:
 		// - Remember we have notified the error situation (the time of it)
 		// - In case not expired (but in case of a configuration change): Update the expire date in the license.
@@ -2379,7 +2210,6 @@ class License
 											'(' . $this->mLicenseString->getError() . ')' 
 											);
 			}
-//			print "<br>Setting new license: $license!<br>serial=$serial";
 
 			$productname = '';
 			if ( !$this->setLicense( $productcode, $productname, $serial, $license ))
@@ -2777,43 +2607,35 @@ class License
 				break;
 			case WW_LICENSE_ERR_UPDATE:
 				$status = BizResources::localize("LIC_ERR_UPDATING_LICENSE");
-//				$flags += WW_LICENSE_REMOVE;
 				break;
 			case WW_LICENSE_ERR_ENCRYPT:
 				$status = BizResources::localize("LIC_ERR_PUBLIC_ENCRYPT");
-//				$flags += WW_LICENSE_REMOVE;
 				break;
 			case WW_LICENSE_ERR_MAKEKEY:
 				$status = BizResources::localize("LIC_ERR_UPDATING_LICENSE");
-//				$flags += WW_LICENSE_REMOVE;
 				break;
 			case WW_LICENSE_ERR_SYSTEM:
 				$status = BizResources::localize("LIC_ERR_NO_LICENSE_INFO");
 				$flags += WW_LICENSE_SUPPORT;
-//				$flags += WW_LICENSE_REMOVE;
 				break;
 			case WW_LICENSE_ERR_SYSTIME:
 				$status = BizResources::localize("LIC_ERR_SYSTIME");
 				$flags += WW_LICENSE_GET;
 				$flags += WW_LICENSE_SUPPORT;
-//				$flags += WW_LICENSE_REMOVE;
 				break;
 			case WW_LICENSE_ERR_UNKNOWNPRODUCT:
 				$status = BizResources::localize("LIC_UNKNOWN_PRODUCT");
 				$flags += WW_LICENSE_GET;
 				$flags += WW_LICENSE_SUPPORT;
-//				$flags += WW_LICENSE_REMOVE;
 				break;
 			case WW_LICENSE_ERR_OLDLICENSE:
 				$status = BizResources::localize("LIC_OLD_LICENSE");
 				$flags += WW_LICENSE_GET;
 				$flags += WW_LICENSE_SUPPORT;
-//				$flags += WW_LICENSE_REMOVE;
 				break;
 			default:
 				$status = BizResources::localize("LIC_UNKNOWN_ERROR");
 				$flags += WW_LICENSE_SUPPORT;
-//				$flags += WW_LICENSE_REMOVE;
 				break;
 		}
 
@@ -2987,7 +2809,6 @@ class License
 	
 				if ( !$keydbenc )
 				{
-//					if ( $debug ) print "<br>setting $keysrcenc";
 					if ( !$this->setLicenseField( "key$key", $keysrcenc ))
 					{
 						$wwl_error = $this->getErrorCode();
@@ -3021,7 +2842,6 @@ class License
 				}
 			}
 
-//			if ( $debug ) print "key ($key) = $keysrc";
 			if ( $keystr )
 				$keystr .= "#";
 			$keystr .= $keysrc;
@@ -3084,8 +2904,6 @@ class License
 				return false;
 			}
 		}
-//		print "<br>$serial";
-//		print "<br>$license";
 
 		if ( $license == '**REMOVE**' )
 		{
@@ -3135,8 +2953,6 @@ class License
 			$errorMessage = '';
 			$info = Array();
 			$serial = $this->getSerial( $pc );
-//			$pcname = $this->getName( $pc );
-//			print "<br>pc=$pc, name=$pcname, serial=$serial...";
 			$licenseStatus = $this->getLicenseStatus( $pc, $serial, $info, $errorMessage );
 			if ( $licenseStatus <= WW_LICENSE_OK_MAX )
 			{
@@ -3290,21 +3106,27 @@ class License
 		foreach( $productcodesArr as $pc )
 		{
 			$errorMessage = '';
+			$errorNotSupported = '';
 			$info = Array();
 			$serial = $this->getSerial( $pc );
 			$pcname = $this->getName( $pc );
+			if( !$this->isSupportedProduct( $pc ) ) {
+				$errorNotSupported = BizResources::localize("LIC_UNKNOWN_PRODUCT");
+			}
 			$licenseStatus = $this->getLicenseStatus( $pc, $serial, $info, $errorMessage );
 			$limitsArr[ $i ] = $info;
 			$limitsArr[ $i ]['serial' ] = $serial;
 			$limitsArr[ $i ]['licensestatus' ] = $licenseStatus;
-			
-//			print "<br>$pc, $serial, $curusage, $maxusage, $usageLimitReached, $errorMessage, $expires";
 			$limitsArr[ $i ]['pcode'] = $pc;
 			if ( !$pcname )
 				$pcname = '[' . $pc . ']';
 			$limitsArr[ $i ]['name'] = $pcname;
-			if ( !$errorMessage )
+			if ( !$errorMessage && !$errorNotSupported  ) {
 				$errorMessage = '&nbsp;';
+			} else {
+				$errorMessage = $errorMessage.$errorNotSupported;
+			}
+
 			$limitsArr[ $i ]['error'] = $errorMessage;
 			$expires = $limitsArr[ $i ]['expires'];
 			$limitsArr[ $i ]['expires'] = '&nbsp;';
@@ -3436,7 +3258,6 @@ class License
 				print "<td>" . $limitArr2[ 'renew' ] . "</td>";
 				print "<td>" . $limitArr2[ 'expires' ] . "</td>";
 				print "<td align='center'>$cur</td>";
-//				print "<td><img src='images/$c1.gif' width='$w1' height='10'><img src='images/$c2.gif' width='$w2' height='10'><img src='images/$c3.gif' width='$w3' height='10'></td>";
 				print "<td><table cellpadding=0 cellspacing=0 border='0' bgcolor='#d3d3d3'><tr>";
 				if ( $w1 )
 					print "<td bgcolor='$c1' width='$w1' height='10' style=\"min-width:1px\"></td>";
@@ -3551,7 +3372,32 @@ class License
 
 		$this->printAutoLicense();
 	}
-	
+
+	/**
+	 * Check if product is supported for current Enterprise Server version.
+	 *
+	 * @since 10.5.0
+	 * @param string $product
+	 * @return bool
+	 */
+	public function isSupportedProduct( string $product ): bool
+	{
+		$supported = false;
+		$pattern = '/(SCID|DIGMAG)([0-9]+)/';
+		$matches = array();
+		$minimumSupportedScDmCVersion = 1100; // CC 2015
+		$found = preg_match( $pattern, $product, $matches );
+		if( $found ) {
+			if( intval( $matches[2] ) >= $minimumSupportedScDmCVersion ) {
+				$supported = true;
+			}
+		} else {
+			$supported = true;
+		}
+
+		return $supported;
+	}
+
 	/**
 	 * Just test whether the 'local' file in the filestore can be updated (if present).
 	 * The license status can be OK (= only read), while logging on may fail (=update 'local' file).
@@ -3561,7 +3407,6 @@ class License
 	 */
 	public function wwTestWritable()
 	{
-		//AAA 2007-8-31
 		//May be new Filestore fields can be read and written, but may be the current files can not be written to.
 		$field = 'local';
 		$value = $this->lo_getFieldFS( $field );
@@ -3707,20 +3552,6 @@ class License
 		{
 			$warningMessage = '';
 			$warningHelp = '';
-
-			/*// Commented out for many reasons mentioned in BZ#17849
-			//Logon will be slow on CGI or CLI systems
-			//Give a warning for that.
-		    $cgi_cli = ((strpos(php_sapi_name(),'cgi') !== false) ||
-						(strpos(php_sapi_name(),'cli') !== false));
-			if ( $cgi_cli ) {
-				$warningMessage = BizResources::localize("LIC_CGICLI_SLOWLOGON_ERROR");
-				$warningHelp = BizResources::localize("LIC_CGICLI_SLOWLOGON_HELP");
-				$warningHelp .= "<br/><a href='http://www.php.net/install.windows' target='_blank'>www.php.net/install.windows</a>\n";
-				$warningHelp .= "<br/><a href='http://www.tjitjing.com/blog/2006/05/php5-with-iis6-on-windows-server-2003.html' target='_blank'>php5-with-iis6-on-windows-server-2003</a>\n";
-				$warningHelp .= "<br/><a href='http://www.visualwin.com/PHP-ISAPI/' target='_blank'>www.visualwin.com/PHP-ISAPI/</a>\n";
-			}*/
-			
 			$productcodes = $this->getLicenseField( "productcodes" );
 			if ( ($productcodes === false ) || !$productcodes ) 
 			{
@@ -4005,7 +3836,6 @@ class License
 			return false;
 		$timestampDB = $this->mLicenseString->WWTimeStr2Unix($arr[1]);
 		
-//		print "$timestampFS < $timestampDB";
 		if ( $timestampFS < $timestampDB ) {
 			$target = 'FS'; 
 		} else if ( $timestampFS > $timestampDB ) {
