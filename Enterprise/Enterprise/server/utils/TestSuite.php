@@ -2136,7 +2136,7 @@ class WW_Utils_TestSuite
 			$client = $this->createClientToCallJobIndex();
 			$client->setParameterGet( array(
 												'createrecurringjob' => $serverJobName,
-											   'maxexectime', $maxExecTime ) );
+											   'maxexectime' => $maxExecTime ) );
 			// 'timeout' must exceed the execution time to give the client time to return to caller.
 			$client->setOptions( array( 'timeout' => $maxExecTime + 5, 'connecttimeout' => 5 ) );
 			$client->send();
