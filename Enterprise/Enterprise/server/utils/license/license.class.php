@@ -397,6 +397,29 @@ class License
 				} else if ( $dbstampunix ) {
 					$dbstamp = $this->mLicenseString->unix2WWTimeStr( $dbstampunix );
 				}
+				/*
+						else
+						{
+							//Try to convert to the UNIX time
+							//Note: this can go wrong: see test.php; 1-12-2007 can be december or january?
+							$dbstampunix = strtotime( $dbstamp );
+							if ( $dbstampunix !== false ) {
+								$dbstamp = $dbstampunix;
+							}
+						}
+				*/
+
+				/*
+								//As discussed with Flip, we ignore the creation date of the root filestore
+								//Also because of the fact that the creation date doesn't really exists in Unix... :-((
+
+								$dir = ATTACHMENTDIRECTORY;
+								$fstampRoot = filectime( $dir );
+								if ( !$fstampRoot )
+									$fstampRoot = '';
+								else
+									$fstampRoot = $this->mLicenseString->unix2WWTimeStr( $fstampRoot );
+				*/
 
 				if ( !$this->initDirectories() )
 					return false;
@@ -460,7 +483,8 @@ class License
 				} else {
 					$key2Arr[ 5 ] = '';
 				}
-				
+
+				//mac address:
 				$key2Arr[ 6 ] = '';
 				$macstr = '';
 				$key2Arr[ 6 ] = $macstr;
@@ -3106,14 +3130,17 @@ class License
 		foreach( $productcodesArr as $pc )
 		{
 			$errorMessage = '';
-			$errorNotSupported = '';
+			$errorMessages = array();
 			$info = Array();
 			$serial = $this->getSerial( $pc );
 			$pcname = $this->getName( $pc );
-			if( !$this->isSupportedProduct( $pc ) ) {
-				$errorNotSupported = BizResources::localize("LIC_UNKNOWN_PRODUCT");
-			}
 			$licenseStatus = $this->getLicenseStatus( $pc, $serial, $info, $errorMessage );
+			if( $errorMessage ) {
+				$errorMessages[] = $errorMessage;
+			}
+			if( !$this->isSupportedProduct( $pc ) ) {
+				$errorMessages[] = BizResources::localize("LIC_UNKNOWN_PRODUCT");
+			}
 			$limitsArr[ $i ] = $info;
 			$limitsArr[ $i ]['serial' ] = $serial;
 			$limitsArr[ $i ]['licensestatus' ] = $licenseStatus;
@@ -3121,13 +3148,7 @@ class License
 			if ( !$pcname )
 				$pcname = '[' . $pc . ']';
 			$limitsArr[ $i ]['name'] = $pcname;
-			if ( !$errorMessage && !$errorNotSupported  ) {
-				$errorMessage = '&nbsp;';
-			} else {
-				$errorMessage = $errorMessage.$errorNotSupported;
-			}
-
-			$limitsArr[ $i ]['error'] = $errorMessage;
+			$limitsArr[ $i ]['error'] = $errorMessages ? implode( "<br/>", $errorMessages ) : "&nbsp;";
 			$expires = $limitsArr[ $i ]['expires'];
 			$limitsArr[ $i ]['expires'] = '&nbsp;';
 			if ( $expires && ( $expires != -1 ))
@@ -3374,27 +3395,51 @@ class License
 	}
 
 	/**
+	 * Filter out no longer supported products from the list of all products (as returned by Acttvation Server)
+	 * and return only the supported products.
+	 *
+	 * @since 10.5.0
+	 * @param string[] $products
+	 * @return string[]
+	 */
+	public function filterOutNotSupportedProducts( array $products ): array
+	{
+		$supportedProducts = array();
+		if( $products ) foreach( $products as $product ) {
+			if( $this->isSupportedProduct( $product ) ) {
+				$supportedProducts[] = $product;
+			}
+		}
+
+		return $supportedProducts;
+	}
+
+	/**
 	 * Check if product is supported for current Enterprise Server version.
+	 *
+	 * Since 10.5.0, support for CC2014 has been dropped.
+	 * Any product which is either SmartConnection or DigitalMagazine for CC2014 and older will be seen as non-supported
+	 * products.
+	 * E.g $product for CC2014:
+	 *    - SmartConnection: SCID1000~Smart Connection for InDesign/InCopy~10)
+	 *    - DigitalMagazine: DIGMAG1000~Digital Magazine~10)
 	 *
 	 * @since 10.5.0
 	 * @param string $product
 	 * @return bool
 	 */
-	public function isSupportedProduct( string $product ): bool
+	private function isSupportedProduct( string $product ): bool
 	{
-		$supported = false;
+		$supported = true;
 		$pattern = '/(SCID|DIGMAG)([0-9]+)/';
 		$matches = array();
 		$minimumSupportedScDmCVersion = 1100; // CC 2015
 		$found = preg_match( $pattern, $product, $matches );
 		if( $found ) {
-			if( intval( $matches[2] ) >= $minimumSupportedScDmCVersion ) {
-				$supported = true;
+			if( intval( $matches[2] ) < $minimumSupportedScDmCVersion ) {
+				$supported = false;
 			}
-		} else {
-			$supported = true;
 		}
-
 		return $supported;
 	}
 
@@ -3552,6 +3597,20 @@ class License
 		{
 			$warningMessage = '';
 			$warningHelp = '';
+
+			/*// Commented out for many reasons mentioned in BZ#17849
+			//Logon will be slow on CGI or CLI systems
+			//Give a warning for that.
+         $cgi_cli = ((strpos(php_sapi_name(),'cgi') !== false) ||
+				(strpos(php_sapi_name(),'cli') !== false));
+			if ( $cgi_cli ) {
+				$warningMessage = BizResources::localize("LIC_CGICLI_SLOWLOGON_ERROR");
+				$warningHelp = BizResources::localize("LIC_CGICLI_SLOWLOGON_HELP");
+				$warningHelp .= "<br/><a href='http://www.php.net/install.windows' target='_blank'>www.php.net/install.windows</a>\n";
+				$warningHelp .= "<br/><a href='http://www.tjitjing.com/blog/2006/05/php5-with-iis6-on-windows-server-2003.html' target='_blank'>php5-with-iis6-on-windows-server-2003</a>\n";
+				$warningHelp .= "<br/><a href='http://www.visualwin.com/PHP-ISAPI/' target='_blank'>www.visualwin.com/PHP-ISAPI/</a>\n";
+			}*/
+
 			$productcodes = $this->getLicenseField( "productcodes" );
 			if ( ($productcodes === false ) || !$productcodes ) 
 			{

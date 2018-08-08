@@ -361,7 +361,7 @@
 			$concurrentproducts = isset($_POST[ 'concurrentproducts' ]) ? $_POST[ 'concurrentproducts' ] : '';
 			if ( $concurrentproducts ) {
 				$prodarr = explode( '^', $concurrentproducts );
-				$prodarr = filterOutNotSupportedProducts( $prodarr );
+				$prodarr = $lic->filterOutNotSupportedProducts( $prodarr );
 			}
 			$productindex = isset($_POST[ 'productindex' ]) ? $_POST[ 'productindex' ] : '';
 			$productcode = isset($_POST[ 'productcode' ]) ? $_POST[ 'productcode' ] : '';
@@ -1474,26 +1474,4 @@ function getlicense_buildDoc()
 	
 	$txt = HtmlDocument::buildDocument($txt, true, null, false, true);
 	print $txt;
-}
-
-/**
- * Filter out no longer supported products from the list of all products (as returned by Acttvation Server).
- *
- * @since 10.5.0
- * @param string[] $products
- * @return string[]
- */
-function filterOutNotSupportedProducts( array $products ): array
-{
-    require_once BASEDIR.'/server/utils/license/license.class.php';
-    $license = new License();
-	$supportedProducts = array();
-	$minimumSupportedScDmCVersion = 1100; // CC 2015
-	if( $products ) foreach( $products as $product ) {
-	    if( $license->isSupportedProduct( $product ) ) {
-		     $supportedProducts[] = $product;
-        }
-	}
-
-	return $supportedProducts;
 }
