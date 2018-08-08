@@ -98,17 +98,17 @@ class VersionUtils
 	 */
 	public static function getVersionDigits( $version, $digits )
 	{
-		$versionInfo = self::getVersionInfo( SERVERVERSION );
-		$version = $versionInfo['major'];
+		$versionInfo = self::getVersionInfo( $version );
+		$returnVersion = $versionInfo['major'];
 		if( $digits >= 2 ) {
-			$version .= '.'.$versionInfo['minor'];
+			$returnVersion .= '.'.$versionInfo['minor'];
 		}
 		if( $digits >= 3 ) {
-			$version .= '.'.$versionInfo['patch'];
+			$returnVersion .= '.'.$versionInfo['patch'];
 		}
 		if( $digits >= 4 ) {
-			$version .= '.'.$versionInfo['build'];
+			$returnVersion .= '.'.$versionInfo['build'];
 		}
-		return $version;
+		return $returnVersion;
 	}
 }
