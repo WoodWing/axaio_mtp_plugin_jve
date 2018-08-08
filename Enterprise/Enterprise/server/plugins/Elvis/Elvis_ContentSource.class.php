@@ -469,7 +469,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 														'; shadowId:' . $shadowId . '; version:' . $version . '; rendition:' . $rendition);
 
 		$versionHandler = new Elvis_BizClasses_Version();
-		return $versionHandler->retrieveVersion( $alienId, $version, $rendition );
+		$versionInfo = $versionHandler->retrieveVersion( $alienId, $version, $rendition );
+		$versionInfos = Elvis_BizClasses_Object::setVersionStatusFromEnterprise( $shadowId, array( $versionInfo ) );
+		return reset( $versionInfos );
 	}
 
 	/**
