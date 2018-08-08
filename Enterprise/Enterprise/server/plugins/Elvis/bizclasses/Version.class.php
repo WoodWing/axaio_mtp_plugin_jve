@@ -38,7 +38,7 @@ class Elvis_BizClasses_Version
 	public function retrieveVersion( string $alienId, string $version, string $rendition ) : VersionInfo
 	{
 		$assetId = Elvis_BizClasses_AssetId::getAssetIdFromAlienId( $alienId );
-		$assetVersion = self::getElvisVersionNumber( $version );
+		$assetVersion = self::getElvisAssetVersionNumber( $version );
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$stdClassHit = $client->retrieveVersion( $assetId, $assetVersion );
 		$hit = Elvis_DataClasses_EntHit::fromStdClass( $stdClassHit );
@@ -54,7 +54,7 @@ class Elvis_BizClasses_Version
 	public function promoteVersion( string $alienId, string $version )
 	{
 		$assetId = Elvis_BizClasses_AssetId::getAssetIdFromAlienId( $alienId );
-		$assetVersion = self::getElvisVersionNumber( $version );
+		$assetVersion = self::getElvisAssetVersionNumber( $version );
 		$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 		$client->promoteVersion( $assetId, $assetVersion );
 	}
@@ -91,7 +91,7 @@ class Elvis_BizClasses_Version
 	 * @param string $version Enterprise object version number.
 	 * @return string Elvis asset version
 	 */
-	public static function getElvisVersionNumber( string $version ) : string
+	public static function getElvisAssetVersionNumber( string $version ): string
 	{
 		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return substr($version, strlen(ELVIS_ENTERPRISE_VERSIONPREFIX));
@@ -103,9 +103,41 @@ class Elvis_BizClasses_Version
 	 * @param string $version Elvis asset version number.
 	 * @return string Enterprise object version number.
 	 */
-	public static function getEnterpriseVersionNumber( string $version ) : string
+	public static function getEnterpriseObjectVersionNumber( string $version ): string
 	{
 		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return ELVIS_ENTERPRISE_VERSIONPREFIX.$version;
+	}
+
+	/**
+	 * Validate if a given object version notation is valid (and possibly originates* from the integration).
+	 *
+	 * *) Only versions with leading "0." could originate from the integration.
+	 *
+	 * @since 10.5.0
+	 * @param string $version Enterprise object version number.
+	 * @return bool Whether or not valid.
+	 */
+	public static function isValidEnterpriseObjectVersionNumber( string $version ): bool
+	{
+		require_once BASEDIR.'/config/config_elvis.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
+		$valid = false;
+		if( strpos( $version, ELVIS_ENTERPRISE_VERSIONPREFIX ) === 0 ) {
+			$assetVersion = self::getElvisAssetVersionNumber( $version );
+			$valid = self::isValidElvisAssetVersionNumber( $assetVersion );
+		}
+		return $valid;
+	}
+
+	/**
+	 * Validate if a given asset version notation is valid.
+	 *
+	 * @since 10.5.0
+	 * @param string $version Elvis asset version number.
+	 * @return bool Whether or not valid.
+	 */
+	public static function isValidElvisAssetVersionNumber( string $version ): bool
+	{
+		return $version && intval( $version ) == $version;
 	}
 }

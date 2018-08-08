@@ -17,7 +17,7 @@ class Elvis_FieldHandlers_Version extends Elvis_FieldHandlers_ReadOnly
 	{
 		$elvisVersion = $elvisMetadata[ $this->lvsFieldName ];
 		if( isset( $elvisVersion ) ) {
-			$enterpriseVersion = Elvis_BizClasses_Version::getEnterpriseVersionNumber( $elvisVersion );
+			$enterpriseVersion = Elvis_BizClasses_Version::getEnterpriseObjectVersionNumber( $elvisVersion );
 			$entMetadata->{$this->entMetadataCategory}->{$this->property->Name} = $enterpriseVersion;
 		}
 	}

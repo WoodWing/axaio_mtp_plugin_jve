@@ -107,7 +107,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		}
 
 		if( $rendition ) {
-			if( !$haveVersion || version_compare( $haveVersion, Elvis_BizClasses_Version::getEnterpriseVersionNumber( $hit->metadata['versionNumber'] ), '<' ) ) {
+			if( !$haveVersion || version_compare( $haveVersion, Elvis_BizClasses_Version::getEnterpriseObjectVersionNumber( $hit->metadata['versionNumber'] ), '<' ) ) {
 				$object->Files = $this->getFiles( $hit, array( $rendition ) );
 			}
 		}
