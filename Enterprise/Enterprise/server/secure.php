@@ -33,25 +33,36 @@ function checkSecure( $app = null, $userPwdExpir = null, $redir=true, $ticket=nu
 	global $isadmin;
 	global $globUser;
 
-	$dbDriver = DBDriverFactory::gen();
+	$dbDriver = getDbDriverIfConnected();
+	if( !$dbDriver ) {
+		// The admin user might not have setup a table space yet or the DB is not running.
+		// In that case, show connection error and provide link to the dbadmin.php module to setup the DB.
+		raiseDbConnectionErrorAndProvideLinkToDbSetup();
+		exit();
+	}
 
 	if( empty($userPwdExpir) ) {
-		$ticket = $ticket != null ? $ticket : getLogCookie('ticket',$redir);
+		if( !$ticket ) {
+			$ticket = getLogCookie('ticket' );
+			if( !$ticket ) {
+				if( !isDbInstalled( $dbDriver ) ) {
+					// The admin user might have prepared a clean database with an empty table space.
+					// In that case, show connection error and provide link to the dbadmin.php module to setup the DB.
+					raiseDbConnectionErrorAndProvideLinkToDbSetup();
+					exit();
+				}
+				header( 'Location: '.LOGINPHP );
+				exit();
+			}
+		}
 		try {
 			$user = BizSession::checkTicket( $ticket );
 		} catch( BizException $e ) {
 			$user = '';
-
-			// The admin user might have prepared a clean database with an empty table space.
-			// In that case, we detect and redirect to the dbadmin.php module to setup the DB.
-			try {
-				if( !$dbDriver->tableExists( 'config' ) ) { // Just pick the smart_config table.
-					throw new BizException( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE', 'Server', '' );
-				}
-			} catch( BizException $e ) {
-				echo $e->getMessage() . '<br/>';
-				echo 'Please check if your database is running.<br/>';
-				echo 'Or, click <a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/dbadmin.php'.'">here</a> to check your database setup.<br/>';
+			if( !isDbInstalled( $dbDriver ) ) {
+				// The admin user might have prepared a clean database with an empty table space.
+				// In that case, show connection error and provide link to the dbadmin.php module to setup the DB.
+				raiseDbConnectionErrorAndProvideLinkToDbSetup();
 				exit();
 			}
 		}
@@ -96,6 +107,47 @@ function checkSecure( $app = null, $userPwdExpir = null, $redir=true, $ticket=nu
 }
 
 /**
+ * Return the DB driver, only when a DB connection could be made.
+ *
+ * @since 10.5.0
+ * @return WW_DbDrivers_DriverBase|null DB driver, or null when no DB connection.
+ */
+function getDbDriverIfConnected()
+{
+	$dbDriver = null;
+	try {
+		$dbDriver = DBDriverFactory::gen();
+	} catch( BizException $e ) { // typically ERR_COULD_NOT_CONNECT_TO_DATEBASE (S1003)
+	}
+	return $dbDriver;
+
+}
+
+/**
+ * Detect if the DB is installed.
+ *
+ * @since 10.5.0
+ * @param WW_DbDrivers_DriverBase $dbDriver
+ * @return bool
+ */
+function isDbInstalled( WW_DbDrivers_DriverBase $dbDriver )
+{
+	return $dbDriver->tableExists( 'config' ); // Just pick the smart_config table.
+}
+
+/**
+ * Show a DB connection error and provide a HTML link that opens the DB setup page.
+ *
+ * @since 10.5.0
+ */
+function raiseDbConnectionErrorAndProvideLinkToDbSetup()
+{
+	echo BizResources::localize( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE' ) . '<br/>';
+	echo 'Please check if your database is running.<br/>';
+	echo 'Or, click <a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/dbadmin.php'.'">here</a> to check your database setup.<br/>';
+}
+
+/**
  * Get cookie value from cookie jar.
  *
  * @param string $cookieName
@@ -110,20 +162,17 @@ function getOptionalCookie( $cookieName )
 }
 
 /**
- * Get cookie value and refresh the cookie. If not exists, redirect to the Login page.
+ * Get cookie value and refresh the cookie.
  *
  * @param string $cookieName
- * @param bool $redir Deprecated since 10.5.0
  * @return string|null The cookie value, or NULL when the cookie does not exist.
  */
-function getLogCookie( $cookieName, $redir=true )
+function getLogCookie( $cookieName )
 {
 	$cookieValue = getOptionalCookie( $cookieName );
-	if( !$cookieValue ) {
-		header( 'Location: '.LOGINPHP );
-		exit();
+	if( $cookieValue ) {
+		setLogCookie( $cookieName, $cookieValue ); // refresh cookie
 	}
-	setLogCookie( $cookieName, $cookieValue ); // refresh cookie
 	return $cookieValue;
 }
 

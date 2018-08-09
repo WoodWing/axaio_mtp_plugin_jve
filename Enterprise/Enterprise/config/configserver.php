@@ -1128,14 +1128,6 @@ if( !defined('PASSWORD_MIN_SPECIAL') ) {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Path to private RSA encryption key and base64 encoded public key
-// Using these options can have a significant performance hit on password encryptions done on server-side.
-// -------------------------------------------------------------------------------------------------
-// To do: As long as there is a 4-second delay, password encryption is not enabled (default setting)
-//define ('ENCRYPTION_PRIVATEKEY_PATH', BASEDIR.'/config/encryptkeys/privkey_1024.pem' ); // use forward slashes
-//define ('ENCRYPTION_PUBLICKEY_PATH',  BASEDIR.'/config/encryptkeys/pubkey_1024.pem' );  // use forward slashes
-
-// -------------------------------------------------------------------------------------------------
 // Sorting query results 
 // -------------------------------------------------------------------------------------------------
 // SORT_ON_STATE_ORDER:
@@ -1171,7 +1163,7 @@ if( !defined('APPLICATION_SERVERS') ) {
 	define( 'APPLICATION_SERVERS', serialize( array(
 	   //  ServerInfo( Name, URL [, Developer] [, Implementation] [, Technology] [, Version] [, array of Feature] [, Cryptkey (file path)] )
 	   new ServerInfo( SERVERNAME, SERVERURL, SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY, SERVERVERSION,
-	                  unserialize(SERVERFEATURES), defined('ENCRYPTION_PUBLICKEY_PATH') ? ENCRYPTION_PUBLICKEY_PATH : null ), // this server
+	                  unserialize(SERVERFEATURES) ), // this server
 	   new ServerInfo( 'WoodWing.net', 'http://demo.woodwing.net/Enterprise/index.php',
 	                  SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY,
 	                  '', 	// version unknown - may not be null

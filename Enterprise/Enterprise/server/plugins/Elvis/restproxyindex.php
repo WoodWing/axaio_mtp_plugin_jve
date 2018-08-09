@@ -15,10 +15,11 @@
  *              Note that when the client does not run in a web browser it should round-trip web cookies by itself.
  * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
  * - rendition: The file rendition to download. Supported values: 'native', 'preview' or 'thumb'.
+ * - objectversion: Optional. The Enterprise object version to download. If not specified, the current version is provided.
  * - preview-args: The preview- or cropping dimensions. Optional. See Elvis REST API for details.
  *
  * Example request:
- *    http://localhost/Enterprise/server/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=123&rendition=preview
+ *    http://localhost/Enterprise/server/plugins/Elvis/restproxyindex.php?ww-app=Content%20Station&objectid=123&rendition=preview&objectversion=0.1
  *
  * The following HTTP codes may be returned:
  * - HTTP 200: The file is found and is streamed back to caller.

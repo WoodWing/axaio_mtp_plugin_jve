@@ -221,20 +221,34 @@ class Elvis_BizClasses_Client
 	 */
 	public function listVersions( string $assetId ) : array
 	{
+		// Here we can NOT use 'services/asset/history' service because the COPY operation(*) is not directly reflected
+		// into this history log. For Elvis, this service is more about auditing log trail, rather than a reliable version
+		// history stack. For Enterprise, we need the last option, which is serviced by Elvis through the version controller
+		// as accessible through the 'services/version/list' entry point. So we use this instead.
+		// (*) The COPY operation is used to create the first version in context of creating a shadow image, but only when
+		//     the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone'.
+
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest(
-			'services/asset/history', $this->shortUserName );
-		$request->setSubjectEntity( BizResources::localize('OBJECT' ) );
+			'services/version/list', $this->shortUserName );
+		$request->setSubjectEntity( BizResources::localize( 'OBJECT' ) );
 		$request->setSubjectId( $assetId );
-		$request->addQueryParam( 'id', $assetId );
-		$request->addQueryParam( 'detailLevel', 1 );
+		$request->addQueryParam( 'assetId', $assetId );
 		$request->setExpectJson();
 
 		$response = $this->execute( $request );
 		$body = $response->jsonBody();
 		if( !isset( $body->hits ) ) {
-			throw new BizException( 'ERR_NOTFOUND', 'Server', 'Elvis assetId: ' . $assetId, null, null, 'INFO' );
+			throw new BizException( 'ERR_NOTFOUND', 'Server', 'Elvis assetId: '.$assetId, null, null, 'INFO' );
 		}
-		return array_map( function ( $hit ) { return $hit->hit; }, $body->hits );
+		$callback = function( $hit ) {
+			if( isset( $hit->hit ) ) { // the 2-nd until the N-th item in the list, representing a version in history, has a 'hit' container
+				$retVal = $hit->hit;
+			} else { // the first item in the list, representing the current version, does not have a 'hit' container
+				$retVal = $hit;
+			}
+			return $retVal;
+		};
+		return array_map( $callback, $body->hits );
 	}
 
 	/**

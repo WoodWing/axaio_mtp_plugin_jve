@@ -743,7 +743,7 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 	 */
 	private function supportedVersions()
 	{
-		return array( '3.6', '3.7' );
+		return array( '3.7' );
 	}
 
 	/**

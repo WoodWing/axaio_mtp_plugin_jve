@@ -108,6 +108,11 @@ class Elvis_BizClasses_Metadata
 	/**
 	 * Update (changed) Enterprise metadata in Elvis server.
 	 *
+	 * If a user logs on the cache of editable fields is cleared. The very first time a user changes a property of an
+	 * asset the cache is rebuild. For all subsequent modify actions the cache is reused. The advantage of this approach
+	 * is that if a user does not modify properties no field information has to be retrieved from Elvis. This reduces
+	 * network traffic. But when he does modify properties the cache is rebuild with the latest information of Elvis.
+	 *
 	 * @param string $assetId
 	 * @param MetaData $entMetadata The (changed) metadata to update.
 	 * @param Attachment|null $file
@@ -123,12 +128,8 @@ class Elvis_BizClasses_Metadata
 		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
 			$client = new Elvis_BizClasses_Client( BizSession::getShortUserName() );
 			$fieldInfos = $client->fieldInfo();
-			if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
-				if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
-					( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
-				) {
-					$editableFields[] = $field;
-				}
+			if( $fieldInfos ) {
+				$editableFields = $this->extractEditableFieldsFromFieldInfos( $fieldInfos );
 			}
 			Elvis_BizClasses_UserSetting::setEditableFields( $editableFields );
 		}
@@ -218,7 +219,7 @@ class Elvis_BizClasses_Metadata
 	 *
 	 * @return string[] metadata to return
 	 */
-	public function getMetadataToReturn() : array
+	public function getMetadataToReturn(): array
 	{
 		if( !isset( $this->metadataToReturn ) ) {
 			$this->initFieldHandlers();
@@ -303,5 +304,26 @@ class Elvis_BizClasses_Metadata
 	public function getHandlerName()
 	{
 		return $this->handlerName;
+	}
+
+	/**
+	 * Extract the fields that are marked as editable.
+	 *
+	 * @since 10.1.8
+	 * @param stdClass $fieldInfos
+	 * @return string[]
+	 */
+	private function extractEditableFieldsFromFieldInfos( stdClass $fieldInfos ): array
+	{
+		$editableFields = array();
+		foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
+			if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
+				( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
+			) {
+				$editableFields[] = $field;
+			}
+		}
+
+		return $editableFields;
 	}
 }

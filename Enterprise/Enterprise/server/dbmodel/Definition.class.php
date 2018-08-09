@@ -11,7 +11,7 @@
 
 require_once BASEDIR.'/server/dbmodel/Provider.class.php';
 
-define ('MINIMALGENVERSION', '8.0');
+define ('MINIMALGENVERSION', '9.0');
 
 class WW_DbModel_Definition extends WW_DbModel_Provider
 {
@@ -32,7 +32,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 			'3.1', '3.2', '3.3', '3.4', '4.0', '4.1', '4.2',
 			'5.0', '6.0', '6.1', '7.0', '7.5', '7.6', '8.0',
 			'9.0', '9.1', '9.2', '9.4', '9.5', '9.6', '9.7', '9.8',
-			'10.0', '10.1', '10.2', '10.3', '10.4'
+			'10.0', '10.1', '10.2', '10.3', '10.4', '10.5'
 		);
 	}
 
@@ -1677,6 +1677,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 						array ('v' => '4.2', 'name' => 'oimtd_messagelog', 	'fields' => 'objid, messagetypedetail', ),
 						array ('v' => '4.2', 'name' => 'mi_messagelog', 	'fields' => 'msgid'),
 						array ('v' => '8.0', 'name' => 'uid_messagelog', 	'fields' => 'userid'),
+						array ('v' => '10.5', 'name' => 'tmid_messagelog', 	'fields' => 'threadmessageid'),
 					),
 					'inserts' => array(
 					),

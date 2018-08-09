@@ -361,6 +361,7 @@
 			$concurrentproducts = isset($_POST[ 'concurrentproducts' ]) ? $_POST[ 'concurrentproducts' ] : '';
 			if ( $concurrentproducts ) {
 				$prodarr = explode( '^', $concurrentproducts );
+				$prodarr = $lic->filterOutNotSupportedProducts( $prodarr );
 			}
 			$productindex = isset($_POST[ 'productindex' ]) ? $_POST[ 'productindex' ] : '';
 			$productcode = isset($_POST[ 'productcode' ]) ? $_POST[ 'productcode' ] : '';
@@ -1474,5 +1475,3 @@ function getlicense_buildDoc()
 	$txt = HtmlDocument::buildDocument($txt, true, null, false, true);
 	print $txt;
 }
-
-?>
