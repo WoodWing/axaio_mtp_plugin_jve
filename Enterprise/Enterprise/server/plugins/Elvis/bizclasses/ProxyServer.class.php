@@ -95,6 +95,21 @@ class Elvis_BizClasses_ProxyServer
 			$this->httpParams['rendition'] = $requestParams['rendition'];
 		}
 
+		// Accept the objectversion or assetversion param.
+		if( isset( $requestParams['objectversion'] ) ) {
+			if( !Elvis_BizClasses_Version::isValidEnterpriseObjectVersionNumber( $requestParams['objectversion'] ) ) {
+				$message = 'The "objectversion" param is not valid.';
+				throw new Elvis_BizClasses_ProxyServerHttpException( $message, 400 );
+			}
+			$this->httpParams['assetversion'] = intval( Elvis_BizClasses_Version::getElvisAssetVersionNumber( $requestParams['objectversion'] ) );
+		} elseif( isset( $requestParams['assetversion'] ) ) {
+			if( !Elvis_BizClasses_Version::isValidElvisAssetVersionNumber( $requestParams['assetversion'] ) ) {
+				$message = 'The "assetversion" param is not valid.';
+				throw new Elvis_BizClasses_ProxyServerHttpException( $message, 400 );
+			}
+			$this->httpParams['assetversion'] = intval( $requestParams['assetversion'] );
+		}
+
 		// Accept the preview-args param (preview arguments).
 		if( isset( $requestParams['preview-args'] ) ) {
 			$this->httpParams['preview-args'] = $requestParams['preview-args'];
@@ -274,8 +289,11 @@ class Elvis_BizClasses_ProxyServer
 				$service = 'file/'.rawurlencode( $this->elvisAssetId );
 				break;
 			default:
-				$message = 'The option provided for the"rendition" param is unsupported.';
+				$message = 'The option provided for the "rendition" param is unsupported.';
 				throw new Elvis_BizClasses_ProxyServerHttpException( $message, 400 );
+		}
+		if( isset( $this->httpParams['assetversion'] ) ) {
+			$service .= '?v='.$this->httpParams['assetversion'];
 		}
 		return $service;
 	}

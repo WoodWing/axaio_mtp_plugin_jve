@@ -41,7 +41,9 @@ class Elvis_BizClasses_Attachment
 						$attempt = 0;
 						do {
 							$attempt += 1;
-							$proxyUrl = self::composePrivateProxyFileDownloadUrlForAsset( $hit->metadata['id'], $rendition, BizSession::getTicket() );
+							$proxyUrl = self::composePrivateProxyFileDownloadUrlForAsset( $hit->metadata['id'], $rendition,
+								$hit->metadata['versionNumber'], BizSession::getTicket() );
+							//$proxyUrl .= '&XDEBUG_SESSION_START=PHPSTORM'; // uncomment to debug the proxy server
 							$httpStatus = $transferServer->copyToFileTransferServer( $proxyUrl, $attachment );
 							$retry = self::retryCopyToFileTransferServer( $attempt, $httpStatus );
 						} while( $retry );
@@ -100,14 +102,16 @@ class Elvis_BizClasses_Attachment
 	 * @since 10.5.0
 	 * @param string $assetId
 	 * @param string $rendition File rendition to download.
+	 * @param string $version
 	 * @param string $ticket
 	 * @return string The proxy file download URL.
 	 */
-	private static function composePrivateProxyFileDownloadUrlForAsset( $assetId, $rendition, $ticket )
+	private static function composePrivateProxyFileDownloadUrlForAsset( $assetId, $rendition, $version, $ticket )
 	{
 		return ELVIS_CONTENTSOURCE_PRIVATE_PROXYURL.
 			'?assetid='.urlencode( $assetId ).
 			'&rendition='.urlencode( $rendition ).
+			'&assetversion='.urlencode( $version ).
 			'&ticket='.urlencode( $ticket );
 	}
 
@@ -165,17 +169,23 @@ class Elvis_BizClasses_Attachment
 			case 'thumb' :
 				if( $hit->thumbnailUrl ) {
 					$result = $hit->thumbnailUrl;
+				} else {
+					$result = ELVIS_CLIENT_URL.'/thumbnail/'.rawurlencode( $hit->metadata['id'] ).'/*/'.rawurlencode( $hit->metadata['name'] ).'?v='.intval( $hit->metadata['versionNumber'] );
 				}
 				break;
 			case 'preview' :
 				if( $hit->previewUrl ) {
 					$result = $hit->previewUrl;
+				} else {
+					$result = ELVIS_CLIENT_URL.'/preview/'.rawurlencode( $hit->metadata['id'] ).'/*/'.rawurlencode( $hit->metadata['name'] ).'?v='.intval( $hit->metadata['versionNumber'] );
 				}
 				break;
 			case 'native' :
 			case 'placement' :
 				if( $hit->originalUrl ) {
 					$result = $hit->originalUrl;
+				} else {
+					$result = ELVIS_CLIENT_URL.'/file/'.rawurlencode( $hit->metadata['id'] ).'/*/'.rawurlencode( $hit->metadata['name'] ).'?v='.intval( $hit->metadata['versionNumber'] );
 				}
 				break;
 		}

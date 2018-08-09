@@ -107,7 +107,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		}
 
 		if( $rendition ) {
-			if( !$haveVersion || version_compare( $haveVersion, Elvis_BizClasses_Version::getEnterpriseVersionNumber( $hit->metadata['versionNumber'] ), '<' ) ) {
+			if( !$haveVersion || version_compare( $haveVersion, Elvis_BizClasses_Version::getEnterpriseObjectVersionNumber( $hit->metadata['versionNumber'] ), '<' ) ) {
 				$object->Files = $this->getFiles( $hit, array( $rendition ) );
 			}
 		}
@@ -469,7 +469,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 														'; shadowId:' . $shadowId . '; version:' . $version . '; rendition:' . $rendition);
 
 		$versionHandler = new Elvis_BizClasses_Version();
-		return $versionHandler->retrieveVersion( $alienId, $version, $rendition );
+		$versionInfo = $versionHandler->retrieveVersion( $alienId, $version, $rendition );
+		$versionInfos = Elvis_BizClasses_Object::setVersionStatusFromEnterprise( $shadowId, array( $versionInfo ) );
+		return reset( $versionInfos );
 	}
 
 	/**

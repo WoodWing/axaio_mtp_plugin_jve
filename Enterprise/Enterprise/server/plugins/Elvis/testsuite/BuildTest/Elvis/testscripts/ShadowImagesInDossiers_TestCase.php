@@ -139,15 +139,17 @@ EOT;
 			$this->testDownloadImageViaProxyServer();
 
 			// Test version history of image shadow objects.
-			$this->testListZeroVersionsOfImage();
+			$this->testListOneVersionOfImage();
 			$this->updateElvisImage();
-			$this->testListOneVersionsOfImage();
-			$this->promoteElvisImageVersion(); // through Elvis
 			$this->testListTwoVersionsOfImage();
+			sleep( 1 ); // Elvis's Elastic Search needs time, or else it may throw a Version Conflict error (HTTP 409)
+			$this->promoteElvisImageVersion(); // through Elvis
+			$this->testListThreeVersionsOfImage();
 			if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
 				$this->testRetrieveFirstVersion();
+				sleep( 1 ); // Elvis's Elastic Search needs time, or else it may throw a Version Conflict error (HTTP 409)
 				$this->restoreImageObjectVersion(); // through Enterprise
-				$this->testListThreeVersionsOfImage();
+				$this->testListFourVersionsOfImage();
 			}
 			$this->unlockImageObject();
 
@@ -543,13 +545,12 @@ EOT;
 	}
 
 	/**
-	 * Test retrieving the object version history for the Elvis shadow image object for which no versions are available yet.
+	 * Test retrieving the object version history for the Elvis shadow image object for which 1 version is available.
 	 */
-	private function testListZeroVersionsOfImage()
+	private function testListOneVersionOfImage()
 	{
-		$expectedCount = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? 1 : 0;
 		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
-		$this->assertCount( $expectedCount, $versions ); // no versions created yet
+		$this->assertCount( 1, $versions );
 	}
 
 	/**
@@ -649,12 +650,13 @@ EOT;
 	}
 
 	/**
-	 * Test retrieving the object version history for the Elvis shadow image object for which one version should be available.
+	 * Test retrieving the object version history for the Elvis shadow image object for which 2 versions should be available.
 	 */
-	private function testListOneVersionsOfImage()
+	private function testListTwoVersionsOfImage()
 	{
 		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
-		$this->assertCount( 1, $versions );
+		$expectedCount = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? 1 : 2;
+		$this->assertCount( $expectedCount, $versions );
 	}
 
 	/**
@@ -667,12 +669,12 @@ EOT;
 	}
 
 	/**
-	 * Test retrieving the object version history for the Elvis shadow image object for which two version should be available.
+	 * Test retrieving the object version history for the Elvis shadow image object for which 3 versions should be available.
 	 */
-	private function testListTwoVersionsOfImage()
+	private function testListThreeVersionsOfImage()
 	{
 		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
-		$expectedCount = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? 1 : 2;
+		$expectedCount = ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' ? 1 : 3;
 		$this->assertCount( $expectedCount, $versions );
 	}
 
@@ -703,12 +705,12 @@ EOT;
 	}
 
 	/**
-	 * Test retrieving the object version history for the Elvis shadow image object for which three version should be available.
+	 * Test retrieving the object version history for the Elvis shadow image object for which 4 versions should be available.
 	 */
-	private function testListThreeVersionsOfImage()
+	private function testListFourVersionsOfImage()
 	{
 		$versions = $this->listObjectVersions( $this->images[0]->shadowId );
-		$this->assertCount( 3, $versions );
+		$this->assertCount( 4, $versions );
 	}
 
 	/**

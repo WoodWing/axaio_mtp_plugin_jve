@@ -16,6 +16,10 @@ class Elvis_BizClasses_ProxyClient
 	 * @var string
 	 */
 	private $service;
+	/**
+	 * @var string[]
+	 */
+	private $queryParams;
 
 	/**
 	 * Elvis_BizClasses_ProxyClient constructor.
@@ -26,7 +30,22 @@ class Elvis_BizClasses_ProxyClient
 	public function __construct( $shortUserName, $service )
 	{
 		$this->shortUserName = $shortUserName;
-		$this->service = $service;
+		$queryPos = strpos( $service, '?' );
+		$this->queryParams = array();
+		if( $queryPos === false ) {
+			$this->service = $service;
+		} else {
+			$this->service = substr( $service, 0, $queryPos );
+			$queryParamsAndValues = explode( '&', substr( $service, $queryPos + 1 ) );
+			foreach( $queryParamsAndValues as $queryParamsAndValue ) {
+				if( strpos( $queryParamsAndValue, '=' ) === false ) {
+					$this->queryParams[ $queryParamsAndValue ] = null;
+				} else {
+					list( $paramName, $paramValue ) = explode( '=', $queryParamsAndValue, 2 );
+					$this->queryParams[ $paramName ] = $paramValue;
+				}
+			}
+		}
 	}
 
 	/**
@@ -50,6 +69,9 @@ class Elvis_BizClasses_ProxyClient
 			}
 		);
 		$request = Elvis_BizClasses_ClientRequest::newAuthorizedRequest( $this->service, $this->shortUserName );
+		foreach( $this->queryParams as $paramName => $paramValue ) {
+			$request->addQueryParam( $paramName, $paramValue );
+		}
 		// Elvis has support for 'ETag' and so it returns it in the file download response headers. When the web browser
 		// requests for 'If-None-Match', here we pass on that header to Elvis to let it decide if the client already has
 		// the latest file version. If so, it returns HTTP 304 without file, else HTTP 200 with file.
