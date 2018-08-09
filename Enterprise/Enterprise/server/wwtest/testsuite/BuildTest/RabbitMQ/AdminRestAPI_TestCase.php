@@ -62,6 +62,13 @@ class WW_TestSuite_BuildTest_RabbitMQ_AdminRestAPI_TestCase extends TestCase
 		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
 		require_once BASEDIR.'/server/utils/rabbitmq/restapi/Client.class.php';
 
+		// Bail out gently with 'NOT INSTALLED' when the RabbitMQ integration is not setup.
+		if( !BizMessageQueue::isInstalled() ) {
+			$message = 'The MESSAGE_QUEUE_CONNECTIONS option in configserver.php is not properly configured.';
+			$this->setResult( 'NOTINSTALLED', $message );
+			throw new BizException( null, 'Server', null, $message, null, 'NOTINSTALLED' );
+		}
+
 		// Pick and validate connection configuration.
 		$this->connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST', false );
 		$this->assertInstanceOf( 'MessageQueueConnection', $this->connection,
