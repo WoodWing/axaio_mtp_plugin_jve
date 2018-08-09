@@ -404,11 +404,12 @@ class ActionPropertiesAdminApp
 				$detailTxt .= "<td>".$row['category'].'</td>';
 				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
 				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				if( empty( $row['edit'] ) && in_array( $row['property'], $this->sysProps ) ) {
+				if( empty( trim($row['edit']) ) // trim: temporary hack due to DBActionproperty::listActionPropertyWithNames is not returning the expected data.
+					&& in_array( $row['property'], $this->sysProps ) ) {
 					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
 				} else {
 					$title = $isConfigurable ? BizResources::localize("OBJ_EDITABLE") : $nonAdjustableDefaultFieldsMsg;
-					$checkbox = inputvar("edit$i", $row['edit'], 'checkbox', null, true, null, !$isConfigurable );
+					$checkbox = inputvar("edit$i", trim( $row['edit'] ), 'checkbox', null, true, null, !$isConfigurable );
 					$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
 				}
 				$title = $isConfigurable ? BizResources::localize("OBJ_MANDATORY") : $nonAdjustableDefaultFieldsMsg;
@@ -507,7 +508,8 @@ class ActionPropertiesAdminApp
 				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
 				$detailTxt .= '<td>'.formvar($prop).'</td>';
 				$isConfigurable = $this->isConfigurableField( $prop );
-				if( empty( $row['edit'] ) && in_array( $row['property'], $this->sysProps )) {
+				if( empty( trim($row['edit']) ) // trim: temporary hack due to DBActionproperty::listActionPropertyWithNames is not returning the expected data.
+					&& in_array( $row['property'], $this->sysProps )) {
 					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:LOCKIMAGE).'</td>';
 				} else {
 					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:'').'</td>';
