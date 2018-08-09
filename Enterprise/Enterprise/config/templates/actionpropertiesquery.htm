@@ -7,13 +7,13 @@ function myconfirm(code)
 	switch(code) {
         case 'deleteAllSelected':
             if( isThereAnyCheckboxesChecked() ) {
-                txt = "Are you sure you want to delete the selected properties?"; // 10.x.x TODO: Localise the string
+                txt = "Are you sure you want to remove the selected properties?"; // 10.x.x TODO: Localise the string
             } else {
-                return alert( "There is no row selected for deletion." ); // 10.x.x TODO: Localise the string
+                return alert( "Please select one or more rows to remove." ); // 10.x.x TODO: Localise the string
             }
             break;
         case 'reset':
-            txt = "Are you sure you want to reset? (This will delete all properties including the mandatory properties)."; // 10.x.x TODO: Localise the string
+            txt = "Are you sure you want to clear all settings for this set of properties?"; // 10.x.x TODO: Localise the string
             break;
     }
 	return confirm(txt);
@@ -195,10 +195,10 @@ $(document).ready(function() {
 		<table class="listbtnbar">
 			<tr>
 				<td>
-					<button style="<!--RESET_BUTTON-->" type="button" id="resetButton"><!--RES:BUT_RESET--></button>
+					<button style="<!--RESET_BUTTON-->" type="button" id="resetButton"><!--RES:ACT_CLEAR--></button>
 					<input type="hidden" id="resetProperties" name="resetProperties" value="">
 
-					<button style="<!--DELETE_BUTTON-->" type="button" id="deleteButton"><!--RES:ACT_DELETE_SELECTED--></button>
+					<button style="<!--DELETE_BUTTON-->" type="button" id="deleteButton"><!--RES:ACT_REMOVE--></button>
 					<input type="hidden" id="deleteProperties" name="deleteProperties" value="">
 
 					<button style="<!--UPDATE_BUTTON-->" type="button" id="updateButton"><!--RES:BUT_UPDATE--></button>
@@ -208,14 +208,12 @@ $(document).ready(function() {
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="addProperties" name="addProperties" value="">
 					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
 					<!--10.x.x TODO: Localise the string-->
-					<div   style="display:none" id="dialog_confirm" title="Add default fields?">
+					<div   style="display:none" id="dialog_confirm" title="<!--RES:ACT_INFO-->">
 						<p>
 							<span style="float: left; margin: 0 0px 0px 0;"></span>
-							This is a first setup for this configuration,
-							mandatory properties will be added automatically. <br/>
-							There are also some regularly used properties, do you want to add them? <br/>
-							(Note that you will be able to remove these regularly used properties or reset
-							the whole configuration later.)
+							You are about to set up this configuration for the first time.<br/>
+							Properties that are mandatory will be automatically added.<br/>
+							Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'? (Note that these can be added or removed at any stage.)
 						</p>
 					</div>
 				</td>

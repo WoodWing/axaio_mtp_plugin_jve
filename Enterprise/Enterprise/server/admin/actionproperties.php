@@ -383,10 +383,12 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$nonAdjustableDefaultFieldsMsg = 'This setting cannot be adjusted nor deleted because it is a mandatory property.'; // 10.x.x TODO: Localise the string
+//			$nonAdjustableDefaultFieldsMsg = BizResources::localize("MNU_DIALOG_MANDATORY_NO_EDIT" );
+			$nonAdjustableDefaultFieldsMsg = "This property is mandatory and cannot be changed or removed";
 			if( $isConfigurable ) {
 				$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
-				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") );
+//				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("MNU_DIALOG_SELECT_DELETE") );
+				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, 'Select to permanently remove this row' );
 			} else {
 				$deleteCheckbox = '';
 			}

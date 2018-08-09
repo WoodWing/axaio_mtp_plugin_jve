@@ -321,7 +321,8 @@ class ActionPropertiesQueryAdminApp
 			$deleteCheckbox = '';
 			if( $isConfigurable ) {
 				$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
-				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS") );
+//				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("MNU_DIALOG_SELECT_DELETE") );
+				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, 'Select to permanently remove this row' );
 			}
 			$detailTxt .= "<tr$clr>";
 			$detailTxt .= '<td align="center" width="5">' . $deleteCheckbox . '</td>';
