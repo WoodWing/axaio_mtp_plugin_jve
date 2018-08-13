@@ -446,6 +446,15 @@ class License
 			}
 			case 2:
 			{
+				/*
+					Return: max id (smart_objects) |
+							current number of smart_objects |
+							Filestore harddisk size |
+							current Filestore usage |
+							current time |
+							creation time of last smart object |
+							mac addresses [,]
+				*/
 				$key2Arr = Array();
 		
 				//Max id smart_objects
@@ -3410,7 +3419,6 @@ class License
 				$supportedProducts[] = $product;
 			}
 		}
-
 		return $supportedProducts;
 	}
 
@@ -3433,7 +3441,7 @@ class License
 		$supported = true;
 		$pattern = '/(SCID|DIGMAG)([0-9]+)/';
 		$matches = array();
-		$minimumSupportedScDmCVersion = 1100; // CC 2015
+		$minimumSupportedScDmCVersion = $this->getMinimumSupportedAdobeVersion();
 		$found = preg_match( $pattern, $product, $matches );
 		if( $found ) {
 			if( intval( $matches[2] ) < $minimumSupportedScDmCVersion ) {
@@ -3441,6 +3449,27 @@ class License
 			}
 		}
 		return $supported;
+	}
+
+	/**
+	 * Return the minimum supported Adobe version in licensing notation.
+	 *
+	 * Function retrieves the minimum supported Adobe version from a list of versions
+	 * defined in the option ADOBE_VERSIONS and multiply it with 100 before returning
+	 * it to the caller.
+	 *
+	 * E.g
+	 * CC2015 = 11.0 => returns 1100(In licensing context)
+	 *
+	 * @since 10.5.0
+	 * @return int
+	 */
+	private function getMinimumSupportedAdobeVersion():int
+	{
+		$adobeVersions = array_values( unserialize( ADOBE_VERSIONS ) );
+		$adobeMinimumSupportedVersion = array_shift( $adobeVersions );
+		$adobeMinimumSupportedVersion = $adobeMinimumSupportedVersion * 100; // E.g 1100
+		return intval( $adobeMinimumSupportedVersion );
 	}
 
 	/**
