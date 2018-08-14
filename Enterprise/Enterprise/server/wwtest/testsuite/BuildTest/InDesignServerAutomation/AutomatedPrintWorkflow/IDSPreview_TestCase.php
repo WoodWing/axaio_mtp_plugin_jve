@@ -22,10 +22,15 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 	private $pubChannelObj = null;
 	private $issueObj = null;
 	private $editionObjs = array();
+	/** @var State|null */
 	private $layoutStatus = null;
+	/** @var State|null */
 	private $layoutStatusInResp = null;
+	/** @var State|null */
 	private $articleStatus = null;
+	/** @var State|null */
 	private $imageStatus = null;
+	/** @var State|null */
 	private $dossierStatus = null;
 	private $categoryObj = null;
 
@@ -2476,6 +2481,11 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->InDesignArticles[0] = new InDesignArticle();
 		$response->InDesignArticles[0]->Id = '253';
 		$response->InDesignArticles[0]->Name = 'Article 1';
+		$response->InDesignArticles[0]->SplineIDs = array();
+		$response->InDesignArticles[0]->SplineIDs[0] = "239";
+		$response->InDesignArticles[0]->SplineIDs[1] = "250";
+		$response->InDesignArticles[0]->SplineIDs[2] = "251";
+		$response->InDesignArticles[0]->SplineIDs[3] = "252";
 		$response->Relations = array();
 		$response->Relations[0] = new Relation();
 		$response->Relations[0]->Parent = $this->objectIds['Layouts'][0];
@@ -2487,7 +2497,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[0]->Placements[0]->Element = 'graphic';
 		$response->Relations[0]->Placements[0]->ElementID = '';
 		$response->Relations[0]->Placements[0]->FrameOrder = '0';
-		$response->Relations[0]->Placements[0]->FrameID = '334';
+		$response->Relations[0]->Placements[0]->FrameID = '337';
 		$response->Relations[0]->Placements[0]->Left = '75.600000';
 		$response->Relations[0]->Placements[0]->Top = '96.000000';
 		$response->Relations[0]->Placements[0]->Width = '264.000000';
@@ -2535,7 +2545,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[1]->Placements[0]->Element = 'graphic';
 		$response->Relations[1]->Placements[0]->ElementID = '';
 		$response->Relations[1]->Placements[0]->FrameOrder = '0';
-		$response->Relations[1]->Placements[0]->FrameID = '343';
+		$response->Relations[1]->Placements[0]->FrameID = '346';
 		$response->Relations[1]->Placements[0]->Left = '-199.200000';
 		$response->Relations[1]->Placements[0]->Top = '396.000000';
 		$response->Relations[1]->Placements[0]->Width = '408.000000';
@@ -2597,7 +2607,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[2]->Placements[0]->Element = 'graphic';
 		$response->Relations[2]->Placements[0]->ElementID = '';
 		$response->Relations[2]->Placements[0]->FrameOrder = '0';
-		$response->Relations[2]->Placements[0]->FrameID = '352';
+		$response->Relations[2]->Placements[0]->FrameID = '355';
 		$response->Relations[2]->Placements[0]->Left = '276.000000';
 		$response->Relations[2]->Placements[0]->Top = '85.200000';
 		$response->Relations[2]->Placements[0]->Width = '204.000000';
@@ -2851,6 +2861,12 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 
 		$this->layoutStatus = @$vars['BuildTest_AutomatedPrintWorkflow']['layoutStatus'];
 		$this->assertInstanceOf( 'State', $this->layoutStatus );
+		// When we would pick a Produce status for the layout, SC will generate PDFs in context of the automated IDS scripts,
+		// and so the internal frameID counter used by SC to automatically assign placed objects to frames will be affected
+		// (using up more frameIDs then it would without PDF). Since the test script has hardcoded frameIDs, we error here.
+		// This is an early detection of troubles that will follow later that are hard to relate back to this root of evil.
+		// PS. Obviously this problem would not exist if we would not have reused the WW News setup but setup our own brand.
+		$this->assertNotEquals( true, $this->layoutStatus->Produce );
 
 		$this->layoutStatusInResp = unserialize( serialize( $this->layoutStatus ));
 		$this->layoutStatusInResp->Produce = null; // In Response, null is returned instead of boolean.
