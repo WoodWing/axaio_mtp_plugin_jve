@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">Standaard {CHANNEL}</Term>
   <Term key="DELETED">Verwijderd</Term>
   <Term key="DELETE_NOTES">Plaknotities verwijderen</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">U heeft een nieuwe Plaknotitie aangemaakt of een Plaknotitie beantwoord zonder tekst in te voeren.\n\n\Als u doorgaat zal de Plaknotitie of het antwoord worden verwijderd.\n\nWilt u doorgaan?\n</Term>
   <Term key="DESK_ID">{DESK}-ID</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">Landschap hoogte</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Text-Als-Text</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Text View Padding</Term>
   <Term key="DEVICE_THUMBHEIGHT">Miniatuur hoogte</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, Publication and Status) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Afleiden van pagina oriëntatie</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Landschap en portret</Term>
   <Term key="DM_THUMB_ORIENTATION">Pagina miniatuur oriëntatie</Term>
@@ -1432,6 +1434,7 @@
   <Term key="MNU_CHANGE_PSW">Wachtwoord wijzigen</Term>
   <Term key="MNU_DBADMIN">Database instelling</Term>
   <Term key="MNU_DEADLINES">Deadlines</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">Dialogen opzetten</Term>
   <Term key="MNU_EDGEN">{EDITION} generator</Term>
   <Term key="MNU_EXPORT">Exporteren</Term>
@@ -1451,6 +1454,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">Opdracht configuraties</Term>
   <Term key="MNU_SERVER_JOBS">Opdracht wachtrij</Term>
   <Term key="MNU_SERVER_LOGS">Server Logs</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">Uploaden</Term>
   <Term key="MNU_USER">Gebruikers</Term>
   <Term key="MNU_USER_QUERY">Gebruikerszoekopdrachten</Term>
@@ -1932,6 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">Resultaat zoekopdracht</Term>
   <Term key="QRY_SETUP">Zoekopdracht instellen</Term>
   <Term key="QRY_SQL">Zoekopdracht</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, ID or Type) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 tot %2</Term>
   <Term key="READINGDIRECTION">Leesrichting</Term>
   <Term key="READING_ORDER_REV">Pagina's in omgekeerde volgorde</Term>
@@ -1944,6 +1949,7 @@
   <Term key="RELATIVE_DEADLINE">Relatieve deadline</Term>
   <Term key="RELATIVE_DEADLINE_MODE">Relatieve Deadlines activeren</Term>
   <Term key="RENDITION">Weergave</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">De Plaknotities zijn gewijzigd, wilt u deze opslaan voordat u doorgaat?</Term>
   <Term key="SAVE_CHANGED_STICKY">De Plaknotitie is gewijzigd zonder dat het opgeslagen is.\nWilt u deze veranderingen opslaan?</Term>
   <Term key="SAVE_LOCAL">U kunt het menu Opslaan Als gebruiken om dit bestand als een kopie van het originele bestand op te slaan.</Term>
@@ -1954,6 +1960,7 @@
   <Term key="SEC_EDITION_IDS">{EDITION}-ID's</Term>
   <Term key="SEC_SECTION_ID">{SECTION}-ID</Term>
   <Term key="SEELOGFILES">Zie het log-bestand voor meer details.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">Verkorte naam</Term>
   <Term key="SHOW_LOG">Logboek tonen</Term>
   <Term key="SHOW_STATUS">{STATE} tonen</Term>
