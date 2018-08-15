@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">По умолчанию {CHANNEL}</Term>
   <Term key="DELETED">Удалено</Term>
   <Term key="DELETE_NOTES">Удалить записки</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">Вы создали новую записку или ответили на записку, не вводя текст. При продолжении записка или ответ будут удалены.\n\nПродолжить?\n</Term>
   <Term key="DESK_ID">Идентификатор {DESK}</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">Высота альбома</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Текст как текст</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Заполнение текстового представления</Term>
   <Term key="DEVICE_THUMBHEIGHT">Высота значка</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, Publication and Status) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Установить по ориентации страницы</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Альбомная и портретная</Term>
   <Term key="DM_THUMB_ORIENTATION">Ориентация значков страниц</Term>
@@ -1433,6 +1435,7 @@
   <Term key="MNU_CHANGE_PSW">Измените пароль</Term>
   <Term key="MNU_DBADMIN">Настройка базы данных</Term>
   <Term key="MNU_DEADLINES">Крайние сроки</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">Настройка Мета-полей</Term>
   <Term key="MNU_EDGEN">Создатель {EDITION}</Term>
   <Term key="MNU_EXPORT">Экспорт</Term>
@@ -1452,6 +1455,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">Конфигурации работы</Term>
   <Term key="MNU_SERVER_JOBS">Очередь работы</Term>
   <Term key="MNU_SERVER_LOGS">Журналы сервера</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">Загрузить</Term>
   <Term key="MNU_USER">Пользователи</Term>
   <Term key="MNU_USER_QUERY">Запросы Пользователя</Term>
@@ -1933,6 +1937,7 @@
   <Term key="QRY_QUERY_RESULT">Результат ы запроса</Term>
   <Term key="QRY_SETUP">Настройка запроса</Term>
   <Term key="QRY_SQL">Запрос</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, ID or Type) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 по %2</Term>
   <Term key="READINGDIRECTION">Направление чтения</Term>
   <Term key="READING_ORDER_REV">Изменить порядок издания</Term>
@@ -1945,6 +1950,7 @@
   <Term key="RELATIVE_DEADLINE">Относительный крайний срок</Term>
   <Term key="RELATIVE_DEADLINE_MODE">Активировать параметр «Относительные крайние сроки»</Term>
   <Term key="RENDITION">Представление</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">Записки изменены, сохранить изменения?</Term>
   <Term key="SAVE_CHANGED_STICKY">Записка была изменена без сохранения изменений.\nСохранить эти изменения?</Term>
   <Term key="SAVE_LOCAL">Используйте пункт меню Сохранить как для сохранения копии оригинала.</Term>
@@ -1955,6 +1961,7 @@
   <Term key="SEC_EDITION_IDS">Идентификаторы {EDITION}</Term>
   <Term key="SEC_SECTION_ID">ID секции</Term>
   <Term key="SEELOGFILES">Подробные сведения приведены в файлах журнала.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">Краткое имя</Term>
   <Term key="SHOW_LOG">Показать лог</Term>
   <Term key="SHOW_STATUS">Показать {STATE}</Term>

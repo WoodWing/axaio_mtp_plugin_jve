@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">Default {CHANNEL}</Term>
   <Term key="DELETED">Deleted</Term>
   <Term key="DELETE_NOTES">Delete Sticky Notes</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">You have created a new Sticky Note or have replied to a Sticky Note without entering text. If you continue, the Sticky Note or reply will be deleted.\n\nDo you want to continue?\n</Term>
   <Term key="DESK_ID">{DESK} ID</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">Landscape Height</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Text-As-Text</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Text View Padding</Term>
   <Term key="DEVICE_THUMBHEIGHT">Thumbnail Height</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, Publication and Status) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Derive from Page Orientation</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Landscape and Portrait</Term>
   <Term key="DM_THUMB_ORIENTATION">Page Thumbnail Orientation</Term>
@@ -1433,6 +1435,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="MNU_CHANGE_PSW">Change Password</Term>
   <Term key="MNU_DBADMIN">Database Setup</Term>
   <Term key="MNU_DEADLINES">Deadlines</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">Dialogs Setup</Term>
   <Term key="MNU_EDGEN">{EDITION} Generator</Term>
   <Term key="MNU_EXPORT">Export</Term>
@@ -1452,6 +1455,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="MNU_SERVERJOB_CONFIGS">Job Configurations</Term>
   <Term key="MNU_SERVER_JOBS">Job Queue</Term>
   <Term key="MNU_SERVER_LOGS">Server Logs</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">Upload</Term>
   <Term key="MNU_USER">Users</Term>
   <Term key="MNU_USER_QUERY">User Queries</Term>
@@ -1933,6 +1937,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="QRY_QUERY_RESULT">Query Results</Term>
   <Term key="QRY_SETUP">Query Setup</Term>
   <Term key="QRY_SQL">Query</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, ID or Type) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 To %2</Term>
   <Term key="READINGDIRECTION">Reading Direction</Term>
   <Term key="READING_ORDER_REV">Reading Order Reversed</Term>
@@ -1945,6 +1950,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="RELATIVE_DEADLINE">Relative Deadline</Term>
   <Term key="RELATIVE_DEADLINE_MODE">Activate Relative Deadlines</Term>
   <Term key="RENDITION">Rendition</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">One or more Sticky Notes have changed. Do you want to save them before continuing?</Term>
   <Term key="SAVE_CHANGED_STICKY">The Sticky Note has been modified without being saved.\nDo you want to save these changes?</Term>
   <Term key="SAVE_LOCAL">You can use the menu Save As to save this file as a copy of the original file.</Term>
@@ -1955,6 +1961,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="SEC_EDITION_IDS">{EDITION} IDs</Term>
   <Term key="SEC_SECTION_ID">{SECTION} ID</Term>
   <Term key="SEELOGFILES">See the log files for more details.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">Short name</Term>
   <Term key="SHOW_LOG">Show log</Term>
   <Term key="SHOW_STATUS">Show {STATE}</Term>
