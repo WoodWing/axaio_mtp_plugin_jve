@@ -3441,7 +3441,7 @@ class License
 		$supported = true;
 		$pattern = '/(SCID|DIGMAG)([0-9]+)/';
 		$matches = array();
-		$minimumSupportedScDmCVersion = $this->getMinimumSupportedAdobeVersion();
+		$minimumSupportedScDmCVersion = $this->getMinimumSupportedSmartConnectionVersion();
 		$found = preg_match( $pattern, $product, $matches );
 		if( $found ) {
 			if( intval( $matches[2] ) < $minimumSupportedScDmCVersion ) {
@@ -3452,11 +3452,11 @@ class License
 	}
 
 	/**
-	 * Return the minimum supported Adobe version in licensing notation.
+	 * Return the minimum supported Smart Connection version in licensing notation.
 	 *
-	 * Function retrieves the minimum supported Adobe version from a list of versions
-	 * defined in the option ADOBE_VERSIONS and multiply it with 100 before returning
-	 * it to the caller.
+	 * SmartConnection major versions are assumed to be matching with the internal
+	 * Adobe IDS/InDesign/InCopy versions. So this function uses the supported Adobe
+	 * versions setting to determine the minimum SC version.
 	 *
 	 * E.g
 	 * CC2015 = 11.0 => returns 1100(In licensing context)
@@ -3464,11 +3464,11 @@ class License
 	 * @since 10.5.0
 	 * @return int
 	 */
-	private function getMinimumSupportedAdobeVersion():int
+	private function getMinimumSupportedSmartConnectionVersion(): int
 	{
 		$adobeVersions = array_values( unserialize( ADOBE_VERSIONS ) );
 		$adobeMinimumSupportedVersion = array_shift( $adobeVersions );
-		$adobeMinimumSupportedVersion = $adobeMinimumSupportedVersion * 100; // E.g 1100
+		$adobeMinimumSupportedVersion = $adobeMinimumSupportedVersion * 100; // E.g 11.0 x 100 = 1100.0
 		return intval( $adobeMinimumSupportedVersion );
 	}
 
