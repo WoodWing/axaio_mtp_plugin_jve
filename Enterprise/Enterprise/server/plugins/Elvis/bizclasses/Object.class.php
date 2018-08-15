@@ -283,7 +283,7 @@ class Elvis_BizClasses_Object
 		$enterpriseObjectVersions[] = $currentObjectVersion;
 
 		if( $elvisAssetVersions ) foreach( $elvisAssetVersions as $elvisAssetVersion ) {
-			$previousVersionInEnterprise = null;
+			$previousVersionInEnterprise = reset( $enterpriseObjectVersions );
 			foreach( $enterpriseObjectVersions as $enterpriseObjectVersion ) {
 				if( version_compare( $enterpriseObjectVersion['version'], $elvisAssetVersion->Version ) == 0 ) {
 					$elvisAssetVersion->State = $states[$enterpriseObjectVersion['state']];
