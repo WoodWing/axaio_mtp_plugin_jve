@@ -112,7 +112,7 @@ class Elvis_BizClasses_Version
 	/**
 	 * Validate if a given object version notation is valid (and possibly originates* from the integration).
 	 *
-	 * *) Only versions with leading "0." could originate from the integration.
+	 * *) Only versions with leading "0." could originate from the integration. (So 0.5 does, but 1.5 does not.)
 	 *
 	 * @since 10.5.0
 	 * @param string $version Enterprise object version number.
