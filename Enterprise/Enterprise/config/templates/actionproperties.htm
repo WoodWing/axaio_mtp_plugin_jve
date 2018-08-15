@@ -7,13 +7,13 @@ function myconfirm(code)
 	switch(code) {
 		case 'deleteAllSelected':
 		    if( isThereAnyCheckboxesChecked() ) {
-				txt = "Are you sure you want to remove the selected properties?"; // 10.x.x TODO: Localise the string
+				txt = "<!--RES:DELETE_SELECTED_CONFIRM_MESSAGE-->";
 			} else {
-                return alert( "Please select one or more rows to remove." ); // 10.x.x TODO: Localise the string
+                return alert( "<!--RES:SELECT_ROWS_CONFIRM_MESSAGE-->" );
 			}
 		    break;
 		case 'reset':
-		    txt = "Are you sure you want to clear all settings for this set of properties?"; // 10.x.x TODO: Localise the string
+		    txt = "<!--RES:RESET_CONFIRM_MESSAGE-->";
 		    break;
 	}
 	return confirm(txt);
@@ -34,11 +34,16 @@ function isThereAnyCheckboxesChecked()
 
 function checkDeleteCheckboxes()
 {
+    var selectAllCheckbox = document.getElementById("multiDeleteToggle");
     var countCheckBoxes = document.forms['propfilter'].recs.value;
     for(var i = 0; i < countCheckBoxes; i++) {
         var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
         if( objCheckBox !== undefined && objCheckBox.disabled == false ) {
-			objCheckBox.checked = !(objCheckBox.checked)
+            if( selectAllCheckbox.checked == true ) {
+                objCheckBox.checked = true;
+            } else {
+                objCheckBox.checked = false;
+			}
 		}
 	}
     return false;
@@ -80,13 +85,13 @@ $(document).ready(function() {
             modal: true,
             zIndex: 1000,
             buttons: {
-                "Yes": function() {
+                "<!--RES:FEATURE_YES-->": function() {
                     $("#addProperties").val( "add" );
                     $("#addDefaultDynamic").val( "true" );
                     $( this ).dialog( "close" );
                     $( "#propfilter" ).submit();
                 },
-                "No": function() {
+                "<!--RES:FEATURE_NO-->": function() {
                     $("#addProperties").val( "add" );
                     $("#addDefaultDynamic").val( "false" );
                     $( this ).dialog( "close" );
@@ -205,7 +210,7 @@ $(document).ready(function() {
 			<tr style="<!--WORKFLOW_COLUMNS-->">
 				<th style="<!--DELETE_COLUMN-->">
 					<div class="tooltip-wrapper">
-						<input type="checkbox" name="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes();">
+						<input type="checkbox" name="multiDeleteToggle" id="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes();">
 					</div>
 				</th>
 				<th><!--RES:OBJ_CATEGORY--></th>
@@ -220,7 +225,7 @@ $(document).ready(function() {
 			<tr style="<!--PREVIEW_COLUMNS-->">
 				<th style="<!--DELETE_COLUMN-->" width="10px">
 					<div class="tooltip-wrapper">
-						<input type="checkbox" name="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes();">
+						<input type="checkbox" name="multiDeleteToggle" id="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes();">
 					</div>
 				</th>
 				<th><!--RES:LIS_ORDER--></th>
@@ -232,25 +237,22 @@ $(document).ready(function() {
 		<table class="listbtnbar">
 			<tr>
 				<td>
-					<button style="<!--RESET_BUTTON-->"  type="button" id="resetButton" ><!--RES:ACT_CLEAR--></button>
-					<input type="hidden" id="resetProperties" name="resetProperties" value="">
+					<button style="<!--RESET_BUTTON-->"  type="button" id="resetButton" ><!--RES:BUT_RESET--></button>
+					<input type="hidden" id="resetProperties" name="resetProperties" value="" />
 
 					<button style="<!--DELETE_BUTTON-->" type="button" id="deleteButton" ><!--RES:ACT_REMOVE--></button>
-					<input type="hidden" id="deleteProperties" name="deleteProperties" value="">
+					<input type="hidden" id="deleteProperties" name="deleteProperties" value="" />
 
 					<button style="<!--UPDATE_BUTTON-->" type="button" id="updateButton"><!--RES:BUT_UPDATE--></button>
-					<input type="hidden" id="updateProperties" name="updateProperties" value="">
+					<input type="hidden" id="updateProperties" name="updateProperties" value="" />
 
 					<button style="<!--ADD_BUTTON-->" type="button" id="dialog_button"><!--RES:ACT_ADD--></button>
-					<input style="<!--ADD_BUTTON-->" type="hidden" id="addProperties" name="addProperties" value="">
-					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
-					<!--10.x.x TODO: Localise the string-->
-					<div   style="display:none" id="dialog_confirm" title="<!--RES:ACT_INFO-->">
+					<input style="<!--ADD_BUTTON-->" type="hidden" id="addProperties" name="addProperties" value="" />
+					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false" />
+					<div style="display:none" id="dialog_confirm" title="<!--RES:HEA_DIALOG-->">
 						<p>
 							<span style="float: left; margin: 0 0px 0px 0;"></span>
-							You are about to set up this configuration for the first time.<br/>
-							Properties that are mandatory will be automatically added.<br/>
-							Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'? (Note that these can be added or removed at any stage.)
+							<!--DIALOG_CONFIRM_MESSAGE-->
 						</p>
 					</div>
 				</td>

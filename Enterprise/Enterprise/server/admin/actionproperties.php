@@ -383,12 +383,10 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-//			$nonAdjustableDefaultFieldsMsg = BizResources::localize("MNU_DIALOG_MANDATORY_NO_EDIT" );
-			$nonAdjustableDefaultFieldsMsg = "This property is mandatory and cannot be changed or removed";
+			$nonAdjustableDefaultFieldsMsg = BizResources::localize( 'MNU_TOOLTIP_CANNOT_EDIT' );
 			if( $isConfigurable ) {
 				$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
-//				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("MNU_DIALOG_SELECT_DELETE") );
-				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, 'Select to permanently remove this row' );
+				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("MNU_DIALOG_SELECT_DELETE") );
 			} else {
 				$deleteCheckbox = '';
 			}
@@ -530,11 +528,13 @@ class ActionPropertiesAdminApp
 	/**
 	 * Draw the Form to either show or hide Edit, Update and Delete buttons depending on the action ( $this->mode ).
 	 *
+	 * @since 10.5.0
 	 * @param string $txt
 	 * @param int $numberOfRecords
+	 * @param null|bool $onlyStaticProperties
 	 * @return string
 	 */
-	private function showOrHideButtons( $txt, $numberOfRecords )
+	private function showOrHideButtons( string $txt, int $numberOfRecords, ?bool $onlyStaticProperties ):string
 	{
 		switch( $this->mode ) {
 			case "view":
@@ -542,7 +542,7 @@ class ActionPropertiesAdminApp
 			case "reset":
 				$txt = str_replace("<!--ADD_BUTTON-->",  '', $txt );
 				$txt = str_replace("<!--UPDATE_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
-				$txt = str_replace("<!--DELETE_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
+				$txt = str_replace("<!--DELETE_BUTTON-->",( $numberOfRecords == 0 || $onlyStaticProperties ) ? 'display:none' : '', $txt );
 				$txt = str_replace("<!--RESET_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
 				break;
 			case "add":
@@ -683,7 +683,7 @@ class ActionPropertiesAdminApp
 		$detailTxt = '';
 		$showMultiObj = in_array( $this->action, BizProperty::getMultiObjectsAllowedActions() );
 		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
-
+		$onlyStaticProperties = null;
 		switch( $this->mode ) {
 			case 'view':
 			case 'update':
@@ -691,6 +691,7 @@ class ActionPropertiesAdminApp
 			case 'reset':
 				$numberOfRecords = 0;
 				$detailTxt = $this->listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt, $numberOfRecords );
+				$onlyStaticProperties = $this->isOnlyStaticProperties( $rows );
 				break;
 			case 'add':
 				$numberOfRecords = count( $rows );
@@ -698,14 +699,34 @@ class ActionPropertiesAdminApp
 				break;
 		}
 
-		$txt = $this->showOrHideButtons( $txt, $numberOfRecords );
+		$txt = $this->showOrHideButtons( $txt, $numberOfRecords, $onlyStaticProperties );
 		$txt = str_replace("<!--DELETE_COLUMN-->", ( $this->mode == 'add' ) ? 'display:none' : (( $numberOfRecords > 0 ) ? '' : 'display:none'), $txt );
 		$txt = str_replace("<!--WORKFLOW_COLUMNS-->",$this->isActionOnlyForFieldsDisplay( $this->action ) ? 'display:none' : '', $txt );
 		$txt = str_replace("<!--PREVIEW_COLUMNS-->",$this->isActionOnlyForFieldsDisplay( $this->action ) ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--MULTIPLE_OBJECTS_CELL-->", $showMultiObj ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
 		$txt = str_replace("<!--IMG_LOCKIMG-->", LOCKIMAGE, $txt);
+		$txt = str_replace("<!--DIALOG_CONFIRM_MESSAGE-->", BizResources::localize( 'DIALOG_SETUP_CONFIRM_MESSAGE', true, array( "<br/>", "<br/>", "<br/>", "<br/>", "<br/>" )), $txt);
 		return $txt;
+	}
+
+	/**
+	 * Function returns true if the list of properties only contain static properties, false otherwise.
+	 *
+	 * @since 10.5.0
+	 * @param string $propertyRows
+	 * @return bool
+	 */
+	private function isOnlyStaticProperties( array $propertyRows ):bool
+	{
+		$isOnlyStaticProperties = true;
+		if( $propertyRows ) foreach( $propertyRows as $row ) {
+			if( $this->isConfigurableField( $row['property'] )) {
+				$isOnlyStaticProperties = false;
+				break;
+			}
+		}
+		return $isOnlyStaticProperties;
 	}
 
 	/**
