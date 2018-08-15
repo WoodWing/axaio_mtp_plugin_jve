@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">缺省 {CHANNEL}</Term>
   <Term key="DELETED">已删除</Term>
   <Term key="DELETE_NOTES">删除即时贴</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">你已创建一个新的即时贴或回应了一个即时贴但没有输入信息.\n\n如果你要继续, 此即时贴或回应将被删除.\n\n你要继续吗?\n</Term>
   <Term key="DESK_ID">{DESK} ID</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">横向高度</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">文本作为文本</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">文本视图填充值</Term>
   <Term key="DEVICE_THUMBHEIGHT">缩略图高</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, Publication and Status) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">从页面向生成</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">横向和竖向</Term>
   <Term key="DM_THUMB_ORIENTATION">页面缩略图方向</Term>
@@ -1432,6 +1434,7 @@
   <Term key="MNU_CHANGE_PSW">更改密码</Term>
   <Term key="MNU_DBADMIN">数据库设置</Term>
   <Term key="MNU_DEADLINES">期限</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">对话框设置</Term>
   <Term key="MNU_EDGEN">{EDITION} 创建器</Term>
   <Term key="MNU_EXPORT">输出</Term>
@@ -1451,6 +1454,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">任务配置</Term>
   <Term key="MNU_SERVER_JOBS">任务队列</Term>
   <Term key="MNU_SERVER_LOGS">服务器日志</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">上传</Term>
   <Term key="MNU_USER">用户</Term>
   <Term key="MNU_USER_QUERY">用户查询</Term>
@@ -1932,6 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">查询结果</Term>
   <Term key="QRY_SETUP">查询设置</Term>
   <Term key="QRY_SQL">查询</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, ID or Type) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 到 %2</Term>
   <Term key="READINGDIRECTION">阅读方向</Term>
   <Term key="READING_ORDER_REV">阅读顺序置反</Term>
@@ -1944,6 +1949,7 @@
   <Term key="RELATIVE_DEADLINE">相对期限</Term>
   <Term key="RELATIVE_DEADLINE_MODE">激活相关的截止时间</Term>
   <Term key="RENDITION">显示</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">即时贴已更改，先保存再继续?</Term>
   <Term key="SAVE_CHANGED_STICKY">修改的即时贴未保存.\n你要保存这些变更吗?</Term>
   <Term key="SAVE_LOCAL">可使用菜单上的'另存为'来保存这个文件的另一个拷贝．</Term>
@@ -1954,6 +1960,7 @@
   <Term key="SEC_EDITION_IDS">{EDITION} IDs</Term>
   <Term key="SEC_SECTION_ID">{SECTION} ID</Term>
   <Term key="SEELOGFILES">详细查询日志文件.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">短名</Term>
   <Term key="SHOW_LOG">显示日志</Term>
   <Term key="SHOW_STATUS">显示 {STATE}</Term>

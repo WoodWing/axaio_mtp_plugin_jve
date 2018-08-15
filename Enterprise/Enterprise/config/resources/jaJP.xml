@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">デフォルト {CHANNEL}</Term>
   <Term key="DELETED">削除</Term>
   <Term key="DELETE_NOTES">付箋を削除</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">新しい付箋を作成したか、テキスト入力する事なく付箋に対応しました。このまま続けると付箋または返信が削除されます。このまま \n\n続けますか？ \n</Term>
   <Term key="DESK_ID">{DESK} ID</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">横の高さ</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">テキストとして</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">テキストの行送り</Term>
   <Term key="DEVICE_THUMBHEIGHT">サムネイル高さ</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, Publication and Status) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">ページの向きに合わせる</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">縦と横</Term>
   <Term key="DM_THUMB_ORIENTATION">ページサムネイルの向き</Term>
@@ -1432,6 +1434,7 @@
   <Term key="MNU_CHANGE_PSW">パスワード・言語</Term>
   <Term key="MNU_DBADMIN">データベースのセットアップ</Term>
   <Term key="MNU_DEADLINES">期限</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">ダイアログ設定</Term>
   <Term key="MNU_EDGEN">{EDITION} ジェネレータ</Term>
   <Term key="MNU_EXPORT">書き出し</Term>
@@ -1451,6 +1454,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">ジョブコンフィグレーション</Term>
   <Term key="MNU_SERVER_JOBS">ジョブクエリ</Term>
   <Term key="MNU_SERVER_LOGS">サーバーログ</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">アップロード</Term>
   <Term key="MNU_USER">ユーザ</Term>
   <Term key="MNU_USER_QUERY">ユーザクエリ</Term>
@@ -1933,6 +1937,7 @@
   <Term key="QRY_QUERY_RESULT">クエリ結果</Term>
   <Term key="QRY_SETUP">クエリの設定</Term>
   <Term key="QRY_SQL">クエリ</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, ID or Type) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 から %2</Term>
   <Term key="READINGDIRECTION">読み方向</Term>
   <Term key="READING_ORDER_REV">右開き</Term>
@@ -1945,6 +1950,7 @@
   <Term key="RELATIVE_DEADLINE">相対期限</Term>
   <Term key="RELATIVE_DEADLINE_MODE">関連する締切を有効にする</Term>
   <Term key="RENDITION">Rendition</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">付箋が変更されています。変更内容を保存しますか？</Term>
   <Term key="SAVE_CHANGED_STICKY">付箋は保存されることなく修正されました。これら \n 個の変更を保存しますか？</Term>
   <Term key="SAVE_LOCAL">メニューから別名で保存をすると、このファイルを複製することができます</Term>
@@ -1955,6 +1961,7 @@
   <Term key="SEC_EDITION_IDS">{EDITION} IDs</Term>
   <Term key="SEC_SECTION_ID">{SECTION} ID</Term>
   <Term key="SEELOGFILES">詳細はログファイルを参照してください。</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">ショートネーム</Term>
   <Term key="SHOW_LOG">ログを表示</Term>
   <Term key="SHOW_STATUS">{STATE}を表示</Term>
