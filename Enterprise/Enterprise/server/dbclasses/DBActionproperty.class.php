@@ -39,7 +39,19 @@ class DBActionproperty extends DBBase
 	static public function insertActionproperty($values)
 	{
 		return self::insertRow(self::TABLENAME, $values);
-		
+	}
+
+	/**
+	 * Same as insertActionproperty() but this function inserts multiple records at one call.
+	 *
+	 * @since 10.5.0
+	 * @param string[] $columns The list of DB field names.
+	 * @param array $values List of array list which contains the DB fields ( $columns ) values.
+	 * @return bool
+	 */
+	public static function insertActionsProperty( $columns, $values )
+	{
+		return self::insertRows(self::TABLENAME, $columns, $values );
 	}
 
 	/**
@@ -73,24 +85,50 @@ class DBActionproperty extends DBBase
 	}
 
 	/**
-	 * Returns actions by publication and object type.
+	 * Returns list of workflow actions by publication and object type.
 	 *
+	 * @since 10.5.0 Renamed from ﻿listActionpropertyGroups to listWorkflowActionPropertyGroups.
 	 * @return array with results.
 	 */
-	static public function listActionpropertyGroups()
+	static public function listWorkflowActionPropertyGroups()
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$dbap = $dbDriver->tablename( self::TABLENAME );
+
+		$sql = "SELECT DISTINCT actprops.`publication` AS `pubid`, pubs.`code`, pubs.`publication`, actprops.`type`, actprops.`action` ";
+		$sql .= "FROM $dbap actprops ";
+		$sql .= "LEFT JOIN `smart_publications` pubs ON ( actprops.`publication`  = pubs.`id` ) ";
+		$sql .= "WHERE actprops.`action` NOT LIKE 'Query%' ";
+		$sql .= "GROUP BY actprops.`publication`, actprops.`type`, pubs.`code`, pubs.`publication`, actprops.`action` ";
+		$sql .= "ORDER BY pubs.`code` ASC, actprops.`type` ASC, actprops.`action` ASC";
+
+		$sth = $dbDriver->query( $sql );
+
+		return self::fetchResults($sth);
+	}
+
+	/**
+	 * Returns list of query actions.
+	 *
+	 * Unlike For query actions, the query actions cannot be grouped by object type nor publication.
+	 *
+	 * @since 10.5.0
+	 * @return string[]
+	 */
+	public static function listQueryActionPropertyGroups()
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbap = $dbDriver->tablename(self::TABLENAME);
-				
-		$sql = "SELECT DISTINCT actprops.`publication` AS `pubid`, pubs.`code`, pubs.`publication`, actprops.`type`, actprops.`action` ";
+
+		$sql = "SELECT DISTINCT actprops.`action` ";
 		$sql .= "FROM $dbap actprops ";
-        $sql .= "LEFT JOIN `smart_publications` pubs ON ( actprops.`publication`  = pubs.`id` ) ";
-        $sql .= "GROUP BY actprops.`publication`, actprops.`type`, pubs.`code`, pubs.`publication`, actprops.`action` ";
-        $sql .= "ORDER BY pubs.`code` ASC, actprops.`type` ASC, actprops.`action` ASC";
-        
-        $sth = $dbDriver->query($sql);
-        
-        return self::fetchResults($sth);		
+		$sql .= "WHERE actprops.`action` LIKE 'Query%' ";
+		$sql .= "GROUP BY actprops.`action` ";
+		$sql .= "ORDER BY actprops.`action` ASC";
+
+		$sth = $dbDriver->query($sql);
+
+		return self::fetchResults($sth);
 	}
 
 	/**

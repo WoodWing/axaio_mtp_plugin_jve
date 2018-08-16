@@ -55,7 +55,13 @@ function getPropertyTypeMap()
 	return $map;
 }
 
-function getActionTypeMap()
+/**
+ * Returns a list of localised action types that falls under workflow actions.
+ *
+ * @since 10.5.0 Renamed from ﻿getActionTypeMap to ﻿getWorkflowActionTypeMap.
+ * @return string[]
+ */
+function getWorkflowActionTypeMap()
 {	
 	static $map;
 	if (!isset($map)) { // not cached yet
@@ -65,37 +71,58 @@ function getActionTypeMap()
 		$map['SendTo']        = BizResources::localize('ACT_SENDTO');
 		$map['CopyTo']        = BizResources::localize('ACT_COPYTO');
 		$map['SetProperties'] = BizResources::localize('ACT_SETPROPERTIES');
-		$map['Preview'] 	  = BizResources::localize('ACT_PREVIEW');
-		
-		$map['Query']               	= BizResources::localize('ACT_QUERY');
-		$map['QueryOut']            	= BizResources::localize('ACT_QUERYOUT');
-		$map['QueryOutContentStation']	= BizResources::localize('ACT_QUERYOUTCONTENTSTATION');
-		$map['QueryOutInCopy']      	= BizResources::localize('ACT_QUERYOUTINCOPY');
-		$map['QueryOutInDesign']    	= BizResources::localize('ACT_QUERYOUTINDESIGN');
-		$map['QueryOutPlanning']       	= BizResources::localize('ACT_QUERYOUTPLANNING');
+		$map['Preview']       = BizResources::localize('ACT_PREVIEW');
 	}
 	return $map;
 }
 
+/**
+ * Returns a list of localised action types that falls under query actions.
+ *
+ * Used in Query Setup page.
+ *
+ * @since 10.5.0
+ * @return string[]
+ */
+function getQueryActionTypeMap()
+{
+	static $map;
+	if( !isset( $map )) { // not cached yet
+		$map['Query']               	= BizResources::localize('ACT_QUERY');
+		$map['QueryOut']            	= BizResources::localize('ACT_QUERYOUT');
+		$map['QueryOutContentStation']= BizResources::localize('ACT_QUERYOUTCONTENTSTATION');
+		$map['QueryOutInCopy']      	= BizResources::localize('ACT_QUERYOUTINCOPY');
+		$map['QueryOutInDesign']    	= BizResources::localize('ACT_QUERYOUTINDESIGN');
+		$map['QueryOutPlanning']      = BizResources::localize('ACT_QUERYOUTPLANNING');
+	}
+	return $map;
+}
+
+/**
+ * Returns a list of all localised action types that falls under workflow and query actions.
+ *
+ * @param string $objType
+ * @return string[]
+ */
 function getObjectActionTypeMap( $objType )
 {
 	static $map;
-	if (!isset($map)) { // not cached yet
+	if (!isset( $map[$objType] )) { // not cached yet
 		if( $objType ) { // typically not set for Query action
 			$objTypes = getObjectTypeMap();
-			$objTxt = $objTypes[$objType];
+			$objTxt = $objTypes[ $objType ];
 		} else {
 			$objTxt = '';
 		}
-		$map['Create']        = BizResources::localize('ACT_CREATE_OBJECT', true, array( $objTxt ) );
-		$map['CheckIn']       = BizResources::localize('ACT_CHECKIN_OBJECT', true, array( $objTxt ) );
-		$map['SendTo']        = BizResources::localize('ACT_SENDTO_OBJECT', true, array( $objTxt ) );
-		$map['CopyTo']        = BizResources::localize('ACT_COPYTO_OBJECT', true, array( $objTxt ) );
-		$map['SetProperties'] = BizResources::localize('ACT_PROPERTIES_DIALOG_TITLE', true, array( $objTxt ) );
-		$map['Preview'] 	  = BizResources::localize('ACT_PREVIEW_OBJECT', true, array( $objTxt ) );
-		$map['Query'] 		  = BizResources::localize('OBJ_QUERY_DIALOG' );
+		$map[$objType]['Create'] = BizResources::localize( 'ACT_CREATE_OBJECT', true, array( $objTxt ) );
+		$map[$objType]['CheckIn'] = BizResources::localize( 'ACT_CHECKIN_OBJECT', true, array( $objTxt ) );
+		$map[$objType]['SendTo'] = BizResources::localize( 'ACT_SENDTO_OBJECT', true, array( $objTxt ) );
+		$map[$objType]['CopyTo'] = BizResources::localize( 'ACT_COPYTO_OBJECT', true, array( $objTxt ) );
+		$map[$objType]['SetProperties'] = BizResources::localize( 'ACT_PROPERTIES_DIALOG_TITLE', true, array( $objTxt ) );
+		$map[$objType]['Preview'] = BizResources::localize( 'ACT_PREVIEW_OBJECT', true, array( $objTxt ) );
+		$map[$objType]['Query'] = BizResources::localize( 'OBJ_QUERY_DIALOG' );
 	}
-	return $map;
+	return $map[$objType];
 }
 
 function getPropertyViewMap()

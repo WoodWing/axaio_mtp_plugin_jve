@@ -1,39 +1,213 @@
+<!--
+     Do visit actionproperties.htm and actionpropertiesquery.htm when there are fixes done in the javascript areas.
+-->
 <script language="javascript">
 function myconfirm(code)
 {
 	switch(code) {
-		case 'delaction':
-			txt = "<!--RES:ACT_SURE_DELETE_ACTION_PROPERTY_QMK-->";
-			break;
+		case 'deleteAllSelected':
+		    if( isThereAnyCheckboxesChecked() ) {
+				txt = "<!--RES:DELETE_SELECTED_CONFIRM_MESSAGE-->";
+			} else {
+                return alert( "<!--RES:SELECT_ROWS_CONFIRM_MESSAGE-->" );
+			}
+		    break;
+		case 'reset':
+		    txt = "<!--RES:RESET_CONFIRM_MESSAGE-->";
+		    break;
 	}
 	return confirm(txt);
 }
 
-function SetCombos(sPubl, sObjType, sAction)
+function isThereAnyCheckboxesChecked()
 {
-	// Point to the form having Publication and ObjectType combos...
-	var f = document.forms.propfilter;
+    var countCheckBoxes = document.forms['propfilter'].recs.value;
+    for(var i = 0; i < countCheckBoxes; i++) {
+        var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
+        if( objCheckBox !== undefined && objCheckBox.checked ) {
+			return true;
+        }
 
-	// Debug info...
-	//alert( f.publ.options[f.publ.selectedIndex] );
-	//alert( f.objtype.options[f.objtype.selectedIndex].text );
-	//alert( f.action.options[f.action.selectedIndex].text );
+    }
+    return false;
+}
 
-	// Select requested values in Publication and ObjectType combos...
-	f.publ.selectedIndex = 0;
-	for(i=0; i<f.publ.options.length; i++){
-		if(f.publ.options[i].value == sPubl){
-			f.publ.selectedIndex = i;
-			break;
+function checkDeleteCheckboxes()
+{
+    var selectAllCheckbox = document.getElementById("multiDeleteToggle");
+    var countCheckBoxes = document.forms['propfilter'].recs.value;
+    for(var i = 0; i < countCheckBoxes; i++) {
+        var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
+        if( objCheckBox !== undefined && objCheckBox.disabled == false ) {
+            if( selectAllCheckbox.checked == true ) {
+                objCheckBox.checked = true;
+            } else {
+                objCheckBox.checked = false;
+			}
 		}
 	}
-	f.objtype.value = sObjType;
-	f.action.value = sAction;
-
-	// Reflect combo changes in properties.php...
-	f.submit();
+    return false;
 }
+
+function SetCombos(sPubl, sObjType, sAction)
+{
+    // Point to the form having Publication and ObjectType combos...
+    var f = document.forms.propfilter;
+
+    // Debug info...
+    //alert( f.publ.options[f.publ.selectedIndex] );
+    //alert( f.objtype.options[f.objtype.selectedIndex].text );
+    //alert( f.action.options[f.action.selectedIndex].text );
+
+    // Select requested values in Publication and ObjectType combos...
+    f.publ.selectedIndex = 0;
+    for(i=0; i<f.publ.options.length; i++){
+        if(f.publ.options[i].value == sPubl){
+            f.publ.selectedIndex = i;
+            break;
+        }
+    }
+    f.objtype.value = sObjType;
+    f.action.value = sAction;
+
+    // Reflect combo changes in properties.php...
+    f.submit();
+}
+
+function isBrowserIEOrEdge()
+{
+    // Return the Microsoft IE or Edge browser's version, false when browser is not IE or Edge.
+	var ua = window.navigator.userAgent;
+	// 'ua' values:
+	// IE 10:
+	// ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
+
+	// IE 11:
+	// ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
+
+	// Edge 12 (Spartan):
+	// ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0';
+
+	// Edge 13:
+	// ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586';
+
+	var microsoftIE = ua.indexOf( 'MSIE ');
+	if ( microsoftIE > 0 ) { // IE 10 or older
+        return true;
+    }
+    var trident = ua.indexOf('Trident/');
+	if (trident > 0) { // IE 11
+		return true;
+    }
+    var edge = ua.indexOf('Edge/');
+	if (edge > 0) { // Edge (IE 12+)
+        return true;
+    }
+    return false; // other browsers
+}
+
+$(document).ready(function() {
+    // Drawing the dialog box.
+    $(function dialogBox() {
+        $("#dialog_confirm").dialog({
+            autoOpen: false,
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            zIndex: 1000,
+            buttons: {
+                "<!--RES:FEATURE_YES-->": function() {
+                    $("#addProperties").val( "add" );
+                    $("#addDefaultDynamic").val( "true" );
+                    $( this ).dialog( "close" );
+                    $( "#propfilter" ).submit();
+                },
+                "<!--RES:FEATURE_NO-->": function() {
+                    $("#addProperties").val( "add" );
+                    $("#addDefaultDynamic").val( "false" );
+                    $( this ).dialog( "close" );
+                    $( "#propfilter" ).submit();
+                }
+            },
+        }).parent().appendTo($("#propfilter"));
+    });
+
+    // Event when dialog_button is clicked.
+    $("#dialog_button").click( function( event ){
+        event.preventDefault();
+        if( $("input[name=recs]").val() == 0 ){
+            $("#dialog_confirm").dialog( "open" );
+        } else { // There're already records on the page
+            $("#addProperties").val( "add" );
+            $( "#propfilter" ).submit();
+        }
+    });
+
+    $( "#updateButton" ).click( function() {
+        $( '#updateProperties' ).val( "update" );
+        $( "#propfilter" ).submit();
+    });
+
+    $( "#resetButton" ).click( function() {
+        if( myconfirm( 'reset' ) ) {
+            $( '#resetProperties' ).val( "reset" );
+            $( "#propfilter" ).submit();
+        }
+    });
+
+    $( "#deleteButton" ).click( function() {
+        if( myconfirm( 'deleteAllSelected' ) ) {
+            $( '#deleteProperties' ).val( "delete" );
+            $( "#propfilter" ).submit();
+        }
+    });
+
+    // Input box 'Order' during update
+    $( "#order" ).keypress( function( event ) {
+        if( event.key == "Enter" ) {
+            if( isBrowserIEOrEdge() ) {
+                // Pressing Enter while focus on 'Order' textbox sometimes lead to two same property added into DB ( as if page has been submitted twice )
+                event.preventDefault();
+			} else {
+                $( '#updateProperties' ).val( "update" );
+                $( "#propfilter" ).submit();
+			}
+		}
+	});
+
+    // Event for tooltips.
+    $( function() {
+        $( document ).tooltip();
+    } );
+
+    // Starting point: The Brand combo box
+    $( function() {
+        $("select[name=publ]").focus();
+    });
+});
+
 </script>
+
+<style>
+	.tooltip-wrapper {
+		display: inline-block; /* display: block works as well */
+		margin: 1px; /* make some space so the tooltip is visible */
+	}
+
+	/* Only applicable for disabled elements */
+	.tooltip-wrapper input[disabled] {
+		/* don't let button block mouse events from reaching wrapper */
+		pointer-events: none;
+	}
+
+	/* Overwrite the jquery-ui tooltip (popup) style to be similar to Enterprise */
+	.ui-tooltip {
+		background-color: #777;
+		color: white;
+		font-size: 8pt;
+	}
+</style>
 
 <table class="appframe"><tr class="text"><td>
 	
@@ -46,7 +220,7 @@ function SetCombos(sPubl, sObjType, sAction)
 	</table>
 	
 	<!-- app body -->
-	<form name="propfilter" action="actionproperties.php" method="post">
+	<form id="propfilter" action="actionproperties.php" method="post" >
 	<table class="listframe" width="100%"><tr><td>
 		<table class="listpane">
 			<tr>
@@ -69,9 +243,13 @@ function SetCombos(sPubl, sObjType, sAction)
 				<td valign="top"><!--PUB_TYPE_ACTION_LIST--></td>
 			</tr>
 		</table>
-		<br/>
 		<table class="listpane">
-			<tr>
+			<tr style="<!--WORKFLOW_COLUMNS-->">
+				<th style="<!--DELETE_COLUMN-->">
+					<div class="tooltip-wrapper">
+						<input type="checkbox" name="multiDeleteToggle" id="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes();">
+					</div>
+				</th>
 				<th><!--RES:OBJ_CATEGORY--></th>
 				<th><!--RES:LIS_ORDER--></th>
 				<th><!--RES:OBJ_PROPERTY--></th>
@@ -80,7 +258,15 @@ function SetCombos(sPubl, sObjType, sAction)
 				<th><!--RES:OBJ_RESTRICTED--></th>
 				<!-- <th><!--RES:OBJ_REFRESH--><!-- </th> -->
 				<th style="<!--MULTIPLE_OBJECTS_CELL-->"><!--RES:OBJ_MULTIPLE_OBJECTS--></th>
-				<th style="<!--LAST_COLUMN-->"></th>
+			</tr>
+			<tr style="<!--PREVIEW_COLUMNS-->">
+				<th style="<!--DELETE_COLUMN-->" width="10px">
+					<div class="tooltip-wrapper">
+						<input type="checkbox" name="multiDeleteToggle" id="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes();">
+					</div>
+				</th>
+				<th><!--RES:LIS_ORDER--></th>
+				<th><!--RES:OBJ_PROPERTY--></th>
 			</tr>
 		<!--ROWS-->
 		</table>
@@ -88,8 +274,24 @@ function SetCombos(sPubl, sObjType, sAction)
 		<table class="listbtnbar">
 			<tr>
 				<td>
-					<input type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
-					<input type="submit" name="add" value="<!--RES:BUT_ADD_ACTION_PROPERTY-->"/>
+					<button style="<!--RESET_BUTTON-->"  type="button" id="resetButton" ><!--RES:BUT_RESET--></button>
+					<input type="hidden" id="resetProperties" name="resetProperties" value="" />
+
+					<button style="<!--DELETE_BUTTON-->" type="button" id="deleteButton" ><!--RES:ACT_REMOVE--></button>
+					<input type="hidden" id="deleteProperties" name="deleteProperties" value="" />
+
+					<button style="<!--UPDATE_BUTTON-->" type="button" id="updateButton"><!--RES:BUT_UPDATE--></button>
+					<input type="hidden" id="updateProperties" name="updateProperties" value="" />
+
+					<button style="<!--ADD_BUTTON-->" type="button" id="dialog_button"><!--RES:ACT_ADD--></button>
+					<input style="<!--ADD_BUTTON-->" type="hidden" id="addProperties" name="addProperties" value="" />
+					<input style="<!--ADD_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false" />
+					<div style="display:none" id="dialog_confirm" title="<!--RES:HEA_DIALOG-->">
+						<p>
+							<span style="float: left; margin: 0 0px 0px 0;"></span>
+							<!--DIALOG_CONFIRM_MESSAGE-->
+						</p>
+					</div>
 				</td>
 			</tr>
 		</table>

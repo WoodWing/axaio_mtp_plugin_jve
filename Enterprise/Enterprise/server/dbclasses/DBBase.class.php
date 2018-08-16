@@ -339,7 +339,7 @@ class DBBase
 	 *
 	 * @param string $tableName Table name without the 'smart_' prefix.
 	 * @param string[] $columns List of DB field names.
-	 * @param array[] $values List of array list which contains the database params. Refer to function header.
+	 * @param array $values List of array list which contains the database params. Refer to function header.
 	 * @param bool $autoincrement Whether the table to be inserted has autoincrement db field.
 	 * @param bool $writeLog In case of license related queries, this option can be used to not write in the log file.
 	 * @param bool $logExistsErr Suppress 'already exists' errors.

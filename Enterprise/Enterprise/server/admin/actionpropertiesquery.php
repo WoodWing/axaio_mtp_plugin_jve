@@ -11,34 +11,32 @@ checkSecure('admin');
 
 $sysProps= BizProperty::getSystemPropIds();
 $objMap	= getObjectTypeMap();
-$actMap = getWorkflowActionTypeMap();
+$actMap = getQueryActionTypeMap();
 
 // determine incoming mode
-$publ    = isset($_REQUEST['publ'])    ? intval($_REQUEST['publ']) : 0; // Publication id. Zero for all.
-$action  = isset($_REQUEST['action'])  ? $_REQUEST['action']  : ''; 	// Internal action string, such as 'CopyTo'. Empty for <all>.
-$objType = isset($_REQUEST['objtype']) ? $_REQUEST['objtype'] : ''; 	// Internal object type string, such as ArticleTemplate. Empty for <all>.
+$publ = 0; // Cannot set/configure at brand level but for DB saving, publication needs a value.
+$objType = ''; // Cannot set/configure at brand level but for DB saving, object type needs a value.
+$action  = isset($_REQUEST['action'])  ? $_REQUEST['action']  : 'Query'; 	// Internal action string, such as 'Query', 'QueryOut'.
 
 // Validate data retrieved from form (XSS attacks)
 if( !array_key_exists($action, $actMap) ) { $action = '' ; }
 if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
 
 $dum = '';
-cookie('actionproperties', !(isset($_REQUEST['isform']) && $_REQUEST['isform']), $publ, $action, $objType, $dum, $dum, $dum, $dum );
+cookie('actionpropertiesquery', !(isset($_REQUEST['isqueryform']) && $_REQUEST['isqueryform']), $action, $dum, $dum, $dum, $dum, $dum, $dum );
 
 // Re-validate data retrieved from cookie! (XSS attacks)
-$publ = intval($publ);
-if( !array_key_exists($action, $actMap) ) { $action = ''; }
-if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
-//echo 'DEBUG: publ=['. $publ .'] action=['. $action .'] objtype=['. $objType .']</br>';
+//if( !array_key_exists($action, $actMap) ) { $action = ''; }
+//if( !array_key_exists($objType, $objMap) ) { $objType = ''; }
 
-$app = new ActionPropertiesAdminApp( $publ, $objType, $action, $sysProps );
+$app = new ActionPropertiesQueryAdminApp( $publ, $objType, $action, $sysProps );
 
 $app->processRequestData();
 
 $txt = $app->loadHtmlTemplate();
 
 // Upper part - build selection of combo box for Brand, Object Type and Action
-$txt = $app->buildSelectionComboBoxes( $objMap, $actMap, $txt );
+$txt = $app->buildSelectionComboBoxes( $actMap, $txt );
 
 // Middle part - build Brand-Object Type-Action link list
 $txt = $app->createBrandObjectTypeActionLinks( $objMap, $actMap, $txt );
@@ -52,12 +50,11 @@ print HtmlDocument::buildDocument( $txt );
 /**
  * Helper class for the admin application: Dialog Setup Admin Page
  */
-class ActionPropertiesAdminApp
+class ActionPropertiesQueryAdminApp
 {
 	private $publ = null;
 	private $objType = null;
 	private $action = null;
-	private $onlyQuery = null;
 	private $mode = null;
 	private $sAll = null;
 	private $sysProps = null;
@@ -80,55 +77,11 @@ class ActionPropertiesAdminApp
 	 *
 	 * @return string $txt HTML strings
 	 */
-	public function buildSelectionComboBoxes( $objMap, $actMap, $txt )
+	public function buildSelectionComboBoxes( $actMap, $txt )
 	{
-		$combo = $this->buildBrandComboBox();
-		$txt = str_replace('<!--COMBO:PUBL-->', $combo, $txt );
-
-		$combo = $this->buildObjectTypeComboBox( $objMap );
-		$txt = str_replace('<!--COMBO:TYPE-->', $combo, $txt );
-
 		$combo = $this->buildActionComboBox( $actMap );
 		$txt = str_replace('<!--COMBO:ACTION-->', $combo, $txt );
 		return $txt;
-	}
-
-	/**
-	 * Build Brand combo box
-	 *
-	 * @return string $combo Brand HTML combo element text
-	 */
-	private function buildBrandComboBox()
-	{
-		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		$rows = DBPublication::listPublications(array('id', 'publication'));
-		$combo = inputvar( 'isform', '1', 'hidden' );
-		$combo .= '<select name="publ" onchange="submit();">';
-		$combo .= '<option value="">&lt;'.$this->sAll.'&gt;</option>';
-		if( $rows ) foreach( $rows as $row ) {
-			$selected = ($row['id'] == $this->publ) ? 'selected="selected"' : '';
-			$combo .= '<option value="'.$row['id'].'" '.$selected.'>'.formvar($row['publication']).'</option>';
-		}
-		$combo .= '</select>';
-		return $combo;
-	}
-
-	/**
-	 * Build object type combo box
-	 *
-	 * @param array $objMap Array of object type
-	 * @return string $combo Object type HTML combo element text
-	 */
-	private function buildObjectTypeComboBox( $objMap )
-	{
-		$combo = '<select name="objtype" onchange="submit();">';
-		$combo .= '<option value="">&lt;'.$this->sAll.'&gt;</option>';
-		foreach( $objMap as $k => $sDisplayType ) {
-			$selected = ($k == $this->objType) ? 'selected="selected"' : '';
-			$combo .= '<option value="'.$k.'" '.$selected.'>'.formvar($sDisplayType).'</option>';
-		}
-		$combo .= '</select>';
-		return $combo;
 	}
 
 	/**
@@ -139,8 +92,8 @@ class ActionPropertiesAdminApp
 	 */
 	private function buildActionComboBox( $actMap )
 	{
-		$combo = '<select name="action" onchange="submit();">';
-		$combo .= '<option value="">&lt;'.$this->sAll.'&gt;</option>';
+		$combo = inputvar( 'isqueryform', '1', 'hidden' );
+		$combo .= '<select name="action" onchange="submit();">';
 		foreach( $actMap as $k => $sDisplayValue ) {
 			$selected = ($k == $this->action) ? 'selected="selected"' : '';
 			$combo .= '<option value="'.$k.'" '.$selected.'>'.formvar($sDisplayValue).'</option>';
@@ -159,8 +112,6 @@ class ActionPropertiesAdminApp
 		$edit = isset($_REQUEST['edit']) ? $_REQUEST['edit'] : '';
 		$mandatory = isset($_REQUEST['mandatory']) ? $_REQUEST['mandatory'] : '';
 		$restricted = isset($_REQUEST['restricted']) ? $_REQUEST['restricted'] : '';
-		$multipleObjects = isset($_REQUEST['multipleobjects']) ? $_REQUEST['multipleobjects'] : '';
-		//echo 'DEBUG: order=['. $order .'] prop=['. $prop .'] edit=['. $edit .'] mandatory=['. $mandatory .'] restricted=['. $restricted .']</br>';
 		// Validate data retrieved from form (XSS attacks)
 		if( in_array($prop, $this->sysProps) ) {
 			$edit = '';
@@ -168,11 +119,9 @@ class ActionPropertiesAdminApp
 		$edit = $edit ? 'on' : '';
 		$mandatory = $mandatory ? 'on' : '';
 		$restricted = $restricted ? 'on' : '';
-		$multipleObjects = $multipleObjects ? 'on' : '';
 		if( $prop ) {
 			$values = array('publication' => $this->publ, 'action' => $this->action, 'type' => $this->objType, 'orderid' => $order, 'property' => $prop,
-				'edit' => $edit, 'mandatory' => $mandatory, 'restricted' => $restricted,
-				'multipleobjects' => $multipleObjects );
+				'edit' => $edit, 'mandatory' => $mandatory, 'restricted' => $restricted );
 			$this->insertActionProperty( $values );
 		}
 	}
@@ -189,6 +138,44 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
+	 * Composes and creates Query default property usages and returns the list of property usages created.
+	 *
+	 * @since 10.5.0
+	 * @return array List of usages or empty list if the insertion of the property usages into database fails.
+	 */
+	private function composeAndInsertActionsProperty():array
+	{
+		$addDefaultDynamicFields = ( isset( $_REQUEST['addDefaultDynamic'] ) && strval( $_REQUEST['addDefaultDynamic'] ) == 'true' ) ? true : false;
+		if( $addDefaultDynamicFields == 'true' ) {
+			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
+		} else {
+			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
+		}
+		$order = 5;
+		$listOfValues = array();
+		if( $usages ) foreach( $usages as $usage ) {
+			$values = array();
+			$values = array(
+				$this->publ,
+				$this->action,
+				$this->objType,
+				$order,
+				$usage->Name,
+				$usage->Editable ? 'on' : '',
+				$usage->Mandatory ? 'on' : '',
+				$usage->Restricted ? 'on' : '',
+				$usage->MultipleObjects ? 'on' : ''
+			);
+			$listOfValues[] = $values;
+			$order += 5;
+		}
+		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		$result = DBActionproperty::insertActionsProperty( $fields, $listOfValues );
+		return $result ? $usages : array();
+	}
+
+	/**
 	 * Loop through all the current action properties, and perform update action.
 	 *
 	 * @param integer $numberOfRecords Number of records count
@@ -196,70 +183,27 @@ class ActionPropertiesAdminApp
 	private function updateActionProperties( $numberOfRecords )
 	{
 		for( $i=0; $i < $numberOfRecords; $i++ ) {
+			$id = intval($_REQUEST["id$i"]);        // Record id. Used in POST and GET requests.
+			$order = intval($_REQUEST["order$i"]);  // Sorting order field. Zero when not filled.
 			$prop = $_REQUEST["prop$i"];            // Name of action property. Always set.
-			$id = intval($_REQUEST["id$i"]);  // Record id. Used in POST and GET requests.
-			$isConfigurableField = $this->isConfigurableField( $prop );
-			if( $isConfigurableField ) {
-				$this->updateConfigurableActionProperty( $id, $i, $prop );
+			$edit = isset($_REQUEST["edit$i"]) ? $_REQUEST["edit$i"] : '';
+			$mandatory = isset($_REQUEST["mandatory$i"]) ? $_REQUEST["mandatory$i"] : '';
+			$restricted = isset($_REQUEST["restricted$i"]) ? $_REQUEST["restricted$i"] : '';
+			// Validate data retrieved from form (XSS attacks)
+			if( in_array($prop, $this->sysProps) ) {
+				$edit = '';
 			}
-			if( !$isConfigurableField ) {
-				$this->updateNonConfigurableActionPropertySortOrder( $id, $i );
-			}
+			$edit = $edit ? 'on' : '';
+			$mandatory = $mandatory ? 'on' : '';
+			$restricted = $restricted ? 'on' : '';
+			$values = array('publication' => $this->publ, 'orderid' => $order, 'property' => $prop, 'edit' => $edit,
+				'mandatory' => $mandatory,	'restricted' => $restricted );
+			DBActionproperty::updateActionproperty( $id, $values );
 		}
 	}
 
 	/**
-	 * Update action property that can be configured by the end-user.
-	 *
-	 * @since 10.5.0
-	 * @param integer $id
-	 * @param integer $counter
-	 * @param string $prop
-	 */
-	private function updateConfigurableActionProperty( int $id, int $counter, string $prop ):void
-	{
-		require_once BASEDIR .'/server/dbclasses/DBActionproperty.class.php';
-
-		$order = intval($_REQUEST["order$counter"]);  // Sorting order field. Zero when not filled.
-		$edit = isset($_REQUEST["edit$counter"]) ? $_REQUEST["edit$counter"] : '';
-		$mandatory = isset($_REQUEST["mandatory$counter"]) ? $_REQUEST["mandatory$counter"] : '';
-		$restricted = isset($_REQUEST["restricted$counter"]) ? $_REQUEST["restricted$counter"] : '';
-		$multipleObjects = isset($_REQUEST["multipleobjects$counter"]) ? $_REQUEST["multipleobjects$counter"] : '';
-		// Validate data retrieved from form (XSS attacks)
-		if( in_array($prop, $this->sysProps) ) {
-			$edit = '';
-		}
-		$edit = $edit ? 'on' : '';
-		$mandatory = $mandatory ? 'on' : '';
-		$restricted = $restricted ? 'on' : '';
-		$multipleObjects = $multipleObjects ? 'on' : '';
-		//echo 'DEBUG: order=['. $order .'] prop=['. $prop .'] edit=['. $edit .'] mandatory=['. $mandatory .'] restricted=['. $restricted .']</br>';
-		$values = array('publication' => $this->publ, 'orderid' => $order, 'property' => $prop, 'edit' => $edit,
-			'mandatory' => $mandatory,	'restricted' => $restricted,
-			'multipleobjects' => $multipleObjects );
-		DBActionproperty::updateActionproperty( $id, $values );
-	}
-
-	/**
-	 * Update non-configurable action property's order.
-	 *
-	 * For non-configurable action properties, only its order in the dialog list can be adjusted.
-	 *
-	 * @since 10.5.0
-	 * @param integer $id
-	 * @param integer $counter
-	 */
-	private function updateNonConfigurableActionPropertySortOrder( int $id, int $counter ):void
-	{
-		require_once BASEDIR .'/server/dbclasses/DBActionproperty.class.php';
-		$id = intval($_REQUEST["id$counter"]);
-		$order = intval($_REQUEST["order$counter"]);  // Sorting order field. Zero when not filled.
-		$values = array( 'orderid' => $order );
-		DBActionproperty::updateActionproperty( $id, $values );
-	}
-
-	/**
-	 * Delete action propert(ies) selected on the Form.
+	 * Delete action property(ies) selected on the Form.
 	 *
 	 * @param int $numberOfRecords
 	 */
@@ -305,22 +249,14 @@ class ActionPropertiesAdminApp
 	 */
 	public function createBrandObjectTypeActionLinks( $objMap, $actMap,  $txt )
 	{
-		$rows = DBActionproperty::listWorkflowActionPropertyGroups();
+		$rows = DBActionproperty::listQueryActionPropertyGroups();
 		// Show results in a list of hyperlinks to select the Brand/Type/Act combos when user clicks on them...
 		$brandTypeActionlist = "";
 
 		if( $rows ) foreach( $rows as $row ) {
 			// Skip SetPublishProperties action for PublishFormTemplates, they should never be editable from the action properties page.
-			if (isset($row['action']) && isset($row['type']) && trim($row['action']) == 'SetPublishProperties' && trim($row['type']) == 'PublishFormTemplate') {
+			if (isset($row['action']) && trim($row['action']) == 'SetPublishProperties' && trim($row['type']) == 'PublishFormTemplate') {
 				continue;
-			}
-			$disp_pub = $row['publication'];
-			if( !$disp_pub ) $disp_pub = '<'.$this->sAll.'>'; // set to "<all>" when not defined
-			$disp_type = trim($row['type']);
-			if( $disp_type ) {
-				$disp_type = $objMap[$disp_type];
-			} else {
-				$disp_type = '<'.$this->sAll.'>'; // set to "<all>" when not defined
 			}
 			$disp_act = trim($row['action']);
 			if( $disp_act ) {
@@ -328,8 +264,8 @@ class ActionPropertiesAdminApp
 			} else {
 				$disp_act = '<'.$this->sAll.'>'; // set to "<all>" when not defined
 			}
-			$brandTypeActionlist .= '<a href="javascript:SetCombos(\''.$row['pubid'].'\',\''.formvar(trim($row['type'])).'\',\''.formvar(trim($row['action'])).'\');">';
-			$brandTypeActionlist .= formvar($disp_pub).' - '.formvar($disp_type).' - '.formvar($disp_act).'</a><br/>';
+			$brandTypeActionlist .= '<a href="javascript:SetCombos(\''.formvar(trim($row['action'])).'\');">';
+			$brandTypeActionlist .= formvar($disp_act).'</a><br/>';
 		}
 		$txt = str_replace("<!--PUB_TYPE_ACTION_LIST-->", $brandTypeActionlist, $txt );
 		return $txt;
@@ -340,14 +276,13 @@ class ActionPropertiesAdminApp
 	 * If exact brand is found from 1st left join query result, only get the custom property display name from the 2nd left join.
 	 * If exact brand is not found, then continue to get custom displayname from the 2nd left join query result.
 	 *
-	 * @param boolean $showMultiObj When True to show multiple objects|False not to show
 	 * @param array $locals Array of property infos
 	 * @param array $rows Array of action properties database records
 	 * @param string $detailTxt HTML strings
 	 * @param int $numberOfRecords [In/Out] Total number of action properties listed.
 	 * @return string $detailTxt HTML strings of the table list
 	 */
-	private function listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt, &$numberOfRecords )
+	private function listCurrentActionProperties( $locals, $rows, $detailTxt, &$numberOfRecords )
 	{
 		$i = 0;
 		$color = array (" bgcolor='#eeeeee'", '');
@@ -383,50 +318,17 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$nonAdjustableDefaultFieldsMsg = BizResources::localize( 'MNU_TOOLTIP_CANNOT_EDIT' );
+			$deleteCheckbox = '';
 			if( $isConfigurable ) {
 				$deleteCheckbox = inputvar( "multiDelete$i", '', 'checkbox', null, true, null, !$isConfigurable );
-				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("MNU_DIALOG_SELECT_DELETE") );
-			} else {
-				$deleteCheckbox = '';
+//				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, BizResources::localize("MNU_DIALOG_SELECT_DELETE") );
+				$deleteCheckbox = $this->placeCheckboxInAToolTipWrapper( $deleteCheckbox, 'Select to permanently remove this row' );
 			}
-			if( $this->isActionOnlyForFieldsDisplay( $this->action ) ) {
-				$detailTxt .= "<tr$clr>";
-				$detailTxt .= '<td align="center">' . $deleteCheckbox. '</td>';
-				$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
-				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				$detailTxt .= '</tr>';
-			} else {
-				$detailTxt .= "<tr$clr>";
-				$detailTxt .= '<td align="center">' . $deleteCheckbox.'</td>';
-				$detailTxt .= "<td>".$row['category'].'</td>';
-				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
-				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				if( empty( trim($row['edit']) ) // trim: temporary hack due to DBActionproperty::listActionPropertyWithNames is not returning the expected data.
-					&& in_array( $row['property'], $this->sysProps ) ) {
-					$detailTxt .= '<td align="center">'.LOCKIMAGE.'</td>';
-				} else {
-					$title = $isConfigurable ? BizResources::localize("OBJ_EDITABLE") : $nonAdjustableDefaultFieldsMsg;
-					$checkbox = inputvar("edit$i", trim( $row['edit'] ), 'checkbox', null, true, null, !$isConfigurable );
-					$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
-				}
-				$title = $isConfigurable ? BizResources::localize("OBJ_MANDATORY") : $nonAdjustableDefaultFieldsMsg;
-				$checkbox = inputvar("mandatory$i", $row['mandatory'], 'checkbox', null, true, null, !$isConfigurable );
-				$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
-
-				$title = $isConfigurable ? BizResources::localize("OBJ_RESTRICTED") : $nonAdjustableDefaultFieldsMsg;
-				$checkbox = inputvar("restricted$i", $row['restricted'], 'checkbox', null, true, null, !$isConfigurable );
-				$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
-
-				if( $showMultiObj ) {
-					$title = $isConfigurable ? BizResources::localize("OBJ_MULTIPLE_OBJECTS") : $nonAdjustableDefaultFieldsMsg;
-					$checkbox = inputvar("multipleobjects$i", $row['multipleobjects'], 'checkbox', null, true, null, !$isConfigurable );
-					$detailTxt .= '<td align="center">' . $this->placeCheckboxInAToolTipWrapper( $checkbox, $title ) . '</td>';
-				} else { // Don't fill in the multiple objects column.
-					$detailTxt .= '<td style="display:none"></td>'; // No checkbox.
-				}
-				$detailTxt .= "</tr>";
-			}
+			$detailTxt .= "<tr$clr>";
+			$detailTxt .= '<td align="center" width="5">' . $deleteCheckbox . '</td>';
+			$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
+			$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
+			$detailTxt .= '</tr>';
 			$detailTxt .= inputvar( "id$i", $row['id'], 'hidden' );
 			$i++;
 		}
@@ -440,40 +342,24 @@ class ActionPropertiesAdminApp
 	 * If exact brand is found from 1st left join query result, only get the custom property display name from the 2nd left join.
 	 * If exact brand is not found, then continue to get custom displayname from the 2nd left join query result.
 	 *
-	 * @param boolean $showMultiObj When True to show multiple objects|False not to show
 	 * @param array $props Array of properties
 	 * @param array $rows Array of action properties database records
 	 * @param string $detailTxt HTML strings
 	 * @return string $detailTxt HTML strings of the table list
 	 */
-	private function listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt )
+	private function listNewAndCurrentActionProperties( $props, $rows, $detailTxt )
 	{
 		$highestOrderId = $rows ? max( array_column( $rows, 'orderid' )) + 5 : 5;
-		if( $this->isActionOnlyForFieldsDisplay( $this->action )) {
-			$detailTxt .= '<tr>';
-			$detailTxt .= '<td>'.inputvar('order', $highestOrderId, 'small', null, true, null, false, 'order' ).'</td>';
-			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
-			$detailTxt .= '</tr>';
-			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
-		} else {
-			$detailTxt .= '<tr><td></td><td>'.inputvar('order', $highestOrderId, 'small', null, true, null, false, 'order' ).'</td>';
-			$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
-			$detailTxt .= '<td align="center">'.inputvar('edit','', 'checkbox', null, true, BizResources::localize("OBJ_EDITABLE")).'</td>';
-			$detailTxt .= '<td align="center">'.inputvar('mandatory','', 'checkbox', null, true, BizResources::localize("OBJ_MANDATORY")).'</td>';
-			$detailTxt .= '<td align="center">'.inputvar('restricted','', 'checkbox', null, true, BizResources::localize("OBJ_RESTRICTED")).'</td>';
-			if( $showMultiObj ) {
-				$detailTxt .= '<td align="center">'.inputvar('multipleobjects','', 'checkbox', null, true, BizResources::localize("OBJ_MULTIPLE_OBJECTS")).'</td>';
-			} else {
-				$detailTxt .= '<td style="display:none"></td>';
-			}
-			$detailTxt .= '<td style="display:none"></td></tr>';
-			$detailTxt .= inputvar( 'insert', '1', 'hidden' );
-		}
+		$detailTxt .= '<tr>';
+		$detailTxt .= '<td>'.inputvar( 'order', $highestOrderId, 'small', null, true, null, false, 'order' ).'</td>';
+		$detailTxt .= '<td>'.inputvar('prop', '', 'combo', $props, false).'</td>';
+		$detailTxt .= '</tr>';
+		$detailTxt .= inputvar( 'insert', '1', 'hidden' );
 		// show other states as info
 		$color = array (" bgcolor='#eeeeee'", '');
 		$flip = 0;
 		$exactBrandFound = $this->isExactBrandFound( $rows );
-		foreach( $rows as $row ) {
+		if ( $rows ) foreach( $rows as $row ) {
 			$dprop = $row['dispname'];
 			$prop = $row['property'];
 			$isCustomProperty = BizProperty::isCustomPropertyName( $prop );
@@ -500,27 +386,7 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			if( $this->isActionOnlyForFieldsDisplay( $this->action )) {
-				$detailTxt .= "<tr$clr><td>".$row['orderid'].'</td><td>'.formvar($prop).'</td>';
-			} else {
-				$detailTxt .= "<tr$clr><td>".formvar($row['category']).'</td><td>'.$row['orderid'].'</td>';
-				$detailTxt .= '<td>'.formvar($prop).'</td>';
-				$isConfigurable = $this->isConfigurableField( $prop );
-				if( empty( trim($row['edit']) ) // trim: temporary hack due to DBActionproperty::listActionPropertyWithNames is not returning the expected data.
-					&& in_array( $row['property'], $this->sysProps )) {
-					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:LOCKIMAGE).'</td>';
-				} else {
-					$detailTxt .= '<td align="center">'.(trim($row['edit'])?CHECKIMAGE:'').'</td>';
-				}
-				$detailTxt .= '<td align="center">'.(trim($row['mandatory'])?CHECKIMAGE:'').'</td>';
-				$detailTxt .= '<td align="center">'.(trim($row['restricted'])?CHECKIMAGE:'').'</td>';
-				if( $showMultiObj ) {
-					$detailTxt .= '<td align="center">'.(trim($row['multipleobjects'])?CHECKIMAGE:'').'</td>';
-				} else {
-					$detailTxt .= '<td style="display:none"></td>';
-				}
-				$detailTxt .= '<td style="display:none"></td></tr>';
-			}
+			$detailTxt .= "<tr$clr><td>".$row['orderid'].'</td><td>'.formvar($prop).'</td>';
 		}
 		return $detailTxt;
 	}
@@ -562,13 +428,13 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
-	 * Load different Html Template.
+	 * Load different Html Template
 	 *
 	 * @return string $txt HTML strings
 	 */
 	public function loadHtmlTemplate()
 	{
-		return HtmlDocument::loadTemplate( 'actionproperties.htm' );
+		return HtmlDocument::loadTemplate( 'actionpropertiesquery.htm' );
 	}
 
 	/**
@@ -579,8 +445,7 @@ class ActionPropertiesAdminApp
 	 */
 	public function buildCurrentActionProperties( $txt )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
+		require_once BASEDIR .'/server/bizclasses/BizQueryBase.class.php';
 		$staticProps   = BizProperty::getStaticPropIds();
 		$dynamicProps  = BizProperty::getDynamicPropIds();
 		$xmpProps      = BizProperty::getXmpPropIds();
@@ -589,31 +454,33 @@ class ActionPropertiesAdminApp
 
 		$already = array();
 		$usages = $this->preparePropertyUsages();
-		if( $usages ) foreach( $usages as $usage ) { // $onlyMultiSetProperties = false: Returns all properties regardless of single/multi-set properties support.
+		if( $usages ) foreach( $usages as $usage ) {
 			$already[] = $usage->Name;
 		}
 
-		$limitPub = true;
 		switch( $this->action ) {
-			case 'SendTo':
-				$allProps = $wfProps;
+			case 'Query': // 'Query Parameters'
+				$allProps = array_merge( $dynamicProps, $xmpProps, $readonlyProps);
 				break;
-			case 'Preview':
+			case 'QueryOut': // 'Query Result Columns'
+			case 'QueryOutInDesign':
+			case 'QueryOutInCopy':
+			case 'QueryOutContentStation':
+			case 'QueryOutPlanning':
 				$allProps = array_merge($staticProps, $dynamicProps, $xmpProps, $readonlyProps);
+				$already = array_merge( $already, BizQueryBase::getMandatoryQueryResultColumnFields() );
+				$already[] = 'Issue'; // BZ#27830 In the query result only 'Issues' are of interest.
 				break;
 			default:
 				$allProps = array_merge($dynamicProps, $xmpProps);
-				$already[] = 'ID';
-				$already[] = 'Type';
-				$already[] = 'Name';
+				$already = array_merge( $already, BizQueryBase::getMandatoryQueryResultColumnFields() );
 				break;
 		}
 
 		// get customfields
 		$cust = array();
 		$trans = array();
-		$publication = $limitPub ? $this->publ : 0;
-		$propObjs = BizProperty::getProperties( $publication, $this->objType, null, null, false, false, true );
+		$propObjs = BizProperty::getProperties( $this->publ, $this->objType, null, null, false, false, $this->isPropertySupportedOnlyAtAllObjectTypeLevel() );
 
 		require_once BASEDIR.'/server/bizclasses/BizCustomField.class.php';
 		$excludedPropTypes = BizCustomField::getExcludedObjectFields();
@@ -632,21 +499,6 @@ class ActionPropertiesAdminApp
 			// Only show the properties where the AdminUI internal property is set to true.
 			if( $isCustomProperty && $propObj->AdminUI ) $cust[] = $name;
 			if( $propObj->DisplayName ) $trans[$name] = $propObj->DisplayName;
-		}
-
-		$hasCust = count($cust);
-		if( $limitPub && $this->action != 'SendTo' ) {
-			$properties = DBProperty::listPropertyDisplayNames();
-			foreach( $properties as $propertyName => $property ) {
-				if( BizProperty::isCustomPropertyName( $propertyName ) &&
-					!isset( $propObjs[$propertyName] )) { // Only continues if it is not yet checked in the top foreach loop.
-					if ( $hasCust ) {
-						continue;			// if there are already specific customfields, skip generic customfields
-					} else {
-						$cust[] = $propertyName;
-					}
-				}
-			}
 		}
 		$allProps = array_merge($allProps, $cust);
 
@@ -681,32 +533,27 @@ class ActionPropertiesAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		$showMultiObj = in_array( $this->action, BizProperty::getMultiObjectsAllowedActions() );
-		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, true );
 		$onlyStaticProperties = null;
+		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->isPropertySupportedOnlyAtAllObjectTypeLevel() );
 		switch( $this->mode ) {
 			case 'view':
 			case 'update':
 			case 'delete':
 			case 'reset':
 				$numberOfRecords = 0;
-				$detailTxt = $this->listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt, $numberOfRecords );
+				$detailTxt = $this->listCurrentActionProperties( $locals, $rows, $detailTxt, $numberOfRecords );
 				$onlyStaticProperties = $this->isOnlyStaticProperties( $rows );
 				break;
 			case 'add':
 				$numberOfRecords = count( $rows );
-				$detailTxt = $this->listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt );
+				$detailTxt = $this->listNewAndCurrentActionProperties( $props, $rows, $detailTxt );
 				break;
 		}
 
 		$txt = $this->showOrHideButtons( $txt, $numberOfRecords, $onlyStaticProperties );
 		$txt = str_replace("<!--DELETE_COLUMN-->", ( $this->mode == 'add' ) ? 'display:none' : (( $numberOfRecords > 0 ) ? '' : 'display:none'), $txt );
-		$txt = str_replace("<!--WORKFLOW_COLUMNS-->",$this->isActionOnlyForFieldsDisplay( $this->action ) ? 'display:none' : '', $txt );
-		$txt = str_replace("<!--PREVIEW_COLUMNS-->",$this->isActionOnlyForFieldsDisplay( $this->action ) ? '' : 'display:none', $txt );
-		$txt = str_replace("<!--MULTIPLE_OBJECTS_CELL-->", $showMultiObj ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
-		$txt = str_replace("<!--IMG_LOCKIMG-->", LOCKIMAGE, $txt);
-		$txt = str_replace("<!--DIALOG_CONFIRM_MESSAGE-->", BizResources::localize( 'DIALOG_SETUP_CONFIRM_MESSAGE', true, array( "<br/>", "<br/>", "<br/>", "<br/>", "<br/>" )), $txt);
+		$txt = str_replace("<!--DIALOG_CONFIRM_MESSAGE-->", BizResources::localize( 'QUERY_SETUP_CONFIRM_MESSAGE', true, array( "<br/>", "<br/>", "<br/>", "<br/>", "<br/>" )), $txt);
 		return $txt;
 	}
 
@@ -772,9 +619,51 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
+	 * To determine if the property is supported only at object type level 'ALL' or also at '<specific>' object type level.
+	 *
+	 * The properties ( whether they are static, dynamic or custom ), can be adjusted or defined at 'ALL' object type level
+	 * or '<specific>' object type level in the MetaData page.
+	 * Depending on the Query action ( 'Query Parameters', 'Query Result Columns' and etc ), some action(s) can only use
+	 * the properties defined at 'ALL' object type level and '<specific>' object type level; while some can only use the
+	 * properties that are defined at 'ALL' object type level.
+	 *
+	 * The list of which actions can use which type of properties are listed below.
+	 * 1) Actions that can use propertes defined at 'ALL' and '<specific> object type level:
+	 * 'Query Result Columns'
+	 * 'Query Result Columns for Content Station'
+	 * 'Query Result Columns for InCopy'
+	 * 'Query Result Columns for InDesign'
+	 * 'Query Result Columns for Planning'
+	 * Possible example properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_Image_RouteTo, All_Article_CustomProp and etc.
+	 *
+	 * 2) Actions that can use properties that are defined only at 'ALL' object type level:
+	 * 'Query Parameters'
+	 * Possible example properties(<Brand>_<Type>_<Property>): All_All_RouteTo, All_All_CustomProp and etc.
+	 *
+	 * @since 10.5.0
+	 * @return bool
+	 */
+	private function isPropertySupportedOnlyAtAllObjectTypeLevel()
+	{
+		switch( $this->action ) {
+			case 'QueryOut': // 'Query Result Columns'
+			case 'QueryOutInDesign':
+			case 'QueryOutInCopy':
+			case 'QueryOutContentStation':
+			case 'QueryOutPlanning':
+				$propertyObjectTypeApplicableToAction = false;
+			break;
+			case 'Query': // 'Query Parameters'
+				$propertyObjectTypeApplicableToAction = true;
+				break;
+		}
+		return $propertyObjectTypeApplicableToAction;
+	}
+
+	/**
 	 * Check if the exact brand is found from the first join return value
 	 *
-	 * @param array $rows
+	 * @param $rows
 	 * @return bool
 	 */
 	private function isExactBrandFound( $rows )
@@ -800,23 +689,34 @@ class ActionPropertiesAdminApp
 	 */
 	private function isConfigurableField( $prop )
 	{
-		require_once BASEDIR .'/server/bizclasses/BizProperty.class.php';
-		$nonConfigurableFields = BizProperty::getStaticPropIds();
-		return !in_array( $prop, $nonConfigurableFields );
+		require_once BASEDIR .'/server/bizclasses/BizQueryBase.class.php';
+		$editable = true;
+		switch( $this->action ) {
+			case 'Query':
+				switch( $prop ) {
+					case 'Name':
+						$editable = false;
+						break;
+				}
+				break;
+			case 'QueryOut':
+			case 'QueryOutInDesign':
+			case 'QueryOutInCopy':
+			case 'QueryOutContentStation':
+			case 'QueryOutPlanning':
+				$nonEditableFields = array_merge( BizQueryBase::getMandatoryQueryResultColumnFields(), array( 'Issue' ) );
+				if( in_array( $prop, $nonEditableFields )) {
+					$editable = false;
+				}
+				break;
+			default:
+				$nonEditableFields = BizQueryBase::getMandatoryQueryResultColumnFields();
+					$editable = false;
+				break;
+		}
+		return $editable;
 	}
 
-
-	/**
-	 * To check if the fields to be displayed for the action is only meant for displayed and not adjustable.
-	 *
-	 * @since 10.5.0
-	 * @param string $action
-	 * @return bool
-	 */
-	private function isActionOnlyForFieldsDisplay( $action )
-	{
-		return $action === 'Preview';
-	}
 
 	/**
 	 * To place a checkbox in a tooltip wrapper.
@@ -845,8 +745,9 @@ class ActionPropertiesAdminApp
 	 * Returns list of property usages retrieved from the database.
 	 *
 	 * When there's no property usages found in the database and if it is first time
-	 * configuration, function will pre-insert all the default properties into database
-	 * and returns this set of default properties usages.
+	 * configuration, user will be prompted if default dynamic properties should be
+	 * added in advance. If user chooses 'Yes', function will pre-insert all the default
+	 * dynamic properties into database and returns this set of default dynamic properties usages.
 	 *
 	 * @since 10.5.0
 	 * @return array List of usages or list can be empty if insertion properties into database has taken place but failed.
@@ -861,63 +762,11 @@ class ActionPropertiesAdminApp
 			$wiwiwUsages, // $wiwiwUsages = null when it is not for Template and PublishForm.
 			false );
 
-		// Configuring for the first time?
 		if( !$usages ) {
 			if( $this->mode == 'add' ) {
-				$usages = $this->preInsertDefaultProperties();
+				$usages = $this->composeAndInsertActionsProperty();
 			}
 		}
 		return $usages;
-	}
-
-	/**
-	 * Inserts a list of default properties ( with or without non-static properties ) and
-	 * returns the list of the added property usages.
-	 *
-	 * On a fresh setup of Dialog Setup, list of default static properties will be pre-added
-	 * before the user can add a new property. On top of that, user can choose if some selective
-	 * non-static (dynamic) properties need to be added.
-	 * If user choose to add in the non-static properties as well, both static and non-static default
-	 * properties will be added into database; otherwise, only the default static properties will
-	 * be added.
-	 *
-	 * @since 10.5.0
-	 * @return array List of usages or empty list if the insertion of the property usages into database fails.
-	 */
-	private function preInsertDefaultProperties():array
-	{
-		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
-		$addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) && strval( $_REQUEST['addDefaultDynamic'] ) == 'true' ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
-		if( $addDefaultDynamicFields == 'true' ) {
-			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
-		} else {
-			$usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
-		}
-
-		if( $this->action != '' ) { // When action is <All>, don't fix anything as some action needs 'Dossier' and some don't.
-			BizWorkflow::fixDossierPropertyUsage( $this->action, $this->objType, '', $usages );
-		}
-		$order = 5;
-		$listOfValues = array();
-		if( $usages ) foreach( $usages as $usage ) {
-			$values = array(
-				$this->publ,
-				$this->action,
-				$this->objType,
-				$order,
-				$usage->Name,
-				$usage->Editable ? 'on' : '',
-				$usage->Mandatory ? 'on' : '',
-				$usage->Restricted ? 'on' : '',
-				$usage->MultipleObjects ? 'on' : '',
-			);
-			$listOfValues[] = $values;
-			$order += 5;
-		}
-		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
-		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
-		$result = DBActionproperty::insertActionsProperty( $fields, $listOfValues );
-		return $result ? $usages : array();
 	}
 }

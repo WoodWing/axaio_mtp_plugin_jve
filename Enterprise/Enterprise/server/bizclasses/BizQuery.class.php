@@ -587,7 +587,23 @@ class BizQuery extends BizQueryBase
         return $sqlarray;
     }
 
-	static protected function getPropNames($mode, $minimalProps, $requestProps, $areas)
+	/**
+	 * Returns a list of properties to be used in the Query Result columns.
+	 *
+	 * When $requestProps is specified, the list will be returned as it is, no extra
+	 * properties will be added.
+	 *
+	 * When $minimalProps is specified, this list will be added on top of the following:
+	 * - List of mandatory fields.
+	 * - List of configured fields ( via QuerySetup page ) when available.
+	 *
+	 * @param string $mode
+	 * @param string[] $minimalProps
+	 * @param string[] $requestProps
+	 * @param string[] $areas
+	 * @return string[]
+	 */
+	static protected function getPropNames( $mode, $minimalProps, $requestProps, $areas )
 	{
 		// If $requestProps set, this is the complete list of properties, so if no empty return this
 		if( !empty( $requestProps ) ) {
