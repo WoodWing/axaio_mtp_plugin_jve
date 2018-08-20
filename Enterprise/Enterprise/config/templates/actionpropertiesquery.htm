@@ -1,6 +1,7 @@
 <!--
      Do visit actionproperties.htm and actionpropertiesquery.htm when there are fixes done in the javascript areas.
 -->
+<script language="javascript"><!--INC:BrowserDetect.js--></script>
 <script language="javascript">
 function myconfirm(code)
 {
@@ -53,38 +54,6 @@ function SetCombos(sAction)
     var f = document.forms.propfilter;
     f.action.value = sAction;
     f.submit();
-}
-
-function isBrowserIEOrEdge()
-{
-    // Return the Microsoft IE or Edge browser's version, false when browser is not IE or Edge.
-    var ua = window.navigator.userAgent;
-    // 'ua' values:
-    // IE 10:
-    // ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
-
-    // IE 11:
-    // ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
-
-    // Edge 12 (Spartan):
-    // ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0';
-
-    // Edge 13:
-    // ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586';
-
-    var microsoftIE = ua.indexOf( 'MSIE ');
-    if ( microsoftIE > 0 ) { // IE 10 or older
-        return true;
-    }
-    var trident = ua.indexOf('Trident/');
-    if (trident > 0) { // IE 11
-        return true;
-    }
-    var edge = ua.indexOf('Edge/');
-    if (edge > 0) { // Edge (IE 12+)
-        return true;
-    }
-    return false; // other browsers
 }
 
 $(document).ready(function() {
@@ -147,7 +116,7 @@ $(document).ready(function() {
     // Input box 'Order' during update
     $( "#order" ).keypress( function( event ) {
         if( event.key == "Enter" ) {
-            if( isBrowserIEOrEdge() ) {
+            if( BrowserDetect.isInternetExplorerOrEdge() ) {
                 // Pressing Enter while focus on 'Order' textbox sometimes lead to two same property added into DB ( as if page has been submitted twice )
                 event.preventDefault();
             } else {
