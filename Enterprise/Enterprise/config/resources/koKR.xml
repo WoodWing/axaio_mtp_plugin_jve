@@ -1936,7 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">쿼리 결과</Term>
   <Term key="QRY_SETUP">쿼리의 설정</Term>
   <Term key="QRY_SQL">쿼리</Term>
-  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {AC_MENU}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 에서 %2</Term>
   <Term key="READINGDIRECTION">읽기 방향</Term>
   <Term key="READING_ORDER_REV">오른쪽 열림</Term>

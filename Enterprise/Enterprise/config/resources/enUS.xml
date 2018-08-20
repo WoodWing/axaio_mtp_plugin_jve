@@ -1937,7 +1937,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="QRY_QUERY_RESULT">Query Results</Term>
   <Term key="QRY_SETUP">Query Setup</Term>
   <Term key="QRY_SQL">Query</Term>
-  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {AC_MENU}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 To %2</Term>
   <Term key="READINGDIRECTION">Reading Direction</Term>
   <Term key="READING_ORDER_REV">Reading Order Reversed</Term>
