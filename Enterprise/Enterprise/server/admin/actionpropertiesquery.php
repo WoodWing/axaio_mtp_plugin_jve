@@ -397,10 +397,10 @@ class ActionPropertiesQueryAdminApp
 	 * @since 10.5.0
 	 * @param string $txt
 	 * @param int $numberOfRecords
-	 * @param null|bool $onlyStaticProperties
+	 * @param null|bool $onlyConfigurableProperties
 	 * @return string
 	 */
-	private function showOrHideButtons( string $txt, int $numberOfRecords, ?bool $onlyStaticProperties ):string
+	private function showOrHideButtons( string $txt, int $numberOfRecords, ?bool $onlyConfigurableProperties ): string
 	{
 		switch( $this->mode ) {
 			case "view":
@@ -408,7 +408,7 @@ class ActionPropertiesQueryAdminApp
 			case "reset":
 				$txt = str_replace("<!--ADD_BUTTON-->",  '', $txt );
 				$txt = str_replace("<!--UPDATE_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
-				$txt = str_replace("<!--DELETE_BUTTON-->",( $numberOfRecords == 0 || $onlyStaticProperties ) ? 'display:none' : '', $txt );
+				$txt = str_replace("<!--DELETE_BUTTON-->",( $numberOfRecords == 0 || $onlyConfigurableProperties ) ? 'display:none' : '', $txt );
 				$txt = str_replace("<!--RESET_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
 				break;
 			case "add":
@@ -533,7 +533,7 @@ class ActionPropertiesQueryAdminApp
 		asort( $props );
 
 		$detailTxt = '';
-		$onlyStaticProperties = null;
+		$onlyConfigurableProperties = null;
 		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->isPropertySupportedOnlyAtAllObjectTypeLevel() );
 		switch( $this->mode ) {
 			case 'view':
@@ -542,7 +542,7 @@ class ActionPropertiesQueryAdminApp
 			case 'reset':
 				$numberOfRecords = 0;
 				$detailTxt = $this->listCurrentActionProperties( $locals, $rows, $detailTxt, $numberOfRecords );
-				$onlyStaticProperties = $this->isOnlyStaticProperties( $rows );
+			$onlyConfigurableProperties = $this->isListOfConfigurablePropertiesOnly( $rows );
 				break;
 			case 'add':
 				$numberOfRecords = count( $rows );
@@ -550,30 +550,30 @@ class ActionPropertiesQueryAdminApp
 				break;
 		}
 
-		$txt = $this->showOrHideButtons( $txt, $numberOfRecords, $onlyStaticProperties );
+		$txt = $this->showOrHideButtons( $txt, $numberOfRecords, $onlyConfigurableProperties );
 		$txt = str_replace("<!--DELETE_COLUMN-->", ( $this->mode == 'add' ) ? 'display:none' : (( $numberOfRecords > 0 ) ? '' : 'display:none'), $txt );
 		$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
-		$txt = str_replace("<!--DIALOG_CONFIRM_MESSAGE-->", BizResources::localize( 'QUERY_SETUP_CONFIRM_MESSAGE', true, array( "<br/>", "<br/>", "<br/>", "<br/>", "<br/>" )), $txt);
+		$txt = str_replace("<!--DIALOG_CONFIRM_MESSAGE-->", BizResources::localize( 'QUERY_SETUP_CONFIRM_MESSAGE', true, array( "<br/>" )), $txt);
 		return $txt;
 	}
 
 	/**
-	 * Function returns true if the list of properties only contain static properties, false otherwise.
+	 * Function tells whether the provided list of properties consist of configurable properties only.
 	 *
 	 * @since 10.5.0
 	 * @param string $propertyRows
 	 * @return bool
 	 */
-	private function isOnlyStaticProperties( array $propertyRows ):bool
+	private function isListOfConfigurablePropertiesOnly( array $propertyRows ): bool
 	{
-		$isOnlyStaticProperties = true;
+		$isOnlyConfigurableProperties = true;
 		if( $propertyRows ) foreach( $propertyRows as $row ) {
 			if( $this->isConfigurableField( $row['property'] )) {
-				$isOnlyStaticProperties = false;
+				$isOnlyConfigurableProperties = false;
 				break;
 			}
 		}
-		return $isOnlyStaticProperties;
+		return $isOnlyConfigurableProperties;
 	}
 
 	/**

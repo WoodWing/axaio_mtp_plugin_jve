@@ -39,11 +39,7 @@ function checkDeleteCheckboxes()
     for(var i = 0; i < countCheckBoxes; i++) {
         var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
         if( objCheckBox !== undefined &&  objCheckBox.disabled == false ) {
-            if( selectAllCheckbox.checked == true ) {
-                objCheckBox.checked = true;
-            } else {
-                objCheckBox.checked = false;
-            }
+            objCheckBox.checked = (selectAllCheckbox.checked == true);
         }
     }
     return false;
