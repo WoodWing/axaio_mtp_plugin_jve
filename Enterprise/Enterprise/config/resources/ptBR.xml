@@ -670,7 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Texto-como-Texto</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Assentamento no Modo Texto</Term>
   <Term key="DEVICE_THUMBHEIGHT">Altura da Miniatura</Term>
-  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, Publication and Status) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Derivado da Orientação da Página</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Paisagem e Retrato</Term>
   <Term key="DM_THUMB_ORIENTATION">Orientação da Miniatura da Página</Term>
@@ -1937,7 +1937,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="QRY_QUERY_RESULT">Resultado da consulta</Term>
   <Term key="QRY_SETUP">Configuração da consulta</Term>
   <Term key="QRY_SQL">Consulta</Term>
-  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, ID or Type) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 para %2</Term>
   <Term key="READINGDIRECTION">Direção de Leitura</Term>
   <Term key="READING_ORDER_REV">Ordem de leitura invertida</Term>
