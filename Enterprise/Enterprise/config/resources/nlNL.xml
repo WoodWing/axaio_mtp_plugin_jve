@@ -670,7 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Text-Als-Text</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Text View Padding</Term>
   <Term key="DEVICE_THUMBHEIGHT">Miniatuur hoogte</Term>
-  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, Publication and Status) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Afleiden van pagina oriëntatie</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Landschap en portret</Term>
   <Term key="DM_THUMB_ORIENTATION">Pagina miniatuur oriëntatie</Term>
@@ -1936,7 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">Resultaat zoekopdracht</Term>
   <Term key="QRY_SETUP">Zoekopdracht instellen</Term>
   <Term key="QRY_SQL">Zoekopdracht</Term>
-  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, ID or Type) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {AC_MENU}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 tot %2</Term>
   <Term key="READINGDIRECTION">Leesrichting</Term>
   <Term key="READING_ORDER_REV">Pagina's in omgekeerde volgorde</Term>

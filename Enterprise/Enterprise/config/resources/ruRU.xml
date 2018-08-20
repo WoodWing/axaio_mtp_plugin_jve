@@ -670,7 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Текст как текст</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Заполнение текстового представления</Term>
   <Term key="DEVICE_THUMBHEIGHT">Высота значка</Term>
-  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, Publication and Status) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Установить по ориентации страницы</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Альбомная и портретная</Term>
   <Term key="DM_THUMB_ORIENTATION">Ориентация значков страниц</Term>
@@ -1937,7 +1937,7 @@
   <Term key="QRY_QUERY_RESULT">Результат ы запроса</Term>
   <Term key="QRY_SETUP">Настройка запроса</Term>
   <Term key="QRY_SQL">Запрос</Term>
-  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%2Properties that are mandatory (such as Name, ID or Type) will be automatically added.%3%4Do you also want to add properties that are used regularly such as 'RouteTo' and 'Comment'?%5(Note that these can be added or removed at any stage.)</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {AC_MENU}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 по %2</Term>
   <Term key="READINGDIRECTION">Направление чтения</Term>
   <Term key="READING_ORDER_REV">Изменить порядок издания</Term>
