@@ -1314,7 +1314,7 @@ class BizWorkflow
 			} else { // BZ#24883/28647 - Get default issueid from related targets, where object relation is contained/placed
 				if( self::canBeIssuelessObject($obj->MetaData->BasicMetaData->Type) ||
 					( $obj->MetaData->BasicMetaData->Type == 'PublishForm' ) ){ // Form only has Relational Target as it is always contained inside a dossier.
-					foreach( $obj->Relations as $relation ) {
+					if( $obj->Relations ) foreach( $obj->Relations as $relation ) {
 						if( $relation->Child == $obj->MetaData->BasicMetaData->ID && ($relation->Type == 'Contained' || $relation->Type == 'Placed')) {
 							$iss = BizTarget::getDefaultIssueId( $pub, $relation->Targets );
 							if( !$iss && count( $relation->Targets ) > 0 ) {

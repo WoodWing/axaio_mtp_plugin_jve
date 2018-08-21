@@ -25,7 +25,7 @@ class Elvis_ConfigFiles extends ConfigFiles_EnterpriseConnector
 	public function displayOptionValue( $configFile, $optionName, $value )
 	{
 		require_once BASEDIR.'/config/config_elvis.php';
-		if( $optionName == 'ELVIS_SUPER_USER_PASS' || $optionName == 'ELVIS_ENT_ADMIN_PASS' ) {
+		if( $optionName == 'ELVIS_SUPER_USER_PASS' || $optionName == 'ELVIS_ENT_ADMIN_PASS' || $optionName == 'ELVIS_CLIENT_SECRET' ) {
 			$value = '***';
 		}
 		// Note that ELVIS_SUPER_USER_PASS is obsoleted since 10.5.0, but still hide it in case the option is not removed yet.
