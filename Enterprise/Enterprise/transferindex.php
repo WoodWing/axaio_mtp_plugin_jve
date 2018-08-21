@@ -144,7 +144,11 @@ class TransferEntry
 		// (Clients should check for the SCEntError_InvalidTicket key since 403 is not unique.)
 		// The new ticket obtained should be set to the upload/download URL to try again.
 		if( $validateTicket ) {
-			$user = BizSession::checkTicket( $ticket );
+			try {
+				$user = BizSession::checkTicket( $ticket );
+			} catch( BizException $e ) {
+				$user = null;
+			}
 			if( !$user ) {
 				$message = 'Ticket expired. Please relogin. (SCEntError_InvalidTicket)';
 				header('HTTP/1.1 403 Forbidden');

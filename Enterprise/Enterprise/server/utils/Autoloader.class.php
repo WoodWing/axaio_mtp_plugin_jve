@@ -63,13 +63,13 @@ class WW_Utils_Autoloader
 					}
 				}
 			} elseif( strpos( $className, '_' ) !== false ) { // plugin classes
-				$classNameParts = explode( '_', $className ); // e.g. Hello_BizClasses_Foo_Bar => Hello,DbClasses,Foo,Bar
-				$pluginName = array_shift( $classNameParts ); // e.g. Hello,DbClasses,Foo,Bar => DbClasses,Foo,Bar
+				$classNameParts = explode( '_', $className ); // e.g. Hello_BizClasses_Foo_Bar => Hello,BizClasses,Foo,Bar
+				$pluginName = array_shift( $classNameParts ); // e.g. Hello,BizClasses,Foo,Bar => BizClasses,Foo,Bar
 				if( $pluginName && array_key_exists( $pluginName, self::$serverPlugins ) ) { // plugin registered?
-					$fileNameBase = array_pop( $classNameParts ); // e.g. DbClasses,Foo,Bar => DbClasses,Foo
+					$fileNameBase = array_pop( $classNameParts ); // e.g. BizClasses,Foo,Bar => BizClasses,Foo
 					if( $fileNameBase ) {
-						$folders = array_map( 'strtolower', $classNameParts ); // e.g. DbClasses,Foo => dbclasses,foo
-						$folder = implode( '/', $folders ); // e.g. dbclasses,foo => dbclasses/foo
+						$folders = array_map( 'strtolower', $classNameParts ); // e.g. BizClasses,Foo => bizclasses,foo
+						$folder = implode( '/', $folders ); // e.g. bizclasses,foo => bizclasses/foo
 						$file = BASEDIR.'/config/plugins/'.$pluginName.'/'.$folder.'/'.$fileNameBase.'.class.php';
 								// L> e.g. <BASEDIR>/config/plugins/Hello/bizclasses/foo/Bar.class.php
 						if( file_exists( $file ) ) {
