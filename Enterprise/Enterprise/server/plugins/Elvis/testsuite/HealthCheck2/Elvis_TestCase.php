@@ -163,8 +163,56 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 				$result = false;
 			}
 		}
-
+		foreach( array( 'ELVIS_URL', 'ELVIS_CLIENT_URL' ) as $elvisUrlDefine ) {
+			$result = $this->validateDefinedElvisUrl( $elvisUrlDefine, $help );
+			if( !$result ) {
+				break; // by default ELVIS_CLIENT_URL is based on ELVIS_URL, so let's first mention problems for ELVIS_URL only
+			}
+		}
 		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server defined values checked.' );
+		return $result;
+	}
+
+	/**
+	 * Validate the ELVIS_URL or ELVIS_CLIENT_URL define.
+	 *
+	 * @since 10.5.0
+	 * @param string $elvisUrlDefine
+	 * @param string $help
+	 * @return bool
+	 */
+	private function validateDefinedElvisUrl( string $elvisUrlDefine, $help ): bool
+	{
+		$result = true;
+		$elvisUrValue = constant( $elvisUrlDefine );
+		try {
+			$uri = new Zend\Uri\Uri;
+			$uri->parse( $elvisUrValue );
+			if( !$uri->getScheme() ) {
+				$message = "The {$elvisUrlDefine} option has value '{$elvisUrValue}'. The scheme of this URL is not defined. ".
+					"Please use http:// or https://.";
+				$this->setResult('ERROR', $message, $help );
+				$result = false;
+			} elseif( !in_array( strtolower( $uri->getScheme() ), array( 'http', 'https' ) ) ) {
+				$message = "The {$elvisUrlDefine} option has value '{$elvisUrValue}'. The scheme '".$uri->getScheme()."' ".
+					" of this URL is not supported. Please use http:// or https://.";
+				$this->setResult('ERROR', $message, $help );
+				$result = false;
+			}
+		} catch( Exception $e ) {
+			$message = "The {$elvisUrlDefine} option has value '{$elvisUrValue}'. This URL is not valid: ".$e->getMessage();
+			$this->setResult('ERROR', $message, $help );
+			$result = false;
+		}
+		if( $result ) {
+			$elvisUrValue = trim( $elvisUrValue );
+			$endsWithSlash = strrpos( $elvisUrValue, '/' ) === ( strlen( $elvisUrValue ) - 1 );
+			if( $endsWithSlash ) {
+				$message = "The {$elvisUrlDefine} option has value '{$elvisUrValue}'. This URL should not end with a slash.";
+				$this->setResult( 'ERROR', $message, $help );
+				$result = false;
+			}
+		}
 		return $result;
 	}
 
