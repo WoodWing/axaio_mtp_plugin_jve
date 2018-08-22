@@ -210,7 +210,7 @@ class ElvisSync
 		$tip = 'Please check your Crontab/Scheduler settings.';
 		$minMaxExecTime = $options['production'] ? 60 : 1;
 		if( $options['maxexectime'] < $minMaxExecTime || $options['maxexectime'] > 600 ) {
-			$detail = "The 'maxexectime' parameter is set to {$options['maxexectime']} but should be in range ['.$minMaxExecTime.'-600].";
+			$detail = "The 'maxexectime' parameter is set to {$options['maxexectime']} but should be in range [{$minMaxExecTime}-600].";
 			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
 		}
 		if( $options['maxtimeoutperrun'] < 1 || $options['maxtimeoutperrun'] > 20 ) {
