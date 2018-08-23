@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">Oletus {CHANNEL}</Term>
   <Term key="DELETED">Poistettu</Term>
   <Term key="DELETE_NOTES">Poista muistilappuja</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">Olet luonut uuden muistilapun tai vastannut muistilappuun kirjoittamatta tekstiä. Jos jatkat, muistilappu tai vastaus poistetaan.\n\nHaluatko jatkaa?\n</Term>
   <Term key="DESK_ID">{DESK} tunnus</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">Vaakasuuntainen korkeus</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Teksti tekstinä -näkymä</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Tekstinäkymän täyttö</Term>
   <Term key="DEVICE_THUMBHEIGHT">Pikkukuvan korkeus</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Johda sivun suunnasta</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Vaaka- ja pystysuunta</Term>
   <Term key="DM_THUMB_ORIENTATION">Sivun pikkukuvan suuntaus</Term>
@@ -1432,6 +1434,7 @@
   <Term key="MNU_CHANGE_PSW">Vaihda salasanaa</Term>
   <Term key="MNU_DBADMIN">Tietokannan asetukset</Term>
   <Term key="MNU_DEADLINES">Deadlinet</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">Valintaikkunoiden asetukset</Term>
   <Term key="MNU_EDGEN">{EDITION} Generaattori</Term>
   <Term key="MNU_EXPORT">Vienti</Term>
@@ -1451,6 +1454,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">Työkokoonpanot</Term>
   <Term key="MNU_SERVER_JOBS">Työjono</Term>
   <Term key="MNU_SERVER_LOGS">Palvelinlokit</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">Lataa</Term>
   <Term key="MNU_USER">Käyttäjät</Term>
   <Term key="MNU_USER_QUERY">Käyttäjäkyselyt</Term>
@@ -1932,6 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">Kyselyn tulokset</Term>
   <Term key="QRY_SETUP">Kyselyn asennus</Term>
   <Term key="QRY_SQL">Kysely</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 Kenelle %2</Term>
   <Term key="READINGDIRECTION">Lukusuunta</Term>
   <Term key="READING_ORDER_REV">Lukusuunta on käännetty</Term>
@@ -1944,6 +1949,7 @@
   <Term key="RELATIVE_DEADLINE">Suhteellinen deadline</Term>
   <Term key="RELATIVE_DEADLINE_MODE">Ota käyttöön suhteelliset deadlinet</Term>
   <Term key="RENDITION">Käännös</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">Olet tehnyt muutoksia muistilappuihin, haluatko tallentaa ne ennen jatkamista?</Term>
   <Term key="SAVE_CHANGED_STICKY">Muistilappua on muokattu tallentamatta.\nHaluatko tallentaa nämä muutokset?</Term>
   <Term key="SAVE_LOCAL">Voit käyttää Tallenna Nimellä -painiketta tallentaaksesi tästä tiedostosta alkuperäisen tiedoston kopion.</Term>
@@ -1954,6 +1960,7 @@
   <Term key="SEC_EDITION_IDS">{EDITION} tunnukset</Term>
   <Term key="SEC_SECTION_ID">{SECTION} tunnus</Term>
   <Term key="SEELOGFILES">Katso lisätietoja lokitiedostosta.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">Nimen lyhenne</Term>
   <Term key="SHOW_LOG">Näytä loki</Term>
   <Term key="SHOW_STATUS">Näytä {STATE}</Term>

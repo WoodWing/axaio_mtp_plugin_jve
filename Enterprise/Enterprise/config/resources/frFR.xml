@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">{CHANNEL} par défaut</Term>
   <Term key="DELETED">Supprimé</Term>
   <Term key="DELETE_NOTES">Supprimer des notes autocollantes</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">Vous avez créé une nouvelle note autocollante ou répondu à une note autocollante sans saisir de texte. Si vous continuez, la note autocollante ou la réponse sera supprimée.\n\nVoulez-vous continuer ?\n</Term>
   <Term key="DESK_ID">ID de {DESK}</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">Hauteur Paysage</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Texte au format texte</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Mode de remplissage de texte</Term>
   <Term key="DEVICE_THUMBHEIGHT">Hauteur de vignette</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Déduire de l’orientation des pages</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Paysage et Portrait</Term>
   <Term key="DM_THUMB_ORIENTATION">Orientation des vignettes de page</Term>
@@ -1432,6 +1434,7 @@
   <Term key="MNU_CHANGE_PSW">Modifier le mot de passe</Term>
   <Term key="MNU_DBADMIN">Configuration de la base de données</Term>
   <Term key="MNU_DEADLINES">Echéances</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">Configuration des boîtes de dialogue</Term>
   <Term key="MNU_EDGEN">Générateur d'{EDITION}</Term>
   <Term key="MNU_EXPORT">Exporter</Term>
@@ -1451,6 +1454,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">Configurations des travaux</Term>
   <Term key="MNU_SERVER_JOBS">File d’attente des travaux</Term>
   <Term key="MNU_SERVER_LOGS">Journaux du serveur</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">Télécharger</Term>
   <Term key="MNU_USER">Utilisateurs</Term>
   <Term key="MNU_USER_QUERY">Requêtes de l'utilisateur</Term>
@@ -1932,6 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">Résultat de la requête</Term>
   <Term key="QRY_SETUP">Configuration de la requête</Term>
   <Term key="QRY_SQL">Requête</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 vers %2</Term>
   <Term key="READINGDIRECTION">Sens de lecture</Term>
   <Term key="READING_ORDER_REV">Ordre de lecture inversé</Term>
@@ -1944,6 +1949,7 @@
   <Term key="RELATIVE_DEADLINE">Echéance relative</Term>
   <Term key="RELATIVE_DEADLINE_MODE">Activer l'échéance relative</Term>
   <Term key="RENDITION">Rendu</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">Les notes autocollantes ont été modifiées ; souhaitez-vous les enregistrer avant de poursuivre ?</Term>
   <Term key="SAVE_CHANGED_STICKY">Les modifications apportées à la note autocollante n’ont pas été enregistrées.\nVoulez-vous enregistrer ces modifications ?</Term>
   <Term key="SAVE_LOCAL">Vous pouvez utiliser l'option Enregistrer sous pour enregistrer une copie du fichier d'origine.</Term>
@@ -1954,6 +1960,7 @@
   <Term key="SEC_EDITION_IDS">IDs de l’{EDITION}</Term>
   <Term key="SEC_SECTION_ID">ID de {SECTION}</Term>
   <Term key="SEELOGFILES">Voyez les fichiers journal pour plus amples détails.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">Nom abrégé</Term>
   <Term key="SHOW_LOG">Afficher le rapport</Term>
   <Term key="SHOW_STATUS">Afficher l'{STATE}</Term>

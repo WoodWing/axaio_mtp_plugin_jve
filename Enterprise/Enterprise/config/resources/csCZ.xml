@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">Výchozí {CHANNEL}</Term>
   <Term key="DELETED">Odstraněno</Term>
   <Term key="DELETE_NOTES">Odstranit poznámky</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">Vytvořil(a) jste novou poznámku nebo jste odpověděl(a) na poznámku bez zadání textu. Budete-li pokračovat, poznámka nebo odpověď bude smazána.\n\nChcete pokračovat?\n</Term>
   <Term key="DESK_ID">ID {DESK}</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">Výška zobrazení na šířku</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Text jako Text</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Vyrovnání zobrazení textu</Term>
   <Term key="DEVICE_THUMBHEIGHT">Výška miniatury</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Odvodit od orientace stránky</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Na šířku a Na výšku</Term>
   <Term key="DM_THUMB_ORIENTATION">Orientace miniatur na stránce</Term>
@@ -1432,6 +1434,7 @@
   <Term key="MNU_CHANGE_PSW">Změnit heslo</Term>
   <Term key="MNU_DBADMIN">Nastavení databáze</Term>
   <Term key="MNU_DEADLINES">Termíny</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">Nastavení dialogů</Term>
   <Term key="MNU_EDGEN">Generátor {EDITION}</Term>
   <Term key="MNU_EXPORT">Exportovat</Term>
@@ -1451,6 +1454,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">Konfigurace úloh</Term>
   <Term key="MNU_SERVER_JOBS">Fronta úloh</Term>
   <Term key="MNU_SERVER_LOGS">Protokoly serveru</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">Odeslat</Term>
   <Term key="MNU_USER">Uživatelé</Term>
   <Term key="MNU_USER_QUERY">Dotazy uživatele</Term>
@@ -1932,6 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">Výsledky dotazu</Term>
   <Term key="QRY_SETUP">Nastavení dotazu</Term>
   <Term key="QRY_SQL">Dotaz</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 až %2</Term>
   <Term key="READINGDIRECTION">Čtení pokynu</Term>
   <Term key="READING_ORDER_REV">Obrácené pořadí čtení</Term>
@@ -1944,6 +1949,7 @@
   <Term key="RELATIVE_DEADLINE">Relativní termín</Term>
   <Term key="RELATIVE_DEADLINE_MODE">Aktivovat relativní konečné termíny</Term>
   <Term key="RENDITION">Interpretace</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">Lístky s poznámkami byly změněny, chcete je před pokračováním uložit?</Term>
   <Term key="SAVE_CHANGED_STICKY">Poznámka byla změněna a nebyla uložena.\nChcete tyto změny uložit?</Term>
   <Term key="SAVE_LOCAL">Můžete použít příkaz Uložit jako z nabídky a uložit tento soubor jako kopii původního souboru.</Term>
@@ -1954,6 +1960,7 @@
   <Term key="SEC_EDITION_IDS">ID {EDITION}</Term>
   <Term key="SEC_SECTION_ID">ID {SECTION}</Term>
   <Term key="SEELOGFILES">Více podrobností viz soubory protokolu.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">Krátký název</Term>
   <Term key="SHOW_LOG">Zobrazit protokol</Term>
   <Term key="SHOW_STATUS">Zobrazit {STATE}</Term>

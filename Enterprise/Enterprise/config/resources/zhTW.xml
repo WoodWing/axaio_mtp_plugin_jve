@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">預設 {CHANNEL}</Term>
   <Term key="DELETED">刪除</Term>
   <Term key="DELETE_NOTES">刪除即時貼</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">此即時貼或回應將被刪除的“\n\n你要繼續嗎？\n</Term>
   <Term key="DESK_ID">{DESK} ID</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">橫向高度</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">文本作為文本</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">文本視圖填充值</Term>
   <Term key="DEVICE_THUMBHEIGHT">縮略圖高</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">從頁面向生成</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">橫向和豎向</Term>
   <Term key="DM_THUMB_ORIENTATION">頁面縮略圖方向</Term>
@@ -1432,6 +1434,7 @@
   <Term key="MNU_CHANGE_PSW">更改密碼</Term>
   <Term key="MNU_DBADMIN">數據庫設置</Term>
   <Term key="MNU_DEADLINES">限期</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">對話方塊設定</Term>
   <Term key="MNU_EDGEN">{EDITION} 產生器</Term>
   <Term key="MNU_EXPORT">輸出</Term>
@@ -1451,6 +1454,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">任務配置</Term>
   <Term key="MNU_SERVER_JOBS">任務隊列</Term>
   <Term key="MNU_SERVER_LOGS">服務器日誌</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">上載</Term>
   <Term key="MNU_USER">用戶</Term>
   <Term key="MNU_USER_QUERY">用戶查詢</Term>
@@ -1932,6 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">查詢結果</Term>
   <Term key="QRY_SETUP">查詢設定</Term>
   <Term key="QRY_SQL">查詢</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 至 %2</Term>
   <Term key="READINGDIRECTION">閱讀方向</Term>
   <Term key="READING_ORDER_REV">從右開始反方向讀取</Term>
@@ -1944,6 +1949,7 @@
   <Term key="RELATIVE_DEADLINE">相對限期</Term>
   <Term key="RELATIVE_DEADLINE_MODE">啟用相對截止日期</Term>
   <Term key="RENDITION">Rendition(展示)</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">告示貼已更改，先儲存在繼續?</Term>
   <Term key="SAVE_CHANGED_STICKY">修改的即時貼未保存\ N你要儲存這些變更嗎？</Term>
   <Term key="SAVE_LOCAL">可使用功能表上的'儲存為'來儲存為文檔的拷貝．</Term>
@@ -1954,6 +1960,7 @@
   <Term key="SEC_EDITION_IDS">{EDITION} IDs</Term>
   <Term key="SEC_SECTION_ID">{SECTION} ID</Term>
   <Term key="SEELOGFILES">詳細查詢日誌文件.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">簡短名字</Term>
   <Term key="SHOW_LOG">顯示記錄</Term>
   <Term key="SHOW_STATUS">顯示 {STATE}</Term>

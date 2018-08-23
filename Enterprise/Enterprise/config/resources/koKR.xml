@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">기본 {CHANNEL}</Term>
   <Term key="DELETED">삭제</Term>
   <Term key="DELETE_NOTES">스티커 메모 삭제</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">새로운 스티커 메모가 생성되었거나 내용없는 스티커 메모 답변이 생성되었습니다..\n\n계속하려면, 스티커 메모나 답변을 삭제하십시요.\n\n계속하시겠습니까?\n</Term>
   <Term key="DESK_ID">{DESK} ID</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">가로방향 높이</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Text-As-Text</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">텍스트 보기 패딩</Term>
   <Term key="DEVICE_THUMBHEIGHT">썸네일 높이</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">페이지 방향으로 부터 가져옴</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">가로 및 세로 방향</Term>
   <Term key="DM_THUMB_ORIENTATION">페이지 썸네일 방향</Term>
@@ -1432,6 +1434,7 @@
   <Term key="MNU_CHANGE_PSW">패스워드·언어</Term>
   <Term key="MNU_DBADMIN">데이터베이스 셋업</Term>
   <Term key="MNU_DEADLINES">기한</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">다이얼로그 설정</Term>
   <Term key="MNU_EDGEN">{EDITION} 제너레이터</Term>
   <Term key="MNU_EXPORT">내보내기</Term>
@@ -1451,6 +1454,7 @@
   <Term key="MNU_SERVERJOB_CONFIGS">작업 환경설정</Term>
   <Term key="MNU_SERVER_JOBS">작업 큐</Term>
   <Term key="MNU_SERVER_LOGS">서버 로그</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">업 로드</Term>
   <Term key="MNU_USER">사용자</Term>
   <Term key="MNU_USER_QUERY">사용자 쿼리</Term>
@@ -1932,6 +1936,7 @@
   <Term key="QRY_QUERY_RESULT">쿼리 결과</Term>
   <Term key="QRY_SETUP">쿼리의 설정</Term>
   <Term key="QRY_SQL">쿼리</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 에서 %2</Term>
   <Term key="READINGDIRECTION">읽기 방향</Term>
   <Term key="READING_ORDER_REV">오른쪽 열림</Term>
@@ -1944,6 +1949,7 @@
   <Term key="RELATIVE_DEADLINE">상대적 기한</Term>
   <Term key="RELATIVE_DEADLINE_MODE">관련 데드라인 활성화</Term>
   <Term key="RENDITION">Rendition</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">부전이 변경되고 있습니다.변경 내용을 저장합니까?</Term>
   <Term key="SAVE_CHANGED_STICKY">저장되지 않은 스티커 메모가 있습니다..\n저장하시겠습니까?</Term>
   <Term key="SAVE_LOCAL">메뉴로부터 별명으로 저장을 하면, 이 파일을 복사할 수 있습니다</Term>
@@ -1954,6 +1960,7 @@
   <Term key="SEC_EDITION_IDS">{EDITION} IDs</Term>
   <Term key="SEC_SECTION_ID">{SECTION} ID</Term>
   <Term key="SEELOGFILES">자세한 사항은 로그 파일을 참고하십시오.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">짧은 이름</Term>
   <Term key="SHOW_LOG">로그를 표시</Term>
   <Term key="SHOW_STATUS">{STATE}를 표시</Term>

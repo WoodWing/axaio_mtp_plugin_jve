@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">Standard-{CHANNEL}</Term>
   <Term key="DELETED">Gelöscht</Term>
   <Term key="DELETE_NOTES">Notizzettel löschen</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">Sie haben einen neuen Notizzettel erstellt oder auf einen Notizzettel geantwortet, ohne Text einzugeben. Wenn Sie fortfahren, wird der Notizzettel bzw. die Antwort gelöscht.\n\nMöchten Sie fortfahren?\n</Term>
   <Term key="DESK_ID">{DESK}s-ID</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">Querformat-Höhe</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Text als Text</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Rand in der Textansicht</Term>
   <Term key="DEVICE_THUMBHEIGHT">Höhe der Miniaturansicht</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Aus Seitenausrichtung ableiten</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Querformat und Hochformat</Term>
   <Term key="DM_THUMB_ORIENTATION">Seitenminiaturausrichtung</Term>
@@ -1433,6 +1435,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="MNU_CHANGE_PSW">Kennwort/Sprache</Term>
   <Term key="MNU_DBADMIN">Datenbankeinstellungen</Term>
   <Term key="MNU_DEADLINES">Abgabedatum</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">Dialoge einrichten</Term>
   <Term key="MNU_EDGEN">{EDITIONS}erstellung</Term>
   <Term key="MNU_EXPORT">Export</Term>
@@ -1452,6 +1455,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="MNU_SERVERJOB_CONFIGS">Job-Konfigurationen</Term>
   <Term key="MNU_SERVER_JOBS">Job-Warteschlange</Term>
   <Term key="MNU_SERVER_LOGS">Server Logs</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">Hochladen</Term>
   <Term key="MNU_USER">Benutzer</Term>
   <Term key="MNU_USER_QUERY">Benutzerabfragen</Term>
@@ -1933,6 +1937,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="QRY_QUERY_RESULT">Abfrage-Ergebnis</Term>
   <Term key="QRY_SETUP">Abfrage einrichten</Term>
   <Term key="QRY_SQL">Abfrage</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 nach %2</Term>
   <Term key="READINGDIRECTION">Leserichtung</Term>
   <Term key="READING_ORDER_REV">Umgekehrte Lesereihenfolge</Term>
@@ -1945,6 +1950,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="RELATIVE_DEADLINE">Relatives Abgabedatum</Term>
   <Term key="RELATIVE_DEADLINE_MODE">Relatives Abgabedatum aktivieren</Term>
   <Term key="RENDITION">Wiedergabe</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">Notizzettel haben sich geändert, sollen sie gespeichert werden?</Term>
   <Term key="SAVE_CHANGED_STICKY">Der Notizzettel wurde verändert und nicht gespeichert.\nMöchten Sie die Änderungen speichern?</Term>
   <Term key="SAVE_LOCAL">Sie können den Menübefehl DATEI -&gt; SICHERN UNTER nutzen, um eine Kopie dieser Datei zu erzeugen.</Term>
@@ -1955,6 +1961,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="SEC_EDITION_IDS">{EDITION}-IDs</Term>
   <Term key="SEC_SECTION_ID">{SECTION}-ID</Term>
   <Term key="SEELOGFILES">Einzelheiten sind den Protokolldateien zu entnehmen.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">Kurzer Name</Term>
   <Term key="SHOW_LOG">Datei-Historie anzeigen</Term>
   <Term key="SHOW_STATUS">{STATE} anzeigen</Term>

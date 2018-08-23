@@ -655,6 +655,7 @@
   <Term key="DEFAULT_CHANNEL">{CHANNEL} Padrão</Term>
   <Term key="DELETED">Excluído</Term>
   <Term key="DELETE_NOTES">Excluir Notas Adesiva</Term>
+  <Term key="DELETE_SELECTED_CONFIRM_MESSAGE">Are you sure you want to remove the selected properties?</Term>
   <Term key="DELETE_UNCHANGED_STICKY">Você criou uma nova Nota Adesiva ou respondeu a uma Nota sem inserir texto. Se continuar, a Nota ou a Resposta será excluída.\n\nVocê deseja continuar?\n</Term>
   <Term key="DESK_ID">ID de {DESK}</Term>
   <Term key="DEVICE_LANDSCAPEHEIGHT">Altura de Paisagem</Term>
@@ -669,6 +670,7 @@
   <Term key="DEVICE_TEXTASTEXT">Texto-como-Texto</Term>
   <Term key="DEVICE_TEXTVIEWPADDING">Assentamento no Modo Texto</Term>
   <Term key="DEVICE_THUMBHEIGHT">Altura da Miniatura</Term>
+  <Term key="DIALOG_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {PUBLICATION} and {STATE}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="DM_DERIVE_PG_ORIENTATION">Derivado da Orientação da Página</Term>
   <Term key="DM_PAGE_ORIENTATION_BOTH">Paisagem e Retrato</Term>
   <Term key="DM_THUMB_ORIENTATION">Orientação da Miniatura da Página</Term>
@@ -1433,6 +1435,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="MNU_CHANGE_PSW">Alterar senha</Term>
   <Term key="MNU_DBADMIN">Configuração do Banco de dados</Term>
   <Term key="MNU_DEADLINES">Prazos</Term>
+  <Term key="MNU_DIALOG_SELECT_DELETE">Select to permanently remove this row</Term>
   <Term key="MNU_DIALOG_SETUP">Configuração dos Diálogos</Term>
   <Term key="MNU_EDGEN">Gerador de {EDITION}</Term>
   <Term key="MNU_EXPORT">Exportar</Term>
@@ -1452,6 +1455,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="MNU_SERVERJOB_CONFIGS">Configurações de Serviçøs</Term>
   <Term key="MNU_SERVER_JOBS">Fila de Serviços</Term>
   <Term key="MNU_SERVER_LOGS">Registros do Servidor</Term>
+  <Term key="MNU_TOOLTIP_CANNOT_EDIT">This setting cannot be changed or removed</Term>
   <Term key="MNU_UPLOAD">Fazer upload</Term>
   <Term key="MNU_USER">Usuários</Term>
   <Term key="MNU_USER_QUERY">Consultas do Usuário</Term>
@@ -1933,6 +1937,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="QRY_QUERY_RESULT">Resultado da consulta</Term>
   <Term key="QRY_SETUP">Configuração da consulta</Term>
   <Term key="QRY_SQL">Consulta</Term>
+  <Term key="QUERY_SETUP_CONFIRM_MESSAGE">You are about to set up this configuration for the first time.%1%1Properties that are mandatory (such as {OBJ_NAME}, {OBJ_ID} or {OBJ_TYPE2}) will be automatically added.%1%1Do you also want to add properties that are used regularly such as '{OBJ_ROUTE_TO}' and '{OBJ_COMMENT}'?%1(Note that these can be added or removed at any stage.)</Term>
   <Term key="RANGE_TO">%1 para %2</Term>
   <Term key="READINGDIRECTION">Direção de Leitura</Term>
   <Term key="READING_ORDER_REV">Ordem de leitura invertida</Term>
@@ -1945,6 +1950,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="RELATIVE_DEADLINE">Prazo relativo</Term>
   <Term key="RELATIVE_DEADLINE_MODE">Ativar Prazos Relativos</Term>
   <Term key="RENDITION">Rendition</Term>
+  <Term key="RESET_CONFIRM_MESSAGE">Are you sure you want to reset this setup? All properties will be removed.</Term>
   <Term key="SAVE_CHANGED_STICKIES">As anotações suspensas foram alteradas. Salvar antes de continuar?</Term>
   <Term key="SAVE_CHANGED_STICKY">A Nota Adesiva foi modificada sem ser salva. \nVocê quer salvar essas alterações?</Term>
   <Term key="SAVE_LOCAL">É possível usar o menu Salvar como para salvar este arquivo como cópia do arquivo original.</Term>
@@ -1955,6 +1961,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="SEC_EDITION_IDS">IDs da {EDITION}</Term>
   <Term key="SEC_SECTION_ID">ID da {SECTION}</Term>
   <Term key="SEELOGFILES">Para mais detalhes, veja os arquivos de log.</Term>
+  <Term key="SELECT_ROWS_CONFIRM_MESSAGE">Please select one or more rows to remove.</Term>
   <Term key="SHORTNAME">Nome reduzido</Term>
   <Term key="SHOW_LOG">Mostrar registro</Term>
   <Term key="SHOW_STATUS">Mostrar {STATE}</Term>
