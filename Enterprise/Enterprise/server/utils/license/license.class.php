@@ -1445,7 +1445,7 @@ class License
 		}
 		$orderBy['expire'] = false;
 
-		$fields = array( 'usr', 'appname', 'appversion', 'expire', 'id', 'appserial', 'appproductcode' );
+		$fields = array( 'usr', 'appname', 'appversion', 'expire', 'id', 'appserial', 'appproductcode', 'ticketid' );
 		$rows = DBBase::listRows( 'tickets', '', '', $where, $fields, $params, $orderBy,
 			null, null, null, $this->mLicLog );
 
@@ -1507,11 +1507,9 @@ class License
 					if( $this->mLicLog ) {
 						LogHandler::Log('license', 'INFO', $deleteReason );
 					}
-					$where = '`id` = ?';
-					$params = array( intval( $row[ 'id' ] ) );
-					if( !DBBase::deleteRows( 'tickets', $where, $params, $this->mLicLog ) ) {
-						return false;
-					}
+					require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+					$bizTicket = new BizTicket();
+					$bizTicket->deleteTicketAndAffiliatedStructures( $row['ticketid'] );
 				}
 			}
 		}
