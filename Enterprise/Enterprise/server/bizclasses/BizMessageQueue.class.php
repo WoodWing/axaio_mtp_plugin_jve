@@ -471,6 +471,33 @@ class BizMessageQueue
 	}
 
 	/**
+	 * Remove a list of orphaned queue from the RabbitMQ queue.
+	 *
+	 * @since 10.4.2 QP
+	 * @param array $queueNames
+	 */
+	public static function removeOrphanQueuesByQueueName( array $orphanedQueueNames ): void
+	{
+		if( !$orphanedQueueNames ) {
+			return;
+		}
+		$restClient = self::getRestClient();
+		if( !$restClient ) {
+			return;
+		}
+		/** @noinspection PhpUnusedLocalVariableInspection */
+		$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO', 'S1144' => 'INFO' ) );
+		// L> Not all clients support RabbitMQ so HTTP 404 / "Record not (S1029)" found may happen.
+		foreach( $orphanedQueueNames as $orphanedQueueName ) {
+			try {
+				$restClient->deleteQueue( $orphanedQueueName );
+			} catch( BizException $e ) {
+				// silently continue
+			}
+		}
+	}
+
+	/**
 	 * For all expired tickets in Enterprise it removes corresponding queues from RabbitMQ (since they became orphan).
 	 */
 	public static function removeOrphanQueues()
@@ -483,19 +510,19 @@ class BizMessageQueue
 		if( !$queues ) {
 			return;
 		}
-		$expiredTickets = array();
+		$orphanedQueueNames = array();
 		require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
 		foreach( $queues as $queue ) {
 			$ticket = self::deriveTicketFromMessageQueueName( $queue );
 			if( $ticket ) {
 				$clientName = DBTicket::DBappticket( $ticket );
 				if( $clientName === false ) {
-					$expiredTickets[] = $ticket;
+					$orphanedQueueNames[] = $queue;
 				}
 			}
 		}
-		if( $expiredTickets ) {
-			self::removeOrphanQueuesByTickets( $expiredTickets );
+		if( $orphanedQueueNames ) {
+			self::removeOrphanQueuesByQueueName( $orphanedQueueNames );
 		}
 	}
 
