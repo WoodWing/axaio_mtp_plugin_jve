@@ -474,7 +474,7 @@ class BizMessageQueue
 	 * Remove a list of orphaned queue from the RabbitMQ queue.
 	 *
 	 * @since 10.4.2 QP
-	 * @param array $queueNames
+	 * @param array $orphanedQueueNames
 	 */
 	public static function removeOrphanQueuesByQueueName( array $orphanedQueueNames ): void
 	{
