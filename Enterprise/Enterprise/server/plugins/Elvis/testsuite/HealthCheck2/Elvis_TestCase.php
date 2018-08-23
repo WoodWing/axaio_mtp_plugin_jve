@@ -184,31 +184,46 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	private function validateDefinedElvisUrl( string $elvisUrlDefine, $help ): bool
 	{
 		$result = true;
-		$elvisUrValue = constant( $elvisUrlDefine );
-		try {
-			$uri = new Zend\Uri\Uri;
-			$uri->parse( $elvisUrValue );
-			if( !$uri->getScheme() ) {
-				$message = "The {$elvisUrlDefine} option has value '{$elvisUrValue}'. The scheme of this URL is not defined. ".
-					"Please use http:// or https://.";
-				$this->setResult('ERROR', $message, $help );
-				$result = false;
-			} elseif( !in_array( strtolower( $uri->getScheme() ), array( 'http', 'https' ) ) ) {
-				$message = "The {$elvisUrlDefine} option has value '{$elvisUrValue}'. The scheme '".$uri->getScheme()."' ".
-					" of this URL is not supported. Please use http:// or https://.";
-				$this->setResult('ERROR', $message, $help );
+		$elvisUrlValue = constant( $elvisUrlDefine );
+		if( $result ) {
+			if( trim( $elvisUrlValue ) !== $elvisUrlValue ) {
+				$message = "The {$elvisUrlDefine} option has value '{$elvisUrlValue}'. This URL not should start or end with spaces or tabs.";
+				$this->setResult( 'ERROR', $message, $help );
 				$result = false;
 			}
-		} catch( Exception $e ) {
-			$message = "The {$elvisUrlDefine} option has value '{$elvisUrValue}'. This URL is not valid: ".$e->getMessage();
-			$this->setResult('ERROR', $message, $help );
-			$result = false;
 		}
 		if( $result ) {
-			$elvisUrValue = trim( $elvisUrValue );
-			$endsWithSlash = strrpos( $elvisUrValue, '/' ) === ( strlen( $elvisUrValue ) - 1 );
+			$endsWithSlash = strrpos( $elvisUrlValue, '/' ) === ( strlen( $elvisUrlValue ) - 1 );
 			if( $endsWithSlash ) {
-				$message = "The {$elvisUrlDefine} option has value '{$elvisUrValue}'. This URL should not end with a slash.";
+				$message = "The {$elvisUrlDefine} option has value '{$elvisUrlValue}'. This URL should not end with a slash.";
+				$this->setResult( 'ERROR', $message, $help );
+				$result = false;
+			}
+		}
+		$schema = '';
+		if( $result ) {
+			try {
+				$uri = new Zend\Uri\Uri;
+				$uri->parse( $elvisUrlValue );
+				$schema = $uri->getScheme();
+			} catch( Exception $e ) {
+				$message = "The {$elvisUrlDefine} option has value '{$elvisUrlValue}'. This URL is not valid: ".$e->getMessage();
+				$this->setResult( 'ERROR', $message, $help );
+				$result = false;
+			}
+		}
+		if( $result ) {
+			if( !$schema ) {
+				$message = "The {$elvisUrlDefine} option has value '{$elvisUrlValue}'. The scheme of this URL is not defined. ".
+					"Please use http:// or https://.";
+				$this->setResult( 'ERROR', $message, $help );
+				$result = false;
+			}
+		}
+		if( $result ) {
+			if( !in_array( strtolower( $schema ), array( 'http', 'https' ) ) ) {
+				$message = "The {$elvisUrlDefine} option has value '{$elvisUrlValue}'. The scheme '{$schema}' ".
+					" of this URL is not supported. Please use http:// or https://.";
 				$this->setResult( 'ERROR', $message, $help );
 				$result = false;
 			}
