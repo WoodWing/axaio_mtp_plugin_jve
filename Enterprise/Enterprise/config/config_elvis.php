@@ -239,7 +239,7 @@ WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
 /**
  * Mapping fields between Enterprise and Elvis fields
  * 
- * Note: custom Enterprise fields and multi-value Elvis fields cannot be mapped with other fields.
+ * Note: Custom Enterprise fields and multi-value Elvis fields cannot be mapped with other fields.
  * 
  * Special fields which are statically mapped between Enterprise and Elvis:
  * - Keywords <-> tags
@@ -265,34 +265,38 @@ WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
  * - ReadOnlyFieldHandler  => Elvis_FieldHandlers_ReadOnly
  * - NameFieldHandler      => Elvis_FieldHandlers_Name
  * - ... etc
- * If your Elvis/config.php file still contains field handlers in the old notation, please adjust accordingly.
+ * If you copy field handlers from an old installation to the new installation, please rename accordingly as shown above.
  *
- * Since 10.5.0 it is recommended to add your custom field handlers in the config_overrule.php file.
- * Please add them in a function named Elvis_Config_GetAdditionalFieldHandlers as follows:
+ * Since 10.5.0 it is recommended to add your custom field handlers in the config_overrule.php file. Add them in a
+ * function named Elvis_Config_GetAdditionalFieldHandlers. Doing so, you could copy the example function as shown below
+ * to the config_overrule.php file and uncomment it. Then replace the sample handlers with your custom field handlers.
+ *
  *    function Elvis_Config_GetAdditionalFieldHandlers()
  *    {
  *       // Field handler parameters: Elvis fieldname, multivalue field, Elvis data type, Enterprise fieldname
  *       $cfgFieldHandlers = array();
- *       $cfgFieldHandlers['C_BooleanTest'] = new Elvis_FieldHandlers_ReadWrite("cf_BooleanTest", false, "boolean", "C_BooleanTest");
- *       $cfgFieldHandlers['C_DateTest'] = new Elvis_FieldHandlers_ReadWrite("cf_DateTest", false, "datetime", "C_DateTest");
- *       $cfgFieldHandlers['C_DateTimeTest'] = new Elvis_FieldHandlers_ReadWrite("cf_DateTimeTest", false, "datetime", "C_DateTimeTest");
- *       $cfgFieldHandlers['C_DoubleTest'] = new Elvis_FieldHandlers_ReadWrite("cf_DoubleTest", false, "decimal", "C_DoubleTest");
- *       $cfgFieldHandlers['C_IntegerTest'] = new Elvis_FieldHandlers_ReadWrite("cf_IntegerTest", false, "number", "C_IntegerTest");
- *       $cfgFieldHandlers['C_ListTest'] = new Elvis_FieldHandlers_ReadWrite("cf_ListTest", false, "text", "C_ListTest");
- *       $cfgFieldHandlers['C_MultiLineTest'] = new Elvis_FieldHandlers_ReadWrite("cf_MultiLineTest", false, "text", "C_MultiLineTest");
- *       $cfgFieldHandlers['C_MultiListTestElvisMultiField'] = new Elvis_FieldHandlers_ReadWrite("cf_MultiListTestElvisMultiField", true, "text", "C_MultiListTestElvisMultiField");
- *       $cfgFieldHandlers['C_MultiStringTestElvisMultiField'] = new Elvis_FieldHandlers_ReadWrite("cf_MultiStringTestElvisMultiField", true, "text", "C_MultiStringTestElvisMultiField");
- *       $cfgFieldHandlers['C_StringTest'] = new Elvis_FieldHandlers_ReadWrite("cf_StringTest", false, "text", "C_StringTest");
+ *       $cfgFieldHandlers['C_BooleanTest']   = new Elvis_FieldHandlers_ReadWrite( "cf_BooleanTest", false, "boolean", "C_BooleanTest" );
+ *       $cfgFieldHandlers['C_DateTest']      = new Elvis_FieldHandlers_ReadWrite( "cf_DateTest", false, "datetime", "C_DateTest" );
+ *       $cfgFieldHandlers['C_DateTimeTest']  = new Elvis_FieldHandlers_ReadWrite( "cf_DateTimeTest", false, "datetime", "C_DateTimeTest" );
+ *       $cfgFieldHandlers['C_DoubleTest']    = new Elvis_FieldHandlers_ReadWrite( "cf_DoubleTest", false, "decimal", "C_DoubleTest" );
+ *       $cfgFieldHandlers['C_IntegerTest']   = new Elvis_FieldHandlers_ReadWrite( "cf_IntegerTest", false, "number", "C_IntegerTest" );
+ *       $cfgFieldHandlers['C_ListTest']      = new Elvis_FieldHandlers_ReadWrite( "cf_ListTest", false, "text", "C_ListTest" );
+ *       $cfgFieldHandlers['C_MultiLineTest'] = new Elvis_FieldHandlers_ReadWrite( "cf_MultiLineTest", false, "text", "C_MultiLineTest" );
+ *       $cfgFieldHandlers['C_MultiListTestElvisMultiField']   = new Elvis_FieldHandlers_ReadWrite( "cf_MultiListTestElvisMultiField", true, "text", "C_MultiListTestElvisMultiField" );
+ *       $cfgFieldHandlers['C_MultiStringTestElvisMultiField'] = new Elvis_FieldHandlers_ReadWrite( "cf_MultiStringTestElvisMultiField", true, "text", "C_MultiStringTestElvisMultiField" );
+ *       $cfgFieldHandlers['C_StringTest']    = new Elvis_FieldHandlers_ReadWrite( "cf_StringTest", false, "text", "C_StringTest" );
  *       // In case the mapping is only applicable for a specific brand, the brand Id ( e.g. 1) can be added.
- *       $cfgFieldHandlers['C_StringTest'] = new Elvis_FieldHandlers_ReadWrite("cf_StringTest", false, "text", "C_StringTest", 1 );
+ *       $cfgFieldHandlers['C_StringTest']    = new Elvis_FieldHandlers_ReadWrite( "cf_StringTest", false, "text", "C_StringTest", 1 );
  *       return $cfgFieldHandlers;
  *    }
- * In the very exceptional case that you want to change the field definitions listed below, it is recommended
- * to add them to the Elvis_Config_GetAdditionalFieldHandlers function in the config_overrule.php file.
- * This makes it easier to maintain compared to adjusting the definitions below.
+ *
+ * In the very exceptional case that you want to change the field definitions listed below, it is recommended to copy
+ * a field handler from the Elvis_Config_GetFieldHandlers function below to the Elvis_Config_GetAdditionalFieldHandlers
+ * function in the config_overrule.php file and change the handler's properties only for the copy. This works because the
+ * fields listed in Elvis_Config_GetAdditionalFieldHandlers overrule(!) the ones listed in Elvis_Config_GetFieldHandlers.
+ * This makes it easier to maintain. (Otherwise you'd need to compare files to adjust the definitions below.)
  *
  * Since 10.5.0 the field handlers are listed in a new function named Elvis_Config_GetFieldHandlers.
- * If that function does not exist in your Elvis/config.php file, please add as shown below:
  */
 if( !function_exists( 'Elvis_Config_GetFieldHandlers' ) ) {
 	function Elvis_Config_GetFieldHandlers()
@@ -332,13 +336,6 @@ if( !function_exists( 'Elvis_Config_GetFieldHandlers' ) ) {
 
 		return $cfgFieldHandlers;
 	}
-}
-if( defined( 'ELVIS_FIELD_HANDLERS' ) ) { // Warn incomplete migrations.
-	LogHandler::Log( 'EVLIS', 'ERROR', 'The ELVIS_FIELD_HANDLERS option is no longer supported. '.
-		'To configure field handlers in your config_overrule.php file, please define a function named '.
-		'Elvis_Config_GetFieldHandlers. In the config_elvis.php file there is the default implementation '.
-		'of this function which could be used as an example. And, please remove your ELVIS_FIELD_HANDLERS option definition. '
-);
 }
 
 /* --------------------------------------------------------------------------------

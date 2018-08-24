@@ -22,7 +22,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	/** @var string Version of Elvis Server */
 	private $serverVersion;
 
-	const CONFIG_FILES = 'Enterprise/config/config_elvis.php or Enterprise/config/overrule_config.php';
+	const CONFIG_FILES = 'Enterprise/config/config_elvis.php or Enterprise/config/config_overrule.php';
 
 	/**
 	 * @inheritdoc
@@ -37,6 +37,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			return;
 		}
 		if ( !$this->checkDefinedValues() ) {
+			return;
+		}
+		if( !$this->checkMigrationOfFieldHandlers() ) {
 			return;
 		}
 		if( !$this->checkPhpExtensions() ) {
@@ -227,6 +230,56 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 				$this->setResult( 'ERROR', $message, $help );
 				$result = false;
 			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Check if the system admin has correclty merged the field handlers from old installations into the new config files.
+	 *
+	 * How to migrate is written in for the Elvis_Config_GetFieldHandlers function in the config_elvis.php file.
+	 *
+	 * @since 10.5.0
+	 */
+	private function checkMigrationOfFieldHandlers()
+	{
+		$help = 'Please check the '.self::CONFIG_FILES.' file. Migrate your old field handlers as described for '.
+			'the Elvis_Config_GetFieldHandlers function in the config_elvis.php file.';
+
+		// Install an autoloader that detects old field handler classes that are not correctly migrated in the
+		// config_elvis.php file. Limitation: This does NOT detect old field handlers added to the config_overrule.php
+		// because it is included way before the Health Check runs.
+		spl_autoload_register( function( $className ) use ( $help ) {
+			$postfixLen = strlen( 'FieldHandler' );
+			if( substr( $className, -$postfixLen ) == 'FieldHandler' ) {
+				$aliasClassName = 'Elvis_FieldHandlers_'.substr( $className, 0, strlen( $className ) - $postfixLen );
+				$help = 'Please check the '.self::CONFIG_FILES.' file. Migrate your old field handlers as described for '.
+					'the Elvis_Config_GetFieldHandlers function in the config_elvis.php file.';
+				$message = "An obsoleted {$className} field handler class is still in use. It should be renamed to {$aliasClassName}.";
+				$this->setResult( 'ERROR', $message, $help );
+				// Temporary define the obsoleted class to let PHP continue running Health Check validations.
+				class_alias( $aliasClassName, $className );
+				return true;
+			}
+			return false;
+		} );
+
+		$result = true;
+		if( function_exists( 'Elvis_Config_GetFieldHandlers' ) ) {
+			// In case old field handler classes were added to the Elvis_Config_GetFieldHandlers function in config_elvis.php,
+			// or when they are added to the Elvis_Config_GetAdditionalFieldHandlers function in config_overrule.php,
+			// the call below will trigger the spl_autoload_register function above that detects those classes.
+			// Note that Elvis_Config_GetFieldHandlers calls Elvis_Config_GetAdditionalFieldHandlers, so both are detected.
+			Elvis_Config_GetFieldHandlers();
+		} else {
+			$message = 'The Elvis_Config_GetFieldHandlers function is missing.';
+			$this->setResult( 'ERROR', $message, $help );
+			$result = false;
+		}
+		if( defined( 'ELVIS_FIELD_HANDLERS' ) ) {
+			$message = 'The ELVIS_FIELD_HANDLERS option is obsoleted.';
+			$this->setResult( 'ERROR', $message, $help );
+			$result = false;
 		}
 		return $result;
 	}
