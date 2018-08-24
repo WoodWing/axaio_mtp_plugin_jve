@@ -576,6 +576,7 @@ function step5_ionCubeEncodePhpFiles {
 		Enterprise/server/bizclasses/BizServerJob.class.php \
 		Enterprise/server/bizclasses/BizPublishing.class.php \
 		Enterprise/server/bizclasses/BizSemaphore.class.php \
+		Enterprise/server/bizclasses/BizTicket.class.php \
 		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
 		Enterprise/server/plugins/Elvis/Elvis_WflLogOn.class.php \
 		Enterprise/server/plugins/Elvis/Elvis_ContentSource.class.php \
