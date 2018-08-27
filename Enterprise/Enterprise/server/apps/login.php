@@ -43,12 +43,6 @@ $userLimitAdmin = false;
 $licenseAdmin = false;
 if( !empty( $login ) && !empty( $user ) ) // && !empty($password))
 {
-	if( !hasRights( DBDriverFactory::gen(), $user ) &&
-		!publRights( DBDriverFactory::gen(), $user ) ) {
-		header( 'Location: '.NORIGHT );
-		exit();
-	}
-
 	require_once BASEDIR.'/server/utils/UrlUtils.php';
 	$server		= 'Enterprise Server';
 	$clientip = WW_Utils_UrlUtils::getClientIP();
@@ -161,6 +155,12 @@ if( !$loginsucceed ) {
 	$tpl .= "\n".$errNoJavascript;
 	print HtmlDocument::buildDocument( $tpl, false );
 } else {  // Is succeed.
+	if( !hasRights( DBDriverFactory::gen(), $user ) &&
+		!publRights( DBDriverFactory::gen(), $user ) ) {
+		header( 'Location: '.NORIGHT );
+		exit();
+	}
+
 	$sLanguage_code = BizSession::getUserLanguage();
 	setLogCookie( "language", $sLanguage_code ); // remember for next requests
 	setLogCookie( "ticket", $ticket );
