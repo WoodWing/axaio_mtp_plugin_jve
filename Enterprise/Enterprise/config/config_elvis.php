@@ -265,11 +265,11 @@ WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
  * - ReadOnlyFieldHandler  => Elvis_FieldHandlers_ReadOnly
  * - NameFieldHandler      => Elvis_FieldHandlers_Name
  * - ... etc
- * If you copy field handlers from an old installation to the new installation, please rename accordingly as shown above.
+ * If field handlers are copied/brought over from an old installation to the new installation, please rename accordingly as shown above.
  *
- * Since 10.5.0 it is recommended to add your custom field handlers in the config_overrule.php file. Add them in a
- * function named Elvis_Config_GetAdditionalFieldHandlers. Doing so, you could copy the example function as shown below
- * to the config_overrule.php file and uncomment it. Then replace the sample handlers with your custom field handlers.
+ * Since 10.5.0 it is recommended to add the custom field handlers in the config_overrule.php file. Add them in a
+ * function named Elvis_Config_GetAdditionalFieldHandlers. This can be achived by copying the example function as shown
+ * below to the config_overrule.php file and uncomment it. Replace the sample handlers with the desired custom field handlers.
  *
  *    function Elvis_Config_GetAdditionalFieldHandlers()
  *    {
@@ -290,11 +290,11 @@ WW_Utils_Autoloader::registerServerPlugin( 'Elvis' );
  *       return $cfgFieldHandlers;
  *    }
  *
- * In the very exceptional case that you want to change the field definitions listed below, it is recommended to copy
- * a field handler from the Elvis_Config_GetFieldHandlers function below to the Elvis_Config_GetAdditionalFieldHandlers
- * function in the config_overrule.php file and change the handler's properties only for the copy. This works because the
- * fields listed in Elvis_Config_GetAdditionalFieldHandlers overrule(!) the ones listed in Elvis_Config_GetFieldHandlers.
- * This makes it easier to maintain. (Otherwise you'd need to compare files to adjust the definitions below.)
+ * In the exceptional case that a field definition listed below need to be changed, it is recommended to copy the
+ * field handler (that needs to be changed) from the Elvis_Config_GetFieldHandlers function below to the
+ * Elvis_Config_GetAdditionalFieldHandlers function in the config_overrule.php file and customize/change the handler's
+ * attributes accordingly. This works because the fields listed in Elvis_Config_GetAdditionalFieldHandlers overrule(!)
+ * the ones listed in Elvis_Config_GetFieldHandlers. This makes it easier to maintain and upgrade Enterprise installation.
  *
  * Since 10.5.0 the field handlers are listed in a new function named Elvis_Config_GetFieldHandlers.
  */
