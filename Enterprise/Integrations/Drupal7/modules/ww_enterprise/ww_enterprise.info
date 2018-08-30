@@ -2,7 +2,7 @@
 name = WoodWing Enterprise
 description = Integrates WoodWing Enterprise as Content & Publishing platform with Drupal for the web publishing.
 core = 7.x
-version = "10.5.0 Build 250"
+version = "10.5.0 Build 251"
 ;package = Services
 dependencies[] = image
 dependencies[] = taxonomy
