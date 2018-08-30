@@ -438,9 +438,9 @@ class ElvisSync
 			return;
 		}
 
-		$checkedOutBy = self::getUsername( $update->metadata['checkedOutBy'] );
+		$checkedOutBy = $update->metadata['checkedOutBy'] ? self::getShortNameOfUserOrActingUser( $update->metadata['checkedOutBy'] ) : '';
 		$alienId = Elvis_BizClasses_AssetId::getAlienIdFromAssetId( $update->assetId );
-		$username = self::getUsername( $update->username );
+		$username = self::getShortNameOfUserOrActingUser( $update->username );
 
 		$requestInfo = array();
 		$requestInfo[] = 'WorkflowMetaData';
@@ -487,7 +487,7 @@ class ElvisSync
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'UpdateObjectProperties - for: '.$alienId );
 		try {
 			$entMetadata = new MetaData();
-			$username = self::getUsername( $update->username );
+			$username = self::getShortNameOfUserOrActingUser( $update->username );
 			$obj = BizObject::getObject( $alienId, $username, false, 'none', array( 'MetaData' ), null,
 				false, null, null, false );
 			$metadataHandler->readByElvisMetadata( $obj, $update->metadata );
@@ -513,7 +513,7 @@ class ElvisSync
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'DeletingObject: '.$alienId );
 
 		try {
-			$username = self::getUsername( $update->username );
+			$username = self::getShortNameOfUserOrActingUser( $update->username );
 			BizDeletedObject::deleteObject( $username, $alienId, true );
 		} catch( BizException $e ) {
 			LogHandler::Log( 'ELVISSYNC', 'ERROR', 'An error occurred while deleting object: '.$alienId.'. Details: '.$e->getMessage() );
@@ -523,12 +523,12 @@ class ElvisSync
 	}
 
 	/**
-	 * Get user name
+	 * Get user name or the acting user short name when $username is empty.
 	 *
 	 * @param string|null $username Short or full name of Enterprise or Elvis user.
 	 * @return string|null Short name of Enterprise user.
 	 */
-	private function getUsername( $username )
+	private function getShortNameOfUserOrActingUser( $username )
 	{
 		$bizUser = new Elvis_BizClasses_User();
 		$userShortName = $bizUser->getShortNameOfUserOrActingUser( $username );
