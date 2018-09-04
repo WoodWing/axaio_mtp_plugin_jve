@@ -34,7 +34,11 @@ function getMTPUserName()
 
 
     $addr = $_SERVER['REMOTE_ADDR'];
-	$host = gethostbyaddr( $addr );
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR']) {
+        $addr = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+
+    $host = gethostbyaddr( $addr );
 	
 	if( isset( $users[$addr] ) )
 	{

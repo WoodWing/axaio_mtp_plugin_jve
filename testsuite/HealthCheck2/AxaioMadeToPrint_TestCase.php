@@ -96,11 +96,11 @@ class WW_TestSuite_HealthCheck2_AxaioMadeToPrint_TestCase extends TestCase
 		$sql_error = '';
 		$dbDriver = DBDriverFactory::gen();
 
-		$check_tables = array('axaio_mtp_trigger', 'axaio_mtp_sentobjects');
+		$check_tables = array('axaio_mtp_trigger', 'axaio_mtp_sentobjects', 'axaio_mtp_process_options');
 		$not_found_tables =array();
         foreach ($check_tables as $value) {
-            if (!$dbDriver->tableExists($value, false)) {
-                $not_found_tables[] = $value;
+            if (!$dbDriver->tableExists($value)) {
+                $not_found_tables[] = $dbDriver->tablename($value);
             }
         }
 		if(!empty($not_found_tables))

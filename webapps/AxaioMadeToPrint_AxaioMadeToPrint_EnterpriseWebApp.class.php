@@ -298,9 +298,10 @@ class AxaioMadeToPrint_AxaioMadeToPrint_EnterpriseWebApp extends EnterpriseWebAp
      */
     static function detectBadIssues(&$badIssueIds)
     {
+        return '';
         $error = '';
         $dbDriver = DBDriverFactory::gen();
-        $mtpTab = 'axaio_mtp_trigger';
+        $mtpTab = $dbDriver->tablename('axaio_mtp_trigger');
         $pubTab = $dbDriver->tablename('publications');
         $issTab = $dbDriver->tablename('issues');
         $chnTab = $dbDriver->tablename('channels');
