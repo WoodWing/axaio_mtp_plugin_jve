@@ -101,7 +101,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$service = new Elvis_BizClasses_AssetService();
 		$hit = $service->retrieve( $assetId, $lock );
 
-		$hasSceId = array_key_exists('sceId', $hit->{'metadata'}) && empty($hit->{'metadata'}['sceId']);
+		$hasSceId = array_key_exists('sceId', $hit->{'metadata'}) && !empty($hit->{'metadata'}['sceId']);
 		if( !$hasSceId ) {
 			$hit->{'metadata'}['sceId'] = $object->MetaData->BasicMetaData->ID; // needed by getFiles()
 		}
