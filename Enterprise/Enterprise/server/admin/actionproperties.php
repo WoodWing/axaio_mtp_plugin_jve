@@ -910,12 +910,13 @@ class ActionPropertiesAdminApp
 				$usage->Editable ? 'on' : '',
 				$usage->Mandatory ? 'on' : '',
 				$usage->Restricted ? 'on' : '',
+				$usage->RefreshOnChange ? 'on' : '',
 				$usage->MultipleObjects ? 'on' : '',
 			);
 			$listOfValues[] = $values;
 			$order += 5;
 		}
-		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'multipleobjects' );
+		$fields = array( 'publication', 'action', 'type', 'orderid', 'property', 'edit', 'mandatory', 'restricted', 'refreshonchange', 'multipleobjects' );
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		$result = DBActionproperty::insertActionsProperty( $fields, $listOfValues );
 		return $result ? $usages : array();
