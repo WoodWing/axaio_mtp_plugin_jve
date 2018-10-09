@@ -1,6 +1,6 @@
 <?php
 /**
- * This is the configuration file for axaio MadeToPrint EnterprisePlugin
+ * This is the configuration file for axaio MadeToPrint plugin.
  *
  * @copyright (c) 2015, axaio software GmbH
  * @author René Treuber <support@axaio.com>
