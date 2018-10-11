@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="koKR">
-  <Term key="Elvis.ERR_CONNECT">Elvis에서 연결이 끊어져 파일을 가져 오는 중에 오류가 발생했습니다.#EOL##EOL#중요 : 연결이 다시 복원 될 때까지 시스템의 모든 파일에 대한 작업을 중지하고 모든 작업을 수행하지 말 것을 강력히 권장합니다 (S1144)#EOL##EOL#시스템 관리자에게 문의하십시오. 체크 아웃, 체크 인, 버전 저장, 체크 아웃, 파일 또는 서류 정리 등.#EOL##EOL#어떤 식 으로든 파일 작업을 계속하면 데이터가 손실되거나 파일이 손상 될 수 있습니다.</Term>
-  <Term key="Elvis.PRODUCTION_ZONE">프로덕션 존</Term>
-</LocalizationMap>

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="deDE">
-  <Term key="Elvis.ERR_CONNECT">Beim Abruf der Datei aus Elvis ist ein Fehler aufgetreten, da die Verbindung unterbrochen wurde. (S1144)#EOL##EOL#Bitte wenden Sie sich an Ihren Systemadministrator.#EOL##EOL#WICHTIG: Wir raten dringend davon ab, an Dateien im System zu arbeiten, solange die Verbindung wiederhergestellt wird. Das umfasst auch das Ein- oder Auschecken, das Öffnen von Dateien oder Dossiers oder auch das Speichern von Versionen.#EOL##EOL#Arbeiten Sie trotzdem weiter an den Dateien, können diese beschädigt werden oder Daten verloren gehen.</Term>
-  <Term key="Elvis.PRODUCTION_ZONE">Produktionszone</Term>
-</LocalizationMap>

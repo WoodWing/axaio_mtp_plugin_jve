@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="esES">
-  <Term key="Elvis.ERR_CONNECT">Ocurrió un error al obtener un archivo de Elvis debido a una interrupción en la conexión. (S1144)#EOL##EOL#Por favor contacte al administrador del sistema.#EOL##EOL#IMPORTANTE: Aconsejamos encarecidamente dejar de trabajar en CUALQUIER archivo del sistema hasta que la conexión se restablezca y no realizar NINGUNA acción como anular extracción, consignar, guardar versión, extraer, abrir archivos o dossiers, etc.#EOL##EOL#El seguir trabajando en los archivos puede resultar en pérdida de información o en archivos corruptos.</Term>
-  <Term key="Elvis.PRODUCTION_ZONE">Zona de producción</Term>
-</LocalizationMap>

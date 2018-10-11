@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="fiFI">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Poista käytöstä alkaen</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Poista käyttäjätili käytöstä</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">Käyttäjätili on poistettu käytöstä %1 alkaen.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">Käyttäjätili on poistettu käytöstä välittömästi, koska asetettu päivämäärä (%1) on ohitettu.</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">Asetuksia ei voitu tallentaa.</Term>
-</LocalizationMap>

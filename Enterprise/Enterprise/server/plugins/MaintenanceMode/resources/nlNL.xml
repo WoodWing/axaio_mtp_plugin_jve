@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="nlNL">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Uitschakelen vanaf</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Inloggen voor gebruikers uitschakelen</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">Het inloggen voor gebruikers is uitgeschakeld vanaf %1.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">Het inloggen voor gebruikers is per direct uitgeschakeld omdat de datum is ingesteld in het verleden (%1).</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">De instellingen konden niet worden opgeslagen.</Term>
-</LocalizationMap>

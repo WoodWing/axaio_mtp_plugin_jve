@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="itIT">
-  <Term key="Elvis.ERR_CONNECT">Si è verificato un errore durante l’acquisizione di un file da Elvis a causa della perdita di connessione. (S1144)#EOL##EOL#Rivolgersi all'amministratore di sistema.#EOL##EOL#IMPORTANTE: Raccomandiamo di interrompere la lavorazione di QUALSIASI file nel sistema fino a quando la connessione non viene nuovamente ripristinata e di non eseguire ALCUNA azione, quale l’estrazione, l’assegnazione, l’apertura di file o di dossier e così via.#EOL##EOL#Se si continua a utilizzare i file in qualsiasi modo, potrebbe verificarsi la perdita di dati o il danneggiamento dei file.</Term>
-  <Term key="Elvis.PRODUCTION_ZONE">Zona produzione</Term>
-</LocalizationMap>

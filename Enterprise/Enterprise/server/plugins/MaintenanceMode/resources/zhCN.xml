@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="zhCN">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">禁用的</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">禁用用户登录</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">用户登录从%1被禁用。</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">用户登录禁用立即生效,因为日期设置在过去(%1)。</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">设置不能保存。</Term>
-</LocalizationMap>

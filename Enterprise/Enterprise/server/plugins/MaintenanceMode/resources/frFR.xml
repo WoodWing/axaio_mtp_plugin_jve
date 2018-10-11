@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="frFR">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Désactivé à compter de</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Désactiver la connexion de l'utilisateur</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">La connexion de l'utilisateur n'est plus possible à compter de %1.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">La connexion de l'utilisateur est désactivée avec effet immédiat car la date a été définie dans le passé (%1).</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">Les paramètres n'ont pas pu être enregistrés.</Term>
-</LocalizationMap>

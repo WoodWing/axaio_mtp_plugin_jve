@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="csCZ">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Deaktivovat od</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Deaktivovat přihlášení uživatele</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">Přihlášení uživatele bude deaktivováno od %1.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">Přihlášení uživatele bude s okamžitou platností deaktivováno, neboť nastavené datum je v minulosti (%1).</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">Nastavení nelze uložit.</Term>
-</LocalizationMap>

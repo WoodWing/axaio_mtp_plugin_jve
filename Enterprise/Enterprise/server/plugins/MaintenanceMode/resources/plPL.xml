@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="plPL">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Wyłącz od</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Wyłącz logowanie użytkowników</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">Logowanie użytkowników jest wyłączone od dnia %1.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">Logowanie użytkowników jest wyłączone od tej chwili, ponieważ wybrano datę z przeszłości (%1).</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">Nie udało się zapisać ustawień.</Term>
-</LocalizationMap>

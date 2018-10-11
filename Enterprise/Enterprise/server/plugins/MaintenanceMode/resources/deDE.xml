@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="deDE">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Deaktivieren ab</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Benutzeranmeldung deaktivieren</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">Benutzeranmeldung wird ab %1 deaktiviert.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">Benutzeranmeldung mit sofortiger Wirkung deaktiviert, da das gesetzte Datum in der Vergangenheit liegt (%1).</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">Die Einstellungen konnten nicht gespeichert werden.</Term>
-</LocalizationMap>

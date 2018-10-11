@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="ptBR">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Desativar De</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Desativar Log-in do Usuário</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">Log-in do usuário desativado desde %1.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">O log-in do usuário é desativado imediatamente, pois foi definida uma data passada(%1).</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">As definições não puderam ser salvas.</Term>
-</LocalizationMap>

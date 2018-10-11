@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="esES">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Inhabilitar forma</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Inhabilitar ingreso a usuario</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">Se inhabilitará el ingreso al usuario a partir del %1.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">Se inhabilitará el ingreso al usuario inmediatamente debido a que esta es una fecha pasada (%1).</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">No fue posible guardar los parámetros.</Term>
-</LocalizationMap>

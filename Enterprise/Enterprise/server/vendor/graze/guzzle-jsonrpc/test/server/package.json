@@ -1,6 +1,0 @@
-{
-    "private": true,
-    "dependencies": {
-        "jayson": "~1.1"
-    }
-}
